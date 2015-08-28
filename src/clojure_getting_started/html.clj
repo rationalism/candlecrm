@@ -29,11 +29,12 @@
    [:h3 (str "Welcome. Your username is: " username)]
    [:a {:href auth-url} "Get started here"]])
 
-(defn gmail-finished [flash username]
+(defn gmail-finished [flash username email-total]
   [:div {:class "columns small-12"}
    [:h2 "Congrats - your account is connected to GMail."]
    [:p [:span {:style "padding:0 0 0 10px;color:red;"} flash]]
    [:h3 (str "Welcome. Your username is: " username)]
+   [:h3 (str "The number of emails in your inbox is: " email-total)]
    [:a {:href "/"} "Return home"]])
 
 (defn homepage []

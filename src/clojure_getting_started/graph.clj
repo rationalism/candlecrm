@@ -61,7 +61,8 @@
   (wrap-commit target-graph
                (let [vertex (add-vertex! target-graph vertex-type)]
                  (doseq [field properties]
-                   (set-property! vertex
+                   (set-property! target-graph
+                                  vertex
                                   (:property field)
                                   (:value field))))))
 

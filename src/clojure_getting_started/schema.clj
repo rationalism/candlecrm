@@ -46,29 +46,32 @@
 (defn make-params [& args]
   (into-array (map param args)))
 
-(defn prop [arg1 arg2 arg3]
-  (.createProperty arg1 arg2 arg3))
+(defn prop
+  ([arg1 arg2 arg3]
+   (.createProperty arg1 arg2 arg3))
+  ([arg1 arg2 arg3 arg4]
+   (.createProperty arg1 arg2 arg3 arg4)))
 
-(defn prop [arg1 arg2 arg3 arg4]
-  (.createProperty arg1 arg2 arg3 arg4))
-
-(defn vertex [target-graph name]
-  (.createVertexType target-graph name))
-
-(defn vertex [target-graph name super]
-  (.createVertexType target-graph name super))
+(defn vertex
+  ([target-graph name]
+   (.createVertexType target-graph name))
+  ([target-graph name super]
+   (.createVertexType target-graph name super)))
 
 (defn get-vertex [target-graph name]
   (.getVertexType target-graph name))
 
-(defn drop-vertex [target-graph name]
+(defn drop-vertex! [target-graph name]
   (.dropVertexType target-graph name))
 
-(defn edge [target-graph name]
-  (.createEdgeType target-graph name))
+(defn drop-edge! [target-graph name]
+  (.dropEdgeType target-graph name))
 
-(defn edge [target-graph name super]
-  (.createEdgeType target-graph name super))
+(defn edge
+  ([target-graph name]
+   (.createEdgeType target-graph name))
+  ([target-graph name super]
+   (.createEdgeType target-graph name super)))
 
 (defn key-index [target-graph var-type var-class params]
   (.createKeyIndex target-graph var-type var-class params))
@@ -106,7 +109,7 @@
     (prop person name-type OType/STRING)
     (prop person email-address-type OType/STRING)
     (prop person phone-num-type OType/STRING))
-  
+
   (let [person (get-vertex g person-type) 
         email (vertex g email-type)
         email-person (edge g email-person-edge)
@@ -137,8 +140,17 @@
                              " (out, in) UNIQUE")))
         
 (defn drop-user-schema [g]
-  (drop-vertex g user-type)
-  (drop-vertex g person-type)
-  (drop-vertex g email-type)
-  (drop-vertex g location-type))
+  (drop-edge! g user-person-edge)
+  (drop-edge! g user-owns-edge)
+  (drop-edge! g email-person-edge)
+  (drop-edge! g email-to-edge)
+  (drop-edge! g email-cc-edge)
+  (drop-edge! g email-bcc-edge)
+  (drop-edge! g email-from-edge)
+  (drop-edge! g email-replyto-edge)
+  (drop-edge! g email-mentions-edge)
+  (drop-vertex! g user-type)
+  (drop-vertex! g person-type)
+  (drop-vertex! g email-type)
+  (drop-vertex! g location-type))
 

@@ -1,6 +1,5 @@
 (ns clojure-getting-started.database
   (:require [clojure.java.io :as io]
-            [clojure-getting-started.email :as email]
             [clojure-getting-started.graph :as graph]
             [clojure-getting-started.schema :as schema]
             [environ.core :refer [env]]))
@@ -62,23 +61,8 @@
                      (person-from-property user schema/email-address-type (:email person))
                      (person-from-property user schema/name-type (:name person))
                      (person-from-property user schema/phone-num-type (:phone person))))
+        ;; TODO: add reconciliation here
         new-person (if (zero? (count old-people))
                      (create-person! user person)
                      (first old-people))]
     (graph/create-edge! graph/*graph* email new-person link-type)))
-
-(defn insert-email! [user email]
-  (let [email-link! (partial add-email-link! user email)
-        parsed-email (email/full-parse email)
-        new-email (graph/create-vertex!
-                    graph/*graph* schema/email-type
-                    [{:property schema/email-received :value (:time-received parsed-email)}
-                     {:property schema/email-sent :value (:time-sent parsed-email)}
-                     {:property schema/email-subject :value (:subject parsed-email)}
-                     {:property schema/email-body :value (:body parsed-email)}])]
-    (map (partial email-link! schema/email-to-edge) (:to parsed-email))
-    (map (partial email-link! schema/email-cc-edge) (:cc parsed-email))
-    (map (partial email-link! schema/email-bcc-edge) (:bcc parsed-email))
-    (map (partial email-link! schema/email-from-edge) (:from parsed-email))
-    (map (partial email-link! schema/email-replyto-edge) (:replyto parsed-email))
-    (map (partial email-link! schema/email-mentions-edge) (:people-mentioned parsed-email))))

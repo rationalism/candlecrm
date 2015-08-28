@@ -6,6 +6,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure-getting-started.auth :as auth]
+            [clojure-getting-started.email :as email]
             [clojure-getting-started.google :as google]
             [clojure-getting-started.graph :as graph]
             [clojure-getting-started.corenlp :as nlp]
@@ -85,7 +86,8 @@
 
 (defn app-init []
   (graph/define-graph!)
-  (nlp/load-pipeline!))
+  (nlp/load-pipeline!)
+  (email/define-imap-lookup))
 
 (defn app-shutdown []
   (graph/shutdown-graph!))

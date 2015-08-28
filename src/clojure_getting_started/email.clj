@@ -1,8 +1,12 @@
 (ns clojure-getting-started.email
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [clojure-getting-started.database :as database]
+            [clojure-getting-started.google :as google]
+            [clojure-getting-started.graph :as graph]
             [clojure-getting-started.corenlp :as nlp]
             [clojure-getting-started.regex :as regex]
+            [clojure-getting-started.schema :as schema]
             [environ.core :refer [env]])
   (:import [javax.mail Folder Message Message$RecipientType]))
 
@@ -21,6 +25,9 @@
 
 (defn message-count [folder]
   (.getMessageCount folder))
+
+(defn inbox-count [store]
+  (message-count (get-inbox store)))
 
 (defn get-message [folder num]
   (.getMessage folder num))
@@ -104,3 +111,35 @@
      (decode-replyto message)
      {:people-mentioned (people-from-text full-text)})))
    
+(defn define-imap-lookup []
+  (def ^:dynamic *imap-lookup* {}))
+
+;; TODO: support IMAP stores other than GMail
+;; TODO: add failure checking for IMAP timing out
+(defn fetch-imap-store [user]
+  (if (contains? *imap-lookup* user)
+    (*imap-lookup* user)
+    (do (def ^:dynamic *imap-lookup*
+          (assoc *imap-lookup* user
+                 (-> user
+                     google/lookup-token
+                     google/get-access-token!
+                     (google/get-imap-store!
+                      (database/get-username user)))))
+        (*imap-lookup* user))))
+
+(defn insert-email! [user email]
+  (let [email-link! (partial database/add-email-link! user email)
+        parsed-email (full-parse email)
+        new-email (graph/create-vertex!
+                    graph/*graph* schema/email-type
+                    [{:property schema/email-received :value (:time-received parsed-email)}
+                     {:property schema/email-sent :value (:time-sent parsed-email)}
+                     {:property schema/email-subject :value (:subject parsed-email)}
+                     {:property schema/email-body :value (:body parsed-email)}])]
+    (map (partial email-link! schema/email-to-edge) (:to parsed-email))
+    (map (partial email-link! schema/email-cc-edge) (:cc parsed-email))
+    (map (partial email-link! schema/email-bcc-edge) (:bcc parsed-email))
+    (map (partial email-link! schema/email-from-edge) (:from parsed-email))
+    (map (partial email-link! schema/email-replyto-edge) (:replyto parsed-email))
+    (map (partial email-link! schema/email-mentions-edge) (:people-mentioned parsed-email))))

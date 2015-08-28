@@ -2,7 +2,6 @@
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [clojure-getting-started.auth :as auth]
-            [clojure-getting-started.email :as email]
             [clojure-getting-started.graph :as graph]
             [clojure-getting-started.schema :as schema])
   (:import [com.google.api.client.googleapis.auth.oauth2 GoogleAuthorizationCodeRequestUrl
