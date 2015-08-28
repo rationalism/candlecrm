@@ -8,6 +8,7 @@
             [clojure-getting-started.auth :as auth]
             [clojure-getting-started.google :as google]
             [clojure-getting-started.graph :as graph]
+            [clojure-getting-started.corenlp :as nlp]
             [clojure-getting-started.pages :as pages]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.defaults :refer :all]
@@ -84,7 +85,7 @@
 
 (defn app-init []
   (graph/define-graph!)
-  (corenlp/load-pipeline!))
+  (nlp/load-pipeline!))
 
 (defn app-shutdown []
   (graph/shutdown-graph!))

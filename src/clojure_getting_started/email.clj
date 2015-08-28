@@ -1,7 +1,6 @@
 (ns clojure-getting-started.email
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure-getting-started.database :as database]
             [clojure-getting-started.corenlp :as nlp]
             [clojure-getting-started.regex :as regex]
             [environ.core :refer [env]])

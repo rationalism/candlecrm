@@ -27,35 +27,7 @@
                     [{:property schema/name-type :value (:name user)}
                      {:property schema/email-address-type :value (:email user)}
                      {:property schema/phone-num-type :value (:phone user)}])]
-    (graph/create-edge! target-graph user new-person schema/person-owns-edge)))
-
-(defn add-email-link! [user email link-type person]
-  (let [old-people (distinct
-                    (concat
-                     (person-from-property user schema/email-address-type (:email person))
-                     (person-from-property user schema/name-type (:name person))
-                     (person-from-property user schema/phone-num-type (:phone person))))
-        new-person (if (zero? (count old-people))
-                     (create-person! user person)
-                     (first old-people))]
-    (graph/create-edge! target-graph email new-person link-type)))
-
-(defn insert-email! [user email]
-  (let [target-graph graph/*graph*
-        email-link! (partial add-email-link! user email)
-        parsed-email (email/full-parse email)
-        new-email (graph/create-vertex!
-                    target-graph schema/email-type
-                    [{:property schema/email-received :value (:time-received parsed-email)}
-                     {:property schema/email-sent :value (:time-sent parsed-email)}
-                     {:property schema/email-subject :value (:subject parsed-email)}
-                     {:property schema/email-body :value (:body parsed-email)}])]
-    (map (partial email-link! schema/email-to-edge) (:to parsed-email))
-    (map (partial email-link! schema/email-cc-edge) (:cc parsed-email))
-    (map (partial email-link! schema/email-bcc-edge) (:bcc parsed-email))
-    (map (partial email-link! schema/email-from-edge) (:from parsed-email))
-    (map (partial email-link! schema/email-replyto-edge) (:replyto parsed-email))
-    (map (partial email-link! schema/email-mentions-edge) (:people-mentioned parsed-email))))
+    (graph/create-edge! target-graph user new-person schema/user-owns-edge)))
 
 ;; Composite index query from https://github.com/orientechnologies/orientdb/issues/4862
 (defn person-from-property [user property value]
@@ -83,3 +55,30 @@
         schema/user-type
         " AND in = $"
         schema/person-type)))
+
+(defn add-email-link! [user email link-type person]
+  (let [old-people (distinct
+                    (concat
+                     (person-from-property user schema/email-address-type (:email person))
+                     (person-from-property user schema/name-type (:name person))
+                     (person-from-property user schema/phone-num-type (:phone person))))
+        new-person (if (zero? (count old-people))
+                     (create-person! user person)
+                     (first old-people))]
+    (graph/create-edge! graph/*graph* email new-person link-type)))
+
+(defn insert-email! [user email]
+  (let [email-link! (partial add-email-link! user email)
+        parsed-email (email/full-parse email)
+        new-email (graph/create-vertex!
+                    graph/*graph* schema/email-type
+                    [{:property schema/email-received :value (:time-received parsed-email)}
+                     {:property schema/email-sent :value (:time-sent parsed-email)}
+                     {:property schema/email-subject :value (:subject parsed-email)}
+                     {:property schema/email-body :value (:body parsed-email)}])]
+    (map (partial email-link! schema/email-to-edge) (:to parsed-email))
+    (map (partial email-link! schema/email-cc-edge) (:cc parsed-email))
+    (map (partial email-link! schema/email-bcc-edge) (:bcc parsed-email))
+    (map (partial email-link! schema/email-from-edge) (:from parsed-email))
+    (map (partial email-link! schema/email-replyto-edge) (:replyto parsed-email))
+    (map (partial email-link! schema/email-mentions-edge) (:people-mentioned parsed-email))))

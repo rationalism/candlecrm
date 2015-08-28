@@ -31,6 +31,6 @@
   ({:phone number}))
 
 (defn find-phone-people [text]
-  (->> (find-phone-number text)
+  (->> (find-phone-nums text)
        (map phone-person)
        distinct))
