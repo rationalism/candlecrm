@@ -34,7 +34,9 @@
   "Takes an expression and wraps it in a try / catch
   which commits on success and rolls back on failure."
   [target-graph fn]
-  `(try (do ~fn (.commit ~target-graph))
+  `(try (let [return-val# ~fn]
+          (.commit ~target-graph)
+          return-val#)
         (catch Exception e#
           (do (prn "Exception caught when writing to graph")
               (prn "Rolling back changes")
@@ -58,13 +60,12 @@
                (.addVertex target-graph (str "class:" vertex-type))))
 
 (defn create-vertex! [target-graph vertex-type properties]
-  (wrap-commit target-graph
-               (let [vertex (add-vertex! target-graph vertex-type)]
-                 (doseq [field properties]
-                   (set-property! target-graph
-                                  vertex
-                                  (:property field)
-                                  (:value field))))))
+  (let [vertex (add-vertex! target-graph vertex-type)]
+    (doseq [field properties]
+      (set-property! target-graph vertex
+                     (:property field)
+                     (:value field)))
+    vertex))
 
 (defn delete-vertex! [target-graph vertex]
   (wrap-commit target-graph
