@@ -35,6 +35,16 @@
    [:p [:span {:style "padding:0 0 0 10px;color:red;"} flash]]
    [:h3 (str "Welcome. Your username is: " username)]
    [:h3 (str "The number of emails in your inbox is: " email-total)]
+   [:h3 "Load emails into database: "
+    [:small "(Enter a range of emails in your inbox to load.)"]]
+   [:div.row
+    [:form {:method "POST" :action "load-emails" :class "columns small-4"}
+     (anti-forgery-field)
+     [:div.row "Start with: " [:input {:type "text" :name "lower" :required "required"}]]
+     [:div.row "End with: " [:input {:type "text" :name "upper" :required "required"}]]
+      [:div.row
+       [:input {:type "submit" :class "button" :value "Load"}]
+       [:span {:style "padding:0 0 0 10px;color:red;"} flash]]]]
    [:a {:href "/"} "Return home"]])
 
 (defn homepage []
