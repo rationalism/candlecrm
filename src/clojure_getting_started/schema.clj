@@ -153,4 +153,3 @@
   (drop-vertex! g person-type)
   (drop-vertex! g email-type)
   (drop-vertex! g location-type))
-

@@ -95,7 +95,8 @@
    (concat
     (regex/find-email-people text)
     (regex/find-phone-people text)
-    (nlp/nlp-people text))))
+    (nlp/nlp-people
+     (nlp/nlp-entities nlp/*pipeline* text)))))
 
 (defn full-parse [message]
   (let [subject-text (subject message)
