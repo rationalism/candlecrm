@@ -1,0 +1,10 @@
+{:dev  {:env {:database-url "remote:localhost/MainGraph"
+              :database-username "root"
+              :database-password "josedog"
+              :google-client-id " 
+              :google-client-secret " "
+              :app-domain "https://localhost"}}
+ :test {:env {:database-url "remote:localhost/TestGraph"
+              :database-username "root"
+              :database-password "josedog"}}
+ :production {:env {:production true}}}

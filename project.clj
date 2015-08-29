@@ -32,5 +32,4 @@
          :destroy spectra.web/app-shutdown
          :nrepl {:start? true
                  :port 9998}}
-  :uberjar-name "spectra-standalone.jar"
-  :profiles {:production {:env {:production true}}})
+  :uberjar-name "spectra-standalone.jar")
