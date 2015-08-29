@@ -53,8 +53,6 @@
              schema/user-type
              " AND in = $"
              schema/person-type)]
-    (prn "This is person-from-property dogs")
-    (prn sql)
     (graph/sql-command! graph/*graph* sql)))
 
 (defn add-email-link! [user email link-type person]

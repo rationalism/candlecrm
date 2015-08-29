@@ -156,14 +156,14 @@
   inbox)
 
 (defn insert-email! [user email]
-  (let [email-link! (partial database/add-email-link! user email)
-        parsed-email (full-parse email)
+  (let [parsed-email (full-parse email)
         new-email (graph/create-vertex!
-                    graph/*graph* schema/email-type
-                    [{:property schema/email-received :value (:time-received parsed-email)}
-                     {:property schema/email-sent :value (:time-sent parsed-email)}
-                     {:property schema/email-subject :value (:subject parsed-email)}
-                     {:property schema/email-body :value (:body parsed-email)}])]
+                   graph/*graph* schema/email-type
+                   [{:property schema/email-received :value (:time-received parsed-email)}
+                    {:property schema/email-sent :value (:time-sent parsed-email)}
+                    {:property schema/email-subject :value (:subject parsed-email)}
+                    {:property schema/email-body :value (:body parsed-email)}])
+        email-link! (partial database/add-email-link! user new-email)]
     (doseq [p (:to parsed-email)] (email-link! schema/email-to-edge p))
     (doseq [p (:cc parsed-email)] (email-link! schema/email-cc-edge p))
     (doseq [p (:bcc parsed-email)] (email-link! schema/email-bcc-edge p))

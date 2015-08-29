@@ -25,10 +25,15 @@
   (.shutdown *graph*))
 
 (defn sql-command! [target-graph command]
-  (.execute
-   (.command target-graph
-             (OCommandSQL. command))
-   nil))
+  (try (.execute
+        (.command target-graph
+                  (OCommandSQL. command))
+        nil)
+       (catch Exception e
+         (do (prn "Exception caught when executing SQL command")
+             (prn (str "Command was: " command))
+             (prn ("Type of exception is: "))
+             (prn (.getMessage e))))))
 
 (defmacro wrap-commit
   "Takes an expression and wraps it in a try / catch
