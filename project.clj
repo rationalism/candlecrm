@@ -9,6 +9,7 @@
                  [ring/ring-defaults "0.1.5"]
                  [hiccup "1.0.5"]
                  [environ "1.0.0"]
+                 [com.taoensso/timbre "4.1.1"]
                  [com.cemerick/friend "0.2.1"]
                  [com.google.api-client/google-api-client "1.20.0"]
                  [com.tinkerpop.blueprints/blueprints-core "2.6.0"]
