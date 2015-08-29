@@ -22,8 +22,8 @@
      (if (google/lookup-token user)
        (html/gmail-finished (:flash req)
                             (database/get-username user)
-                            (email/inbox-count
-                             (email/fetch-imap-store user)))
+                            (email/message-count
+                             (email/fetch-imap-folder user)))
        (html/gmail-setup (:flash req)
                          (database/get-username user)
                          (google/make-auth-url))))))

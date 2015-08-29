@@ -20,8 +20,20 @@
 (defn get-inbox [store]
   (.getFolder store inbox-folder-name))
 
+(defn close-store! [store]
+  (.close store))
+
 (defn open-folder-read! [folder]
   (.open folder (Folder/READ_ONLY)))
+
+(defn close-folder! [folder]
+  (.close folder false))
+
+(defn folder-open? [folder]
+  (.isOpen folder))
+
+(defn folder-store [folder]
+  (.getStore folder))
 
 (defn message-count [folder]
   (.getMessageCount folder))
@@ -115,19 +127,33 @@
 (defn define-imap-lookup []
   (def ^:dynamic *imap-lookup* {}))
 
+(defn update-imap-lookup! [user inbox]
+  (def ^:dynamic *imap-lookup*
+    (assoc *imap-lookup* user inbox)))
+
+(defn shut-folder! [folder]
+  (def store (folder-store folder))
+  (close-folder! folder)
+  (close-store! store))
+
+(defn close-imap-lookup! []
+  (->> (keys *imap-lookup*)
+       (map #(*imap-lookup* %))
+       (map shut-folder!))
+  (define-imap-lookup))
+
 ;; TODO: support IMAP stores other than GMail
 ;; TODO: add failure checking for IMAP timing out
-(defn fetch-imap-store [user]
-  (if (contains? *imap-lookup* user)
-    (*imap-lookup* user)
-    (do (def ^:dynamic *imap-lookup*
-          (assoc *imap-lookup* user
-                 (-> user
-                     google/lookup-token
-                     google/get-access-token!
-                     (google/get-imap-store!
-                      (database/get-username user)))))
-        (*imap-lookup* user))))
+(defn fetch-imap-folder [user]
+  (def inbox (if (contains? *imap-lookup* user)
+               (*imap-lookup* user)
+               (-> user google/lookup-token
+                   google/get-access-token!
+                   (google/get-imap-store! (database/get-username user))
+                   get-inbox)))
+  (if (folder-open? inbox) nil (open-folder-read! inbox))
+  (update-imap-lookup! user inbox)
+  inbox)
 
 (defn insert-email! [user email]
   (let [email-link! (partial database/add-email-link! user email)
@@ -138,9 +164,9 @@
                      {:property schema/email-sent :value (:time-sent parsed-email)}
                      {:property schema/email-subject :value (:subject parsed-email)}
                      {:property schema/email-body :value (:body parsed-email)}])]
-    (map (partial email-link! schema/email-to-edge) (:to parsed-email))
-    (map (partial email-link! schema/email-cc-edge) (:cc parsed-email))
-    (map (partial email-link! schema/email-bcc-edge) (:bcc parsed-email))
-    (map (partial email-link! schema/email-from-edge) (:from parsed-email))
-    (map (partial email-link! schema/email-replyto-edge) (:replyto parsed-email))
-    (map (partial email-link! schema/email-mentions-edge) (:people-mentioned parsed-email))))
+    (doseq [p (:to parsed-email)] (email-link! schema/email-to-edge p))
+    (doseq [p (:cc parsed-email)] (email-link! schema/email-cc-edge p))
+    (doseq [p (:bcc parsed-email)] (email-link! schema/email-bcc-edge p))
+    (doseq [p (:from parsed-email)] (email-link! schema/email-from-edge p))
+    (doseq [p (:replyto parsed-email)] (email-link! schema/email-replyto-edge p))
+    (doseq [p (:people-mentioned parsed-email)] (email-link! schema/email-mentions-edge p))))

@@ -11,7 +11,7 @@
   (re-seq email-regex text))
 
 (defn email-person [addr]
-  ({:email addr}))
+  (assoc {} :email addr))
 
 (defn find-email-people [text]
   (->> (find-email-addrs text)
@@ -28,7 +28,7 @@
        (map #(.rawString %)))) 
 
 (defn phone-person [number]
-  ({:phone number}))
+  (assoc {} :phone number))
 
 (defn find-phone-people [text]
   (->> (find-phone-nums text)

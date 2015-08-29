@@ -30,30 +30,32 @@
 
 ;; Composite index query from https://github.com/orientechnologies/orientdb/issues/4862
 (defn person-from-property [user property value]
-  (graph/sql-command!
-   graph/*graph*
-   (str "SELECT expand( outV() ) FROM "
-        schema/user-owns-edge
-        " LET "
-        schema/user-type
-        " = SELECT FROM "
-        schema/user-type
-        " WHERE "
-        schema/email-address-type
-        " = '"
-        (get-username user)
-        "' LET "
-        schema/person-type
-        " = SELECT FROM "
-        schema/person-type
-        " WHERE "
-        property
-        " = '"
-        value
-        "' WHERE out = $"
-        schema/user-type
-        " AND in = $"
-        schema/person-type)))
+  (let [sql (str
+             "SELECT expand( outV() ) FROM "
+             schema/user-owns-edge
+             " LET "
+             schema/user-type
+             " = SELECT FROM "
+             schema/user-type
+             " WHERE "
+             schema/email-address-type
+             " = '"
+             (get-username user)
+             "' LET "
+             schema/person-type
+             " = SELECT FROM "
+             schema/person-type
+             " WHERE "
+             property
+             " = '"
+             value
+             "' WHERE out = $"
+             schema/user-type
+             " AND in = $"
+             schema/person-type)]
+    (prn "SQL command is: ")
+    (prn sql)
+    (graph/sql-command! graph/*graph* sql)))
 
 (defn add-email-link! [user email link-type person]
   (let [old-people (distinct

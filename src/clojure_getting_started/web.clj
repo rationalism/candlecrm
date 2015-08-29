@@ -70,14 +70,13 @@
   (POST "/load-emails" {{:keys [lower upper] :as params} :params :as req}
         (friend/authenticated
          (if-let [user (auth/get-user-obj (friend/identity req))]
-           (let [imap-store (email/fetch-imap-store user)
-                 folder (email/get-inbox imap-store)]
-             (email/open-folder-read! folder)
-             (map #(email/insert-email! user %)
-                  (email/messages-in-range folder
-                   (Integer/parseInt lower)
-                   (Integer/parseInt upper)))
-             (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
+           (do (doseq [message
+                       (email/messages-in-range
+                        (email/fetch-imap-folder user)
+                        (Integer/parseInt lower)
+                        (Integer/parseInt upper))]
+                 (email/insert-email! user message))
+               (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
            (assoc (resp/redirect "/") :flash "Error: Could not log in"))))
   (route/resources "/")
   (route/not-found (slurp (io/resource "public/404.html"))))
@@ -102,5 +101,6 @@
   (email/define-imap-lookup))
 
 (defn app-shutdown []
-  (graph/shutdown-graph!))
+  (graph/shutdown-graph!)
+  (email/close-imap-lookup!))
 

@@ -45,7 +45,7 @@
        (apply merge-with concat)))
 
 (defn name-person [name]
-  ({:name name}))
+  (assoc {} :name name))
 
 (defn nlp-people [entities]
   (->> (concat (entities person-key) (entities organization-key))
