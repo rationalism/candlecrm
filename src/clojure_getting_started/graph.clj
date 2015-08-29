@@ -67,9 +67,10 @@
 (defn create-vertex! [target-graph vertex-type properties]
   (let [vertex (add-vertex! target-graph vertex-type)]
     (doseq [field properties]
-      (set-property! target-graph vertex
-                     (:property field)
-                     (:value field)))
+      (if-not (empty? (:value field))
+        (set-property! target-graph vertex
+                       (:property field)
+                       (:value field))))
     vertex))
 
 (defn delete-vertex! [target-graph vertex]

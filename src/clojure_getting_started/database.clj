@@ -1,5 +1,6 @@
 (ns clojure-getting-started.database
   (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure-getting-started.graph :as graph]
             [clojure-getting-started.schema :as schema]
             [environ.core :refer [env]]))
@@ -26,7 +27,8 @@
                     [{:property schema/name-type :value (:name user)}
                      {:property schema/email-address-type :value (:email user)}
                      {:property schema/phone-num-type :value (:phone user)}])]
-    (graph/create-edge! target-graph user new-person schema/user-owns-edge)))
+    (graph/create-edge! target-graph user new-person schema/user-owns-edge)
+    new-person))
 
 ;; Composite index query from https://github.com/orientechnologies/orientdb/issues/4862
 (defn person-from-property [user property value]
@@ -48,7 +50,7 @@
              " WHERE "
              property
              " = '"
-             value
+             (str/escape value {"'" "", "\"" ""})
              "') WHERE out = $"
              schema/user-type
              " AND in = $"
