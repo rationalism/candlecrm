@@ -46,9 +46,6 @@
           (home-with-message err-msg)
           (let [user (auth/create-user! (select-keys params [:username :password]))]
             (friend/merge-authentication (home-with-message nil) user))))
-  ;(POST "/login" {{:keys [username password] :as params} :params :as req}
-  ;      (let [user (auth/auth-user params)]
-  ;        (resp/redirect (str (:context params) "/"))))
   (GET "/logout" req (friend/logout* (logout req)))
   (GET "/gmail" req
        (friend/authenticated

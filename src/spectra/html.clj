@@ -4,9 +4,6 @@
   (:use [hiccup.core] [hiccup.page]
         [ring.util.anti-forgery]))
 
-(defn splash-body []
-  (pr-str ["Hello Alyssa (template), " :from 'Heroku]))
-
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "Spectra"]
