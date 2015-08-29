@@ -1,7 +1,7 @@
-(ns clojure-getting-started.corenlp
+(ns spectra.corenlp
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure-getting-started.graph :as graph]
+            [spectra.graph :as graph]
             [environ.core :refer [env]])
   (:import [edu.stanford.nlp.pipeline Annotation StanfordCoreNLP]
            [edu.stanford.nlp.ling

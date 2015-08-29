@@ -1,8 +1,7 @@
-(defproject clojure-getting-started "1.0.0-SNAPSHOT"
-  :description "Demo Clojure web app"
-  :url "http://clojure-getting-started.herokuapp.com"
-  :license {:name "Eclipse Public License v1.0"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
+(defproject spectra "0.0.1"
+  :description "Personal semantic graphs"
+  :url "http://spectra.herokuapp.com"
+  :license {:name "Copyright Alyssa Vance - all rights reserved"}
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [compojure "1.1.8"]
                  [ring/ring-jetty-adapter "1.2.2"]
@@ -28,10 +27,10 @@
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.0"]
             [lein-ring "0.9.6"]]
-  :ring {:handler clojure-getting-started.web/secure-app
-         :init clojure-getting-started.web/app-init
-         :destroy clojure-getting-started.web/app-shutdown
+  :ring {:handler spectra.web/secure-app
+         :init spectra.web/app-init
+         :destroy spectra.web/app-shutdown
          :nrepl {:start? true
                  :port 9998}}
-  :uberjar-name "clojure-getting-started-standalone.jar"
+  :uberjar-name "spectra-standalone.jar"
   :profiles {:production {:env {:production true}}})

@@ -1,4 +1,4 @@
-(ns clojure-getting-started.html
+(ns spectra.html
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]])
   (:use [hiccup.core] [hiccup.page]
@@ -9,7 +9,7 @@
 
 (defn base-template [& content]
   (html5 {:lang "en"}
-         [:head [:title "Welcome to guestbook"]
+         [:head [:title "Spectra"]
           (include-css "css/screen.css")]
          [:body [:h1 "Hi there! Welcome :)"]
           (into [:div.content] content)]))

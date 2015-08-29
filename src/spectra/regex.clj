@@ -1,4 +1,4 @@
-(ns clojure-getting-started.regex
+(ns spectra.regex
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [environ.core :refer [env]])

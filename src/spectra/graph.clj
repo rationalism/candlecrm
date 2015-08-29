@@ -1,4 +1,4 @@
-(ns clojure-getting-started.graph
+(ns spectra.graph
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling

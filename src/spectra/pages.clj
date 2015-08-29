@@ -1,11 +1,11 @@
-(ns clojure-getting-started.pages
+(ns spectra.pages
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
-            [clojure-getting-started.auth :as auth]
-            [clojure-getting-started.database :as database]
-            [clojure-getting-started.email :as email]
-            [clojure-getting-started.google :as google]
-            [clojure-getting-started.html :as html]
+            [spectra.auth :as auth]
+            [spectra.database :as database]
+            [spectra.email :as email]
+            [spectra.google :as google]
+            [spectra.html :as html]
             [cemerick.friend :as friend]))
 
 (defn homepage [req]

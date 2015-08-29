@@ -1,8 +1,8 @@
-(ns clojure-getting-started.database
+(ns spectra.database
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure-getting-started.graph :as graph]
-            [clojure-getting-started.schema :as schema]
+            [spectra.graph :as graph]
+            [spectra.schema :as schema]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))

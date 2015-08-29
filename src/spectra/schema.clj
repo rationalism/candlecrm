@@ -1,6 +1,6 @@
-(ns clojure-getting-started.schema
+(ns spectra.schema
   (:require [clojure.java.io :as io]
-            [clojure-getting-started.graph :as graph]
+            [spectra.graph :as graph]
             [environ.core :refer [env]])
   (:import [com.orientechnologies.orient.core.metadata.schema OClass$INDEX_TYPE OType]
            [com.tinkerpop.blueprints Parameter Edge Vertex]))

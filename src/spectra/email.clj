@@ -1,12 +1,12 @@
-(ns clojure-getting-started.email
+(ns spectra.email
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure-getting-started.database :as database]
-            [clojure-getting-started.google :as google]
-            [clojure-getting-started.graph :as graph]
-            [clojure-getting-started.corenlp :as nlp]
-            [clojure-getting-started.regex :as regex]
-            [clojure-getting-started.schema :as schema]
+            [spectra.database :as database]
+            [spectra.google :as google]
+            [spectra.graph :as graph]
+            [spectra.corenlp :as nlp]
+            [spectra.regex :as regex]
+            [spectra.schema :as schema]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])

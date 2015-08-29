@@ -1,6 +1,6 @@
-(ns clojure-getting-started.web-test
+(ns spectra.corenlp-test
   (:require [clojure.test :refer :all]
-            [clojure-getting-started.web :refer :all]))
+            [spectra.corenlp :refer :all]))
 
 (deftest first-test
   (is "Tests should be written"))

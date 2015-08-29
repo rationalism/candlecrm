@@ -1,9 +1,9 @@
-(ns clojure-getting-started.google
+(ns spectra.google
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
-            [clojure-getting-started.auth :as auth]
-            [clojure-getting-started.graph :as graph]
-            [clojure-getting-started.schema :as schema])
+            [spectra.auth :as auth]
+            [spectra.graph :as graph]
+            [spectra.schema :as schema])
   (:import [com.google.api.client.googleapis.auth.oauth2 GoogleAuthorizationCodeRequestUrl
             GoogleAuthorizationCodeTokenRequest GoogleCredential$Builder GoogleTokenResponse]
            [com.google.api.client.auth.oauth2 AuthorizationCodeResponseUrl

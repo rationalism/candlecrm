@@ -1,12 +1,12 @@
-(ns clojure-getting-started.auth
+(ns spectra.auth
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [environ.core :refer [env]]
             [clj-time.core :as clj-time]
-            [clojure-getting-started.database :as database]
-            [clojure-getting-started.graph :as graph]
-            [clojure-getting-started.regex :as regex]
-            [clojure-getting-started.schema :as schema]
+            [spectra.database :as database]
+            [spectra.graph :as graph]
+            [spectra.regex :as regex]
+            [spectra.schema :as schema]
             [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
                              [credentials :as creds]))
