@@ -55,11 +55,10 @@
                property
                " = '"
                (str/escape value {\' "", \" ""})
-               "') WHERE out = $"
+               "') WHERE out in $"
                schema/user-type
-               " AND in = $"
+               " AND in in $"
                schema/person-type)]
-      (prn (str "The SQL command is: ") sql)
       (p :person-lookup (graph/sql-command! graph/*graph* sql)))))
 
 (defn add-email-link! [user email link-type person]
