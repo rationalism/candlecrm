@@ -22,13 +22,13 @@
 (defn get-username [user]
   (graph/get-property user schema/email-address-type))
 
-(defn create-person! [user props]
+(defn create-person! [user person]
   (let [target-graph graph/*graph*
         new-person (graph/create-vertex!
                     target-graph schema/person-type
-                    [{:property schema/name-type :value (:name user)}
-                     {:property schema/email-address-type :value (:email user)}
-                     {:property schema/phone-num-type :value (:phone user)}])]
+                    [{:property schema/name-type :value (:name person)}
+                     {:property schema/email-address-type :value (:email person)}
+                     {:property schema/phone-num-type :value (:phone person)}])]
     (graph/create-edge! target-graph user new-person schema/user-owns-edge)
     new-person))
 
@@ -37,7 +37,7 @@
   (if (graph/no-value? value)
     []
     (let [sql (str
-               "SELECT expand( outV() ) FROM "
+               "SELECT expand( inV() ) FROM "
                schema/user-owns-edge
                " LET "
                schema/user-type
@@ -59,6 +59,7 @@
                schema/user-type
                " AND in = $"
                schema/person-type)]
+      (prn (str "The SQL command is: ") sql)
       (p :person-lookup (graph/sql-command! graph/*graph* sql)))))
 
 (defn add-email-link! [user email link-type person]
