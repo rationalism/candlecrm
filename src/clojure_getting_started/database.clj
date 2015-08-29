@@ -35,25 +35,25 @@
              schema/user-owns-edge
              " LET "
              schema/user-type
-             " = SELECT FROM "
+             " = (SELECT FROM "
              schema/user-type
              " WHERE "
              schema/email-address-type
              " = '"
              (get-username user)
-             "' LET "
+             "'), "
              schema/person-type
-             " = SELECT FROM "
+             " = (SELECT FROM "
              schema/person-type
              " WHERE "
              property
              " = '"
              value
-             "' WHERE out = $"
+             "') WHERE out = $"
              schema/user-type
              " AND in = $"
              schema/person-type)]
-    (prn "SQL command is: ")
+    (prn "This is person-from-property dogs")
     (prn sql)
     (graph/sql-command! graph/*graph* sql)))
 
