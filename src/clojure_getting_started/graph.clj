@@ -1,6 +1,8 @@
 (ns clojure-getting-started.graph
   (:require [clojure.java.io :as io]
-            [environ.core :refer [env]])
+            [environ.core :refer [env]]
+            [taoensso.timbre.profiling :as profiling
+             :refer (pspy pspy* profile defnp p p*)])
   (:import [com.tinkerpop.blueprints.impls.orient OrientGraphFactory]
            [com.orientechnologies.orient.core.sql OCommandSQL]))
 
@@ -40,7 +42,7 @@
   which commits on success and rolls back on failure."
   [target-graph fn]
   `(try (let [return-val# ~fn]
-          (.commit ~target-graph)
+          (p :commit (.commit ~target-graph))
           return-val#)
         (catch Exception e#
           (do (prn "Exception caught when writing to graph")
@@ -53,8 +55,9 @@
   (.getProperty vertex property))
 
 (defn set-property! [target-graph vertex property value]
-  (wrap-commit target-graph
-               (.setProperty vertex property value)))
+  (p :set-property
+     (wrap-commit target-graph
+                  (.setProperty vertex property value))))
 
 (defn delete-property! [target-graph vertex property]
   (wrap-commit target-graph
@@ -65,13 +68,14 @@
                (.addVertex target-graph (str "class:" vertex-type))))
 
 (defn create-vertex! [target-graph vertex-type properties]
-  (let [vertex (add-vertex! target-graph vertex-type)]
-    (doseq [field properties]
-      (if-not (empty? (:value field))
-        (set-property! target-graph vertex
-                       (:property field)
-                       (:value field))))
-    vertex))
+  (p :create-vertex
+     (let [vertex (add-vertex! target-graph vertex-type)]
+       (doseq [field properties]
+         (if-not (empty? (:value field))
+           (set-property! target-graph vertex
+                          (:property field)
+                          (:value field))))
+       vertex)))
 
 (defn delete-vertex! [target-graph vertex]
   (wrap-commit target-graph
@@ -84,8 +88,10 @@
   (.getVerticesOfClass target-graph class))
 
 (defn create-edge! [target-graph out-vertex in-vertex class]
-  (wrap-commit target-graph
-               (.addEdge target-graph nil out-vertex in-vertex class)))
+  (p :create-edge
+     (wrap-commit target-graph
+                  (.addEdge target-graph nil out-vertex
+                            in-vertex class))))
 
 (defn delete-edge! [target-graph edge]
   (wrap-commit target-graph

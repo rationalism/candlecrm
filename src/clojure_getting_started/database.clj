@@ -3,7 +3,9 @@
             [clojure.string :as str]
             [clojure-getting-started.graph :as graph]
             [clojure-getting-started.schema :as schema]
-            [environ.core :refer [env]]))
+            [environ.core :refer [env]]
+            [taoensso.timbre.profiling :as profiling
+             :refer (pspy pspy* profile defnp p p*)]))
 
 (defn add-user-graph! [user]
   (let [target-graph graph/*graph*
@@ -55,7 +57,7 @@
              schema/user-type
              " AND in = $"
              schema/person-type)]
-    (graph/sql-command! graph/*graph* sql)))
+    (p :person-lookup (graph/sql-command! graph/*graph* sql))))
 
 (defn add-email-link! [user email link-type person]
   (let [old-people (distinct
@@ -65,7 +67,7 @@
                      (person-from-property user schema/phone-num-type (:phone person))))
         ;; TODO: add reconciliation here
         new-person (if (zero? (count old-people))
-                     (create-person! user person)
+                     (p :create-person (create-person! user person))
                      (first old-people))]
     (graph/create-edge! graph/*graph* email new-person link-type)))
 
