@@ -67,11 +67,16 @@
   (wrap-commit target-graph
                (.addVertex target-graph (str "class:" vertex-type))))
 
+(defn no-value? [property]
+  (if (string? property)
+    (empty? property)
+    (nil? property)))
+
 (defn create-vertex! [target-graph vertex-type properties]
   (p :create-vertex
      (let [vertex (add-vertex! target-graph vertex-type)]
        (doseq [field properties]
-         (if-not (empty? (:value field))
+         (if-not (no-value? (:value field))
            (set-property! target-graph vertex
                           (:property field)
                           (:value field))))
