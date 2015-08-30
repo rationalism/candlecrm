@@ -20,7 +20,8 @@
   (testing "all types of entities"
     (let [entities (nlp-entities *pipeline* wikipedia-blurb)]
       (is (set/subset? wikipedia-people (set (entities person-key))))
-      (is (set/subset? wikipedia-dates (set (entities date-key))))
+      ;; TODO: move date testing to natty when that's installed
+      ;; (is (set/subset? wikipedia-dates (set (entities date-key))))
       (is (set/subset? wikipedia-locations (set (entities location-key))))))
   (testing "people detection"
     (let [people (nlp-people (nlp-entities *pipeline* wikipedia-blurb))]

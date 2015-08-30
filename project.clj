@@ -27,6 +27,7 @@
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.0"]
             [lein-ring "0.9.6"]]
+  :resource-paths ["config" "resources"]
   :ring {:handler spectra.web/secure-app
          :init spectra.web/app-init
          :destroy spectra.web/app-shutdown
