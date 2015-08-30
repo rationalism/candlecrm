@@ -23,7 +23,8 @@
                  [com.sun.mail/javax.mail "1.5.4"]
                  [edu.stanford.nlp/stanford-corenlp "3.5.2"]
                  [edu.stanford.nlp/stanford-corenlp "3.5.2" :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.0.9"]]
+                 [com.googlecode.libphonenumber/libphonenumber "7.0.9"]
+                 [com.joestelmach/natty "0.11"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.0"]
             [lein-ring "0.9.6"]]
