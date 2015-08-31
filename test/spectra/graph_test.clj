@@ -2,5 +2,13 @@
   (:require [clojure.test :refer :all]
             [spectra.graph :refer :all]))
 
-(deftest first-test
-  (is "Tests should be written"))
+(defn graph-ready [f]
+  (def test-graph (get-graph))
+  (f)
+  (.shutdown test-graph))
+
+(use-fixtures :once graph-ready)
+
+(deftest vertex-create-destroy
+  (testing "create, find, destroy vertices"
+    (is (= 2 2))))

@@ -86,8 +86,13 @@
   (wrap-commit target-graph
                (.removeVertex target-graph vertex)))
 
+(defn get-vertices [target-graph class index value]
+  (if (coll? index)
+    (.getVertices target-graph class index value)
+    (.getVertices target-graph (str class "." index) value)))
+
 (defn get-vertex [target-graph class index value]
-  (first (.getVertices target-graph (str class "." index) value)))
+  (first (get-vertices target-graph class index value)))
 
 (defn get-vertices-class [target-graph class]
   (.getVerticesOfClass target-graph class))
