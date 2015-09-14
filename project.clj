@@ -1,37 +1,31 @@
-(defproject spectra "0.0.1"
+(defproject spectra "0.0.2"
   :description "Personal semantic graphs"
   :url "http://spectra.herokuapp.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
-  :dependencies [[org.clojure/clojure "1.6.0"]
-                 [compojure "1.1.8"]
-                 [ring/ring-jetty-adapter "1.2.2"]
+  :dependencies [[org.clojure/clojure "1.7.0"]
+                 [compojure "1.4.0"]
+                 [ring "1.4.0"]
                  [ring/ring-defaults "0.1.5"]
                  [hiccup "1.0.5"]
-                 [environ "1.0.0"]
+                 [environ "1.0.1"]
                  [com.taoensso/timbre "4.1.1"]
                  [com.cemerick/friend "0.2.1"]
                  [com.google.api-client/google-api-client "1.20.0"]
-                 [com.tinkerpop.blueprints/blueprints-core "2.6.0"]
-                 [com.tinkerpop.gremlin/gremlin-java "2.6.0"]
-                 [com.orientechnologies/orientdb-core "2.1.0"]
-                 [com.orientechnologies/orientdb-graphdb "2.1.0"]
-                 [com.orientechnologies/orientdb-client "2.1.0"]
-                 [com.orientechnologies/orientdb-enterprise "2.1.0"]
                  [org.passay/passay "1.1.0"]
-                 [com.google.apis/google-api-services-oauth2 "v2-rev93-1.20.0"]
+                 [com.google.apis/google-api-services-oauth2 "v2-rev94-1.20.0"]
                  [com.google.http-client/google-http-client-jackson "1.20.0"]
                  [com.sun.mail/javax.mail "1.5.4"]
                  [edu.stanford.nlp/stanford-corenlp "3.5.2"]
                  [edu.stanford.nlp/stanford-corenlp "3.5.2" :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.0.9"]
-                 [com.joestelmach/natty "0.11"]]
+                 [com.googlecode.libphonenumber/libphonenumber "7.0.10"]
+                 [com.joestelmach/natty "0.12"]
+                 [clojurewerkz/neocons "3.1.0-rc1"]]
   :min-lein-version "2.0.0"
-  :plugins [[lein-environ "1.0.0"]
+  :plugins [[lein-environ "1.0.1"]
             [lein-ring "0.9.6"]]
   :resource-paths ["config" "resources"]
   :ring {:handler spectra.web/secure-app
          :init spectra.web/app-init
          :destroy spectra.web/app-shutdown
-         :nrepl {:start? true
-                 :port 9998}}
+         :nrepl {:start? true :port 9998}}
   :uberjar-name "spectra-standalone.jar")

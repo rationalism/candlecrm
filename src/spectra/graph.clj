@@ -2,15 +2,14 @@
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
-             :refer (pspy pspy* profile defnp p p*)])
-  (:import [com.tinkerpop.blueprints.impls.orient OrientGraphFactory]
-           [com.orientechnologies.orient.core.sql OCommandSQL]))
+             :refer (pspy pspy* profile defnp p p*)]))
 
-(defn get-factory []
-  (OrientGraphFactory.
-   (env :database-url)
-   (env :database-username)
-   (env :database-password)))
+;; PLACEHOLDER
+(defn get-factory [] nil)
+
+;  [(env :database-url)
+;   (env :database-username)
+;   (env :database-password)])
 
 (defn get-graph []
   (let [factory (get-factory)]
@@ -28,8 +27,7 @@
 
 (defn sql-command! [target-graph command]
   (try (.execute
-        (.command target-graph
-                  (OCommandSQL. command))
+        (.command target-graph nil) ;; PLACEHOLDER
         nil)
        (catch Exception e
          (do (prn "Exception caught when executing SQL command")
@@ -87,9 +85,10 @@
                (.removeVertex target-graph vertex)))
 
 (defn get-vertices [target-graph class index value]
-  (if (coll? index)
-    (.getVertices target-graph class index value)
-    (.getVertices target-graph (str class "." index) value)))
+  (into []
+   (if (coll? index)
+     (do (prn "collection") (.getVertices target-graph class index value))
+     (do (prn "collection") (.getVertices target-graph (str class "." index) value)))))
 
 (defn get-vertex [target-graph class index value]
   (first (get-vertices target-graph class index value)))
