@@ -58,10 +58,9 @@
 (defn get-vertices-class [class]
   (.getVerticesOfClass *graph* class))
 
-(defn create-edge! [out-vertex in-vertex class]
+(defn create-edge! [out in class]
   (p :create-edge
-     (.addEdge *graph* nil out-vertex
-               in-vertex class)))
+     (nrl/create *graph* out in class)))
 
 (defn delete-edge! [edge]
   (.removeEdge *graph* edge))
