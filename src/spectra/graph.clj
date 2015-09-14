@@ -21,50 +21,50 @@
 (defn get-property [vertex property]
   (.getProperty vertex property))
 
-(defn set-property! [target-graph vertex property value]
+(defn set-property! [vertex property value]
   (p :set-property
      (.setProperty vertex property value)))
 
-(defn delete-property! [target-graph vertex property]
+(defn delete-property! [vertex property]
   (.removeProperty vertex property))
 
-(defn add-vertex! [target-graph vertex-type]
-  (.addVertex target-graph (str "class:" vertex-type)))
+(defn add-vertex! [vertex-type]
+  (.addVertex *graph* (str "class:" vertex-type)))
 
 (defn no-value? [property]
   (if (string? property)
     (empty? property)
     (nil? property)))
 
-(defn create-vertex! [target-graph vertex-type properties]
+(defn create-vertex! [vertex-type properties]
   (p :create-vertex
-     (let [vertex (add-vertex! target-graph vertex-type)]
+     (let [vertex (add-vertex! *graph* vertex-type)]
        (doseq [field properties]
          (if-not (no-value? (:value field))
-           (set-property! target-graph vertex
+           (set-property! *graph* vertex
                           (:property field)
                           (:value field))))
        vertex)))
 
-(defn delete-vertex! [target-graph vertex]
-  (.removeVertex target-graph vertex))
+(defn delete-vertex! [vertex]
+  (.removeVertex *graph* vertex))
 
-(defn get-vertices [target-graph class index value]
+(defn get-vertices [class index value]
   (into []
    (if (coll? index)
-     (do (prn "collection") (.getVertices target-graph class index value))
-     (do (prn "collection") (.getVertices target-graph (str class "." index) value)))))
+     (do (prn "collection") (.getVertices *graph* class index value))
+     (do (prn "collection") (.getVertices *graph* (str class "." index) value)))))
 
-(defn get-vertex [target-graph class index value]
-  (first (get-vertices target-graph class index value)))
+(defn get-vertex [*graph* class index value]
+  (first (get-vertices *graph* class index value)))
 
-(defn get-vertices-class [target-graph class]
-  (.getVerticesOfClass target-graph class))
+(defn get-vertices-class [class]
+  (.getVerticesOfClass *graph* class))
 
-(defn create-edge! [target-graph out-vertex in-vertex class]
+(defn create-edge! [out-vertex in-vertex class]
   (p :create-edge
-     (.addEdge target-graph nil out-vertex
+     (.addEdge *graph* nil out-vertex
                in-vertex class)))
 
-(defn delete-edge! [target-graph edge]
-  (.removeEdge target-graph edge))
+(defn delete-edge! [edge]
+  (.removeEdge *graph* edge))

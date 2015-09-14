@@ -23,7 +23,7 @@
    new-user))
 
 (defn lookup-user [username]
-  (graph/get-vertex graph/*graph* schema/user-type schema/email-address-type username))
+  (graph/get-vertex schema/user-type schema/email-address-type username))
 
 (defn get-user-pwd [username]
   (let [user (lookup-user username)]
@@ -37,13 +37,13 @@
     nil))
 
 (defn list-users []
-  (graph/get-vertices-class graph/*graph* schema/user-type))
+  (graph/get-vertices-class schema/user-type))
 
 (defn delete-user! [username]
-  (graph/delete-vertex! graph/*graph* (lookup-user username)))
+  (graph/delete-vertex! (lookup-user username)))
 
 (defn auth-user [credentials]
-  (let [user (graph/get-vertex graph/*graph* schema/email-address-type (:username credentials))
+  (let [user (graph/get-vertex schema/email-address-type (:username credentials))
         unauthed [false {:flash "Invalid username or password"}]]
     (if user
       (if (= (:password credentials) (:password user))            

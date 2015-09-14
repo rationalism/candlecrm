@@ -67,12 +67,10 @@
   (graph/get-property user schema/google-token-type))
 
 (defn write-token! [user token]
-  (graph/set-property! graph/*graph* user
-                       schema/google-token-type token))
+  (graph/set-property! user schema/google-token-type token))
 
 (defn delete-token! [user]
-  (graph/delete-property! graph/*graph* user
-                          schema/google-token-type))
+  (graph/delete-property! user schema/google-token-type))
 
 (defn get-access-token! [refresh-token]
   (.getAccessToken

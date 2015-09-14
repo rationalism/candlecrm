@@ -51,28 +51,28 @@
    (.createProperty arg1 arg2 arg3 arg4)))
 
 (defn vertex
-  ([target-graph name]
-   (.createVertexType target-graph name))
-  ([target-graph name super]
-   (.createVertexType target-graph name super)))
+  ([name]
+   (.createVertexType name))
+  ([name super]
+   (.createVertexType name super)))
 
-(defn get-vertex [target-graph name]
-  (.getVertexType target-graph name))
+(defn get-vertex [name]
+  (.getVertexType name))
 
-(defn drop-vertex! [target-graph name]
-  (.dropVertexType target-graph name))
+(defn drop-vertex! [name]
+  (.dropVertexType name))
 
-(defn drop-edge! [target-graph name]
-  (.dropEdgeType target-graph name))
+(defn drop-edge! [name]
+  (.dropEdgeType name))
 
 (defn edge
-  ([target-graph name]
-   (.createEdgeType target-graph name))
-  ([target-graph name super]
-   (.createEdgeType target-graph name super)))
+  ([name]
+   (.createEdgeType name))
+  ([name super]
+   (.createEdgeType name super)))
 
-(defn key-index [target-graph var-type var-class params]
-  (.createKeyIndex target-graph var-type var-class params))
+(defn key-index [var-type var-class params]
+  (.createKeyIndex var-type var-class params))
 
 ;; TODO: Get this into a config file so it's cleaner/easier to specify
 ;; Potentially useful notes: https://groups.google.com/forum/#!msg/orient-database/Y0QJiXk7d1I/uXEv-paQ9wUJ

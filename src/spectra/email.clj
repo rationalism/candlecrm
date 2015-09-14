@@ -160,7 +160,7 @@
 (defn insert-email! [user email]
   (let [parsed-email (full-parse email)
         new-email (graph/create-vertex!
-                   graph/*graph* schema/email-type
+                   schema/email-type
                    [{:property schema/email-received :value (:time-received parsed-email)}
                     {:property schema/email-sent :value (:time-sent parsed-email)}
                     {:property schema/email-subject :value (:subject parsed-email)}
