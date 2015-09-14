@@ -3,17 +3,14 @@
             [spectra.graph :as graph]
             [environ.core :refer [env]]))
 
-(def name-type "name")
-(def out-type "out")
-(def in-type "in")
-
 (def user-type "user")
-(def pwd-hash-type "pwdhash")
-(def google-token-type "google-token")
+(def name-type :name)
+(def pwd-hash-type :pwd-hash)
+(def google-token-type :google-token)
 
 (def person-type "person")
-(def email-address-type "email-addr")
-(def phone-num-type "phone-num")
+(def email-address-type :email-addr)
+(def phone-num-type :phone-num)
 (def user-person-edge "user-person")
 
 (def email-type "email")
@@ -25,10 +22,10 @@
 (def email-replyto-edge "email-replyto")
 (def email-mentions-edge "email-mentions")
 
-(def email-subject "subject")
-(def email-body "body")
-(def email-received "received-date")
-(def email-sent "sent-date")
+(def email-subject :subject)
+(def email-body :body)
+(def email-received :received-date)
+(def email-sent :sent-date)
 
 (def location-type "location")
 
