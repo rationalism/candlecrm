@@ -3,38 +3,32 @@
             [spectra.graph :as graph]
             [environ.core :refer [env]]))
 
-;; CANNOT use dashes, etc. in column names
-;; TODO: create systematic names for these
 (def name-type "name")
 (def out-type "out")
 (def in-type "in")
 
-;; CANNOT call these fields "user", "account", etc. due to known
-;; database bug. See https://github.com/orientechnologies/orientdb/issues/3972
-(def user-type "appuser")
-(def pwd-hash-type "bcrypt")
-(def google-token-type "googletoken")
+(def user-type "user")
+(def pwd-hash-type "pwdhash")
+(def google-token-type "google-token")
 
 (def person-type "person")
-(def email-address-type "emailaddr")
-(def phone-num-type "phonenum")
-(def user-person-edge "appuserperson")
-(def user-owns-edge "appuserowns")
-(def user-person-index "personindex")
+(def email-address-type "email-addr")
+(def phone-num-type "phone-num")
+(def user-person-edge "user-person")
 
 (def email-type "email")
-(def email-person-edge "emailperson")
-(def email-to-edge "emailto")
-(def email-cc-edge "emailcc")
-(def email-bcc-edge "emailbcc")
-(def email-from-edge "emailfrom")
-(def email-replyto-edge "emailreplyto")
-(def email-mentions-edge "emailmentions")
+(def email-person-edge "email-person")
+(def email-to-edge "email-to")
+(def email-cc-edge "email-cc")
+(def email-bcc-edge "email-bcc")
+(def email-from-edge "email-from")
+(def email-replyto-edge "email-replyto")
+(def email-mentions-edge "email-mentions")
 
 (def email-subject "subject")
 (def email-body "body")
-(def email-received "receiveddate")
-(def email-sent "sentdate")
+(def email-received "received-date")
+(def email-sent "sent-date")
 
 (def location-type "location")
 
