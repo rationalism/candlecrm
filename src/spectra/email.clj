@@ -161,10 +161,10 @@
   (let [parsed-email (full-parse email)
         new-email (graph/create-vertex!
                    schema/email-type
-                   [{:property schema/email-received :value (:time-received parsed-email)}
-                    {:property schema/email-sent :value (:time-sent parsed-email)}
-                    {:property schema/email-subject :value (:subject parsed-email)}
-                    {:property schema/email-body :value (:body parsed-email)}])
+                   {schema/email-received (:time-received parsed-email)
+                    schema/email-sent (:time-sent parsed-email)
+                    schema/email-subject (:subject parsed-email)
+                    schema/email-body (:body parsed-email)})
         email-link! (partial database/add-email-link! user new-email)]
     (doseq [p (:to parsed-email)] (email-link! schema/email-to-edge p))
     (doseq [p (:cc parsed-email)] (email-link! schema/email-cc-edge p))

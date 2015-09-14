@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.labels :as nl]
             [clojurewerkz.neocons.rest.nodes :as nn]
             [clojurewerkz.neocons.rest.relationships :as nrl]
             [taoensso.timbre.profiling :as profiling
@@ -36,14 +37,10 @@
     (empty? property)
     (nil? property)))
 
-(defn create-vertex! [vertex-type properties]
+(defn create-vertex! [labels properties]
   (p :create-vertex
-     (let [vertex (add-vertex! *graph* vertex-type)]
-       (doseq [field properties]
-         (if-not (no-value? (:value field))
-           (set-property! *graph* vertex
-                          (:property field)
-                          (:value field))))
+     (let [vertex (nn/create *graph* properties)]
+       (nl/add *graph* vertex labels)
        vertex)))
 
 (defn delete-vertex! [vertex]
