@@ -9,11 +9,14 @@
                  [hiccup "1.0.5"]
                  [environ "1.0.1"]
                  [com.taoensso/timbre "4.1.1"]
-                 [com.cemerick/friend "0.2.1"]
+                 [com.cemerick/friend "0.2.1"
+                  :exclusions [org.apache.httpcomponents/httpclient
+                               org.apache.httpcomponents/httpcore]]
                  [com.google.api-client/google-api-client "1.20.0"]
                  [org.passay/passay "1.1.0"]
                  [com.google.apis/google-api-services-oauth2 "v2-rev94-1.20.0"]
-                 [com.google.http-client/google-http-client-jackson "1.20.0"]
+                 [com.google.http-client/google-http-client-jackson "1.20.0"
+                  :exclusions [org.apache.httpcomponents/httpclient]]
                  [com.sun.mail/javax.mail "1.5.4"]
                  [edu.stanford.nlp/stanford-corenlp "3.5.2"]
                  [edu.stanford.nlp/stanford-corenlp "3.5.2" :classifier "models"]

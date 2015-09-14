@@ -32,34 +32,9 @@
     (graph/create-edge! target-graph user new-person schema/user-owns-edge)
     new-person))
 
-;; Composite index query from https://github.com/orientechnologies/orientdb/issues/4862
+;; PLACEHOLDER
 (defn person-from-property [user property value]
-  (if (graph/no-value? value)
-    []
-    (let [sql (str
-               "SELECT expand( inV() ) FROM "
-               schema/user-owns-edge
-               " LET "
-               schema/user-type
-               " = (SELECT FROM "
-               schema/user-type
-               " WHERE "
-               schema/email-address-type
-               " = '"
-               (get-username user)
-               "'), "
-               schema/person-type
-               " = (SELECT FROM "
-               schema/person-type
-               " WHERE "
-               property
-               " = '"
-               (str/escape value {\' "", \" ""})
-               "') WHERE out in $"
-               schema/user-type
-               " AND in in $"
-               schema/person-type)]
-      (p :person-lookup (graph/sql-command! graph/*graph* sql)))))
+  [])
 
 (defn add-email-link! [user email link-type person]
   (let [old-people (distinct
