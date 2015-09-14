@@ -1,39 +1,20 @@
 (ns spectra.graph
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
+            [clojurewerkz.neocons.rest :as nr]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
-;; PLACEHOLDER
-(defn get-factory [] nil)
-
-;  [(env :database-url)
-;   (env :database-username)
-;   (env :database-password)])
+(defn make-graph-url []
+  (str "http://" (env :database-username)
+       ":" (env :database-password)
+       "@" (env :database-url)))
 
 (defn get-graph []
-  (let [factory (get-factory)]
-    (.getTx factory)))
-
-(defn get-graph-notx []
-  (let [factory (get-factory)]
-    (.getNoTx factory)))
+  (nr/connect (make-graph-url)))
 
 (defn define-graph! []
   (def ^:dynamic *graph* (get-graph)))
-
-(defn shutdown-graph! []
-  (.shutdown *graph*))
-
-(defn sql-command! [target-graph command]
-  (try (.execute
-        (.command target-graph nil) ;; PLACEHOLDER
-        nil)
-       (catch Exception e
-         (do (prn "Exception caught when executing SQL command")
-             (prn (str "Command was: " command))
-             (prn ("Type of exception is: "))
-             (prn (.getMessage e))))))
 
 (defmacro wrap-commit
   "Takes an expression and wraps it in a try / catch

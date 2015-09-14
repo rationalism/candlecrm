@@ -98,6 +98,5 @@
   (email/define-imap-lookup))
 
 (defn app-shutdown []
-  (graph/shutdown-graph!)
   (email/close-imap-lookup!))
 
