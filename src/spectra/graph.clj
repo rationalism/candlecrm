@@ -44,9 +44,17 @@
     (empty? property)
     (nil? property)))
 
+(defn not-nil-ext? [item]
+  (if (coll? item)
+    (not-any? nil? item)
+    (not (nil? item))))
+
 (defn create-vertex! [labels properties]
   (p :create-vertex
-     (let [vertex (nn/create *graph* properties)]
+     (let [vertex (->> properties
+                       (filter #(not-nil-ext? (val %)))
+                       (into {})
+                       (nn/create *graph*))]
        (nl/add *graph* vertex labels)
        vertex)))
 
