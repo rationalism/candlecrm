@@ -53,8 +53,16 @@
 (defn delete-vertex! [vertex]
   (nn/destroy *graph* vertex))
 
+(defn cypher-prop-coll [prop]
+  (str " ANY (x in root.`" (name (key prop))
+       "` where x = '" (val prop) "') "))
+
+(defn cypher-props-coll [props]
+  (->> props (map cypher-prop-coll) (str/join "AND")))
+
 (defn cypher-property [prop]
-  (str (key prop) ": '" (val prop) "'")) 
+  (str "`" (name (key prop)) "`"
+       ": '" (val prop) "'"))
 
 (defn cypher-properties [props]
   (str "{ "
@@ -64,6 +72,11 @@
 (defn get-vertices [class props]
   (cypher-query (str "MATCH (root:" class
                      " " (cypher-properties props) " ) RETURN root")))
+
+(defn get-vertices-coll [class props]
+  (cypher-query (str "MATCH (root:" class
+                     ") WHERE " (cypher-props-coll props)
+                     " RETURN root")))
 
 (defn get-vertex [class props]
   (first (get-vertices class props)))

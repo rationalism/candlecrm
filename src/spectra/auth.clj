@@ -23,7 +23,7 @@
    new-user))
 
 (defn lookup-user [username]
-  (graph/get-vertex schema/user-type schema/email-address-type username))
+  (graph/get-vertex schema/user-type {schema/email-address-type username}))
 
 (defn get-user-pwd [username]
   (let [user (lookup-user username)]
