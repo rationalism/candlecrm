@@ -23,7 +23,13 @@
    new-user))
 
 (defn lookup-user [username]
-  (graph/get-vertex schema/user-type {schema/email-address-type username}))
+  (if-let [user (graph/get-vertex schema/user-type
+                                  {schema/email-address-type username})]
+    (user "root")
+    nil))
+
+(defn get-username [user]
+  (graph/get-property user schema/email-address-type))
 
 (defn get-user-pwd [username]
   (let [user (lookup-user username)]
@@ -39,8 +45,10 @@
 (defn list-users []
   (graph/get-vertices-class schema/user-type))
 
-(defn delete-user! [username]
-  (graph/delete-vertex! (lookup-user username)))
+(defn delete-user! [user]
+  (graph/cypher-query (str "MATCH (a)-[r*1..6]->m WHERE ID(a) = "
+                           (:id (:metadata user))
+                           " FOREACH(rel in r | DELETE rel) DELETE a, m")))
 
 (defn auth-user [credentials]
   (let [user (graph/get-vertex schema/email-address-type (:username credentials))

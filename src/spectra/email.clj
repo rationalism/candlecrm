@@ -1,6 +1,7 @@
 (ns spectra.email
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [spectra.auth :as auth]
             [spectra.database :as database]
             [spectra.google :as google]
             [spectra.graph :as graph]
@@ -151,7 +152,7 @@
                (*imap-lookup* user)
                (-> user google/lookup-token
                    google/get-access-token!
-                   (google/get-imap-store! (database/get-username user))
+                   (google/get-imap-store! (auth/get-username user))
                    get-inbox)))
   (if (folder-open? inbox) nil (open-folder-read! inbox))
   (update-imap-lookup! user inbox)

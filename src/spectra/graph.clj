@@ -24,11 +24,6 @@
 (defn cypher-query [query]
   (cy/tquery *graph* query))
 
-(defn cypher-root [root query]
-  (cy/tquery *graph*
-             (str "START root=node({sid}) " query)
-             {:sid (:id root)}))
-
 (defn get-property [vertex property]
   (property (:data vertex)))
 
@@ -78,8 +73,9 @@
        " }"))
 
 (defn get-vertices [class props]
-  (cypher-query (str "MATCH (root:" class
-                     " " (cypher-properties props) " ) RETURN root")))
+  (let [query (str "MATCH (root:" class
+                   " " (cypher-properties props) " ) RETURN root")]
+    (cypher-query query)))
 
 (defn get-vertices-coll [class props]
   (cypher-query (str "MATCH (root:" class

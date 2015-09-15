@@ -10,9 +10,6 @@
 (defn user-label [user]
   (str "user_" (:identity user)))
 
-(defn get-username [user]
-  (graph/get-property user schema/email-address-type))
-
 (defn create-user! [user]
   (graph/create-vertex!
    schema/user-type 
