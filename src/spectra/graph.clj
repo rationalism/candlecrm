@@ -1,7 +1,9 @@
 (ns spectra.graph
   (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [environ.core :refer [env]]
             [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.cypher :as cy]
             [clojurewerkz.neocons.rest.labels :as nl]
             [clojurewerkz.neocons.rest.nodes :as nn]
             [clojurewerkz.neocons.rest.relationships :as nrl]
@@ -19,18 +21,23 @@
 (defn define-graph! []
   (def ^:dynamic *graph* (get-graph)))
 
+(defn cypher-query [query]
+  (cy/tquery *graph* query))
+
+(defn cypher-root [root query]
+  (cy/tquery *graph*
+             (str "START root=node({sid}) " query)
+             {:sid (:id root)}))
+
 (defn get-property [vertex property]
-  (.getProperty vertex property))
+  (property (:data vertex)))
 
 (defn set-property! [vertex property value]
-  (p :set-property
-     (.setProperty vertex property value)))
+  (nn/set-property *graph* (:id vertex)
+                   property value))
 
 (defn delete-property! [vertex property]
   (.removeProperty vertex property))
-
-(defn add-vertex! [vertex-type]
-  (.addVertex *graph* (str "class:" vertex-type)))
 
 (defn no-value? [property]
   (if (string? property)
@@ -44,23 +51,29 @@
        vertex)))
 
 (defn delete-vertex! [vertex]
-  (.removeVertex *graph* vertex))
+  (nn/destroy *graph* vertex))
 
-(defn get-vertices [class index value]
-  (into []
-   (if (coll? index)
-     (do (prn "collection") (.getVertices *graph* class index value))
-     (do (prn "collection") (.getVertices *graph* (str class "." index) value)))))
+(defn cypher-property [prop]
+  (str (key prop) ": '" (val prop) "'")) 
 
-(defn get-vertex [*graph* class index value]
-  (first (get-vertices *graph* class index value)))
+(defn cypher-properties [props]
+  (str "{ "
+       (->> props (map cypher-property) (str/join ", "))
+       " }"))
+
+(defn get-vertices [class props]
+  (cypher-query (str "MATCH (root:" class
+                     " " (cypher-properties props) " ) RETURN root")))
+
+(defn get-vertex [class props]
+  (first (get-vertices class props)))
 
 (defn get-vertices-class [class]
-  (.getVerticesOfClass *graph* class))
+  (cypher-query (str "MATCH (root:" class ") RETURN root")))
 
 (defn create-edge! [out in class]
   (p :create-edge
      (nrl/create *graph* out in class)))
 
 (defn delete-edge! [edge]
-  (.removeEdge *graph* edge))
+  (nrl/delete *graph* edge))

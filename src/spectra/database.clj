@@ -8,7 +8,7 @@
              :refer (pspy pspy* profile defnp p p*)]))
 
 (defn user-label [user]
-  (str "user:" (:identity user)))
+  (str "user_" (:identity user)))
 
 (defn get-username [user]
   (graph/get-property user schema/email-address-type))
@@ -31,16 +31,16 @@
         new-person (create-person! new-user {:email (:identity user)})]
     (graph/create-edge! new-user new-person schema/user-person-edge)))
 
-;; PLACEHOLDER FOR CYPHER FUNCTION
-(defn person-from-property [user property value]
-  [])
+(defn person-from-props [user props]
+  (graph/cypher-query (str "MATCH (root:" (user-label user) ":" schema/person-type
+                           " " (graph/cypher-properties props) " ) RETURN root")))
 
 (defn lookup-old-people [user person]
   (distinct
    (concat
-    (person-from-property user schema/email-address-type (:email person))
-    (person-from-property user schema/name-type (:name person))
-    (person-from-property user schema/phone-num-type (:phone person)))))
+    (person-from-props user {schema/email-address-type (:email person)})
+    (person-from-props user {schema/name-type (:name person)})
+    (person-from-props user {schema/phone-num-type (:phone person)}))))
 
 (defn add-email-link! [user email link-type person]
   (let [old-people (lookup-old-people user person)
