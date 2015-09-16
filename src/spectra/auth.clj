@@ -25,8 +25,7 @@
 (defn lookup-user [username]
   (if-let [user (graph/get-vertex schema/user-type
                                   {schema/email-address-type username})]
-    (user "root")
-    nil))
+    user nil))
 
 (defn get-username [user]
   (graph/get-property user schema/email-address-type))
@@ -47,7 +46,7 @@
 
 (defn delete-user! [user]
   (graph/cypher-query (str "MATCH (a)-[r*1..6]->m WHERE ID(a) = "
-                           (:id (:metadata user))
+                           (:id user)
                            " FOREACH(rel in r | DELETE rel) DELETE a, m")))
 
 (defn auth-user [credentials]

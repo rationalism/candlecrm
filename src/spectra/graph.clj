@@ -6,6 +6,7 @@
             [clojurewerkz.neocons.rest.cypher :as cy]
             [clojurewerkz.neocons.rest.labels :as nl]
             [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.records :as rec]
             [clojurewerkz.neocons.rest.relationships :as nrl]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
@@ -21,15 +22,24 @@
 (defn define-graph! []
   (def ^:dynamic *graph* (get-graph)))
 
+(defn cypher-pair-to-node [pair]
+  [(key pair)
+   (rec/instantiate-node-from (val pair))])
+
+(defn cypher-map-to-node [cymap]
+  (->> cymap
+       (map cypher-pair-to-node)
+       (into {})))
+
 (defn cypher-query [query]
-  (cy/tquery *graph* query))
+  (->> (cy/tquery *graph* query)
+       (map cypher-map-to-node)))
 
 (defn get-property [vertex property]
   (property (:data vertex)))
 
 (defn set-property! [vertex property value]
-  (nn/set-property *graph* (:id vertex)
-                   property value))
+  (nn/set-property *graph* vertex property value))
 
 (defn delete-property! [vertex property]
   (.removeProperty vertex property))
@@ -72,21 +82,28 @@
        (->> props (map cypher-property) (str/join ", "))
        " }"))
 
+(defn cypher-list [query]
+  (->> (cypher-query query)
+       (map first)
+       (map val)))
+
 (defn get-vertices [class props]
-  (let [query (str "MATCH (root:" class
-                   " " (cypher-properties props) " ) RETURN root")]
-    (cypher-query query)))
+  (cypher-list
+   (str "MATCH (root:" class
+        " " (cypher-properties props)
+        " ) RETURN root")))
 
 (defn get-vertices-coll [class props]
-  (cypher-query (str "MATCH (root:" class
-                     ") WHERE " (cypher-props-coll props)
-                     " RETURN root")))
+  (cypher-list (str "MATCH (root:" class
+                    ") WHERE " (cypher-props-coll props)
+                    " RETURN root")))
 
 (defn get-vertex [class props]
   (first (get-vertices class props)))
 
 (defn get-vertices-class [class]
-  (cypher-query (str "MATCH (root:" class ") RETURN root")))
+  (cypher-list (str "MATCH (root:" class
+                    ") RETURN root")))
 
 (defn create-edge! [out in class]
   (p :create-edge
