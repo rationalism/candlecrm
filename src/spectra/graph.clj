@@ -22,6 +22,10 @@
 (defn define-graph! []
   (def ^:dynamic *graph* (get-graph)))
 
+(defn cypher-esc [string]
+  (if (nil? string) nil
+      (str/replace string #"[\\'\"]" #(str "\\" %1))))
+
 (defn cypher-pair-to-node [pair]
   [(key pair)
    (rec/instantiate-node-from (val pair))])
@@ -67,15 +71,15 @@
   (nn/destroy *graph* vertex))
 
 (defn cypher-prop-coll [prop]
-  (str " ANY (x in root.`" (name (key prop))
-       "` where x = '" (val prop) "') "))
+  (str " ANY (x in root.`" (cypher-esc (name (key prop)))
+       "` where x = '" (cypher-esc (val prop)) "') "))
 
 (defn cypher-props-coll [props]
   (->> props (map cypher-prop-coll) (str/join "AND")))
 
 (defn cypher-property [prop]
-  (str "`" (name (key prop)) "`"
-       ": '" (val prop) "'"))
+  (str "`" (cypher-esc (name (key prop))) "`"
+       ": '" (cypher-esc (val prop)) "'"))
 
 (defn cypher-properties [props]
   (str "{ "
@@ -89,12 +93,12 @@
 
 (defn get-vertices [class props]
   (cypher-list
-   (str "MATCH (root:" class
+   (str "MATCH (root:" (cypher-esc class)
         " " (cypher-properties props)
         " ) RETURN root")))
 
 (defn get-vertices-coll [class props]
-  (cypher-list (str "MATCH (root:" class
+  (cypher-list (str "MATCH (root:" (cypher-esc class)
                     ") WHERE " (cypher-props-coll props)
                     " RETURN root")))
 
@@ -102,7 +106,7 @@
   (first (get-vertices class props)))
 
 (defn get-vertices-class [class]
-  (cypher-list (str "MATCH (root:" class
+  (cypher-list (str "MATCH (root:" (cypher-esc class)
                     ") RETURN root")))
 
 (defn create-edge! [out in class]

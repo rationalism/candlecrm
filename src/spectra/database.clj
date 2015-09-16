@@ -29,7 +29,7 @@
     (graph/create-edge! new-user new-person schema/user-person-edge)))
 
 (defn person-from-props [user props]
-   (graph/cypher-list (str "MATCH (root:" (user-label user)
+   (graph/cypher-list (str "MATCH (root:" (graph/cypher-esc (user-label user))
                             ":" schema/person-type
                             " ) WHERE " (graph/cypher-props-coll props)
                             " RETURN root")))
