@@ -102,8 +102,7 @@
   (-> (filter #(.contains (.getContentType %) plain-type)
               (get-parts (content message)))
       first
-      .getContent
-      filter-text))
+      .getContent))
 
 (defn people-from-text [text]
   (distinct
