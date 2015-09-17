@@ -39,12 +39,49 @@
   (->> (cy/tquery *graph* query)
        (map cypher-map-to-node)))
 
+(defn cypher-prop-coll [prop]
+  (str " ANY (x in root.`" (cypher-esc (name (key prop)))
+       "` where x = '" (cypher-esc (val prop)) "') "))
+
+(defn cypher-props-coll [props]
+  (->> props (map cypher-prop-coll) (str/join "AND")))
+
+(defn cypher-property [prop]
+  (str "`" (cypher-esc (name (key prop))) "`"
+       ": '" (cypher-esc (val prop)) "'"))
+
+(defn cypher-properties [props]
+  (str "{ "
+       (->> props (map cypher-property) (str/join ", "))
+       " }"))
+
+(defn cypher-list [query]
+  (->> (cypher-query query)
+       (map first)
+       (map val)))
+
 (defn get-property [vertex property]
-  (property (:data vertex)))
+  (let [value (property (:data vertex))]
+    (if (coll? value) (into #{} value) value)))
 
 (defn set-property! [vertex property value]
   (nn/set-property *graph* vertex property value))
 
+(defn find-by-id [id]
+  (first
+   (cypher-list
+    (str "MATCH (a) where ID(a)= " id
+         " RETURN a"))))
+
+(defn refresh-vertex [vertex]
+  (find-by-id (:id vertex)))
+
+(defn recon-property-list! [vertex property value]
+  (let [old-props (get-property vertex property)]
+    (if (some #{value} old-props)
+      nil (set-property! vertex property (conj old-props value)))))
+
+;; TODO: fix this, it's obsolete
 (defn delete-property! [vertex property]
   (.removeProperty vertex property))
 
@@ -69,27 +106,6 @@
 
 (defn delete-vertex! [vertex]
   (nn/destroy *graph* vertex))
-
-(defn cypher-prop-coll [prop]
-  (str " ANY (x in root.`" (cypher-esc (name (key prop)))
-       "` where x = '" (cypher-esc (val prop)) "') "))
-
-(defn cypher-props-coll [props]
-  (->> props (map cypher-prop-coll) (str/join "AND")))
-
-(defn cypher-property [prop]
-  (str "`" (cypher-esc (name (key prop))) "`"
-       ": '" (cypher-esc (val prop)) "'"))
-
-(defn cypher-properties [props]
-  (str "{ "
-       (->> props (map cypher-property) (str/join ", "))
-       " }"))
-
-(defn cypher-list [query]
-  (->> (cypher-query query)
-       (map first)
-       (map val)))
 
 (defn get-vertices [class props]
   (cypher-list

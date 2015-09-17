@@ -38,8 +38,8 @@
   (distinct
    (concat
     (person-from-props user {schema/email-address-type (:email person)})
-    (person-from-props user {schema/name-type (:name person)})
-    (person-from-props user {schema/phone-num-type (:phone person)}))))
+    (person-from-props user {schema/phone-num-type (:phone person)})
+    (person-from-props user {schema/name-type (:name person)}))))
 
 (defn add-email-link! [user email link-type person]
   (let [old-people (lookup-old-people user person)

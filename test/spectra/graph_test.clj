@@ -64,4 +64,22 @@
     (is (= 0 (count (get-people test-email))))
     (is (= 0 (count (get-people test-phone))))))
 
+(deftest recon-property
+  (testing "Reconcile old values of a property with new values"
+    (def new-vertex
+      (create-vertex! schema/person-type
+                      {schema/name-type test-names}))
+    (is (= test-names
+           (get-property new-vertex schema/name-type)))
+    
+    (recon-property-list! new-vertex schema/name-type (first test-names))
+    (def new-vertex (refresh-vertex new-vertex))
+    (is (= test-names
+           (get-property new-vertex schema/name-type)))
+    
+    (recon-property-list! new-vertex schema/name-type other-name)
+    (def new-vertex (refresh-vertex new-vertex))
+    (is (= (conj test-names other-name)
+           (get-property new-vertex schema/name-type)))
 
+    (delete-vertex! new-vertex)))
