@@ -159,18 +159,22 @@
     (nlp/nlp-people
      (p :nlp-text (nlp/nlp-entities nlp/*pipeline* text))))))
 
+(defn headers-parse [message]
+  (merge
+   {:time-received (received-time message)}
+   {:time-sent (sent-time message)}
+   {:subject (subject message)}
+   (decode-recipients message)
+   (decode-sender message)
+   (decode-replyto message)))
+
 (defn full-parse [message]
   (let [subject-text (subject message)
         body-text (p :email-text (get-text-content message))
         full-text (str subject-text ". " body-text)]
     (merge
-     {:time-received (received-time message)}
-     {:time-sent (sent-time message)}
-     {:subject subject-text}
+     (headers-parse message)
      {:body body-text}
-     (decode-recipients message)
-     (decode-sender message)
-     (decode-replyto message)
      {:people-mentioned (people-from-text full-text)})))
    
 (defn define-imap-lookup []

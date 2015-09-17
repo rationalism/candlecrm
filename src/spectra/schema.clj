@@ -25,6 +25,7 @@
 (def email-body :body)
 (def email-received :received-date)
 (def email-sent :sent-date)
+(def email-sub-hash :sub-hash)
 
 (def location-type "location")
 

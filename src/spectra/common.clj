@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [environ.core :refer [env]]
+            [pandect.algo.sha1 :as sha1]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
@@ -48,4 +49,9 @@
 
 (defn make-params [& args]
   (into-array (map param args)))
- 
+
+(defn sha1 [text]
+  (sha1/sha1 text))
+
+(defn end-hash [text]
+  (-> text (subs (- (count text) 10)) sha1))

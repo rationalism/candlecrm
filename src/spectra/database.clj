@@ -1,6 +1,7 @@
 (ns spectra.database
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [spectra.common :as com]
             [spectra.graph :as graph]
             [spectra.schema :as schema]
             [environ.core :refer [env]]
@@ -40,6 +41,16 @@
     (person-from-props user {schema/email-address-type (:email person)})
     (person-from-props user {schema/phone-num-type (:phone person)})
     (person-from-props user {schema/name-type (:name person)}))))
+
+(defn lookup-old-email [message person-from]
+  (graph/cypher-list (str "MATCH (root:" schema/email-type
+                          " " (graph/cypher-properties
+                               {schema/email-sub-hash
+                                (com/end-hash (:subject message))})
+                          ")-[:" (name schema/email-from-edge)
+                          "]->(f) WHERE ID (f)=" (:id person-from)
+                          " AND (root."
+                          " RETURN root")))
 
 (defn recon-person! [old-person new-person]
   (doseq [param {:name schema/name-type
