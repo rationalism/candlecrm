@@ -143,6 +143,11 @@
                                (dec depth))
               (dissoc split-body :remainder)))))
 
+(defn raw-msg-chain [body]
+  (let [lines (str/split-lines body)]
+    (recursive-split lines
+                     (count-depth lines))))
+
 ;; Assumes that message content contains only one
 ;; non-duplicative plain text part
 (defn get-text-content [message]
@@ -168,15 +173,44 @@
    (decode-sender message)
    (decode-replyto message)))
 
+(defn headers-for-last [raw-msgs headers]
+  (update raw-msgs
+          (dec (count raw-msgs))
+          (merge (last raw-msgs) headers)))
+
+(defn infer-email [pair]
+  (assoc (nth pair 0) :to
+         (:from (nth pair 1))))
+
+(defn infer-email-chain [messages]
+  (conj
+   (->> messages
+        (partition 2 1)
+        infer-email)
+   (last messages)))
+
+(defn infer-people [messages]
+  (->> messages
+       (map #(assoc % :people-mentioned
+                    (people-from-text (:body %))))))
+
+(defn infer-subject [subject messages]
+  (->> messages
+       (map #(assoc % :subject subject))
+       (map #(assoc % :sub-hash
+                    (com/end-hash (:subject %))))))
+
 (defn full-parse [message]
-  (let [subject-text (subject message)
-        body-text (p :email-text (get-text-content message))
-        full-text (str subject-text ". " body-text)]
-    (merge
-     (headers-parse message)
-     {:body body-text}
-     {:people-mentioned (people-from-text full-text)})))
-   
+  (let [body-text (p :email-text (get-text-content message))
+        raw-msgs (raw-msg-chain body-text)]
+    (-> raw-msgs
+        (update (dec (count raw-msgs))
+                (merge (last raw-msgs)
+                       (headers-parse message)))
+        infer-email-chain
+        infer-people
+        infer-subject)))
+
 (defn define-imap-lookup []
   (def ^:dynamic *imap-lookup* {}))
 
@@ -208,18 +242,57 @@
   (update-imap-lookup! user inbox)
   inbox)
 
+(defn has-valid-from? [parsed-email]
+  (let [from (:email (:from parsed-email))]
+    (and (not (nil? from))
+         (> (count from) 3))))
+
+(defn from-lookup [message user]
+  (assoc message :from-database
+         (database/lookup-old-people
+          user (:from message))))
+
+(defn already-found? [message]
+  (let [from (:from-database message)]
+    (if (or (nil? from) (empty? from))
+      false
+      (not (empty?
+            (database/lookup-old-email
+             message from))))))
+
+(defn create-email! [parsed-email]
+  (assoc parsed-email :email-vertex
+         (graph/create-vertex!
+          schema/email-type
+          {schema/email-received (:time-received parsed-email)
+           schema/email-sent (:time-sent parsed-email)
+           schema/email-subject (:subject parsed-email)
+           schema/email-sub-hash (:sub-hash parsed-email)
+           schema/email-body (:body parsed-email)})))
+
+(defn create-link [parsed-email user]
+  (assoc parsed-email :link
+         (partial database/add-email-link!
+                  user (:email-vertex parsed-email))))
+
+;; TODO: Replace this with something more consistent
+(def email-keys {:to schema/email-to-edge
+                 :cc schema/email-cc-edge
+                 :bcc schema/email-bcc-edge
+                 :from schema/email-from-edge
+                 :replyto schema/email-replyto-edge
+                 :people-mentioned schema/email-mentions-edge})
+
+(defn insert-links! [parsed-email keys]
+  (doseq [k keys]
+    (doseq [p ((key k) parsed-email)]
+      ((:link parsed-email) (val k) p))))
+
 (defn insert-email! [user email]
-  (let [parsed-email (full-parse email)
-        new-email (graph/create-vertex!
-                   schema/email-type
-                   {schema/email-received (:time-received parsed-email)
-                    schema/email-sent (:time-sent parsed-email)
-                    schema/email-subject (:subject parsed-email)
-                    schema/email-body (:body parsed-email)})
-        email-link! (partial database/add-email-link! user new-email)]
-    (doseq [p (:to parsed-email)] (email-link! schema/email-to-edge p))
-    (doseq [p (:cc parsed-email)] (email-link! schema/email-cc-edge p))
-    (doseq [p (:bcc parsed-email)] (email-link! schema/email-bcc-edge p))
-    (doseq [p (:from parsed-email)] (email-link! schema/email-from-edge p))
-    (doseq [p (:replyto parsed-email)] (email-link! schema/email-replyto-edge p))
-    (doseq [p (:people-mentioned parsed-email)] (email-link! schema/email-mentions-edge p))))
+  (->> (full-parse email)
+       (filter has-valid-from?)
+       (map #(from-lookup % user))
+       (filter #(not (already-found? %)))
+       (map create-email!)
+       (map #(create-link % user))
+       (map #(insert-links! % email-keys))))
