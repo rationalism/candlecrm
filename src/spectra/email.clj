@@ -3,6 +3,7 @@
             [clojure.string :as str]
             [spectra.auth :as auth]
             [spectra.database :as database]
+            [spectra.datetime :as datetime]
             [spectra.google :as google]
             [spectra.graph :as graph]
             [spectra.corenlp :as nlp]
@@ -95,6 +96,71 @@
       (str/replace "\r\n" " ")
       (str/replace " > " " ")
       (str/replace #"\s+" " ")))
+
+(defn strip-arrows [line num]
+  (str/replace-first line (apply str (repeat num ">")) ""))
+
+(defn count-nested [text]
+  (count (first (re-seq #"^>+" text))))
+
+(defn count-depth [lines]
+  (->> lines
+       (map #(re-seq #"^>+" %))
+       (filter #(not (nil? %)))
+       (map first)
+       (map count)
+       (apply max)))
+
+(defn merge-lines [lines]
+  (str/join "\r\n" lines))
+
+(defn reset-if-found! [list header index]
+  (if (and (not (nil? list)) (> (count list) 0))
+    (reset! (index header) (first list))))
+
+(defn slice [start end coll]
+  (->> coll (take end) (drop start)))
+
+(defn slice-not [start end coll]
+  (concat (take start coll) (drop end coll)))
+
+(defn de-atom [pair]
+  [(key pair)
+   (deref (val pair))])
+
+(defn split-email [lines depth]
+  (def start-body (atom 0))
+  (while (> depth
+            (count-nested (nth lines @start-body)))
+    (do (swap! start-body inc)))
+  (def end-body (atom @start-body))
+  (while (= depth
+            (count-nested (nth lines @end-body)))
+    (do (swap! end-body inc)))
+  (def start-header (atom (dec @start-body)))
+  (def header {:date (atom nil) :email (atom nil) :name (atom nil)})
+  (while (and (>= @start-header 0)
+              (not (and (deref (:date header)) (deref (:email header)))))
+    (do (let [this-line (nth lines @start-header)]
+          (reset-if-found! (datetime/dates-in-text this-line) header :date)
+          (reset-if-found! (regex/find-email-addrs this-line) header :email)
+          (reset-if-found! ((nlp/nlp-entities nlp/*pipeline* this-line)
+                            nlp/person-key) header :name)
+          (swap! start-header dec))))
+  (assoc (->> header (map de-atom) (into {}))
+         :body (->> lines
+                    (slice @start-body @end-body)
+                    (map #(strip-arrows % depth))
+                    merge-lines)
+         :remainder (->> lines
+                         (slice-not @start-header @end-body))))
+
+(defn recursive-split [lines depth]
+  (if (<= depth 0) (list {:body (merge-lines lines)})
+      (let [split-body (split-email lines depth)]
+        (conj (recursive-split (:remainder split-body)
+                               (dec depth))
+              (dissoc split-body :remainder)))))
 
 ;; Assumes that message content contains only one
 ;; non-duplicative plain text part

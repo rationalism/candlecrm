@@ -44,11 +44,13 @@
    [(.toString annotation)]})
 
 (defn nlp-entities [pipeline text]
-  (->> (run-nlp pipeline text)
-       (map #(.get % CoreAnnotations$MentionsAnnotation))
-       (apply concat)
-       (map annotation-to-map)
-       (apply merge-with concat)))
+  (if-let [entity-map
+           (->> (run-nlp pipeline text)
+                (map #(.get % CoreAnnotations$MentionsAnnotation))
+                (apply concat)
+                (map annotation-to-map)
+                (apply merge-with concat))]
+    entity-map {}))
 
 (defn name-person [name]
   (assoc {} :name name))

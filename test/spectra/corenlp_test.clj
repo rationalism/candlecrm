@@ -25,4 +25,6 @@
       (is (set/subset? wikipedia-locations (set (entities location-key))))))
   (testing "people detection"
     (let [people (nlp-people (nlp-entities *pipeline* wikipedia-blurb))]
-      (is (set/subset? wikipedia-parsed-people (set people))))))
+      (is (set/subset? wikipedia-parsed-people (set people)))))
+  (testing "empty set"
+    (is (= {} (nlp-entities *pipeline* "")))))
