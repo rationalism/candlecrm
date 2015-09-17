@@ -12,4 +12,12 @@
                (catch Exception e []))
           (map #(.getDates %))
           flatten
+          (map first)
           distinct)))
+
+(defn to-ms [some-date]
+  (.getTime some-date))
+
+(defn catch-dates [value]
+  (if (= java.util.Date (type value))
+    (to-ms value) value))

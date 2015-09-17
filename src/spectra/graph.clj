@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [spectra.common :as com]
+            [spectra.datetime :as dt]
             [environ.core :refer [env]]
             [clojurewerkz.neocons.rest :as nr]
             [clojurewerkz.neocons.rest.cypher :as cy]
@@ -23,9 +24,11 @@
 (defn define-graph! []
   (def ^:dynamic *graph* (get-graph)))
 
-(defn cypher-esc [string]
-  (if (nil? string) nil
-      (str/replace string #"[\\'\"]" #(str "\\" %1))))
+(defn cypher-esc [value]
+  (if (nil? value) nil
+      (-> value
+          dt/catch-dates
+          (str/replace #"[\\'\"]" #(str "\\" %1)))))
 
 (defn cypher-pair-to-node [pair]
   [(key pair)
@@ -66,7 +69,8 @@
     (if (coll? value) (into #{} value) value)))
 
 (defn set-property! [vertex property value]
-  (nn/set-property *graph* vertex property value))
+  (nn/set-property *graph* vertex property
+                   (dt/catch-dates value)))
 
 (defn find-by-id [id]
   (first

@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [spectra.common :as com]
+            [spectra.datetime :as dt]
             [spectra.graph :as graph]
             [spectra.schema :as schema]
             [environ.core :refer [env]]
@@ -42,6 +43,9 @@
     (person-from-props user {schema/phone-num-type (:phone person)})
     (person-from-props user {schema/name-type (:name person)}))))
 
+;; For searching emails, in milliseconds
+(def sent-tolerance 300000)
+
 (defn lookup-old-email [message person-from]
   (graph/cypher-list (str "MATCH (root:" schema/email-type
                           " " (graph/cypher-properties
@@ -49,7 +53,10 @@
                                 (com/end-hash (:subject message))})
                           ")-[:" (name schema/email-from-edge)
                           "]->(f) WHERE ID (f)=" (:id person-from)
-                          " AND (root."
+                          " AND (root." (name schema/email-sent)
+                          " < " (dt/to-ms (:time-sent message)) " + " sent-tolerance
+                          " AND (root." (name schema/email-sent)
+                          " > " (dt/to-ms (:time-sent message)) " - " sent-tolerance 
                           " RETURN root")))
 
 (defn recon-person! [old-person new-person]
