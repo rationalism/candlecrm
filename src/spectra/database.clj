@@ -47,17 +47,18 @@
 (def sent-tolerance 300000)
 
 (defn lookup-old-email [message person-from]
-  (graph/cypher-list (str "MATCH (root:" schema/email-type
-                          " " (graph/cypher-properties
-                               {schema/email-sub-hash
-                                (com/end-hash (:subject message))})
-                          ")-[:" (name schema/email-from-edge)
-                          "]->(f) WHERE ID (f)=" (:id person-from)
-                          " AND (root." (name schema/email-sent)
-                          " < " (dt/to-ms (:time-sent message)) " + " sent-tolerance
-                          " AND (root." (name schema/email-sent)
-                          " > " (dt/to-ms (:time-sent message)) " - " sent-tolerance 
-                          " RETURN root")))
+  (graph/cypher-list
+   (str "MATCH (root:" schema/email-type
+        " " (graph/cypher-properties
+             {schema/email-sub-hash
+              (com/end-hash (:subject message))})
+        ")-[:" (graph/cypher-esc-token schema/email-from-edge)
+        "]->(f) WHERE ID (f)=" (:id person-from)
+        " AND (root." (graph/cypher-esc-token schema/email-sent)
+        " < (" (dt/to-ms (:time-sent message)) " + " sent-tolerance
+        ")) AND (root." (graph/cypher-esc-token schema/email-sent)
+        " > (" (dt/to-ms (:time-sent message)) " - " sent-tolerance 
+        ")) RETURN root")))
 
 (defn recon-person! [old-person new-person]
   (doseq [param {:name schema/name-type

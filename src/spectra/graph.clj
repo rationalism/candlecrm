@@ -30,6 +30,9 @@
           dt/catch-dates
           (str/replace #"[\\'\"]" #(str "\\" %1)))))
 
+(defn cypher-esc-token [token]
+  (str "`" (name token) "`"))
+
 (defn cypher-pair-to-node [pair]
   [(key pair)
    (rec/instantiate-node-from (val pair))])
@@ -44,14 +47,14 @@
        (map cypher-map-to-node)))
 
 (defn cypher-prop-coll [prop]
-  (str " ANY (x in root.`" (cypher-esc (name (key prop)))
-       "` where x = '" (cypher-esc (val prop)) "') "))
+  (str " ANY (x in root." (cypher-esc-token (key prop))
+       " where x = '" (cypher-esc (val prop)) "') "))
 
 (defn cypher-props-coll [props]
   (->> props (map cypher-prop-coll) (str/join "AND")))
 
 (defn cypher-property [prop]
-  (str "`" (cypher-esc (name (key prop))) "`"
+  (str (cypher-esc-token (key prop))
        ": '" (cypher-esc (val prop)) "'"))
 
 (defn cypher-properties [props]
@@ -94,6 +97,8 @@
   (p :create-vertex
      (let [vertex (->> properties
                        (filter #(com/not-nil-ext? (val %)))
+                       (into {})
+                       (map dt/catch-dates-map)
                        (into {})
                        (nn/create *graph*))]
        (nl/add *graph* vertex labels)

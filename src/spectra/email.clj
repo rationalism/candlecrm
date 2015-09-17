@@ -4,7 +4,7 @@
             [spectra.auth :as auth]
             [spectra.common :as com]
             [spectra.database :as database]
-            [spectra.datetime :as datetime]
+            [spectra.datetime :as dt]
             [spectra.google :as google]
             [spectra.graph :as graph]
             [spectra.corenlp :as nlp]
@@ -123,7 +123,7 @@
   (while (and (>= @start-header 0)
               (not (and (deref (:time-sent header)) (deref (:from header)))))
     (do (let [this-line (nth lines @start-header)]
-          (com/reset-if-found! (datetime/dates-in-text this-line) header :time-sent)
+          (com/reset-if-found! (dt/dates-in-text this-line) header :time-sent)
           (com/merge-if-found! (regex/find-email-people this-line) header :from)
           (com/merge-if-found! (->> (nlp/nlp-entities nlp/*pipeline* this-line)
                                     nlp/nlp-people) header :from)

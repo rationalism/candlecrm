@@ -21,3 +21,7 @@
 (defn catch-dates [value]
   (if (= java.util.Date (type value))
     (to-ms value) value))
+
+(defn catch-dates-map [pair]
+  [(key pair)
+   (catch-dates (val pair))])
