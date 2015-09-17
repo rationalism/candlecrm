@@ -99,13 +99,19 @@
 (defn count-nested [text]
   (count (first (re-seq #"^>+" text))))
 
-(defn count-depth [lines]
+(defn count-arrows [lines]
   (->> lines
        (map #(re-seq #"^>+" %))
-       (filter #(not (nil? %)))
-       (map first)
-       (map count)
-       (apply max)))
+       (filter #(not (nil? %)))))
+  
+(defn count-depth [lines]
+  (let [arrows (count-arrows lines)]
+    (if (or (nil? arrows) (empty? arrows))
+      0
+      (->> arrows
+           (map first)
+           (map count)
+           (apply max)))))
 
 (defn merge-lines [lines]
   (str/join "\r\n" lines))
@@ -145,6 +151,7 @@
               (dissoc split-body :remainder)))))
 
 (defn raw-msg-chain [body]
+  (prn "raw-msg-chain")
   (p :raw-msg-chain
      (let [lines (str/split-lines body)]
        (recursive-split lines
@@ -153,6 +160,11 @@
 ;; Assumes that message content contains only one
 ;; non-duplicative plain text part
 (defn get-text-content [message]
+  ;; Bug to be fixed here
+  (prn "get-text-content")
+  (prn (.getContentType message))
+  (prn (map #(prn (.getContentType %))
+            (get-parts (content message))))
   (:p get-text-content
       (-> (filter #(.contains (.getContentType %) plain-type)
                   (get-parts (content message)))
@@ -214,6 +226,7 @@
          infer-subject)))
 
 (defn full-parse [message]
+  (prn "full-parse")
   (as-> (-> message
             get-text-content
             raw-msg-chain) $

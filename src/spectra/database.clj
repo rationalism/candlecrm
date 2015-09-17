@@ -37,11 +37,12 @@
                             " RETURN root")))
 
 (defn lookup-old-people [user person]
-  (distinct
-   (concat
-    (person-from-props user {schema/email-address-type (:email person)})
-    (person-from-props user {schema/phone-num-type (:phone person)})
-    (person-from-props user {schema/name-type (:name person)}))))
+  (p :lookup-old-people
+     (distinct
+      (concat
+       (person-from-props user {schema/email-address-type (:email person)})
+       (person-from-props user {schema/phone-num-type (:phone person)})
+       (person-from-props user {schema/name-type (:name person)})))))
 
 ;; For searching emails, in milliseconds
 (def sent-tolerance 300000)
