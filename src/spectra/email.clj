@@ -74,10 +74,11 @@
    :bcc (map decode-address (.getRecipients message Message$RecipientType/BCC))})
 
 (defn decode-sender [message]
-  {:from (map decode-address (.getFrom message))})
+  {:from (first (map decode-address
+                     (.getFrom message)))})
 
 (defn decode-replyto [message]
-  {:reply-to (map decode-address (.getFrom message))})
+  {:reply-to (map decode-address (.getReplyTo message))})
 
 (defn headers [message]
   (->> (.getAllHeaders message)
@@ -144,17 +145,19 @@
               (dissoc split-body :remainder)))))
 
 (defn raw-msg-chain [body]
-  (let [lines (str/split-lines body)]
-    (recursive-split lines
-                     (count-depth lines))))
+  (p :raw-msg-chain
+     (let [lines (str/split-lines body)]
+       (recursive-split lines
+                        (count-depth lines)))))
 
 ;; Assumes that message content contains only one
 ;; non-duplicative plain text part
 (defn get-text-content [message]
-  (-> (filter #(.contains (.getContentType %) plain-type)
-              (get-parts (content message)))
-      first
-      .getContent))
+  (:p get-text-content
+      (-> (filter #(.contains (.getContentType %) plain-type)
+                  (get-parts (content message)))
+          first
+          .getContent)))
 
 (defn people-from-text [text]
   (distinct
@@ -180,13 +183,15 @@
 
 (defn infer-email [pair]
   (assoc (nth pair 0) :to
-         (:from (nth pair 1))))
+         (list (:from
+                (nth pair 1)))))
 
 (defn infer-email-chain [messages]
   (conj
    (->> messages
         (partition 2 1)
-        infer-email)
+        (map infer-email)
+        (into []))
    (last messages)))
 
 (defn infer-people [messages]
@@ -194,22 +199,28 @@
        (map #(assoc % :people-mentioned
                     (people-from-text (:body %))))))
 
-(defn infer-subject [subject messages]
+(defn infer-subject [messages]
   (->> messages
-       (map #(assoc % :subject subject))
+       (map #(assoc % :subject
+                    (:subject (last messages))))
        (map #(assoc % :sub-hash
                     (com/end-hash (:subject %))))))
 
+(defn message-inference [messages]
+  (p :message-inference
+     (-> messages
+         infer-email-chain
+         infer-people
+         infer-subject)))
+
 (defn full-parse [message]
-  (let [body-text (p :email-text (get-text-content message))
-        raw-msgs (raw-msg-chain body-text)]
-    (-> raw-msgs
-        (update (dec (count raw-msgs))
-                (merge (last raw-msgs)
-                       (headers-parse message)))
-        infer-email-chain
-        infer-people
-        infer-subject)))
+  (as-> (-> message
+            get-text-content
+            raw-msg-chain) $
+    (conj (into [] (drop-last $))
+          (merge (last $)
+                 (headers-parse message)))
+    (message-inference $)))
 
 (defn define-imap-lookup []
   (def ^:dynamic *imap-lookup* {}))
@@ -243,32 +254,36 @@
   inbox)
 
 (defn has-valid-from? [parsed-email]
-  (let [from (:email (:from parsed-email))]
-    (and (not (nil? from))
-         (> (count from) 3))))
+  (p :has-valid-from
+     (let [from (:email (:from parsed-email))]
+       (and (not (nil? from))
+            (> (count from) 3)))))
 
 (defn from-lookup [message user]
-  (assoc message :from-database
-         (database/lookup-old-people
-          user (:from message))))
+  (p :from-lookup
+     (assoc message :from-database
+            (database/lookup-old-people
+             user (:from message)))))
 
 (defn already-found? [message]
-  (let [from (:from-database message)]
-    (if (or (nil? from) (empty? from))
-      false
-      (not (empty?
-            (database/lookup-old-email
-             message from))))))
+  (p :already-found
+     (let [from (:from-database message)]
+       (if (or (nil? from) (empty? from))
+         false
+         (not (empty?
+               (database/lookup-old-email
+                message from)))))))
 
 (defn create-email! [parsed-email]
-  (assoc parsed-email :email-vertex
-         (graph/create-vertex!
-          schema/email-type
-          {schema/email-received (:time-received parsed-email)
-           schema/email-sent (:time-sent parsed-email)
-           schema/email-subject (:subject parsed-email)
-           schema/email-sub-hash (:sub-hash parsed-email)
-           schema/email-body (:body parsed-email)})))
+  (p :create-email
+     (assoc parsed-email :email-vertex
+            (graph/create-vertex!
+             schema/email-type
+             {schema/email-received (:time-received parsed-email)
+              schema/email-sent (:time-sent parsed-email)
+              schema/email-subject (:subject parsed-email)
+              schema/email-sub-hash (:sub-hash parsed-email)
+              schema/email-body (:body parsed-email)}))))
 
 (defn create-link [parsed-email user]
   (assoc parsed-email :link
@@ -279,20 +294,25 @@
 (def email-keys {:to schema/email-to-edge
                  :cc schema/email-cc-edge
                  :bcc schema/email-bcc-edge
-                 :from schema/email-from-edge
                  :replyto schema/email-replyto-edge
                  :people-mentioned schema/email-mentions-edge})
 
 (defn insert-links! [parsed-email keys]
-  (doseq [k keys]
-    (doseq [p ((key k) parsed-email)]
-      ((:link parsed-email) (val k) p))))
+  (p :insert-links
+     ;; Only one "from" per email
+     ((:link parsed-email) schema/email-from-edge
+      (:from parsed-email))
+     (doseq [k keys]
+       (doseq [p ((key k) parsed-email)]
+         ((:link parsed-email) (val k) p)))))
 
 (defn insert-email! [user email]
-  (->> (full-parse email)
-       (filter has-valid-from?)
-       (map #(from-lookup % user))
-       (filter #(not (already-found? %)))
-       (map create-email!)
-       (map #(create-link % user))
-       (map #(insert-links! % email-keys))))
+  (doseq [new-msg
+          (->> (full-parse email)
+               (filter has-valid-from?)
+               (map #(from-lookup % user))
+               (filter #(not (already-found? %)))
+               (map create-email!)
+               (map #(create-link % user)))]
+    ;; Need this because of lazy evaluation
+    (insert-links! new-msg email-keys))) 
