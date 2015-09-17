@@ -33,6 +33,8 @@
     (is (= 17 (deref (:a header))))
     
     (is (nil? (deref (:b header))))
+    (merge-if-found! '() header :b)
+    (is (nil? (deref (:b header))))
     (merge-if-found! [{:dog "Jose"}] header :b)
     (is (= {:dog "Jose"} (deref (:b header))))
     (merge-if-found! [{:cat "Babbage"}] header :b)

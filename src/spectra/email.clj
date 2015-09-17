@@ -118,16 +118,16 @@
   (while (= depth
             (count-nested (nth lines @end-body)))
     (do (swap! end-body inc)))
-  (def start-header (atom (dec @start-body)))
+  (def start-header (atom @start-body))
   (def header {:time-sent (atom nil) :from (atom nil)})
-  (while (and (>= @start-header 0)
+  (while (and (> @start-header 0)
               (not (and (deref (:time-sent header)) (deref (:from header)))))
-    (do (let [this-line (nth lines @start-header)]
+    (do (swap! start-header dec)
+        (let [this-line (nth lines @start-header)]
           (com/reset-if-found! (dt/dates-in-text this-line) header :time-sent)
           (com/merge-if-found! (regex/find-email-people this-line) header :from)
           (com/merge-if-found! (->> (nlp/nlp-entities nlp/*pipeline* this-line)
-                                    nlp/nlp-people) header :from)
-          (swap! start-header dec))))
+                                    nlp/nlp-people) header :from))))
   (assoc (->> header (map com/de-atom) (into {}))
          :body (->> lines
                     (com/slice @start-body @end-body)

@@ -27,4 +27,10 @@
     (let [people (nlp-people (nlp-entities *pipeline* wikipedia-blurb))]
       (is (set/subset? wikipedia-parsed-people (set people)))))
   (testing "empty set"
-    (is (= {} (nlp-entities *pipeline* "")))))
+    (is (= {} (nlp-entities *pipeline* "")))
+    (is (= {} (nlp-entities *pipeline* ">>")))))
+
+(deftest people
+  (testing "making people from empty"
+    (is (= '() (->> (nlp-entities *pipeline* "")
+                    nlp-people)))))
