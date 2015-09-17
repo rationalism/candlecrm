@@ -21,6 +21,26 @@
 (defn one-email? [text]
   (= (count (find-email-addrs text)) 1))
 
+(defn filter-arrows [text]
+  (-> text
+      (str/replace "<" "")
+      (str/replace ">" "")))
+
+(defn parse-name [text email]
+  (-> text
+      (str/replace email "")
+      filter-arrows
+      str/trim))
+  
+(defn parse-name-email [text]
+  (let [addrs (find-email-addrs text)]
+    (if (= 1 (count addrs))
+      (let [found-name (parse-name text (first addrs))]
+        (if (>= (count found-name) 3)
+          {:email (first addrs) :name found-name}
+          {:email (first addrs)}))
+      {:name text})))
+
 (def default-region "US")
 
 (defn find-phone-nums [text]
