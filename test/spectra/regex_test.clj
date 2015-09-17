@@ -4,6 +4,7 @@
 
 (def test-name "Joe Smith")
 (def test-email "joesmith@gmail.com")
+;; This CAN'T be a 555 number or the parser rejects it as invalid
 (def test-phone "(203) 850-2427")
 (def test-both "Joe Smith <joesmith@gmail.com>")
 

@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [spectra.graph :as graph]
+            [spectra.regex :as regex]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -52,10 +53,7 @@
                 (apply merge-with concat))]
     entity-map {}))
 
-(defn name-person [name]
-  (assoc {} :name name))
-
 (defn nlp-people [entities]
   (->> (concat (entities person-key) (entities organization-key))
-       (map name-person)
+       (map regex/parse-name-email)
        distinct))

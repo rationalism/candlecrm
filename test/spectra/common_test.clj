@@ -20,3 +20,22 @@
     (is (not (not-nil-ext? ["zoom" nil])))
     (is (not (not-nil-ext? #{"zoom" nil})))
     (is (not-nil-ext? 0))))
+
+(deftest merge-found
+  (testing "Merging if found test"
+    (def header {:a (atom nil) :b (atom nil)})
+    (is (nil? (deref (:a header))))
+    (reset-if-found! nil header :a)
+    (is (nil? (deref (:a header))))
+    (reset-if-found! [] header :a)
+    (is (nil? (deref (:a header))))
+    (reset-if-found! [17] header :a)
+    (is (= 17 (deref (:a header))))
+    
+    (is (nil? (deref (:b header))))
+    (merge-if-found! [{:dog "Jose"}] header :b)
+    (is (= {:dog "Jose"} (deref (:b header))))
+    (merge-if-found! [{:cat "Babbage"}] header :b)
+    (is (= {:dog "Jose" :cat "Babbage"}
+           (deref (:b header))))))
+    

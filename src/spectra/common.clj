@@ -11,6 +11,12 @@
   (if (and (not (nil? list)) (> (count list) 0))
     (reset! (index header) (first list))))
 
+(defn merge-if-found! [list header index]
+  (if (and (not (nil? list)) (> (count list) 0))
+    (reset! (index header)
+            (merge (first list)
+                   (deref (index header))))))
+
 (defn slice [start end coll]
   (->> coll (take end) (drop start)))
 
