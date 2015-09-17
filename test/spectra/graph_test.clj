@@ -10,15 +10,6 @@
 
 (use-fixtures :once graph-ready)
 
-(deftest not-nil-extended
-  (testing "not nil utility"
-    (is (not-nil-ext? 7))
-    (is (not (not-nil-ext? nil)))
-    (is (not-nil-ext? ["foobar"]))
-    (is (not (not-nil-ext? ["zoom" nil])))
-    (is (not (not-nil-ext? #{"zoom" nil})))
-    (is (not-nil-ext? 0))))
-
 (def test-names #{"Alice" "Bob" "Carol"})
 (def test-emails #{"alice@foo.com" "bob@foo.com" "carol@foo.com"})
 (def test-phones #{"555-5555" "666-6666" "777-7777"})

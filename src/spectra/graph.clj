@@ -1,6 +1,7 @@
 (ns spectra.graph
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [spectra.common :as com]
             [environ.core :refer [env]]
             [clojurewerkz.neocons.rest :as nr]
             [clojurewerkz.neocons.rest.cypher :as cy]
@@ -85,20 +86,10 @@
 (defn delete-property! [vertex property]
   (.removeProperty vertex property))
 
-(defn no-value? [property]
-  (if (string? property)
-    (empty? property)
-    (nil? property)))
-
-(defn not-nil-ext? [item]
-  (if (coll? item)
-    (not-any? nil? item)
-    (not (nil? item))))
-
 (defn create-vertex! [labels properties]
   (p :create-vertex
      (let [vertex (->> properties
-                       (filter #(not-nil-ext? (val %)))
+                       (filter #(com/not-nil-ext? (val %)))
                        (into {})
                        (nn/create *graph*))]
        (nl/add *graph* vertex labels)
@@ -124,6 +115,13 @@
 (defn get-vertices-class [class]
   (cypher-list (str "MATCH (root:" (cypher-esc class)
                     ") RETURN root")))
+
+(defn delete-class! [class]
+  (->> (get-vertices-class class)
+       (map delete-vertex!)))
+
+(defn delete-id! [id]
+  (-> id find-by-id delete-vertex!))
 
 (defn create-edge! [out in class]
   (p :create-edge

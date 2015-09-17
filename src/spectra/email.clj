@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [spectra.auth :as auth]
+            [spectra.common :as com]
             [spectra.database :as database]
             [spectra.datetime :as datetime]
             [spectra.google :as google]
@@ -91,12 +92,6 @@
   (map #(.getBodyPart multipart %)
        (range (.getCount multipart))))
 
-(defn filter-text [text]
-  (-> text
-      (str/replace "\r\n" " ")
-      (str/replace " > " " ")
-      (str/replace #"\s+" " ")))
-
 (defn strip-arrows [line num]
   (str/replace-first line (apply str (repeat num ">")) ""))
 
@@ -114,20 +109,6 @@
 (defn merge-lines [lines]
   (str/join "\r\n" lines))
 
-(defn reset-if-found! [list header index]
-  (if (and (not (nil? list)) (> (count list) 0))
-    (reset! (index header) (first list))))
-
-(defn slice [start end coll]
-  (->> coll (take end) (drop start)))
-
-(defn slice-not [start end coll]
-  (concat (take start coll) (drop end coll)))
-
-(defn de-atom [pair]
-  [(key pair)
-   (deref (val pair))])
-
 (defn split-email [lines depth]
   (def start-body (atom 0))
   (while (> depth
@@ -142,18 +123,18 @@
   (while (and (>= @start-header 0)
               (not (and (deref (:date header)) (deref (:email header)))))
     (do (let [this-line (nth lines @start-header)]
-          (reset-if-found! (datetime/dates-in-text this-line) header :date)
-          (reset-if-found! (regex/find-email-addrs this-line) header :email)
-          (reset-if-found! ((nlp/nlp-entities nlp/*pipeline* this-line)
+          (com/reset-if-found! (datetime/dates-in-text this-line) header :date)
+          (com/reset-if-found! (regex/find-email-addrs this-line) header :email)
+          (com/reset-if-found! ((nlp/nlp-entities nlp/*pipeline* this-line)
                             nlp/person-key) header :name)
           (swap! start-header dec))))
-  (assoc (->> header (map de-atom) (into {}))
+  (assoc (->> header (map com/de-atom) (into {}))
          :body (->> lines
-                    (slice @start-body @end-body)
+                    (com/slice @start-body @end-body)
                     (map #(strip-arrows % depth))
                     merge-lines)
          :remainder (->> lines
-                         (slice-not @start-header @end-body))))
+                         (com/slice-not @start-header @end-body))))
 
 (defn recursive-split [lines depth]
   (if (<= depth 0) (list {:body (merge-lines lines)})
