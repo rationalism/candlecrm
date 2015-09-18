@@ -329,7 +329,7 @@
   (p :insert-emails
      (dorun (->> emails
                  (filter has-valid-from?)
-                 (map #(from-lookup % user))
+                 (pmap #(from-lookup % user))
                  (filter #(not (already-found? %)))
                  (pmap create-email!)
                  (map #(create-link % user))
