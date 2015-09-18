@@ -257,16 +257,23 @@
        (map shut-folder!))
   (define-imap-lookup))
 
+(defn refresh-inbox [user]
+  (-> user google/lookup-token
+      google/get-access-token!
+      (google/get-imap-store! (auth/get-username user))
+      get-inbox))
+  
 ;; TODO: support IMAP stores other than GMail
 ;; TODO: add failure checking for IMAP timing out
 (defn fetch-imap-folder [user]
   (def inbox (if (contains? *imap-lookup* user)
                (*imap-lookup* user)
-               (-> user google/lookup-token
-                   google/get-access-token!
-                   (google/get-imap-store! (auth/get-username user))
-                   get-inbox)))
-  (if (folder-open? inbox) nil (open-folder-read! inbox))
+               (refresh-inbox user)))
+  (if (folder-open? inbox) nil
+      (try (open-folder-read! inbox)
+           (catch Exception e
+             (do (def inbox (refresh-inbox user))
+                 (open-folder-read! inbox)))))
   (update-imap-lookup! user inbox)
   inbox)
 
