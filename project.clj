@@ -13,6 +13,7 @@
                   :exclusions [org.apache.httpcomponents/httpclient
                                org.apache.httpcomponents/httpcore]]
                  [com.google.api-client/google-api-client "1.20.0"]
+                 [com.google.gdata/core "1.47.1"]
                  [org.passay/passay "1.1.0"]
                  [com.google.apis/google-api-services-oauth2 "v2-rev94-1.20.0"]
                  [com.google.http-client/google-http-client-jackson "1.20.0"

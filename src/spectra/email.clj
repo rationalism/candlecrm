@@ -273,7 +273,6 @@
       get-inbox))
   
 ;; TODO: support IMAP stores other than GMail
-;; TODO: add failure checking for IMAP timing out
 (defn fetch-imap-folder [user]
   (def inbox (if (contains? *imap-lookup* user)
                (*imap-lookup* user)
