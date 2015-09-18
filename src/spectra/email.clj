@@ -231,13 +231,16 @@
          infer-subject)))
 
 (defn full-parse [message]
-  (as-> (-> message
-            get-text-recursive
-            raw-msg-chain) $
-    (conj (into [] (drop-last $))
-          (merge (last $)
-                 (headers-parse message)))
-    (message-inference $)))
+  (try (as-> (-> message
+                 get-text-recursive
+                 raw-msg-chain) $
+         (conj (into [] (drop-last $))
+               (merge (last $)
+                      (headers-parse message)))
+         (message-inference $))
+       (catch Exception e
+         (do (prn "Email parse error")
+             (prn e) {}))))
 
 (defn define-imap-lookup []
   (def ^:dynamic *imap-lookup* {}))
@@ -334,14 +337,19 @@
 ;; Assumes emails are already parsed
 (defn insert-emails! [user emails]
   (p :insert-emails
-     (dorun (->> emails
-                 (filter has-valid-from?)
-                 (pmap #(from-lookup % user))
-                 (filter #(not (already-found? %)))
-                 (pmap create-email!)
-                 (map #(create-link % user))
-                 (map #(insert-links! % email-keys))))))
-
+     (try
+       (dorun
+        (->> emails
+             (filter has-valid-from?)
+             (pmap #(from-lookup % user))
+             (filter #(not (already-found? %)))
+             (pmap create-email!)
+             (map #(create-link % user))
+             (map #(insert-links! % email-keys))))
+       (catch Exception e
+         (do (prn "Email insertion error")
+             (prn e) nil)))))
+  
 (defn insert-email-range! [user lower upper]
   (dorun
    (->> (messages-in-range (fetch-imap-folder user)
