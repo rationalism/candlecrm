@@ -88,14 +88,17 @@
        (apply merge)))
 
 (defn content [message]
-  (.getContent message))
+  (p :get-content
+     (.getContent message)))
 
 (defn content-type [message]
-  (.getContentType message))
+  (p :content-type
+     (.getContentType message)))
 
 (defn get-parts [multipart]
-  (map #(.getBodyPart multipart %)
-       (range (.getCount multipart))))
+  (p :get-parts
+     (map #(.getBodyPart multipart %)
+          (range (.getCount multipart)))))
 
 (defn strip-arrows [line num]
   (str/replace-first line (apply str (repeat num ">")) ""))
@@ -161,16 +164,17 @@
                         (count-depth lines)))))
 
 (defn get-text-recursive [message]
-  (cond
-    (.contains (content-type message) plain-type)
-    (content message)
-    (.contains (content-type message) multi-type)
-    (->> (-> message content get-parts)
-         (map get-text-recursive)
-         (filter #(not (= "" %)))
-         (cons "")
-         last)
-    :else ""))
+  (p :get-text-recursive
+     (cond
+       (.contains (content-type message) plain-type)
+       (content message)
+       (.contains (content-type message) multi-type)
+       (->> (-> message content get-parts)
+            (map get-text-recursive)
+            (filter #(not (= "" %)))
+            (cons "")
+            last)
+       :else "")))
 
 (defn people-from-text [text]
   (distinct
@@ -300,9 +304,10 @@
               schema/email-body (:body parsed-email)}))))
 
 (defn create-link [parsed-email user]
-  (assoc parsed-email :link
-         (partial database/add-email-link!
-                  user (:email-vertex parsed-email))))
+  (p :create-link
+     (assoc parsed-email :link
+            (partial database/add-email-link!
+                     user (:email-vertex parsed-email)))))
 
 ;; TODO: Replace this with something more consistent
 (def email-keys {:to schema/email-to-edge
@@ -321,12 +326,13 @@
          ((:link parsed-email) (val k) p)))))
 
 (defn insert-email! [user email]
-  (doseq [new-msg
-          (->> (full-parse email)
-               (filter has-valid-from?)
-               (map #(from-lookup % user))
+  (p :insert-email
+     (doseq [new-msg
+             (->> (full-parse email)
+                  (filter has-valid-from?)
+                  (map #(from-lookup % user))
                (filter #(not (already-found? %)))
                (map create-email!)
                (map #(create-link % user)))]
-    ;; Need this because of lazy evaluation
-    (insert-links! new-msg email-keys))) 
+       ;; Need this because of lazy evaluation
+       (insert-links! new-msg email-keys))))
