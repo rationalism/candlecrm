@@ -325,14 +325,20 @@
        (doseq [p ((key k) parsed-email)]
          ((:link parsed-email) (val k) p)))))
 
-(defn insert-email! [user email]
-  (p :insert-email
-     (doseq [new-msg
-             (->> (full-parse email)
-                  (filter has-valid-from?)
-                  (map #(from-lookup % user))
-               (filter #(not (already-found? %)))
-               (map create-email!)
-               (map #(create-link % user)))]
-       ;; Need this because of lazy evaluation
-       (insert-links! new-msg email-keys))))
+;; Assumes emails are already parsed
+(defn insert-emails! [user emails]
+  (p :insert-emails
+     (dorun (->> emails
+                 (filter has-valid-from?)
+                 (map #(from-lookup % user))
+                 (filter #(not (already-found? %)))
+                 (map create-email!)
+                 (map #(create-link % user))
+                 (map #(insert-links! % email-keys))))))
+
+(defn insert-email-range! [user lower upper]
+  (dorun
+   (->> (messages-in-range (fetch-imap-folder user)
+                           lower upper)
+        (pmap full-parse)
+        (map #(insert-emails! user %)))))

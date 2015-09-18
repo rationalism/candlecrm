@@ -67,12 +67,8 @@
   (POST "/load-emails" {{:keys [lower upper] :as params} :params :as req}
         (friend/authenticated
          (if-let [user (auth/get-user-obj (friend/identity req))]
-           (do (doseq [message
-                       (email/messages-in-range
-                        (email/fetch-imap-folder user)
-                        (Integer/parseInt lower)
-                        (Integer/parseInt upper))]
-                 (email/insert-email! user message))
+           (do (email/insert-email-range!
+                user (Integer/parseInt lower) (Integer/parseInt upper))
                (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
            (assoc (resp/redirect "/") :flash "Error: Could not log in"))))
   (route/resources "/")
