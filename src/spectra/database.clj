@@ -42,11 +42,12 @@
    [:name schema/name-type]])
 
 (defn find-person [attr user person]
-  (let [value (person (nth attr 0))]
-    (if (or (nil? value) (empty? value))
-      nil
-      (first (person-from-props
-              user {(nth attr 1) value})))))
+  (if (nil? person) nil
+      (let [value (person (nth attr 0))]
+        (if (or (nil? value) (empty? value))
+          nil
+          (first (person-from-props
+                  user {(nth attr 1) value}))))))
 
 (defn person-match [user person]
   (p :person-match

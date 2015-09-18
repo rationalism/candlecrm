@@ -123,14 +123,20 @@
 (defn merge-lines [lines]
   (str/join "\r\n" lines))
 
+(defn in-block? [lines index f]
+  (cond (< @index 0) false
+        (>= @index (count lines)) false
+        :else (f (count-nested
+                  (nth lines @index)))))
+
 (defn split-email [lines depth]
   (def start-body (atom 0))
-  (while (> depth
-            (count-nested (nth lines @start-body)))
+  (while (in-block? lines start-body
+                    #(> depth %))
     (do (swap! start-body inc)))
   (def end-body (atom @start-body))
-  (while (= depth
-            (count-nested (nth lines @end-body)))
+  (while (in-block? lines end-body
+                    #(= depth %))
     (do (swap! end-body inc)))
   (def start-header (atom @start-body))
   (def header {:time-sent (atom nil) :from (atom nil)})
