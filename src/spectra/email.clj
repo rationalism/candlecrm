@@ -18,6 +18,7 @@
 (def inbox-folder-name "INBOX")
 (def plain-type "TEXT/PLAIN")
 (def html-type "TEXT/HTML")
+(def multi-type "multipart")
 
 (defn get-folder [store folder-name]
   (.getFolder store folder-name))
@@ -89,6 +90,9 @@
 (defn content [message]
   (.getContent message))
 
+(defn content-type [message]
+  (.getContentType message))
+
 (defn get-parts [multipart]
   (map #(.getBodyPart multipart %)
        (range (.getCount multipart))))
@@ -151,25 +155,22 @@
               (dissoc split-body :remainder)))))
 
 (defn raw-msg-chain [body]
-  (prn "raw-msg-chain")
   (p :raw-msg-chain
      (let [lines (str/split-lines body)]
        (recursive-split lines
                         (count-depth lines)))))
 
-;; Assumes that message content contains only one
-;; non-duplicative plain text part
-(defn get-text-content [message]
-  ;; Bug to be fixed here
-  (prn "get-text-content")
-  (prn (.getContentType message))
-  (prn (map #(prn (.getContentType %))
-            (get-parts (content message))))
-  (:p get-text-content
-      (-> (filter #(.contains (.getContentType %) plain-type)
-                  (get-parts (content message)))
-          first
-          .getContent)))
+(defn get-text-recursive [message]
+  (cond
+    (.contains (content-type message) plain-type)
+    (content message)
+    (.contains (content-type message) multi-type)
+    (->> (-> message content get-parts)
+         (map get-text-recursive)
+         (filter #(not (= "" %)))
+         (cons "")
+         last)
+    :else ""))
 
 (defn people-from-text [text]
   (distinct
@@ -226,9 +227,8 @@
          infer-subject)))
 
 (defn full-parse [message]
-  (prn "full-parse")
   (as-> (-> message
-            get-text-content
+            get-text-recursive
             raw-msg-chain) $
     (conj (into [] (drop-last $))
           (merge (last $)
