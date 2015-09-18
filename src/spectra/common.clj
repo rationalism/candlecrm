@@ -53,5 +53,10 @@
 (defn sha1 [text]
   (sha1/sha1 text))
 
+(defn shorten [text]
+  (if (> (count text) 10)
+    (subs text (- (count text) 10))
+    text))
+
 (defn end-hash [text]
-  (-> text (subs (- (count text) 10)) sha1))
+  (-> text shorten sha1))

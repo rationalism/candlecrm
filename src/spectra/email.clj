@@ -279,9 +279,8 @@
 (defn from-lookup [message user]
   (p :from-lookup
      (assoc message :from-database
-            (first
-             (database/lookup-old-people
-              user (:from message))))))
+             (database/person-match
+              user (:from message)))))
 
 (defn already-found? [message]
   (p :already-found
@@ -332,7 +331,7 @@
                  (filter has-valid-from?)
                  (map #(from-lookup % user))
                  (filter #(not (already-found? %)))
-                 (map create-email!)
+                 (pmap create-email!)
                  (map #(create-link % user))
                  (map #(insert-links! % email-keys))))))
 

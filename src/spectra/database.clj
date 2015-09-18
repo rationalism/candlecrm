@@ -36,19 +36,25 @@
                             " ) WHERE " (graph/cypher-props-coll props)
                             " RETURN root")))
 
-(defn one-prop-search [user property]
-  (let [value (val (first property))]
+(def person-match-attrs
+  [[:email schema/email-address-type]
+   [:phone schema/phone-num-type]
+   [:name schema/name-type]])
+
+(defn find-person [attr user person]
+  (let [value (person (nth attr 0))]
     (if (or (nil? value) (empty? value))
-      []
-      (person-from-props user property))))
-  
-(defn lookup-old-people [user person]
-  (p :lookup-old-people
-     (distinct
-      (concat
-       (one-prop-search user {schema/email-address-type (:email person)})
-       (one-prop-search user {schema/phone-num-type (:phone person)})
-       (one-prop-search user {schema/name-type (:name person)})))))
+      nil
+      (first (person-from-props
+              user {(nth attr 1) value})))))
+
+(defn person-match [user person]
+  (p :person-match
+     (first
+      (conj (->> person-match-attrs
+                 (mapv #(find-person % user person))
+                 (filterv #(not (nil? %))))
+            nil))))
 
 ;; For searching emails, in milliseconds
 (def sent-tolerance 300000)
@@ -81,13 +87,14 @@
   (graph/refresh-vertex old-person))
 
 (defn add-email-link! [user email link-type person]
-  (let [old-people (lookup-old-people user person)
-        new-person (if (zero? (count old-people))
-                     (p :create-person (create-person! user person))
-                     (p :recon-person (recon-person!
-                                       (first old-people)
-                                       person)))]
-    (graph/create-edge! email new-person link-type)))
+  (p :add-email-link
+     (let [old-person (person-match user person)]
+       (graph/create-edge!
+        email
+        (if (nil? old-person)
+          (p :create-person (create-person! user person))
+          (p :recon-person (recon-person! old-person person)))
+        link-type))))
 
 (defn list-entities [entity-class]
   (graph/get-vertices-class entity-class))
