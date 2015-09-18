@@ -6,6 +6,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [spectra.auth :as auth]
+            [spectra.contacts :as contacts]
             [spectra.email :as email]
             [spectra.google :as google]
             [spectra.graph :as graph]

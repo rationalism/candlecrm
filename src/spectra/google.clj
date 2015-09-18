@@ -74,18 +74,20 @@
 (defn delete-token! [user]
   (graph/delete-property! user schema/google-token-type))
 
+(defn build-google-cred! [refresh-token]
+  (doto (-> (GoogleCredential$Builder. )
+            (.setTransport (NetHttpTransport. ))
+            (.setJsonFactory (JacksonFactory. ))
+            (.setClientSecrets (env :google-client-id)
+                               (env :google-client-secret))
+            .build
+            (.setFromTokenResponse
+             (-> (GoogleTokenResponse. )
+                 (.setRefreshToken refresh-token))))
+    .refreshToken))
+
 (defn get-access-token! [refresh-token]
-  (.getAccessToken
-   (doto (-> (GoogleCredential$Builder. )
-             (.setTransport (NetHttpTransport. ))
-             (.setJsonFactory (JacksonFactory. ))
-             (.setClientSecrets (env :google-client-id)
-                                (env :google-client-secret))
-             .build
-             (.setFromTokenResponse
-              (-> (GoogleTokenResponse. )
-                  (.setRefreshToken refresh-token))))
-     .refreshToken)))
+  (.getAccessToken (build-google-cred! refresh-token)))
 
 ;; TODO: get the user's email via a Google API
 (defn get-imap-store! [access-token email]
