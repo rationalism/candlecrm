@@ -275,8 +275,9 @@
 (defn from-lookup [message user]
   (p :from-lookup
      (assoc message :from-database
-            (database/lookup-old-people
-             user (:from message)))))
+            (first
+             (database/lookup-old-people
+              user (:from message))))))
 
 (defn already-found? [message]
   (p :already-found

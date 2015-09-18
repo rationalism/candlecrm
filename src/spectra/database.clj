@@ -36,13 +36,19 @@
                             " ) WHERE " (graph/cypher-props-coll props)
                             " RETURN root")))
 
+(defn one-prop-search [user property]
+  (let [value (val (first property))]
+    (if (or (nil? value) (empty? value))
+      []
+      (person-from-props user property))))
+  
 (defn lookup-old-people [user person]
   (p :lookup-old-people
      (distinct
       (concat
-       (person-from-props user {schema/email-address-type (:email person)})
-       (person-from-props user {schema/phone-num-type (:phone person)})
-       (person-from-props user {schema/name-type (:name person)})))))
+       (one-prop-search user {schema/email-address-type (:email person)})
+       (one-prop-search user {schema/phone-num-type (:phone person)})
+       (one-prop-search user {schema/name-type (:name person)})))))
 
 ;; For searching emails, in milliseconds
 (def sent-tolerance 300000)
