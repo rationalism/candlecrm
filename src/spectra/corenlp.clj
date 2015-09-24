@@ -13,7 +13,8 @@
             CoreAnnotations$EntityTypeAnnotation]
            [java.util Properties]))
 
-(def ner-annotators ["tokenize" "ssplit" "pos" "lemma" "ner" "entitymentions"])
+(def ner-annotators ["tokenize" "ssplit" "pos" "depparse" "lemma"
+                     "ner" "natlog" "openie" "entitymentions"])
 (def ner-model-file "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz")
 
 (def misc-key "MISC")
