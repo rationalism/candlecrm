@@ -11,11 +11,11 @@
 
 (def google-full-url "https://www.google.com/m8/feeds/contacts/default/full")
 
-(defn all-contacts-feed [user]
-  (.getFeed
-   (doto (ContactsService. app-name)
-     (.setOAuth2Credentials
-      (-> user google/lookup-token
-          google/build-google-cred!)))
-   (URL. google-full-url)
-   ContactFeed))
+;(defn all-contacts-feed [user]
+;  (.getFeed
+;   (doto (ContactsService. app-name)
+;     (.setOAuth2Credentials
+;      (-> user google/lookup-token
+;          google/build-google-cred!)))
+;   (URL. google-full-url)
+;   ContactFeed))

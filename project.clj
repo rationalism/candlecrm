@@ -19,8 +19,8 @@
                  [com.google.http-client/google-http-client-jackson "1.20.0"
                   :exclusions [org.apache.httpcomponents/httpclient]]
                  [com.sun.mail/javax.mail "1.5.4"]
-                 [edu.stanford.nlp/stanford-corenlp "3.5.2"]
-                 [edu.stanford.nlp/stanford-corenlp "3.5.2" :classifier "models"]
+                 [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"]
+                 [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT" :classifier "models"]
                  [com.googlecode.libphonenumber/libphonenumber "7.0.10"]
                  [com.joestelmach/natty "0.12"]
                  [clojurewerkz/neocons "3.1.0-rc1"]
@@ -29,6 +29,7 @@
   :plugins [[lein-environ "1.0.1"]
             [lein-ring "0.9.6"]]
   :resource-paths ["config" "resources"]
+  :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
   :ring {:handler spectra.web/secure-app
          :init spectra.web/app-init
          :destroy spectra.web/app-shutdown
