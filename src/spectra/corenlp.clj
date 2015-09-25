@@ -11,6 +11,8 @@
             CoreAnnotations$SentencesAnnotation
             CoreAnnotations$MentionsAnnotation
             CoreAnnotations$EntityTypeAnnotation]
+           [edu.stanford.nlp.naturalli
+            NaturalLogicAnnotations$RelationTriplesAnnotation]
            [java.util Properties]))
 
 (def ner-annotators ["tokenize" "ssplit" "pos" "depparse" "lemma"
@@ -30,7 +32,8 @@
      (.setProperty "annotators" (str/join ", " annotators))
      (.setProperty "ner.applyNumericClassifiers" "false")
      (.setProperty "ner.useSUTime" "false")
-     (.setProperty "ner.model" ner-model-file))))
+     (.setProperty "ner.model" ner-model-file)
+     (.setProperty "openie.triple.all_nominals" "true"))))
 
 (defn load-pipeline! []
   (def ^:dynamic *pipeline* (make-pipeline ner-annotators)))
@@ -58,3 +61,15 @@
   (->> (concat (entities person-key) (entities organization-key))
        (map regex/parse-name-email)
        distinct))
+
+(defn triple-string [triple]
+  (str/join "\t"
+            [(.confidence triple)
+             (.subjectLemmaGloss triple)
+             (.relationLemmaGloss triple)
+             (.objectLemmaGloss triple)]))
+
+(defn nlp-triples [pipeline text]
+  (->> (run-nlp pipeline text)
+       (map #(.get % NaturalLogicAnnotations$RelationTriplesAnnotation))
+       (apply concat)))
