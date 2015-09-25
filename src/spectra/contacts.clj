@@ -41,3 +41,4 @@
                (mapv #(.getAddress %)))
    :phone (->> (.getPhoneNumbers contact)
                (mapv #(.getPhoneNumber %)))})
+

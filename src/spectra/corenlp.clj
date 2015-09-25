@@ -62,6 +62,11 @@
        (map regex/parse-name-email)
        distinct))
 
+(defn nlp-triples [pipeline text]
+  (->> (run-nlp pipeline text)
+       (map #(.get % NaturalLogicAnnotations$RelationTriplesAnnotation))
+       (apply concat)))
+
 (defn triple-string [triple]
   (str/join "\t"
             [(.confidence triple)
@@ -69,7 +74,7 @@
              (.relationLemmaGloss triple)
              (.objectLemmaGloss triple)]))
 
-(defn nlp-triples [pipeline text]
-  (->> (run-nlp pipeline text)
-       (map #(.get % NaturalLogicAnnotations$RelationTriplesAnnotation))
-       (apply concat)))
+(defn print-triples [triples]
+  (->> triples
+       (map triple-string)
+       (map #(print (str % "\n")))))
