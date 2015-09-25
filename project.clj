@@ -22,10 +22,10 @@
                  [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"]
                  [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT" :classifier "models"]
                  [com.googlecode.libphonenumber/libphonenumber "7.0.10"]
+                 [org.deeplearning4j/deeplearning4j-core "0.4-rc3.3"]
                  [com.joestelmach/natty "0.12"]
                  [clojurewerkz/neocons "3.1.0-rc1"]
                  [pandect "0.5.3"]]
-;                 [org.deeplearning4j/deeplearning4j-core "0.4-rc3.2"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]
             [lein-ring "0.9.6"]]
