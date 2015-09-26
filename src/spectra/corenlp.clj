@@ -15,11 +15,11 @@
             NaturalLogicAnnotations$RelationTriplesAnnotation]
            [java.util Properties]))
 
-(def ner-annotators ["tokenize" "ssplit" "pos" "lemma" "ner" "depparse"
-                     "parse" "dcoref" "natlog" "openie" "entitymentions"])
+(def ner-annotators ["tokenize" "ssplit" "pos" "lemma" "ner" "parse" "dcoref"
+                     "depparse" "natlog" "openie" "entitymentions"])
 (def ner-model-file "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz")
 
-;; Shift model is much faster, but takes much longer to load
+;; Shift model supposed to be much faster, but takes much longer to load
 (def shift-parse-model "edu/stanford/nlp/models/srparser/englishSR.ser.gz")
 (def pcfg-parse-model "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
 
@@ -42,7 +42,7 @@
 
 (defn load-pipeline! []
   (def ^:dynamic *pipeline*
-    (make-pipeline ner-annotators shift-parse-model)))
+    (make-pipeline ner-annotators pcfg-parse-model)))
 
 (defn load-pipeline-test! []
   (def ^:dynamic *pipeline*
