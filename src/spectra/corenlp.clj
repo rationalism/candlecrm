@@ -1,8 +1,10 @@
 (ns spectra.corenlp
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [spectra.common :as com]
             [spectra.graph :as graph]
             [spectra.regex :as regex]
+            [loom.graph :as loom]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -90,6 +92,77 @@
     candidate
     (blank-coref candidate)))
 
+(defn single-map [pair]
+  {(key pair) (val pair)})
+
+(defn split-map [m]
+  (map single-map m))
+
+(defn tokens-hash [sent-num tokens]
+  (->> tokens
+       (map #(.index %))
+       (map str)
+       (map #(str sent-num " " %))
+       (str/join " ")
+       com/sha1))
+
+(defn mention-hash [mention]
+  (->> (range (.startIndex mention)
+              (.endIndex mention))
+       (map str)
+       (map #(str (.sentNum mention) " " %))
+       (str/join " ")
+       com/sha1))
+
+(defn mention-nodes [nodes]
+  (zipmap (map mention-hash nodes)
+          (map #(.mentionSpan %) nodes)))
+
+(defn chain-nodes [chain]
+  (->> chain
+       (.getMentionMap)
+       vals
+       (map #(into '() %))
+       (apply concat)
+       mention-nodes
+       split-map))
+
+(defn root-node [chain]
+  (as-> (.getRepresentativeMention chain) $
+    (hash-map (mention-hash $) (.mentionSpan $))))
+
+(defn chain-edges [chain]
+  (->> chain
+       chain-nodes
+       (map #(vector % (root-node chain) "!is!"))
+       (filter #(not (= (nth % 0)
+                        (nth % 1))))))
+
+(defn chain-graph [chain]
+  (as-> (loom/weighted-digraph) $
+    (apply loom/add-nodes $ (chain-nodes chain))
+    (apply loom/add-edges $ (chain-edges chain))))
+
+(defn coref-graph [coref]
+  (apply loom/weighted-digraph
+         (map chain-graph coref)))
+
+(defn ner-node [entity sent-num]
+  (hash-map (tokens-hash
+             sent-num
+             (.get entity CoreAnnotations$TokensAnnotation))
+            (.toString entity)))
+
+(defn ner-edge [entity sent-num]
+  (vector (ner-node entity sent-num)
+          (as-> (.get entity CoreAnnotations$EntityTypeAnnotation) $
+            (hash-map (com/sha1 $) $))
+            "!type!"))
+
+;(defn triple-nodes [triple sent-num]
+;  (->> [(.-subject triple) (.-object triple)]
+;       (map #(hash-map 
+
 (defn run-nlp [pipeline text]
   ;; Global var needed for mutating Java method
   (def parsed-text (Annotation. text))
@@ -129,7 +202,7 @@
        sentence))
 
 (defn nlp-triples [pipeline text]
-  (->> (:sentences (run-nlp pipeline text))
+  (->> (sentences (run-nlp pipeline text))
        sentence-triples
        (apply concat)))
 
