@@ -38,5 +38,5 @@
          :init spectra.web/app-init
          :destroy spectra.web/app-shutdown
          :nrepl {:start? true :port 9998}}
-  :jvm-opts ["-Xmx2g"]
+  :jvm-opts ["-Xmx4g"]
   :uberjar-name "spectra-standalone.jar")

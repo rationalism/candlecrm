@@ -42,7 +42,7 @@
 
 (defn load-pipeline! []
   (def ^:dynamic *pipeline*
-    (make-pipeline ner-annotators pcfg-parse-model)))
+    (make-pipeline ner-annotators shift-parse-model)))
 
 (defn load-pipeline-test! []
   (def ^:dynamic *pipeline*
