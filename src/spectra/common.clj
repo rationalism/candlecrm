@@ -60,3 +60,4 @@
 
 (defn end-hash [text]
   (-> text shorten sha1))
+

@@ -10,9 +10,12 @@
            [edu.stanford.nlp.ling
             CoreAnnotations$SentencesAnnotation
             CoreAnnotations$MentionsAnnotation
-            CoreAnnotations$EntityTypeAnnotation]
+            CoreAnnotations$EntityTypeAnnotation
+            CoreAnnotations$TokensAnnotation]
            [edu.stanford.nlp.naturalli
             NaturalLogicAnnotations$RelationTriplesAnnotation]
+           [edu.stanford.nlp.dcoref
+            CorefCoreAnnotations$CorefChainAnnotation]
            [java.util Properties]))
 
 (def ner-annotators ["tokenize" "ssplit" "pos" "lemma" "ner" "parse" "dcoref"
@@ -48,11 +51,59 @@
   (def ^:dynamic *pipeline*
     (make-pipeline ner-annotators pcfg-parse-model)))
 
+(defn chain-sentences [chain]
+  (->> (keys (.getMentionMap chain))
+       (map #(.getSource %))
+       distinct))
+
+(defn make-map [k v]
+  {k v})
+
+(defn chain-maps [chain]
+  (->> chain
+       chain-sentences
+       (map #(make-map % [chain]))))
+
+(defn bucket-coref [coref]
+  (->> coref
+       (map chain-maps)
+       (apply concat)
+       (apply merge-with concat)))
+
+(defn number-items [items]
+  (zipmap (map inc (range (count items)))
+          items))
+
+(defn merge-coref [sentence corefs]
+  {:sentence sentence
+   :corefs corefs})
+
+(defn blank-coref [sentence]
+  {:sentence sentence
+   :corefs '()})
+
+(defn sentences [nlp-output]
+  (map :sentence nlp-output))
+
+(defn fill-in-corefs [candidate]
+  (if (map? candidate)
+    candidate
+    (blank-coref candidate)))
+
 (defn run-nlp [pipeline text]
   ;; Global var needed for mutating Java method
   (def parsed-text (Annotation. text))
   (p :run-nlp (.annotate pipeline parsed-text))
-  (.get parsed-text CoreAnnotations$SentencesAnnotation))
+  (->>
+   (merge-with merge-coref
+               (-> parsed-text
+                   (.get CoreAnnotations$SentencesAnnotation)
+                   number-items)
+               (-> parsed-text
+                   (.get CorefCoreAnnotations$CorefChainAnnotation)
+                   vals
+                   bucket-coref))
+   vals (map fill-in-corefs)))
 
 (defn annotation-to-map [annotation]
   {(.get annotation CoreAnnotations$EntityTypeAnnotation)
@@ -61,6 +112,7 @@
 (defn nlp-entities [pipeline text]
   (if-let [entity-map
            (->> (run-nlp pipeline text)
+                sentences
                 (map #(.get % CoreAnnotations$MentionsAnnotation))
                 (apply concat)
                 (map annotation-to-map)
@@ -72,9 +124,13 @@
        (map regex/parse-name-email)
        distinct))
 
+(defn sentence-triples [sentence]
+  (map #(.get % NaturalLogicAnnotations$RelationTriplesAnnotation)
+       sentence))
+
 (defn nlp-triples [pipeline text]
-  (->> (run-nlp pipeline text)
-       (map #(.get % NaturalLogicAnnotations$RelationTriplesAnnotation))
+  (->> (:sentences (run-nlp pipeline text))
+       sentence-triples
        (apply concat)))
 
 (defn triple-string [triple]
