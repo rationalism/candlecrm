@@ -20,7 +20,10 @@
                   :exclusions [org.apache.httpcomponents/httpclient]]
                  [com.sun.mail/javax.mail "1.5.4"]
                  [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"]
-                 [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT" :classifier "models"]
+                 [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"
+                  :classifier "models"]
+                 [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"
+                  :classifier "srparser"]
                  [com.googlecode.libphonenumber/libphonenumber "7.0.10"]
                  [org.deeplearning4j/deeplearning4j-core "0.4-rc3.3"]
                  [com.joestelmach/natty "0.12"]

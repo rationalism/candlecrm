@@ -4,7 +4,7 @@
             [spectra.corenlp :refer :all]))
 
 (defn pipeline-ready [f]
-  (load-pipeline!) (f))
+  (load-pipeline-test!) (f))
 
 (use-fixtures :once pipeline-ready)
 

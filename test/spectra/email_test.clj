@@ -5,7 +5,7 @@
             [spectra.email :refer :all]))
 
 (defn pipeline-ready [f]
-  (nlp/load-pipeline!) (f))
+  (nlp/load-pipeline-test!) (f))
 
 (use-fixtures :once pipeline-ready)
 

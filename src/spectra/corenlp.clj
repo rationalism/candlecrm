@@ -15,9 +15,13 @@
             NaturalLogicAnnotations$RelationTriplesAnnotation]
            [java.util Properties]))
 
-(def ner-annotators ["tokenize" "ssplit" "pos" "depparse" "lemma"
-                     "ner" "natlog" "openie" "entitymentions"])
+(def ner-annotators ["tokenize" "ssplit" "pos" "lemma" "ner" "depparse"
+                     "parse" "dcoref" "natlog" "openie" "entitymentions"])
 (def ner-model-file "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz")
+
+;; Shift model is much faster, but takes much longer to load
+(def shift-parse-model "edu/stanford/nlp/models/srparser/englishSR.ser.gz")
+(def pcfg-parse-model "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
 
 (def misc-key "MISC")
 (def number-key "NUMBER")
@@ -26,17 +30,23 @@
 (def date-key "DATE")
 (def organization-key "ORGANIZATION")
 
-(defn make-pipeline [annotators]
+(defn make-pipeline [annotators parse-model]
   (StanfordCoreNLP.
    (doto (Properties. )
      (.setProperty "annotators" (str/join ", " annotators))
      (.setProperty "ner.applyNumericClassifiers" "false")
      (.setProperty "ner.useSUTime" "false")
      (.setProperty "ner.model" ner-model-file)
+     (.setProperty "parse.model" parse-model)
      (.setProperty "openie.triple.all_nominals" "true"))))
 
 (defn load-pipeline! []
-  (def ^:dynamic *pipeline* (make-pipeline ner-annotators)))
+  (def ^:dynamic *pipeline*
+    (make-pipeline ner-annotators shift-parse-model)))
+
+(defn load-pipeline-test! []
+  (def ^:dynamic *pipeline*
+    (make-pipeline ner-annotators pcfg-parse-model)))
 
 (defn run-nlp [pipeline text]
   ;; Global var needed for mutating Java method
