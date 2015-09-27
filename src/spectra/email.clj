@@ -177,7 +177,7 @@
        (.contains (content-type message) multi-type)
        (->> (-> message content get-parts)
             (map get-text-recursive)
-            (filter #(not (= "" %)))
+            (filter #(not= "" %))
             (cons "")
             last)
        :else "")))

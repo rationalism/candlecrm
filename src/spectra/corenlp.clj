@@ -5,6 +5,7 @@
             [spectra.graph :as graph]
             [spectra.regex :as regex]
             [loom.graph :as loom]
+            [loom.io :as gviz]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -13,7 +14,8 @@
             CoreAnnotations$SentencesAnnotation
             CoreAnnotations$MentionsAnnotation
             CoreAnnotations$EntityTypeAnnotation
-            CoreAnnotations$TokensAnnotation]
+            CoreAnnotations$TokensAnnotation
+            CoreAnnotations$PartOfSpeechAnnotation]
            [edu.stanford.nlp.naturalli
             NaturalLogicAnnotations$RelationTriplesAnnotation]
            [edu.stanford.nlp.dcoref
@@ -34,6 +36,8 @@
 (def person-key "PERSON")
 (def date-key "DATE")
 (def organization-key "ORGANIZATION")
+
+(def pronoun-parts ["PRP" "PRP$"])
 
 (defn make-pipeline [annotators parse-model]
   (StanfordCoreNLP.
@@ -58,13 +62,10 @@
        (map #(.getSource %))
        distinct))
 
-(defn make-map [k v]
-  {k v})
-
 (defn chain-maps [chain]
   (->> chain
        chain-sentences
-       (map #(make-map % [chain]))))
+       (map #(hash-map % [chain]))))
 
 (defn bucket-coref [coref]
   (->> coref
@@ -98,6 +99,14 @@
 (defn split-map [m]
   (map single-map m))
 
+(defn pronoun? [tokens]
+  (cond
+    (not= (count tokens) 1) false
+    (some #(= % (-> tokens first
+                    (.get CoreAnnotations$PartOfSpeechAnnotation)))
+          pronoun-parts) true
+          :else false))
+
 (defn tokens-hash [sent-num tokens]
   (->> tokens
        (map #(.index %))
@@ -118,6 +127,10 @@
   (zipmap (map mention-hash nodes)
           (map #(.mentionSpan %) nodes)))
 
+(defn filter-singles [nodes]
+  (if (< (count nodes) 2)
+    '() nodes))
+
 (defn chain-nodes [chain]
   (->> chain
        (.getMentionMap)
@@ -125,7 +138,8 @@
        (map #(into '() %))
        (apply concat)
        mention-nodes
-       split-map))
+       split-map
+       filter-singles))
 
 (defn root-node [chain]
   (as-> (.getRepresentativeMention chain) $
@@ -135,13 +149,17 @@
   (->> chain
        chain-nodes
        (map #(vector % (root-node chain) "!is!"))
-       (filter #(not (= (nth % 0)
-                        (nth % 1))))))
+       (filter #(not= (nth % 0)
+                      (nth % 1)))))
+
+(defn build-graph [nodes edges]
+  (as-> (loom/weighted-digraph) $
+    (apply loom/add-nodes $ nodes)
+    (apply loom/add-edges $ edges)))
 
 (defn chain-graph [chain]
-  (as-> (loom/weighted-digraph) $
-    (apply loom/add-nodes $ (chain-nodes chain))
-    (apply loom/add-edges $ (chain-edges chain))))
+  (build-graph (chain-nodes chain)
+               (chain-edges chain)))
 
 (defn coref-graph [coref]
   (apply loom/weighted-digraph
@@ -159,24 +177,148 @@
             (hash-map (com/sha1 $) $))
             "!type!"))
 
-;(defn triple-nodes [triple sent-num]
-;  (->> [(.-subject triple) (.-object triple)]
-;       (map #(hash-map 
+(defn ner-graph [entity sent-num]
+  (build-graph (list (ner-node entity sent-num))
+               (list (ner-edge entity sent-num))))
+
+(defn triple-nodes [triple sent-num]
+  (split-map
+   (zipmap
+    (->> [(.-subject triple) (.-object triple)]
+         (map #(tokens-hash sent-num %)))
+    [(.subjectLemmaGloss triple) (.objectLemmaGloss triple)])))
+
+(defn triple-edge [triple sent-num]
+  (as-> (triple-nodes triple sent-num) $
+    (vector (nth $ 0) (nth $ 1)
+            (.relationLemmaGloss triple))))
+
+(defn triple-graph [triple sent-num]
+  (build-graph (triple-nodes triple sent-num)
+               (list (triple-edge triple sent-num))))
+
+(defn pronoun-node []
+  (as-> "!PRONOUN!" $
+    (hash-map (com/sha1 $) $)))
+
+(defn pronoun-edge [node]
+  [node (pronoun-node) "!type!"])
+
+(defn pronoun-graph [nodes]
+  (build-graph nodes (map pronoun-edge nodes)))
+
+(defn sentence-graph [sent-pair]
+  (loom/weighted-digraph
+   (->> (.get (val sent-pair)
+              NaturalLogicAnnotations$RelationTriplesAnnotation)
+        (map #(triple-graph % (key sent-pair)))
+        (apply loom/weighted-digraph))
+   (->> (.get (val sent-pair)
+              CoreAnnotations$MentionsAnnotation)
+        (map #(ner-graph % (key sent-pair)))
+        (apply loom/weighted-digraph))
+   (->> (.get (val sent-pair)
+              CoreAnnotations$TokensAnnotation)
+        (map list)
+        (filter pronoun?)
+        (map #(hash-map (tokens-hash (key sent-pair) %)
+                        (.originalText (first %))))
+        pronoun-graph)))
+
+(defn shorten-node [node]
+  (hash-map (subs (key node) 0 5)
+            (val node)))
+
+(defn shorten-nodes [nodes]
+  (map #(strip-node (first %)) nodes))
+
+(defn weighted-edge [g edge]
+  (conj edge (loom/weight g edge)))
+
+(defn shorten-edge [edge]
+  (vector (-> edge (nth 0) first strip-node)
+          (-> edge (nth 1) first strip-node)
+          (-> edge (nth 2))))
+
+(defn strip-nodes [nodes]
+  (->> nodes (apply merge) vals))
+
+(defn strip-edge [edge]
+  (vector (-> edge (nth 0) vals first)
+          (-> edge (nth 1) vals first)
+          (-> edge (nth 2))))
+
+(defn strip-graph [g]
+  (build-graph
+   (->> g loom/nodes strip-nodes)
+   (->> g loom/edges
+        (map #(weighted-edge g %))
+        (map strip-edge))))
+
+(defn out-edges [g node]
+  (->> (loom/out-edges g node)
+       (map #(weighted-edge g %))))
+  
+(defn referenced? [g pronoun]
+  (->> (out-edges g pronoun)
+       (filter #(= "!is!" (nth % 2)))
+       count
+       (= 1)))
+
+(defn up-nodes [g node]
+  (->> (loom/in-edges g node)
+       (map first)))
+
+(defn lonely? [g pronoun]
+  (as-> (out-edges g pronoun) $
+    (and (= (count $) 1)
+         (= "!type!"
+            (nth (first $) 2)))))
+
+(defn find-pronouns [g]
+  (->> (up-nodes g (pronoun-node))
+       (filter #(referenced? g %))))
+
+(defn find-referent [g pronoun]
+  (->> (out-edges g pronoun)
+       (filter #(= "!is!" (nth % 2)))
+       first second))
+
+(defn rewrite-edges [g pronoun]
+  (->> (out-edges g pronoun)
+       (filter #(not= "!is!" (nth % 2)))
+       (filter #(not= "!type!" (nth % 2)))
+       (map #(com/slice 1 3 %))
+       (map #(into (vector (find-referent g pronoun))
+                   %))))
+
+(defn rewrite-pronouns [g]
+  (as-> g $
+    (apply loom/add-edges $
+           (->> g find-pronouns
+                (map #(rewrite-edges g %))
+                (apply concat)))
+    (apply loom/remove-nodes $
+           (find-pronouns g))
+    (apply loom/remove-nodes $
+           (->> (up-nodes g (pronoun-node))
+                (filter #(lonely? g %))))))
 
 (defn run-nlp [pipeline text]
   ;; Global var needed for mutating Java method
   (def parsed-text (Annotation. text))
   (p :run-nlp (.annotate pipeline parsed-text))
-  (->>
-   (merge-with merge-coref
-               (-> parsed-text
-                   (.get CoreAnnotations$SentencesAnnotation)
-                   number-items)
-               (-> parsed-text
-                   (.get CorefCoreAnnotations$CorefChainAnnotation)
-                   vals
-                   bucket-coref))
-   vals (map fill-in-corefs)))
+  (strip-graph
+   (rewrite-pronouns
+    (loom/weighted-digraph
+     (->> (.get parsed-text CoreAnnotations$SentencesAnnotation)
+          number-items
+          (map sentence-graph)
+          (apply loom/weighted-digraph))
+     (-> parsed-text
+         (.get CorefCoreAnnotations$CorefChainAnnotation)
+         vals
+         coref-graph)))))
 
 (defn annotation-to-map [annotation]
   {(.get annotation CoreAnnotations$EntityTypeAnnotation)
