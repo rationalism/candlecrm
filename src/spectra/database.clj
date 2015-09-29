@@ -36,6 +36,12 @@
                             " ) WHERE " (graph/cypher-props-coll props)
                             " RETURN root")))
 
+(defn person-from-id [user id]
+   (graph/cypher-list (str "MATCH (root:" (graph/cypher-esc (user-label user))
+                            ":" schema/person-type
+                            " ) WHERE ID(root)= " id
+                            " RETURN root")))
+
 (def person-match-attrs
   [[:email schema/email-address-type]
    [:phone schema/phone-num-type]

@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [spectra.auth :as auth]
+            [spectra.database :as database]
             [spectra.email :as email]
             [spectra.google :as google]
             [spectra.html :as html]
@@ -30,3 +31,12 @@
 (defn login-needed [uri]
   (html/base-template
    (html/login-needed uri)))
+
+(defn show-person [req id]
+  (if-let [user (auth/get-user-obj (friend/identity req))]
+    (if-let [person (-> user (database/person-from-id id) first)]
+      (html/base-template
+       (html/show-person (-> person :data :name)
+                         (-> person :data)))
+      (html/base-template (html/not-found-error)))
+    (html/base-template (html/unauthorized-error))))

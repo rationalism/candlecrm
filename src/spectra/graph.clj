@@ -126,8 +126,8 @@
                     ") RETURN root")))
 
 (defn delete-class! [class]
-  (->> (get-vertices-class class)
-       (map delete-vertex!)))
+  (cypher-query (str "MATCH (root:" (cypher-esc class)
+                     ")-[v]-() DELETE root, v")))
 
 (defn delete-id! [id]
   (-> id find-by-id delete-vertex!))

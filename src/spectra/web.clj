@@ -72,6 +72,9 @@
                 user (Integer/parseInt lower) (Integer/parseInt upper))
                (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
            (assoc (resp/redirect "/") :flash "Error: Could not log in"))))
+  (GET "/person/:id" [id :as req]
+       (friend/authenticated
+        (html-wrapper (pages/show-person req id))))
   (route/resources "/")
   (route/not-found (slurp (io/resource "public/404.html"))))
 

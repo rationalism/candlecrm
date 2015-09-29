@@ -7,7 +7,7 @@
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "Spectra"]
-          (include-css "css/screen.css")]
+          (include-css "/css/screen.css")]
          [:body [:h1 "Hi there! Welcome :)"]
           (into [:div.content] content)]))
 
@@ -74,3 +74,19 @@
 
 (defn login-needed [uri]
   [:h2 "You do not have sufficient privileges to access " uri])
+
+(defn info-item [item]
+  [:p.infoitem (str (key item) ": "
+                    (val item))])
+
+(defn show-person [person-name attrs]
+  [:div {:class "columns small-12"}
+   [:h3.infotitle (str person-name " (Person)")]
+   (map info-item attrs)])
+
+(defn unauthorized-error []
+  [:h2 "Error: Access to this page is unauthorized."])
+
+(defn not-found-error []
+  [:div {:class "columns small-12"}
+   [:h2 "Error: No such object can be found."]])
