@@ -1,3 +1,3 @@
 (ns spectra-cljs.modern)
 
-(.write js/document "Hello, ClojureScript!")
+; (.write js/document "Hello, ClojureScript!")

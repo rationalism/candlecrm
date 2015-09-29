@@ -7,7 +7,8 @@
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "Spectra"]
-          (include-css "/css/screen.css")]
+          (include-css "/css/screen.css")
+          (include-js "/js/modern.js")]
          [:body [:h1 "Hi there! Welcome :)"]
           (into [:div.content] content)]))
 
@@ -54,11 +55,15 @@
     [:h3 "Sign up "
      [:small "(Any user/pass combination will do, as you are creating a new account or profile.)"]]
     [:div.row
-     [:form {:method "POST" :action "create-account" :class "columns small-4"}
+     [:form {:method "POST" :action "create-account" :class "columns small-4"
+             :id "loginForm" :novalidate ""}
       (anti-forgery-field)
-      [:div.row "Email " [:input {:type "text" :name "username" :required "required"}]]
-      [:div.row "Password " [:input {:type "password" :name "password" :required "required"}]]
-      [:div.row "Confirm " [:input {:type "password" :name "confirm" :required "required"}]]
+      [:div.row "Email " [:input {:type "text" :name "username"
+                                  :id "signupUsername" :required "required"}]]
+      [:div.row "Password " [:input {:type "password" :name "password"
+                                     :id "signupPassword" :required "required"}]]
+      [:div.row "Confirm " [:input {:type "password" :name "confirm"
+                                    :id "signupConfirm" :required "required"}]]
       [:div.row
        [:input {:type "submit" :class "button" :value "Sign up"}]
        [:span {:style "padding:0 0 0 10px;color:red;"} flash]]]]]])

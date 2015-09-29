@@ -29840,4 +29840,42 @@ cljs.core.ns_name = function cljs$core$ns_name(ns_obj) {
 };
 goog.provide("spectra_cljs.modern");
 goog.require("cljs.core");
-document.write("Hello, ClojureScript!");
+goog.provide("spectra_cljs.login");
+goog.require("cljs.core");
+spectra_cljs.login.validate_form = function spectra_cljs$login$validate_form() {
+  var email = document.getElementById("signupUsername");
+  var password = document.getElementById("signupPassword");
+  var confirm = document.getElementById("signupConfirm");
+  if (cljs.core._EQ_.call(null, cljs.core.count.call(null, email.value), 0)) {
+    alert("Please fill in your email address");
+    return false;
+  } else {
+    if (cljs.core._EQ_.call(null, cljs.core.count.call(null, password.value), 0)) {
+      alert("Please fill in your password");
+      return false;
+    } else {
+      if (cljs.core.not_EQ_.call(null, password.value, confirm.value)) {
+        alert("Password and confirmation don't match");
+        return false;
+      } else {
+        return true;
+      }
+    }
+  }
+};
+spectra_cljs.login.init = function spectra_cljs$login$init() {
+  if (cljs.core.truth_(function() {
+    var and__4514__auto__ = document;
+    if (cljs.core.truth_(and__4514__auto__)) {
+      return document.getElementById;
+    } else {
+      return and__4514__auto__;
+    }
+  }())) {
+    var login_form = document.getElementById("loginForm");
+    return login_form.onsubmit = spectra_cljs.login.validate_form;
+  } else {
+    return null;
+  }
+};
+window.onload = spectra_cljs.login.init;
