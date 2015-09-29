@@ -4,7 +4,7 @@
             [spectra.corenlp :refer :all]))
 
 (defn pipeline-ready [f]
-  (load-pipeline-test!) (f))
+  (load-pipeline!) (f))
 
 (use-fixtures :once pipeline-ready)
 
@@ -18,19 +18,19 @@
 
 (deftest nlp
   (testing "all types of entities"
-    (let [entities (nlp-entities *pipeline* wikipedia-blurb)]
+    (let [entities (graph-entities (run-nlp *pipeline* wikipedia-blurb))]
       (is (set/subset? wikipedia-people (set (entities person-key))))
       ;; TODO: move date testing to natty when that's installed
       ;; (is (set/subset? wikipedia-dates (set (entities date-key))))
       (is (set/subset? wikipedia-locations (set (entities location-key))))))
   (testing "people detection"
-    (let [people (nlp-people (nlp-entities *pipeline* wikipedia-blurb))]
+    (let [people (nlp-people (graph-entities (run-nlp *pipeline* wikipedia-blurb)))]
       (is (set/subset? wikipedia-parsed-people (set people)))))
   (testing "empty set"
-    (is (= {} (nlp-entities *pipeline* "")))
-    (is (= {} (nlp-entities *pipeline* ">>")))))
+    (is (= {} (graph-entities (run-nlp *pipeline* ""))))
+    (is (= {} (graph-entities (run-nlp *pipeline* ">>"))))))
 
 (deftest people
   (testing "making people from empty"
-    (is (= '() (->> (nlp-entities *pipeline* "")
+    (is (= '() (->> (graph-entities (run-nlp *pipeline* ""))
                     nlp-people)))))

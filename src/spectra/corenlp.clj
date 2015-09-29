@@ -22,8 +22,11 @@
             CorefCoreAnnotations$CorefChainAnnotation]
            [java.util Properties]))
 
-(def ner-annotators ["tokenize" "ssplit" "pos" "lemma" "ner" "parse" "dcoref"
-                     "depparse" "natlog" "openie" "entitymentions"])
+(def ner-annotators
+  (concat ["tokenize" "ssplit" "pos" "lemma" "ner"]
+          (if (env :coreference) ["parse" "dcoref"] [])
+          ["depparse" "natlog" "openie" "entitymentions"]))
+
 (def ner-model-file "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz")
 
 ;; Shift model supposed to be much faster, but takes much longer to load
@@ -52,10 +55,6 @@
 (defn load-pipeline! []
   (def ^:dynamic *pipeline*
     (make-pipeline ner-annotators shift-parse-model)))
-
-(defn load-pipeline-test! []
-  (def ^:dynamic *pipeline*
-    (make-pipeline ner-annotators pcfg-parse-model)))
 
 (defn chain-sentences [chain]
   (->> (keys (.getMentionMap chain))
@@ -230,14 +229,14 @@
             (val node)))
 
 (defn shorten-nodes [nodes]
-  (map #(strip-node (first %)) nodes))
+  (map #(shorten-node (first %)) nodes))
 
 (defn weighted-edge [g edge]
   (conj edge (loom/weight g edge)))
 
 (defn shorten-edge [edge]
-  (vector (-> edge (nth 0) first strip-node)
-          (-> edge (nth 1) first strip-node)
+  (vector (-> edge (nth 0) first shorten-node)
+          (-> edge (nth 1) first shorten-node)
           (-> edge (nth 2))))
 
 (defn strip-nodes [nodes]
@@ -304,33 +303,33 @@
            (->> (up-nodes g (pronoun-node))
                 (filter #(lonely? g %))))))
 
+(defn nlp-graph [parsed-text]
+  (cond->
+      (->> (.get parsed-text CoreAnnotations$SentencesAnnotation)
+           number-items
+           (map sentence-graph)
+           (apply loom/weighted-digraph))
+    (env :coreference)
+    (loom/weighted-digraph
+     (-> parsed-text
+         (.get CorefCoreAnnotations$CorefChainAnnotation)
+         vals
+         coref-graph))))
+
 (defn run-nlp [pipeline text]
   ;; Global var needed for mutating Java method
   (def parsed-text (Annotation. text))
   (p :run-nlp (.annotate pipeline parsed-text))
-  (strip-graph
-   (rewrite-pronouns
-    (loom/weighted-digraph
-     (->> (.get parsed-text CoreAnnotations$SentencesAnnotation)
-          number-items
-          (map sentence-graph)
-          (apply loom/weighted-digraph))
-     (-> parsed-text
-         (.get CorefCoreAnnotations$CorefChainAnnotation)
-         vals
-         coref-graph)))))
+  (cond-> (nlp-graph parsed-text)
+    (env :coreference) rewrite-pronouns
+    true strip-graph))
 
-(defn annotation-to-map [annotation]
-  {(.get annotation CoreAnnotations$EntityTypeAnnotation)
-   [(.toString annotation)]})
-
-(defn nlp-entities [pipeline text]
+(defn graph-entities [g]
   (if-let [entity-map
-           (->> (run-nlp pipeline text)
-                sentences
-                (map #(.get % CoreAnnotations$MentionsAnnotation))
-                (apply concat)
-                (map annotation-to-map)
+           (->> g loom/edges
+                (map #(weighted-edge g %))
+                (filter #(= "!type!" (nth % 2)))
+                (map #(hash-map (nth % 1) (list (nth % 0))))
                 (apply merge-with concat))]
     entity-map {}))
 
@@ -338,15 +337,6 @@
   (->> (concat (entities person-key) (entities organization-key))
        (map regex/parse-name-email)
        distinct))
-
-(defn sentence-triples [sentence]
-  (map #(.get % NaturalLogicAnnotations$RelationTriplesAnnotation)
-       sentence))
-
-(defn nlp-triples [pipeline text]
-  (->> (sentences (run-nlp pipeline text))
-       sentence-triples
-       (apply concat)))
 
 (defn triple-string [triple]
   (str/join "\t"

@@ -146,7 +146,8 @@
         (let [this-line (nth lines @start-header)]
           (com/reset-if-found! (dt/dates-in-text this-line) header :time-sent)
           (com/merge-if-found! (regex/find-email-people this-line) header :from)
-          (com/merge-if-found! (->> (nlp/nlp-entities nlp/*pipeline* this-line)
+          (com/merge-if-found! (->> (nlp/run-nlp nlp/*pipeline* this-line)
+                                    nlp/graph-entities
                                     nlp/nlp-people) header :from))))
   (assoc (->> header (map com/de-atom) (into {}))
          :body (->> lines
@@ -188,7 +189,8 @@
     (p :email-regex (regex/find-email-people text))
     (p :phone-regex (regex/find-phone-people text))
     (nlp/nlp-people
-     (p :nlp-text (nlp/nlp-entities nlp/*pipeline* text))))))
+     (p :nlp-text (nlp/graph-entities
+                   (nlp/run-nlp nlp/*pipeline* text)))))))
 
 (defn headers-parse [message]
   (merge
