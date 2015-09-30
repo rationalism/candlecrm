@@ -14,10 +14,14 @@
                  [com.taoensso/timbre "4.1.1"]
                  [com.cemerick/friend "0.2.1"
                   :exclusions [org.apache.httpcomponents/httpclient
-                               org.apache.httpcomponents/httpcore]]
+                               org.apache.httpcomponents/httpcore
+                               org.clojure/core.cache
+                               commons-logging
+                               commons-codec]]
                  [com.google.api-client/google-api-client "1.20.0"]
                  [com.google.gdata/core "1.47.1"
-                  :exclusions [com.google.guava/guava]]
+                  :exclusions [com.google.guava/guava
+                               com.google.code.findbugs/jsr305]]
                  [org.passay/passay "1.1.0"]
                  [com.google.apis/google-api-services-oauth2 "v2-rev94-1.20.0"]
                  [com.google.http-client/google-http-client-jackson "1.20.0"
@@ -34,7 +38,8 @@
                  [com.joestelmach/natty "0.12"]
                  [clojurewerkz/neocons "3.1.0-rc1"]
                  [pandect "0.5.3"]
-                 [aysylu/loom "0.5.4"]]
+                 [aysylu/loom "0.5.4"]
+                 [com.taoensso/sente "1.6.0"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]
             [lein-cljsbuild "1.1.0"]]
