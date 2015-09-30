@@ -42,7 +42,8 @@
                  [com.taoensso/sente "1.6.0"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]
-            [lein-cljsbuild "1.1.0"]]
+            [lein-cljsbuild "1.1.0"]
+            [cider/cider-nrepl "0.9.1"]]
   :resource-paths ["config" "resources"]
   :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
   :source-paths ["src" "src/spectra_cljs"]

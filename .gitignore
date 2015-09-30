@@ -15,3 +15,4 @@ pom.xml
 /client_s*
 /repl
 /out
+/resources/public/js
