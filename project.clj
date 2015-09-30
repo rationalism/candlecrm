@@ -1,4 +1,4 @@
-(defproject spectra "0.0.2"
+(defproject spectra "0.0.3"
   :description "Personal semantic graphs"
   :url "http://spectra.herokuapp.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
@@ -11,7 +11,7 @@
                  [compojure "1.4.0"]
                  [hiccup "1.0.5"]
                  [environ "1.0.1"]
-                 [com.taoensso/timbre "4.1.1"]
+                 [com.taoensso/timbre "4.1.2"]
                  [com.cemerick/friend "0.2.1"
                   :exclusions [org.apache.httpcomponents/httpclient
                                org.apache.httpcomponents/httpcore
@@ -32,12 +32,12 @@
                   :classifier "models"]
                  ;[edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"
                  ; :classifier "srparser"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.0.10"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.0.11"]
                  [org.deeplearning4j/deeplearning4j-core "0.4-rc3.3"
                   :exclusions [com.google.guava/guava]]
                  [com.joestelmach/natty "0.12"]
-                 [clojurewerkz/neocons "3.1.0-rc1"]
-                 [pandect "0.5.3"]
+                 [clojurewerkz/neocons "3.1.0"]
+                 [pandect "0.5.4"]
                  [aysylu/loom "0.5.4"]
                  [com.taoensso/sente "1.6.0"]]
   :min-lein-version "2.0.0"
