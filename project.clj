@@ -4,9 +4,11 @@
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.48"]
-                 [compojure "1.4.0"]
-                 [ring "1.4.0"]
+                 [http-kit "2.1.19"]
+                 [ring/ring-core "1.4.0"]
+                 [ring/ring-devel "1.4.0"]
                  [ring/ring-defaults "0.1.5"]
+                 [compojure "1.4.0"]
                  [hiccup "1.0.5"]
                  [environ "1.0.1"]
                  [com.taoensso/timbre "4.1.1"]
@@ -24,8 +26,8 @@
                  [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"]
                  [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"
                   :classifier "models"]
-                 [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"
-                  :classifier "srparser"]
+                 ;[edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"
+                 ; :classifier "srparser"]
                  [com.googlecode.libphonenumber/libphonenumber "7.0.10"]
                  [org.deeplearning4j/deeplearning4j-core "0.4-rc3.3"
                   :exclusions [com.google.guava/guava]]
@@ -35,7 +37,6 @@
                  [aysylu/loom "0.5.4"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]
-            [lein-ring "0.9.6"]
             [lein-cljsbuild "1.1.0"]]
   :resource-paths ["config" "resources"]
   :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
@@ -45,9 +46,10 @@
                 :compiler {:output-to "resources/public/js/modern.js"
                            :optimizations :whitespace
                            :pretty-print true}}]}
-  :ring {:handler spectra.web/secure-app
-         :init spectra.web/app-init
-         :destroy spectra.web/app-shutdown
-         :nrepl {:start? true :port 9998}}
+  :main spectra.web
+  ;:ring {:handler spectra.web/secure-app
+  ;       :init spectra.web/app-init
+  ;       :destroy spectra.web/app-shutdown
+  ;       :nrepl {:start? true :port 9998}}
   :jvm-opts ["-Xmx4g"]
   :uberjar-name "spectra-standalone.jar")

@@ -3,6 +3,8 @@
             [compojure.handler :refer [site]]
             [compojure.route :as route]
             [ring.util.response :as resp]
+            [ring.middleware.defaults :refer :all]
+            [ring.middleware.reload :as reload]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [spectra.auth :as auth]
@@ -12,12 +14,11 @@
             [spectra.graph :as graph]
             [spectra.corenlp :as nlp]
             [spectra.pages :as pages]
-            [ring.adapter.jetty :as jetty]
-            [ring.middleware.defaults :refer :all]
             [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
                              [credentials :as creds])
-            [environ.core :refer [env]]))
+            [environ.core :refer [env]])
+   (:use [org.httpkit.server :only [run-server]]))
 
 (defn unauthorized-handler [req msg]
   {:status 401
@@ -92,11 +93,17 @@
       (wrap-defaults (assoc secure-site-defaults
                             :proxy true))))
 
-(defn app-init []
+(defn app-init! []
   (graph/define-graph!)
   (nlp/load-pipeline!)
   (email/define-imap-lookup))
 
-(defn app-shutdown []
+(defn app-shutdown! []
   (email/close-imap-lookup!))
 
+(defn -main [& args]
+  (app-init!)
+  (let [handler (if (env :in-dev)
+                  (reload/wrap-reload (site #'secure-app)) 
+                  (site secure-app))]
+    (run-server handler {:port 3000})))

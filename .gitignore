@@ -13,3 +13,5 @@ pom.xml
 /test-cert*
 /test_p*
 /client_s*
+/repl
+/out

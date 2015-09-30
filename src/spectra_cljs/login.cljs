@@ -5,9 +5,9 @@
         password (.getElementById js/document "signupPassword")
         confirm (.getElementById js/document "signupConfirm")]
     (cond
-      (= (count (.-value email)) 0)
+      (< (count (.-value email)) 3)
       (do (js/alert "Please fill in your email address") false)
-      (= (count (.-value password)) 0)
+      (< (count (.-value password)) 3)
       (do (js/alert "Please fill in your password") false)
       (not= (.-value password) (.-value confirm))
       (do (js/alert "Password and confirmation don't match") false)

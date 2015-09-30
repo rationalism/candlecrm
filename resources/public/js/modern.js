@@ -29846,11 +29846,11 @@ spectra_cljs.login.validate_form = function spectra_cljs$login$validate_form() {
   var email = document.getElementById("signupUsername");
   var password = document.getElementById("signupPassword");
   var confirm = document.getElementById("signupConfirm");
-  if (cljs.core._EQ_.call(null, cljs.core.count.call(null, email.value), 0)) {
+  if (cljs.core.count.call(null, email.value) < 3) {
     alert("Please fill in your email address");
     return false;
   } else {
-    if (cljs.core._EQ_.call(null, cljs.core.count.call(null, password.value), 0)) {
+    if (cljs.core.count.call(null, password.value) < 3) {
       alert("Please fill in your password");
       return false;
     } else {

@@ -54,7 +54,7 @@
 
 (defn load-pipeline! []
   (def ^:dynamic *pipeline*
-    (make-pipeline ner-annotators shift-parse-model)))
+    (make-pipeline ner-annotators pcfg-parse-model)))
 
 (defn chain-sentences [chain]
   (->> (keys (.getMentionMap chain))
