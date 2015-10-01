@@ -10,7 +10,7 @@
              :refer (pspy pspy* profile defnp p p*)]))
 
 (defn user-label [user]
-  (str "user_" (:identity user)))
+  (str "user_" (:id user)))
 
 (defn create-user! [user]
   (graph/create-vertex!
@@ -41,6 +41,11 @@
                             ":" schema/person-type
                             " ) WHERE ID(root)= " id
                             " RETURN root")))
+
+(defn person-from-user [user]
+   (graph/cypher-list (str "MATCH (root:" (graph/cypher-esc (user-label user))
+                            ":" schema/person-type
+                            " ) RETURN root")))
 
 (def person-match-attrs
   [[:email schema/email-address-type]

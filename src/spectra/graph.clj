@@ -93,16 +93,27 @@
 (defn delete-property! [vertex property]
   (.removeProperty vertex property))
 
+(defn filter-props [props]
+  (->> props
+       (filter #(com/not-nil-ext? (val %)))
+       (into {})
+       (map dt/catch-dates-map)
+       (into {})))
+
 (defn create-vertex! [labels properties]
   (p :create-vertex
-     (let [vertex (->> properties
-                       (filter #(com/not-nil-ext? (val %)))
-                       (into {})
-                       (map dt/catch-dates-map)
-                       (into {})
-                       (nn/create *graph*))]
+     (let [vertex (nn/create *graph* (filter-props properties))]
        (nl/add *graph* vertex labels)
        vertex)))
+
+(defn batch-insert! [items]
+  (p :batch-insert
+     (let [nodes
+           (nn/create-batch *graph*
+                            (map #(filter-props (:props %))
+                                 items))]
+       (map #(nl/add *graph* %1 (:labels %2))
+            nodes items))))
 
 (defn delete-vertex! [vertex]
   (nn/destroy *graph* vertex))
@@ -127,7 +138,9 @@
 
 (defn delete-class! [class]
   (cypher-query (str "MATCH (root:" (cypher-esc class)
-                     ")-[v]-() DELETE root, v")))
+                     ")-[v]-() DELETE root, v"))
+  (cypher-query (str "MATCH (root:" (cypher-esc class)
+                     ") DELETE root")))
 
 (defn delete-id! [id]
   (-> id find-by-id delete-vertex!))

@@ -1,6 +1,7 @@
 (ns spectra.html
   (:require [clojure.java.io :as io]
-            [environ.core :refer [env]])
+            [environ.core :refer [env]]
+            [spectra.schema :as schema])
   (:use [hiccup.core] [hiccup.page]
         [ring.util.anti-forgery]))
 
@@ -12,13 +13,42 @@
          [:body [:h1 "Hi there! Welcome :)"]
           (into [:div.content] content)]))
 
-(defn user-home [flash username]
+(defn user-welcome [flash username]
   [:div {:class "columns small-12"}
    [:h3 "Success! You are logged in now"]
    [:h3 (str "Welcome. Your username is: " username)]
-   [:span {:style "padding:0 0 0 10px;color:red;"} flash]
+   [:span {:style "padding:0 0 0 10px;color:red;"} flash]])
+
+(defn user-footer []
+  [:div {:class "columns small-12"}
    [:p [:a {:href "/gmail"} "Connect to GMail here"]]
    [:p [:a {:href "/logout"} "Logout here"]]])
+
+(def person-attrs {schema/name-type "Name"
+                   schema/email-address-type "Email"
+                   schema/phone-num-type "Phone number"})
+
+(defn header-cell [attr]
+  [:td (val attr)])
+
+(defn person-link [person attr]
+  [:a {:href (str "/person/" (person :id))}
+   (person attr)])
+
+(defn person-cell [person attr]
+  [:td (if (= schema/name-type (key attr))
+         (person-link person (key attr))
+         (person (key attr)))])
+
+(defn person-row [person]
+  [:tr (map #(person-cell person %) person-attrs)])
+
+(defn people-table [people]
+  [:div {:class "columns small-12"}
+   [:table {:class "people-table"}
+    [:tr {:class "people-header"}
+     (map header-cell person-attrs)]
+    (map person-row people)]])
 
 (defn gmail-setup [flash username auth-url]
   [:div {:class "columns small-12"}

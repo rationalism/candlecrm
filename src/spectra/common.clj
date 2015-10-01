@@ -41,7 +41,8 @@
 
 (defn not-nil-ext? [item]
   (if (coll? item)
-    (not-any? nil? item)
+    (and (not (empty? item))
+         (not-any? nil? item))
     (not (nil? item))))
 
 (defn param [args]

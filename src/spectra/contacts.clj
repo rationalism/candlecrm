@@ -2,7 +2,9 @@
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [spectra.auth :as auth]
+            [spectra.database :as database]
             [spectra.google :as google]
+            [spectra.graph :as graph]
             [spectra.schema :as schema]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -30,15 +32,28 @@
     ContactFeed)))
 
 (defn contact-to-map [contact]
-  {:name (cond-> []
-            (and (.hasName contact)
-                 (.hasFullName (.getName contact)))
-            (conj (.getValue (.getFullName (.getName contact))))
-            (and (.hasName contact)
-                 (.hasAdditionalName (.getName contact)))
-            (conj (.getValue (.getAdditionalName (.getName contact)))))
-   :email (->> (.getEmailAddresses contact)
-               (mapv #(.getAddress %)))
-   :phone (->> (.getPhoneNumbers contact)
-               (mapv #(.getPhoneNumber %)))})
+  {schema/name-type
+   (cond-> []
+     (and (.hasName contact)
+          (.hasFullName (.getName contact)))
+     (conj (.getValue (.getFullName (.getName contact))))
+     (and (.hasName contact)
+          (.hasAdditionalName (.getName contact)))
+     (conj (.getValue (.getAdditionalName (.getName contact)))))
+   schema/email-address-type
+   (->> (.getEmailAddresses contact)
+        (mapv #(.getAddress %)))
+   schema/phone-num-type
+   (->> (.getPhoneNumbers contact)
+        (mapv #(.getPhoneNumber %)))})
 
+(defn person-labels [user]
+  [schema/person-type
+   (database/user-label user)])
+  
+(defn batch-insert! [user contacts]
+  (->> contacts 
+    (map contact-to-map)
+    (map #(hash-map :props %))
+    (map #(assoc % :labels (person-labels user)))
+    graph/batch-insert!))

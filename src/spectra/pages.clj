@@ -6,12 +6,37 @@
             [spectra.email :as email]
             [spectra.google :as google]
             [spectra.html :as html]
+            [spectra.schema :as schema]
             [cemerick.friend :as friend]))
+
+(defn first-if-coll [coll]
+  (if (coll? coll) (first coll) coll))
+
+(defn first-table-vals [person]
+  (->> person
+       (map #(hash-map (key %)
+                       (first-if-coll (val %))))
+       (reduce merge)))
+
+(defn node-attrs [node]
+  (merge (:data node)
+         (hash-map :id (:id node))))
+
+(defn people-table [people]
+  (->> people
+       (map node-attrs)
+       (filter #(not (empty? %)))
+       (filter #(contains? % schema/name-type))
+       (map first-table-vals)))
 
 (defn homepage [req]
   (if-let [user (auth/get-user-obj (friend/identity req))]
     (html/base-template
-     (html/user-home (:flash req) (auth/get-username user)))
+     (html/user-welcome (:flash req) (auth/get-username user))
+     (-> user database/person-from-user
+         people-table
+         html/people-table)
+     (html/user-footer))
     (html/base-template
      (html/signup-form (:flash req))
      (html/login-form))))
