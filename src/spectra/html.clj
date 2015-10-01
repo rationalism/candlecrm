@@ -56,7 +56,7 @@
      [:small "(Any user/pass combination will do, as you are creating a new account or profile.)"]]
     [:div.row
      [:form {:method "POST" :action "create-account" :class "columns small-4"
-             :id "loginForm" :novalidate ""}
+             :id "signupForm" :novalidate ""}
       (anti-forgery-field)
       [:div.row "Email " [:input {:type "text" :name "username"
                                   :id "signupUsername" :required "required"}]]
@@ -66,16 +66,23 @@
                                     :id "signupConfirm" :required "required"}]]
       [:div.row
        [:input {:type "submit" :class "button" :value "Sign up"}]
-       [:span {:style "padding:0 0 0 10px;color:red;"} flash]]]]]])
+       [:span {:style "padding:0 0 0 10px;color:red;"
+               :id "signupError"} flash]]]]]])
 
 (defn login-form []
   [:div {:class "columns small-12"}
    [:h3 "Login"]
-   [:form {:method "POST" :action "login" :class "columns small-4"}
+   [:form {:method "POST" :action "login" :class "columns small-4"
+           :id "loginForm" :novalidate ""}
     (anti-forgery-field)
-    [:div.row "Email " [:input {:type "text" :name "username"}]]
-    [:div.row "Password " [:input {:type "password" :name "password"}]]
-    [:div.row [:input {:type "submit" :class "button" :value "Login"}]]]])
+    [:div.row "Email " [:input {:type "text" :name "username"
+                                :id "loginUsername"}]]
+    [:div.row "Password " [:input {:type "password" :name "password"
+                                   :id "loginPassword"}]]
+    [:div.row
+     [:input {:type "submit" :class "button" :value "Login"}]
+     [:span {:style "padding:0 0 0 10px;color:red;"
+               :id "loginError"}]]]])
 
 (defn login-needed [uri]
   [:h2 "You do not have sufficient privileges to access " uri])

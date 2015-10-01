@@ -3,7 +3,9 @@
    [cljs.core.async.macros :as asyncm :refer (go go-loop)])
   (:require
    [cljs.core.async :as async :refer (<! >! put! chan)]
-   [taoensso.sente  :as sente :refer (cb-success?)]))
+   [taoensso.sente  :as sente :refer (cb-success?)]
+   [goog.dom :as dom]
+   [goog.events :as events]))
 
 ;; Sente/AJAX boilerplate from https://github.com/ptaoussanis/sente
 (let [{:keys [chsk ch-recv send-fn state]}
@@ -16,17 +18,29 @@
   (def chsk-state state)   ; Watchable, read-only atom
   )
 
-(defn validate-form []
-  (let [email (.getElementById js/document "signupUsername")
-        password (.getElementById js/document "signupPassword")
-        confirm (.getElementById js/document "signupConfirm")]
+(defn validate-signup-form []
+  (let [email (dom/getElement "signupUsername")
+        password (dom/getElement "signupPassword")
+        confirm (dom/getElement "signupConfirm")
+        error (dom/getElement "signupError")]
     (cond
       (< (count (.-value email)) 3)
-      (do (js/alert "Please fill in your email address") false)
+      (do (set! (.-innerHTML error) "Please fill in your email address") false)
       (< (count (.-value password)) 3)
-      (do (js/alert "Please fill in your password") false)
+      (do (set! (.-innerHTML error) "Please fill in your password") false)
       (not= (.-value password) (.-value confirm))
-      (do (js/alert "Password and confirmation don't match") false)
+      (do (set! (.-innerHTML error) "Password and confirmation don't match") false)
+      :else true)))
+
+(defn validate-login-form []
+  (let [email (dom/getElement "loginUsername")
+        password (dom/getElement "loginPassword")
+        error (dom/getElement "loginError")]
+    (cond
+      (< (count (.-value email)) 3)
+      (do (set! (.-innerHTML error) "Please fill in your email address") false)
+      (< (count (.-value password)) 3)
+      (do (set! (.-innerHTML error) "Please fill in your password") false)
       :else true)))
 
 (defn init []
@@ -34,8 +48,10 @@
   ;; property
   (if (and js/document
            (.-getElementById js/document))
-    (let [login-form (.getElementById js/document "loginForm")]
-      (set! (.-onsubmit login-form) validate-form))))
+    (let [signup-form (dom/getElement "signupForm")
+          login-form (dom/getElement "loginForm")]
+      (set! (.-onsubmit signup-form) validate-signup-form)
+      (set! (.-onsubmit login-form) validate-login-form))))
 
 ;; initialize the HTML page in unobtrusive way
 (set! (.-onload js/window) init)
