@@ -4,6 +4,7 @@
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.48"]
+                 [org.clojure/tools.nrepl "0.2.11"]
                  [http-kit "2.1.19"]
                  [ring/ring-core "1.4.0"]
                  [ring/ring-devel "1.4.0"]
@@ -53,9 +54,5 @@
                            :optimizations :whitespace
                            :pretty-print true}}]}
   :main spectra.web
-  ;:ring {:handler spectra.web/secure-app
-  ;       :init spectra.web/app-init
-  ;       :destroy spectra.web/app-shutdown
-  ;       :nrepl {:start? true :port 9998}}
   :jvm-opts ["-Xmx4g"]
   :uberjar-name "spectra-standalone.jar")

@@ -19,8 +19,10 @@
             [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
                              [credentials :as creds])
-            [environ.core :refer [env]])
-   (:use [org.httpkit.server :only [run-server]]))
+            [environ.core :refer [env]]
+            [clojure.tools.nrepl.server :as nrepl-server]
+            [cider.nrepl :refer (cider-nrepl-handler)])
+  (:use [org.httpkit.server :only [run-server]]))
 
 ;; Sente boilerplate from https://github.com/ptaoussanis/sente
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
@@ -112,7 +114,10 @@
 (defn app-init! []
   (graph/define-graph!)
   (nlp/load-pipeline!)
-  (email/define-imap-lookup))
+  (email/define-imap-lookup)
+  (nrepl-server/start-server
+   :port 9998
+   :handler cider-nrepl-handler))
 
 (defn app-shutdown! []
   (email/close-imap-lookup!))
