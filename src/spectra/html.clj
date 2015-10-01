@@ -132,3 +132,8 @@
 (defn not-found-error []
   [:div {:class "columns small-12"}
    [:h2 "Error: No such object can be found."]])
+
+(defn alerts []
+  [:div {:class "columns small-12"}
+   [:h2 "This alerts page is for testing purposes"]
+   [:div {:id "alertTable"}]])

@@ -65,3 +65,7 @@
                          (-> person :data)))
       (html/base-template (html/not-found-error)))
     (html/base-template (html/unauthorized-error))))
+
+(defn alerts [req]
+  (html/base-template
+   (html/alerts)))

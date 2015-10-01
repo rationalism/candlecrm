@@ -5,10 +5,9 @@
             [ring.util.response :as resp]
             [ring.middleware.defaults :refer :all]
             [ring.middleware.reload :as reload]
-            [taoensso.sente :as sente]
-            [taoensso.sente.server-adapters.http-kit :refer (sente-web-server-adapter)]
             [clojure.java.io :as io]
             [clojure.string :as str]
+            [spectra.ajax :as ajax]
             [spectra.auth :as auth]
             [spectra.contacts :as contacts]
             [spectra.email :as email]
@@ -23,17 +22,6 @@
             [clojure.tools.nrepl.server :as nrepl-server]
             [cider.nrepl :refer (cider-nrepl-handler)])
   (:use [org.httpkit.server :only [run-server]]))
-
-;; Sente boilerplate from https://github.com/ptaoussanis/sente
-(let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
-              connected-uids]}
-      (sente/make-channel-socket! sente-web-server-adapter {})]
-  (def ring-ajax-post                ajax-post-fn)
-  (def ring-ajax-get-or-ws-handshake ajax-get-or-ws-handshake-fn)
-  (def ch-chsk                       ch-recv) ; ChannelSocket's receive channel
-  (def chsk-send!                    send-fn) ; ChannelSocket's send API fn
-  (def connected-uids                connected-uids) ; Watchable, read-only atom
-  )
 
 (defn unauthorized-handler [req msg]
   {:status 401
@@ -54,13 +42,15 @@
 
 (defroutes app
   ;; chsk routes are for Sente AJAX/WebSockets calls
-  (GET "/chsk" req (ring-ajax-get-or-ws-handshake req))
-  (POST "/chsk" req (ring-ajax-post req))
+  (GET "/chsk" req (ajax/ring-ajax-get-or-ws-handshake req))
+  (POST "/chsk" req (ajax/ring-ajax-post req))
   (GET "/" req
        (html-wrapper (pages/homepage req)))
   ;; TODO: Make this return an error message when credentials are invalid
   (GET "/login" req
        (html-wrapper (pages/homepage req)))
+  (GET "/alerts" req
+       (html-wrapper (pages/alerts req)))
   (POST "/create-account" {{:keys [username password confirm] :as params} :params :as req}
         (if-let [err-msg (auth/new-user-check username password confirm)]
           (home-with-message err-msg)
@@ -114,6 +104,7 @@
 (defn app-init! []
   (graph/define-graph!)
   (nlp/load-pipeline!)
+  (ajax/start-router!)
   (email/define-imap-lookup)
   (nrepl-server/start-server
    :port 9998

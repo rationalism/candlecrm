@@ -1,22 +1,7 @@
 (ns spectra-cljs.login
-  (:require-macros
-   [cljs.core.async.macros :as asyncm :refer (go go-loop)])
-  (:require
-   [cljs.core.async :as async :refer (<! >! put! chan)]
-   [taoensso.sente  :as sente :refer (cb-success?)]
-   [goog.dom :as dom]
-   [goog.events :as events]))
-
-;; Sente/AJAX boilerplate from https://github.com/ptaoussanis/sente
-(let [{:keys [chsk ch-recv send-fn state]}
-      (sente/make-channel-socket! "/chsk" ; Note the same path as before
-       {:type :auto ; e/o #{:auto :ajax :ws}
-       })]
-  (def chsk       chsk)
-  (def ch-chsk    ch-recv) ; ChannelSocket's receive channel
-  (def chsk-send! send-fn) ; ChannelSocket's send API fn
-  (def chsk-state state)   ; Watchable, read-only atom
-  )
+  (:require [goog.dom :as dom]
+            [goog.events :as events]
+            [spectra-cljs.ajax :as ajax]))
 
 (defn validate-signup-form []
   (let [email (dom/getElement "signupUsername")
@@ -48,10 +33,12 @@
   ;; property
   (if (and js/document
            (.-getElementById js/document))
-    (let [signup-form (dom/getElement "signupForm")
-          login-form (dom/getElement "loginForm")]
-      (set! (.-onsubmit signup-form) validate-signup-form)
-      (set! (.-onsubmit login-form) validate-login-form))))
+    (do
+      (ajax/start-router!)
+      (let [signup-form (dom/getElement "signupForm")
+            login-form (dom/getElement "loginForm")]
+        (set! (.-onsubmit signup-form) validate-signup-form)
+        (set! (.-onsubmit login-form) validate-login-form)))))
 
 ;; initialize the HTML page in unobtrusive way
 (set! (.-onload js/window) init)
