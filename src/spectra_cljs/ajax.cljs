@@ -21,14 +21,32 @@
 ;; Wrap for logging, catching, etc.:
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
   (js/alert "An event has been received.")
-  (prn "Event: %s" event)
+  (.log js/console "Event: %s" event)
   (event-msg-handler ev-msg))
 
 (do ; Client-side methods
   (defmethod event-msg-handler :default ; Fallback
-    (js/alert "An event has been received.")
     [{:as ev-msg :keys [event]}]
-    (prn "Unhandled event: %s" event)))
+    (js/alert "An event has been received.")
+    (.log js/console "Unhandled event: %s" event))
+  
+  (defmethod event-msg-handler :chsk/state
+    [{:as ev-msg :keys [?data]}]
+    (js/alert "An event has been received.")
+    (if (= ?data {:first-open? true})
+      (.log js/console "Channel socket successfully established!")
+      (.log js/console "Channel socket state change: %s" ?data)))
+      
+  (defmethod event-msg-handler :chsk/recv
+    [{:as ev-msg :keys [?data]}]
+    (js/alert "An event has been received.")
+    (.log js/console "Push event from server: %s" ?data))
+  
+  (defmethod event-msg-handler :chsk/handshake
+    [{:as ev-msg :keys [?data]}]
+    (js/alert "An event has been received.")
+    (let [[?uid ?csrf-token ?handshake-data] ?data]
+      (.log js/console "Handshake: %s" ?data))))
 
 (def router_ (atom nil))
 
@@ -37,5 +55,8 @@
 
 (defn start-router! []
   (stop-router!)
+  (.log js/console "chsk-state")
+  (.log js/console @chsk-state)
   (reset! router_ (sente/start-chsk-router!
-                   ch-chsk event-msg-handler*)))
+                   ch-chsk event-msg-handler*))
+  (sente/chsk-reconnect! chsk))

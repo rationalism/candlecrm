@@ -42,6 +42,12 @@
 
 (def pronoun-parts ["PRP" "PRP$"])
 
+(defn make-default-pipeline [annotators]
+  (StanfordCoreNLP.
+   (doto (Properties. )
+     (.setProperty "annotators"
+                   (str/join ", " annotators)))))
+
 (defn make-pipeline [annotators parse-model]
   (StanfordCoreNLP.
    (doto (Properties. )
@@ -303,9 +309,16 @@
            (->> (up-nodes g (pronoun-node))
                 (filter #(lonely? g %))))))
 
+(defn get-sentences [parsed-text]
+  (.get parsed-text CoreAnnotations$SentencesAnnotation))
+
+(defn sentences-text [sentences]
+  (map #(.toString %) sentences))
+
 (defn nlp-graph [parsed-text]
   (cond->
-      (->> (.get parsed-text CoreAnnotations$SentencesAnnotation)
+      (->> parsed-text
+           get-sentences
            number-items
            (map sentence-graph)
            (apply loom/weighted-digraph))
@@ -316,11 +329,15 @@
          vals
          coref-graph))))
 
-(defn run-nlp [pipeline text]
+(defn run-nlp-simple [pipeline text]
   ;; Global var needed for mutating Java method
   (def parsed-text (Annotation. text))
   (p :run-nlp (.annotate pipeline parsed-text))
-  (cond-> (nlp-graph parsed-text)
+  parsed-text)
+  
+(defn run-nlp [pipeline text]
+  (cond-> (run-nlp-simple pipeline text)
+    true nlp-graph
     (env :coreference) rewrite-pronouns
     true strip-graph))
 

@@ -34,8 +34,11 @@
                  ;[edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"
                  ; :classifier "srparser"]
                  [com.googlecode.libphonenumber/libphonenumber "7.0.11"]
-                 [org.deeplearning4j/deeplearning4j-core "0.4-rc3.3"
+                 [org.deeplearning4j/deeplearning4j-core "0.4-rc3.4"
                   :exclusions [com.google.guava/guava]]
+                 [org.deeplearning4j/deeplearning4j-nlp "0.4-rc3.4"
+                  :uberjar-merge-with {#"\.properties$" [slurp str spit]
+                                       "reference.conf" [slurp str spit]}]
                  [com.joestelmach/natty "0.12"]
                  [clojurewerkz/neocons "3.1.0"]
                  [pandect "0.5.4"]

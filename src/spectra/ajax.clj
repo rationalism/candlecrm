@@ -8,7 +8,10 @@
 ;; Sente boilerplate from https://github.com/ptaoussanis/sente
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
-      (sente/make-channel-socket! sente-web-server-adapter {})]
+      (sente/make-channel-socket!
+       sente-web-server-adapter
+       {:user-id-fn (fn [ring-req]
+                      (:client-id ring-req))})]
   (def ring-ajax-post                ajax-post-fn)
   (def ring-ajax-get-or-ws-handshake ajax-get-or-ws-handshake-fn)
   (def ch-chsk                       ch-recv) ; ChannelSocket's receive channel
@@ -57,5 +60,5 @@
 (defn start-router! []
   (stop-router!)
   (reset! router_ (sente/start-chsk-router!
-                   ch-chsk event-msg-handler*))
-  (start-broadcaster!))
+                   ch-chsk event-msg-handler*)))
+;  (start-broadcaster!))
