@@ -15,7 +15,8 @@
             CoreAnnotations$MentionsAnnotation
             CoreAnnotations$EntityTypeAnnotation
             CoreAnnotations$TokensAnnotation
-            CoreAnnotations$PartOfSpeechAnnotation]
+            CoreAnnotations$PartOfSpeechAnnotation
+            CoreAnnotations$LemmaAnnotation]
            [edu.stanford.nlp.naturalli
             NaturalLogicAnnotations$RelationTriplesAnnotation]
            [edu.stanford.nlp.dcoref
@@ -170,10 +171,17 @@
   (apply loom/weighted-digraph
          (map chain-graph coref)))
 
+(defn get-tokens [words]
+  (.get words CoreAnnotations$TokensAnnotation))
+
+(defn get-sentences [parsed-text]
+  (.get parsed-text CoreAnnotations$SentencesAnnotation))
+
+(defn get-lemma [token]
+  (.get token CoreAnnotations$LemmaAnnotation))
+
 (defn ner-node [entity sent-num]
-  (hash-map (tokens-hash
-             sent-num
-             (.get entity CoreAnnotations$TokensAnnotation))
+  (hash-map (tokens-hash sent-num(get-tokens entity))
             (.toString entity)))
 
 (defn ner-edge [entity sent-num]
@@ -222,8 +230,7 @@
               CoreAnnotations$MentionsAnnotation)
         (map #(ner-graph % (key sent-pair)))
         (apply loom/weighted-digraph))
-   (->> (.get (val sent-pair)
-              CoreAnnotations$TokensAnnotation)
+   (->> (get-tokens (val sent-pair))
         (map list)
         (filter pronoun?)
         (map #(hash-map (tokens-hash (key sent-pair) %)
@@ -308,9 +315,6 @@
     (apply loom/remove-nodes $
            (->> (up-nodes g (pronoun-node))
                 (filter #(lonely? g %))))))
-
-(defn get-sentences [parsed-text]
-  (.get parsed-text CoreAnnotations$SentencesAnnotation))
 
 (defn sentences-text [sentences]
   (map #(.toString %) sentences))
