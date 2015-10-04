@@ -39,6 +39,7 @@
                  [org.deeplearning4j/deeplearning4j-nlp "0.4-rc3.4"
                   :uberjar-merge-with {#"\.properties$" [slurp str spit]
                                        "reference.conf" [slurp str spit]}]
+                 [org.nd4j/nd4j-jcublas-7.5 "0.4-rc3.5"]
                  [com.joestelmach/natty "0.12"]
                  [clojurewerkz/neocons "3.1.0"]
                  [pandect "0.5.4"]

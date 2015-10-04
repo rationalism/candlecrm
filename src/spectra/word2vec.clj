@@ -10,10 +10,24 @@
             Tokenizer]
            [org.deeplearning4j.text.tokenization.tokenizerfactory
             TokenizerFactory]
+           [org.deeplearning4j.models.word2vec
+            Word2Vec$Builder]
            [java.io InputStream]))
 
 (def sentence-annotators ["tokenize" "ssplit"])
 (def token-annotators ["tokenize" "ssplit" "pos" "lemma"])
+
+;; Description of parameter meanings at
+;; http://deeplearning4j.org/word2vec.html
+(def batch-size 1000)
+(def iterations 30)
+(def layer-size 300)
+(def sampling 0.00001)
+(def min-word-freq 5)
+(def use-adagrad false)
+(def learn-rate 0.025)
+(def min-learn-rate 0.01)
+(def neg-sample 10)
 
 (defrecord NullSentenceProcessor []
   SentencePreProcessor
@@ -72,3 +86,21 @@
   (->TokenStoreFactory
    (corenlp/make-default-pipeline 
     token-annotators)))
+
+(defn make-model [filename]
+  (def vec-model
+    (-> (Word2Vec$Builder. )
+        (.batchSize batch-size)
+        (.sampling sampling)
+        (.minWordFrequency min-word-freq)
+        (.useAdaGrad use-adagrad)
+        (.layerSize layer-size)
+        (.iterations iterations)
+        (.learningRate learn-rate)
+        (.minLearningRate min-learn-rate)
+        (.negativeSample neg-sample)
+        (.iterate (SentenceLoaderFactory filename))
+        (.tokenizerFactory (make-token-factory))
+        .build))
+  (p :train-word2vec (.fit vec-model))
+  vec-model)
