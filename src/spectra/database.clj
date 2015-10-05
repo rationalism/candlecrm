@@ -3,7 +3,7 @@
             [clojure.string :as str]
             [spectra.common :as com]
             [spectra.datetime :as dt]
-            [spectra.graph :as graph]
+            [spectra.neo4j :as neo4j]
             [spectra.schema :as schema]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
@@ -13,13 +13,13 @@
   (str "user_" (:id user)))
 
 (defn create-user! [user]
-  (graph/create-vertex!
+  (neo4j/create-vertex!
    schema/user-type 
    {schema/email-address-type (:identity user)
     schema/pwd-hash-type (:password user)}))
   
 (defn create-person! [user person]
-  (graph/create-vertex!
+  (neo4j/create-vertex!
    [schema/person-type (user-label user)]
    {schema/name-type [(:name person)]
     schema/email-address-type [(:email person)]
@@ -28,22 +28,22 @@
 (defn add-user-graph! [user]
   (let [new-user (create-user! user)
         new-person (create-person! new-user {:email (:identity user)})]
-    (graph/create-edge! new-user new-person schema/user-person-edge)))
+    (neo4j/create-edge! new-user new-person schema/user-person-edge)))
 
 (defn person-from-props [user props]
-   (graph/cypher-list (str "MATCH (root:" (graph/cypher-esc (user-label user))
+   (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
                             ":" schema/person-type
-                            " ) WHERE " (graph/cypher-props-coll props)
+                            " ) WHERE " (neo4j/cypher-props-coll props)
                             " RETURN root")))
 
 (defn person-from-id [user id]
-   (graph/cypher-list (str "MATCH (root:" (graph/cypher-esc (user-label user))
+   (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
                             ":" schema/person-type
                             " ) WHERE ID(root)= " id
                             " RETURN root")))
 
 (defn person-from-user [user]
-   (graph/cypher-list (str "MATCH (root:" (graph/cypher-esc (user-label user))
+   (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
                             ":" schema/person-type
                             " ) RETURN root")))
 
@@ -76,16 +76,16 @@
           (empty? person-from)
           (nil? (:id person-from)))
     []
-    (graph/cypher-list
+    (neo4j/cypher-list
      (str "MATCH (root:" schema/email-type
-          " " (graph/cypher-properties
+          " " (neo4j/cypher-properties
                {schema/email-sub-hash
                 (com/end-hash (:subject message))})
-          ")-[:" (graph/cypher-esc-token schema/email-from-edge)
+          ")-[:" (neo4j/cypher-esc-token schema/email-from-edge)
           "]->(f) WHERE ID (f)=" (:id person-from)
-          " AND (root." (graph/cypher-esc-token schema/email-sent)
+          " AND (root." (neo4j/cypher-esc-token schema/email-sent)
           " < (" (dt/to-ms (:time-sent message)) " + " sent-tolerance
-          ")) AND (root." (graph/cypher-esc-token schema/email-sent)
+          ")) AND (root." (neo4j/cypher-esc-token schema/email-sent)
           " > (" (dt/to-ms (:time-sent message)) " - " sent-tolerance 
           ")) RETURN root"))))
 
@@ -94,14 +94,14 @@
                  :email schema/email-address-type
                  :phone schema/phone-num-type}]
     (if (nil? (new-person (key param)))
-      nil (graph/recon-property-list! old-person (val param)
+      nil (neo4j/recon-property-list! old-person (val param)
                                       (new-person (key param)))))
-  (graph/refresh-vertex old-person))
+  (neo4j/refresh-vertex old-person))
 
 (defn add-email-link! [user email link-type person]
   (p :add-email-link
      (let [old-person (person-match user person)]
-       (graph/create-edge!
+       (neo4j/create-edge!
         email
         (if (nil? old-person)
           (p :create-person (create-person! user person))
@@ -109,11 +109,11 @@
         link-type))))
 
 (defn list-entities [entity-class]
-  (graph/get-vertices-class entity-class))
+  (neo4j/get-vertices-class entity-class))
 
 (defn expand-entity [entity properties]
   (merge
-   (map #(assoc {} % (graph/get-property entity %))
+   (map #(assoc {} % (neo4j/get-property entity %))
         properties)))
 
 (defn list-entities-full [entity-class properties]

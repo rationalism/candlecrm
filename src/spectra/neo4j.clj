@@ -1,4 +1,4 @@
-(ns spectra.graph
+(ns spectra.neo4j
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [spectra.common :as com]

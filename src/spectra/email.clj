@@ -6,7 +6,7 @@
             [spectra.database :as database]
             [spectra.datetime :as dt]
             [spectra.google :as google]
-            [spectra.graph :as graph]
+            [spectra.neo4j :as neo4j]
             [spectra.corenlp :as nlp]
             [spectra.regex :as regex]
             [spectra.schema :as schema]
@@ -311,7 +311,7 @@
 (defn create-email! [parsed-email]
   (p :create-email
      (assoc parsed-email :email-vertex
-            (graph/create-vertex!
+            (neo4j/create-vertex!
              schema/email-type
              {schema/email-received (:time-received parsed-email)
               schema/email-sent (:time-sent parsed-email)

@@ -4,7 +4,7 @@
             [environ.core :refer [env]]
             [clj-time.core :as clj-time]
             [spectra.database :as database]
-            [spectra.graph :as graph]
+            [spectra.neo4j :as neo4j]
             [spectra.regex :as regex]
             [spectra.schema :as schema]
             [cemerick.friend :as friend]
@@ -23,17 +23,17 @@
    new-user))
 
 (defn lookup-user [username]
-  (if-let [user (graph/get-vertex schema/user-type
+  (if-let [user (neo4j/get-vertex schema/user-type
                                   {schema/email-address-type username})]
     user nil))
 
 (defn get-username [user]
-  (graph/get-property user schema/email-address-type))
+  (neo4j/get-property user schema/email-address-type))
 
 (defn get-user-pwd [username]
   (let [user (lookup-user username)]
     (if user
-      {:username username :password (graph/get-property user schema/pwd-hash-type)}
+      {:username username :password (neo4j/get-property user schema/pwd-hash-type)}
       nil)))
 
 (defn get-user-obj [friend-map]
@@ -42,15 +42,15 @@
     nil))
 
 (defn list-users []
-  (graph/get-vertices-class schema/user-type))
+  (neo4j/get-vertices-class schema/user-type))
 
 (defn delete-user! [user]
-  (graph/cypher-query (str "MATCH (a)-[r*1..6]->m WHERE ID(a) = "
+  (neo4j/cypher-query (str "MATCH (a)-[r*1..6]->m WHERE ID(a) = "
                            (:id user)
                            " FOREACH(rel in r | DELETE rel) DELETE a, m")))
 
 (defn auth-user [credentials]
-  (let [user (graph/get-vertex schema/email-address-type (:username credentials))
+  (let [user (neo4j/get-vertex schema/email-address-type (:username credentials))
         unauthed [false {:flash "Invalid username or password"}]]
     (if user
       (if (= (:password credentials) (:password user))            

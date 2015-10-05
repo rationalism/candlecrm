@@ -1,11 +1,11 @@
 (ns spectra.schema-test
   (:require [clojure.test :refer :all]
-            [spectra.graph :as graph]
+            [spectra.neo4j :as neo4j]
             [spectra.schema :refer :all]
             [environ.core :refer [env]]))
 
 (defn graph-ready [f]
-  (intern 'spectra.graph '*graph* (graph/get-graph))
+  (intern 'spectra.neo4j '*graph* (neo4j/get-graph))
   (f)
   nil)
 

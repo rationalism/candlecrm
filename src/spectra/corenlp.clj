@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [spectra.common :as com]
-            [spectra.graph :as graph]
+            [spectra.neo4j :as neo4j]
             [spectra.regex :as regex]
             [loom.alg :as galg]
             [loom.graph :as loom]

@@ -1,6 +1,6 @@
 (ns spectra.schema
   (:require [clojure.java.io :as io]
-            [spectra.graph :as graph]
+            [spectra.neo4j :as neo4j]
             [environ.core :refer [env]]))
 
 (def user-type "user")
@@ -122,7 +122,7 @@
 ;    
 ;  ;; This composite index needed for fast search on multiple properties
 ;  ;; See https://github.com/orientechnologies/orientdb/issues/4862
-;  (graph/sql-command! g (str "CREATE INDEX "
+;  (neo4j/sql-command! g (str "CREATE INDEX "
 ;                             user-person-index
 ;                             " ON "
 ;                             user-owns-edge 

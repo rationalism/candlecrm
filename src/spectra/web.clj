@@ -12,7 +12,7 @@
             [spectra.contacts :as contacts]
             [spectra.email :as email]
             [spectra.google :as google]
-            [spectra.graph :as graph]
+            [spectra.neo4j :as neo4j]
             [spectra.corenlp :as nlp]
             [spectra.pages :as pages]
             [cemerick.friend :as friend]
@@ -104,7 +104,7 @@
                             :proxy true))))
 
 (defn app-init! []
-  (graph/define-graph!)
+  (neo4j/define-graph!)
   (nlp/load-pipeline!)
   (nlp/load-recurse-pipeline!)
   (ajax/start-router!)

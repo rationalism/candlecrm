@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [spectra.auth :as auth]
-            [spectra.graph :as graph]
+            [spectra.neo4j :as neo4j]
             [spectra.schema :as schema]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -66,13 +66,13 @@
              nil))))
 
 (defn lookup-token [user]
-  (graph/get-property user schema/google-token-type))
+  (neo4j/get-property user schema/google-token-type))
 
 (defn write-token! [user token]
-  (graph/set-property! user schema/google-token-type token))
+  (neo4j/set-property! user schema/google-token-type token))
 
 (defn delete-token! [user]
-  (graph/delete-property! user schema/google-token-type))
+  (neo4j/delete-property! user schema/google-token-type))
 
 (defn build-google-cred! [refresh-token]
   (doto (-> (GoogleCredential$Builder. )

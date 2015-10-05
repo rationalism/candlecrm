@@ -1,11 +1,11 @@
 (ns spectra.auth-test
   (:require [clojure.test :refer :all]
             [spectra.auth :refer :all]
-            [spectra.graph :as graph]
+            [spectra.neo4j :as neo4j]
             [spectra.schema :as schema]))
 
 (defn graph-ready [f]
-  (intern 'spectra.graph '*graph* (graph/get-graph))
+  (intern 'spectra.neo4j '*graph* (neo4j/get-graph))
   (f)
   nil)
 
@@ -16,7 +16,7 @@
 
 (deftest create-destroy-user
   (testing "Create and destroy a user, verify everything sane"
-    (def get-people (partial graph/get-vertices-coll schema/person-type))
+    (def get-people (partial neo4j/get-vertices-coll schema/person-type))
     (def test-email {schema/email-address-type test-username})
     (is (= 0 (count (get-people test-email))))
 

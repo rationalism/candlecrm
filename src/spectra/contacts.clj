@@ -4,7 +4,7 @@
             [spectra.auth :as auth]
             [spectra.database :as database]
             [spectra.google :as google]
-            [spectra.graph :as graph]
+            [spectra.neo4j :as neo4j]
             [spectra.schema :as schema]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -56,4 +56,4 @@
     (map contact-to-map)
     (map #(hash-map :props %))
     (map #(assoc % :labels (person-labels user)))
-    graph/batch-insert!))
+    neo4j/batch-insert!))
