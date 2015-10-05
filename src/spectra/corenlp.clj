@@ -153,17 +153,23 @@
           pronoun-parts) true
           :else false))
 
-(defn token-pos-map [tokens]
-  (zipmap (range 1 (inc (count tokens)))
-          (map #(.index %) tokens)))
-
-(defn tokens-hash [sent-num tokens]
-  (->> tokens
-       (map #(.index %))
-       (map str)
-       (map #(str sent-num " " %))
+(defn pos-hash [pos-list]
+  (->> pos-list
+       (map #(mapv str %))
+       (map #(str/join " " %))
        (str/join " ")
        com/sha1))
+
+(defn tokens-pos [sent-num tokens]
+  (map #(vector sent-num (.index %)) tokens))
+
+(defn token-pos-map [sent-num tokens]
+  (zipmap (->> tokens
+               count
+               inc
+               (range 1)
+               (map #(vector 1 %)))
+          (tokens-pos sent-num tokens)))
 
 (defn tokens-str [tokens]
   (str/join " " tokens))
@@ -214,7 +220,10 @@
    (map chain-graph coref)))
 
 (defn ner-node [entity sent-num]
-  (hash-map (tokens-hash sent-num(get-tokens entity))
+  (hash-map (->> entity
+                 get-tokens
+                 (tokens-pos sent-num)
+                 pos-hash)
             (.toString entity)))
 
 (defn ner-edge [entity sent-num]
@@ -251,7 +260,8 @@
   (split-map
    (zipmap
     (->> [(.-subject triple) (.-object triple)]
-         (map #(tokens-hash sent-num %)))
+         (map #(tokens-pos sent-num %))
+         (map pos-hash))
     [(.subjectLemmaGloss triple) (.objectLemmaGloss triple)])))
 
 (defn triple-edge [triple sent-num]
@@ -288,7 +298,7 @@
     (->> (get-tokens (val sent-pair))
          (map list)
          (filter pronoun?)
-         (map #(hash-map (tokens-hash (key sent-pair) %)
+         (map #(hash-map (pos-hash (tokens-pos (key sent-pair) %))
                          (.originalText (first %))))
          pronoun-graph)]))
 
