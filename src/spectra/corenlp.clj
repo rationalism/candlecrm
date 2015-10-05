@@ -80,6 +80,30 @@
   (p :run-nlp (.annotate pipeline parsed-text))
   parsed-text)
 
+(defn get-tokens [words]
+  (.get words CoreAnnotations$TokensAnnotation))
+
+(defn get-sentences [parsed-text]
+  (.get parsed-text CoreAnnotations$SentencesAnnotation))
+
+(defn get-lemma [token]
+  (.get token CoreAnnotations$LemmaAnnotation))
+
+(defn get-triples [words]
+  (.get words NaturalLogicAnnotations$RelationTriplesAnnotation))
+
+(defn get-pos [token]
+  (.get token CoreAnnotations$PartOfSpeechAnnotation))
+
+(defn entity-type [entity]
+  (.get entity CoreAnnotations$EntityTypeAnnotation))
+
+(defn entity-mentions [parsed-text]
+  (.get parsed-text CoreAnnotations$MentionsAnnotation))
+  
+(defn get-coref [parsed-text]
+  (.get parsed-text CorefCoreAnnotations$CorefChainAnnotation))
+
 (defn chain-sentences [chain]
   (->> (keys (.getMentionMap chain))
        (map #(.getSource %))
@@ -125,8 +149,7 @@
 (defn pronoun? [tokens]
   (cond
     (not= (count tokens) 1) false
-    (some #(= % (-> tokens first
-                    (.get CoreAnnotations$PartOfSpeechAnnotation)))
+    (some #(= % (-> tokens first get-pos))
           pronoun-parts) true
           :else false))
 
@@ -190,25 +213,13 @@
   (loom/merge-graphs
    (map chain-graph coref)))
 
-(defn get-tokens [words]
-  (.get words CoreAnnotations$TokensAnnotation))
-
-(defn get-sentences [parsed-text]
-  (.get parsed-text CoreAnnotations$SentencesAnnotation))
-
-(defn get-lemma [token]
-  (.get token CoreAnnotations$LemmaAnnotation))
-
-(defn get-triples [words]
-  (.get words NaturalLogicAnnotations$RelationTriplesAnnotation))
-
 (defn ner-node [entity sent-num]
   (hash-map (tokens-hash sent-num(get-tokens entity))
             (.toString entity)))
 
 (defn ner-edge [entity sent-num]
   (vector (ner-node entity sent-num)
-          (as-> (.get entity CoreAnnotations$EntityTypeAnnotation) $
+          (as-> (entity-type entity) $
             (hash-map (com/sha1 $) $))
             "!type!"))
 
@@ -271,8 +282,7 @@
   (loom/merge-graphs
    [(->> (get-triples (val sent-pair))
          (triples-graph (key sent-pair)))
-    (->> (.get (val sent-pair)
-               CoreAnnotations$MentionsAnnotation)
+    (->> (entity-mentions (val sent-pair))
          (map #(ner-graph % (key sent-pair)))
          loom/merge-graphs)
     (->> (get-tokens (val sent-pair))
@@ -362,7 +372,7 @@
     (env :coreference)
     (vector
      (-> parsed-text
-         (.get CorefCoreAnnotations$CorefChainAnnotation)
+         get-coref
          vals
          coref-graph))
     (env :coreference)
