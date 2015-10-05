@@ -61,9 +61,6 @@
 (defn sort-nodes [g]
   (sort-by count > (graph/nodes g)))
 
-(defn reverse-edges [edges]
-  (map #(assoc % 1 (% 0) 0 (% 1)) edges))
-
 (defn replace-node [g old-node new-node]
   (-> g
       (add-nodes [new-node])
@@ -77,6 +74,13 @@
   (-> (graph/weighted-digraph)
       (add-nodes nodes)
       (add-edges edges)))
+
+(defn reverse-edges [edges]
+  (map #(assoc % 1 (% 0) 0 (% 1)) edges))
+
+(defn reverse-graph [g]
+   (build-graph (nodes g)
+                (reverse-edges (weighted-edges g))))
 
 (defn subgraphs [g]
   (->> (galg/connected-components g)
@@ -93,10 +97,7 @@
        count))
 
 (defn count-upstream [g node]
-  (count-downstream
-   (build-graph (nodes g)
-                (reverse-edges (weighted-edges g)))
-   node))
+  (count-downstream (reverse-graph g) node))
 
 (defn display-graph [g]
   (gviz/view g))
