@@ -74,9 +74,9 @@
       (remove-nodes [old-node])))
 
 (defn build-graph [nodes edges]
-  (as-> (graph/weighted-digraph) $
-    (apply graph/add-nodes $ nodes)
-    (apply graph/add-edges $ edges)))
+  (-> (graph/weighted-digraph)
+      (add-nodes nodes)
+      (add-edges edges)))
 
 (defn subgraphs [g]
   (->> (galg/connected-components g)
