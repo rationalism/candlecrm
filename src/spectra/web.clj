@@ -106,6 +106,7 @@
 (defn app-init! []
   (graph/define-graph!)
   (nlp/load-pipeline!)
+  (nlp/load-recurse-pipeline!)
   (ajax/start-router!)
   (email/define-imap-lookup)
   (nrepl-server/start-server

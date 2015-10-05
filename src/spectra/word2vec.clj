@@ -14,9 +14,6 @@
             Word2Vec$Builder]
            [java.io InputStream]))
 
-(def sentence-annotators ["tokenize" "ssplit"])
-(def token-annotators ["tokenize" "ssplit" "pos" "lemma"])
-
 ;; Description of parameter meanings at
 ;; http://deeplearning4j.org/word2vec.html
 (def batch-size 1000)
@@ -50,7 +47,7 @@
   (->> filename
        slurp
        (corenlp/run-nlp-simple (corenlp/make-default-pipeline
-                                token-annotators))
+                                corenlp/sentence-annotators))
        corenlp/get-sentences
        corenlp/sentences-text
        (->SentenceLoader (atom 0))))
@@ -85,7 +82,7 @@
 (defn make-token-factory []
   (->TokenStoreFactory
    (corenlp/make-default-pipeline 
-    token-annotators)))
+    corenlp/token-annotators)))
 
 (defn make-model [filename]
   (def vec-model

@@ -4,6 +4,7 @@
             [spectra.common :as com]
             [spectra.graph :as graph]
             [spectra.regex :as regex]
+            [loom.alg :as galg]
             [loom.graph :as loom]
             [loom.io :as gviz]
             [environ.core :refer [env]]
@@ -23,12 +24,20 @@
             CorefCoreAnnotations$CorefChainAnnotation]
            [java.util Properties]))
 
+(def sentence-annotators ["tokenize" "ssplit"])
+(def token-annotators ["tokenize" "ssplit" "pos" "lemma"])
 (def ner-annotators
   (concat ["tokenize" "ssplit" "pos" "lemma" "ner"]
           (if (env :coreference) ["parse" "dcoref"] [])
           ["depparse" "natlog" "openie" "entitymentions"]))
+(def recurse-annotators
+  (concat token-annotators ["depparse" "natlog" "openie"]))
 
-(def ner-model-file "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz")
+(def ner-model-dir "edu/stanford/nlp/models/ner/")
+(def ner-models
+  (->> ["english.all.3class.distsim.crf.ser.gz"
+        "english.muc.7class.distsim.crf.ser.gz"]
+       (map #(str ner-model-dir %))))
 
 ;; Shift model supposed to be much faster, but takes much longer to load
 (def shift-parse-model "edu/stanford/nlp/models/srparser/englishSR.ser.gz")
@@ -55,13 +64,23 @@
      (.setProperty "annotators" (str/join ", " annotators))
      (.setProperty "ner.applyNumericClassifiers" "false")
      (.setProperty "ner.useSUTime" "false")
-     (.setProperty "ner.model" ner-model-file)
+     (.setProperty "ner.model" (str/join "," ner-models))
      (.setProperty "parse.model" parse-model)
      (.setProperty "openie.triple.all_nominals" "true"))))
 
 (defn load-pipeline! []
   (def ^:dynamic *pipeline*
     (make-pipeline ner-annotators pcfg-parse-model)))
+
+(defn load-recurse-pipeline! []
+  (def ^:dynamic *recurse-pipeline*
+    (make-pipeline recurse-annotators pcfg-parse-model)))
+
+(defn run-nlp-simple [pipeline text]
+  ;; Global var needed for mutating Java method
+  (def parsed-text (Annotation. text))
+  (p :run-nlp (.annotate pipeline parsed-text))
+  parsed-text)
 
 (defn chain-sentences [chain]
   (->> (keys (.getMentionMap chain))
@@ -113,6 +132,10 @@
           pronoun-parts) true
           :else false))
 
+(defn token-pos-map [tokens]
+  (zipmap (range 1 (inc (count tokens)))
+          (map #(.index %) tokens)))
+
 (defn tokens-hash [sent-num tokens]
   (->> tokens
        (map #(.index %))
@@ -120,6 +143,9 @@
        (map #(str sent-num " " %))
        (str/join " ")
        com/sha1))
+
+(defn tokens-str [tokens]
+  (str/join " " tokens))
 
 (defn mention-hash [mention]
   (->> (range (.startIndex mention)
@@ -163,6 +189,10 @@
     (apply loom/add-nodes $ nodes)
     (apply loom/add-edges $ edges)))
 
+(defn subgraphs [g]
+  (->> (galg/connected-components g)
+       (map #(loom/subgraph g %))))
+
 (defn chain-graph [chain]
   (build-graph (chain-nodes chain)
                (chain-edges chain)))
@@ -180,6 +210,9 @@
 (defn get-lemma [token]
   (.get token CoreAnnotations$LemmaAnnotation))
 
+(defn get-triples [words]
+  (.get words NaturalLogicAnnotations$RelationTriplesAnnotation))
+
 (defn ner-node [entity sent-num]
   (hash-map (tokens-hash sent-num(get-tokens entity))
             (.toString entity)))
@@ -193,6 +226,35 @@
 (defn ner-graph [entity sent-num]
   (build-graph (list (ner-node entity sent-num))
                (list (ner-edge entity sent-num))))
+
+(defn sort-nodes [g]
+  (sort-by count > (loom/nodes g)))
+
+(defn replace-val [map f]
+  (assoc map (first (keys map))
+         (f (first (vals map)))))
+
+(defn reverse-edges [edges]
+  (map #(vector (nth 1 %)
+                (nth 0 %)
+                (nth 2 %))
+       edges))
+
+(defn recursive-triples [triples]
+  (->> triples
+       tokens-str
+       (run-nlp-simple *recurse-pipeline*)
+       get-sentences
+       first
+       get-triples))
+
+(defn breakup-node [nodes]
+  (->> nodes
+       sort-nodes
+       (map #(hash-map % (tokens-str %)))
+       (map #(replace-val % recursive-triples))
+       (filter #(-> % vals first empty? not))
+       first))
 
 (defn triple-nodes [triple sent-num]
   (split-map
@@ -210,6 +272,11 @@
   (build-graph (triple-nodes triple sent-num)
                (list (triple-edge triple sent-num))))
 
+(defn triples-graph [sent-num triples]
+  (->> triples
+       (map #(triple-graph % sent-num))
+       (apply loom/weighted-digraph)))
+
 (defn pronoun-node []
   (as-> "!PRONOUN!" $
     (hash-map (com/sha1 $) $)))
@@ -222,10 +289,8 @@
 
 (defn sentence-graph [sent-pair]
   (loom/weighted-digraph
-   (->> (.get (val sent-pair)
-              NaturalLogicAnnotations$RelationTriplesAnnotation)
-        (map #(triple-graph % (key sent-pair)))
-        (apply loom/weighted-digraph))
+   (->> (get-triples (val sent-pair))
+        (triples-graph (key sent-pair)))
    (->> (.get (val sent-pair)
               CoreAnnotations$MentionsAnnotation)
         (map #(ner-graph % (key sent-pair)))
@@ -333,18 +398,6 @@
          vals
          coref-graph))))
 
-(defn run-nlp-simple [pipeline text]
-  ;; Global var needed for mutating Java method
-  (def parsed-text (Annotation. text))
-  (p :run-nlp (.annotate pipeline parsed-text))
-  parsed-text)
-  
-(defn run-nlp [pipeline text]
-  (cond-> (run-nlp-simple pipeline text)
-    true nlp-graph
-    (env :coreference) rewrite-pronouns
-    true strip-graph))
-
 (defn graph-entities [g]
   (if-let [entity-map
            (->> g loom/edges
@@ -359,6 +412,12 @@
        (map regex/parse-name-email)
        distinct))
 
+(defn run-nlp [pipeline text]
+  (cond-> (run-nlp-simple pipeline text)
+    true nlp-graph
+    (env :coreference) rewrite-pronouns
+    true strip-graph))
+
 (defn triple-string [triple]
   (str/join "\t"
             [(.confidence triple)
@@ -370,3 +429,6 @@
   (->> triples
        (map triple-string)
        (map #(print (str % "\n")))))
+
+(defn display-graph [graph]
+  (gviz/view graph))
