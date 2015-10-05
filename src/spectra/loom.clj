@@ -70,6 +70,14 @@
                       (map #(assoc % 1 new-node))))
       (remove-nodes [old-node])))
 
+(defn split-node [g old-node new-node-up new-node-down]
+  (-> g
+      (add-edges (->> (out-edges g old-node)
+                      (map #(assoc % 0 new-node-down))))
+      (add-edges (->> (in-edges g old-node)
+                      (map #(assoc % 1 new-node-up))))
+      (remove-nodes [old-node])))  
+
 (defn build-graph [nodes edges]
   (-> (graph/weighted-digraph)
       (add-nodes nodes)
