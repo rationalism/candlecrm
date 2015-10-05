@@ -2,11 +2,9 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [spectra.common :as com]
+            [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra.regex :as regex]
-            [loom.alg :as galg]
-            [loom.graph :as loom]
-            [loom.io :as gviz]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -184,22 +182,13 @@
        (filter #(not= (nth % 0)
                       (nth % 1)))))
 
-(defn build-graph [nodes edges]
-  (as-> (loom/weighted-digraph) $
-    (apply loom/add-nodes $ nodes)
-    (apply loom/add-edges $ edges)))
-
-(defn subgraphs [g]
-  (->> (galg/connected-components g)
-       (map #(loom/subgraph g %))))
-
 (defn chain-graph [chain]
-  (build-graph (chain-nodes chain)
-               (chain-edges chain)))
+  (loom/build-graph (chain-nodes chain)
+                    (chain-edges chain)))
 
 (defn coref-graph [coref]
-  (apply loom/weighted-digraph
-         (map chain-graph coref)))
+  (loom/merge-graphs
+   (map chain-graph coref)))
 
 (defn get-tokens [words]
   (.get words CoreAnnotations$TokensAnnotation))
@@ -224,21 +213,12 @@
             "!type!"))
 
 (defn ner-graph [entity sent-num]
-  (build-graph (list (ner-node entity sent-num))
-               (list (ner-edge entity sent-num))))
-
-(defn sort-nodes [g]
-  (sort-by count > (loom/nodes g)))
+  (loom/build-graph (list (ner-node entity sent-num))
+                    (list (ner-edge entity sent-num))))
 
 (defn replace-val [map f]
   (assoc map (first (keys map))
          (f (first (vals map)))))
-
-(defn reverse-edges [edges]
-  (map #(vector (nth 1 %)
-                (nth 0 %)
-                (nth 2 %))
-       edges))
 
 (defn recursive-triples [triples]
   (->> triples
@@ -250,7 +230,7 @@
 
 (defn breakup-node [nodes]
   (->> nodes
-       sort-nodes
+       loom/sort-nodes
        (map #(hash-map % (tokens-str %)))
        (map #(replace-val % recursive-triples))
        (filter #(-> % vals first empty? not))
@@ -269,13 +249,13 @@
             (.relationLemmaGloss triple))))
 
 (defn triple-graph [triple sent-num]
-  (build-graph (triple-nodes triple sent-num)
-               (list (triple-edge triple sent-num))))
+  (loom/build-graph (triple-nodes triple sent-num)
+                    (list (triple-edge triple sent-num))))
 
 (defn triples-graph [sent-num triples]
   (->> triples
        (map #(triple-graph % sent-num))
-       (apply loom/weighted-digraph)))
+       loom/merge-graphs))
 
 (defn pronoun-node []
   (as-> "!PRONOUN!" $
@@ -285,22 +265,22 @@
   [node (pronoun-node) "!type!"])
 
 (defn pronoun-graph [nodes]
-  (build-graph nodes (map pronoun-edge nodes)))
+  (loom/build-graph nodes (map pronoun-edge nodes)))
 
 (defn sentence-graph [sent-pair]
-  (loom/weighted-digraph
-   (->> (get-triples (val sent-pair))
-        (triples-graph (key sent-pair)))
-   (->> (.get (val sent-pair)
-              CoreAnnotations$MentionsAnnotation)
-        (map #(ner-graph % (key sent-pair)))
-        (apply loom/weighted-digraph))
-   (->> (get-tokens (val sent-pair))
-        (map list)
-        (filter pronoun?)
-        (map #(hash-map (tokens-hash (key sent-pair) %)
-                        (.originalText (first %))))
-        pronoun-graph)))
+  (loom/merge-graphs
+   [(->> (get-triples (val sent-pair))
+         (triples-graph (key sent-pair)))
+    (->> (.get (val sent-pair)
+               CoreAnnotations$MentionsAnnotation)
+         (map #(ner-graph % (key sent-pair)))
+         loom/merge-graphs)
+    (->> (get-tokens (val sent-pair))
+         (map list)
+         (filter pronoun?)
+         (map #(hash-map (tokens-hash (key sent-pair) %)
+                         (.originalText (first %))))
+         pronoun-graph)]))
 
 (defn shorten-node [node]
   (hash-map (subs (key node) 0 5)
@@ -308,9 +288,6 @@
 
 (defn shorten-nodes [nodes]
   (map #(shorten-node (first %)) nodes))
-
-(defn weighted-edge [g edge]
-  (conj edge (loom/weight g edge)))
 
 (defn shorten-edge [edge]
   (vector (-> edge (nth 0) first shorten-node)
@@ -326,43 +303,34 @@
           (-> edge (nth 2))))
 
 (defn strip-graph [g]
-  (build-graph
+  (loom/build-graph
    (->> g loom/nodes strip-nodes)
-   (->> g loom/edges
-        (map #(weighted-edge g %))
+   (->> g loom/weighted-edges
         (map strip-edge))))
 
-(defn out-edges [g node]
-  (->> (loom/out-edges g node)
-       (map #(weighted-edge g %))))
-  
 (defn referenced? [g pronoun]
-  (->> (out-edges g pronoun)
+  (->> (loom/out-edges g pronoun)
        (filter #(= "!is!" (nth % 2)))
        count
        (= 1)))
 
-(defn up-nodes [g node]
-  (->> (loom/in-edges g node)
-       (map first)))
-
 (defn lonely? [g pronoun]
-  (as-> (out-edges g pronoun) $
+  (as-> (loom/out-edges g pronoun) $
     (and (= (count $) 1)
          (= "!type!"
             (nth (first $) 2)))))
 
 (defn find-pronouns [g]
-  (->> (up-nodes g (pronoun-node))
+  (->> (loom/up-nodes g (pronoun-node))
        (filter #(referenced? g %))))
 
 (defn find-referent [g pronoun]
-  (->> (out-edges g pronoun)
+  (->> (loom/out-edges g pronoun)
        (filter #(= "!is!" (nth % 2)))
        first second))
 
 (defn rewrite-edges [g pronoun]
-  (->> (out-edges g pronoun)
+  (->> (loom/out-edges g pronoun)
        (filter #(not= "!is!" (nth % 2)))
        (filter #(not= "!type!" (nth % 2)))
        (map #(com/slice 1 3 %))
@@ -371,14 +339,14 @@
 
 (defn rewrite-pronouns [g]
   (as-> g $
-    (apply loom/add-edges $
+    (loom/add-edges $
            (->> g find-pronouns
                 (map #(rewrite-edges g %))
                 (apply concat)))
-    (apply loom/remove-nodes $
+    (loom/remove-nodes $
            (find-pronouns g))
-    (apply loom/remove-nodes $
-           (->> (up-nodes g (pronoun-node))
+    (loom/remove-nodes $
+           (->> (loom/up-nodes g (pronoun-node))
                 (filter #(lonely? g %))))))
 
 (defn sentences-text [sentences]
@@ -390,25 +358,27 @@
            get-sentences
            number-items
            (map sentence-graph)
-           (apply loom/weighted-digraph))
+           loom/merge-graphs)
     (env :coreference)
-    (loom/weighted-digraph
+    (vector
      (-> parsed-text
          (.get CorefCoreAnnotations$CorefChainAnnotation)
          vals
-         coref-graph))))
+         coref-graph))
+    (env :coreference)
+    loom/merge-graphs))
 
 (defn graph-entities [g]
   (if-let [entity-map
-           (->> g loom/edges
-                (map #(weighted-edge g %))
+           (->> g loom/weighted-edges
                 (filter #(= "!type!" (nth % 2)))
                 (map #(hash-map (nth % 1) (list (nth % 0))))
                 (apply merge-with concat))]
     entity-map {}))
 
 (defn nlp-people [entities]
-  (->> (concat (entities person-key) (entities organization-key))
+  (->> (concat (entities person-key)
+               (entities organization-key))
        (map regex/parse-name-email)
        distinct))
 
@@ -429,6 +399,3 @@
   (->> triples
        (map triple-string)
        (map #(print (str % "\n")))))
-
-(defn display-graph [graph]
-  (gviz/view graph))
