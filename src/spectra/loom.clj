@@ -27,6 +27,20 @@
   (->> (graph/in-edges g node)
        (map #(weighted-edge g %))))
 
+(defn fan-in [g node]
+  (count (graph/in-edges g node)))
+
+(defn fan-out [g node]
+  (count (graph/in-edges g node)))
+
+(defn top-nodes [g]
+  (filter #(= 0 (fan-in g %))
+          (nodes g)))
+
+(defn bottom-nodes [g]
+  (filter #(= 0 (fan-out g %))
+          (nodes g)))
+       
 (defn add-nodes [g nodes]
   (apply graph/add-nodes g nodes))
 
@@ -48,10 +62,7 @@
   (sort-by count > (graph/nodes g)))
 
 (defn reverse-edges [edges]
-  (map #(vector (nth 1 %)
-                (nth 0 %)
-                (nth 2 %))
-       edges))
+  (map #(assoc % 1 (% 0) 0 (% 1)) edges))
 
 (defn replace-node [g old-node new-node]
   (-> g
@@ -73,6 +84,19 @@
 
 (defn merge-graphs [graphs]
   (apply graph/weighted-digraph graphs))
+
+(defn count-downstream [g node]
+  (->> (galg/bf-span g node)
+       vals
+       (apply concat)
+       distinct
+       count))
+
+(defn count-upstream [g node]
+  (count-downstream
+   (build-graph (nodes g)
+                (reverse-edges (weighted-edges g)))
+   node))
 
 (defn display-graph [g]
   (gviz/view g))
