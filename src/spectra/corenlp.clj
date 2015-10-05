@@ -300,17 +300,17 @@
   (map #(shorten-node (first %)) nodes))
 
 (defn shorten-edge [edge]
-  (vector (-> edge (nth 0) first shorten-node)
-          (-> edge (nth 1) first shorten-node)
-          (-> edge (nth 2))))
+  (-> edge
+      (assoc 0 (shorten-node (nth edge 0)))
+      (assoc 1 (shorten-node (nth edge 1)))))
 
 (defn strip-nodes [nodes]
   (->> nodes (apply merge) vals))
 
 (defn strip-edge [edge]
-  (vector (-> edge (nth 0) vals first)
-          (-> edge (nth 1) vals first)
-          (-> edge (nth 2))))
+  (-> edge
+      (assoc 0 (first (vals (nth edge 0))))
+      (assoc 1 (first (vals (nth edge 1))))))
 
 (defn strip-graph [g]
   (loom/build-graph

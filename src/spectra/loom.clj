@@ -27,6 +27,9 @@
   (->> (graph/in-edges g node)
        (map #(weighted-edge g %))))
 
+(defn add-nodes [g nodes]
+  (apply graph/add-nodes g nodes))
+
 (defn add-edges [g edges]
   (apply graph/add-edges g edges))
 
@@ -49,6 +52,15 @@
                 (nth 0 %)
                 (nth 2 %))
        edges))
+
+(defn replace-node [g old-node new-node]
+  (-> g
+      (add-nodes [new-node])
+      (add-edges (->> (out-edges g old-node)
+                      (map #(assoc % 0 new-node))))
+      (add-edges (->> (in-edges g old-node)
+                      (map #(assoc % 1 new-node))))
+      (remove-nodes [old-node])))
 
 (defn build-graph [nodes edges]
   (as-> (graph/weighted-digraph) $
