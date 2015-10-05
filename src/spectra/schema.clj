@@ -60,7 +60,7 @@
   (.createKeyIndex var-type var-class params))
 
 ;; TODO: Get this into a config file so it's cleaner/easier to specify
-;; Potentially useful notes: https://groups.google.com/forum/#!msg/orient-database/Y0QJiXk7d1I/uXEv-paQ9wUJ
+;; Potentially useful notes: https://groups.google.com/forum/#!msg/orient-recon/Y0QJiXk7d1I/uXEv-paQ9wUJ
 ;(defn init-user-schema!
 ;  "Schema manipulation is non-transactional, so remember to 
 ;  use a non-transactional graph instance here"

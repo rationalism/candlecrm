@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [spectra.auth :as auth]
-            [spectra.database :as database]
+            [spectra.recon :as recon]
             [spectra.email :as email]
             [spectra.google :as google]
             [spectra.html :as html]
@@ -33,7 +33,7 @@
   (if-let [user (auth/get-user-obj (friend/identity req))]
     (html/base-template
      (html/user-welcome (:flash req) (auth/get-username user))
-     (-> user database/person-from-user
+     (-> user recon/person-from-user
          people-table
          html/people-table)
      (html/user-footer))
@@ -59,7 +59,7 @@
 
 (defn show-person [req id]
   (if-let [user (auth/get-user-obj (friend/identity req))]
-    (if-let [person (-> user (database/person-from-id id) first)]
+    (if-let [person (-> user (recon/person-from-id id) first)]
       (html/base-template
        (html/show-person (-> person :data :name)
                          (-> person :data)))

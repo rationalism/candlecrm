@@ -3,7 +3,7 @@
             [clojure.string :as str]
             [spectra.auth :as auth]
             [spectra.common :as com]
-            [spectra.database :as database]
+            [spectra.recon :as recon]
             [spectra.datetime :as dt]
             [spectra.google :as google]
             [spectra.neo4j :as neo4j]
@@ -296,7 +296,7 @@
 (defn from-lookup [message user]
   (p :from-lookup
      (assoc message :from-database
-             (database/person-match
+             (recon/person-match
               user (:from message)))))
 
 (defn already-found? [message]
@@ -305,7 +305,7 @@
        (if (or (nil? from) (empty? from))
          false
          (not (empty?
-               (database/lookup-old-email
+               (recon/lookup-old-email
                 message from)))))))
 
 (defn create-email! [parsed-email]
@@ -322,7 +322,7 @@
 (defn create-link [parsed-email user]
   (p :create-link
      (assoc parsed-email :link
-            (partial database/add-email-link!
+            (partial recon/add-email-link!
                      user (:email-vertex parsed-email)))))
 
 ;; TODO: Replace this with something more consistent

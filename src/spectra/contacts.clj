@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [spectra.auth :as auth]
-            [spectra.database :as database]
+            [spectra.recon :as recon]
             [spectra.google :as google]
             [spectra.neo4j :as neo4j]
             [spectra.schema :as schema]
@@ -49,7 +49,7 @@
 
 (defn person-labels [user]
   [schema/person-type
-   (database/user-label user)])
+   (recon/user-label user)])
   
 (defn batch-insert! [user contacts]
   (->> contacts 

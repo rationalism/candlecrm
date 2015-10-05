@@ -3,7 +3,7 @@
             [clojure.string :as str]
             [environ.core :refer [env]]
             [clj-time.core :as clj-time]
-            [spectra.database :as database]
+            [spectra.recon :as recon]
             [spectra.neo4j :as neo4j]
             [spectra.regex :as regex]
             [spectra.schema :as schema]
@@ -19,7 +19,7 @@
         (-> (dissoc user-data :admin)
             (assoc :identity username
                    :password (creds/hash-bcrypt password)))]
-   (database/add-user-graph! new-user)
+   (recon/add-user-graph! new-user)
    new-user))
 
 (defn lookup-user [username]
