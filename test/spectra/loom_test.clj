@@ -16,3 +16,16 @@
     (dotimes [i 7]
       (is (= (nth up-counts i)
              (count-upstream g (nth test-nodes i)))))))
+
+(deftest replacement
+  (testing "Replacing a graph node"
+    (def g (build-graph test-nodes test-edges))
+    (is (= test-nodes
+           (sort (nodes g))))
+    (is (= test-edges
+           (sort (edges g))))
+    (def g (replace-node g 3 42))
+    (is (= '(1 2 4 5 6 7 42)
+           (sort (nodes g))))
+    (is (= '([1 2] [1 42] [2 4] [6 7] [42 5] [42 6])
+           (sort (edges g))))))
