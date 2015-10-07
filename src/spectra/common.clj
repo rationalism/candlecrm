@@ -62,3 +62,9 @@
 (defn end-hash [text]
   (-> text shorten sha1))
 
+(defn compose-maps [a b]
+  (zipmap (keys a)
+          (->> (keys a) (map a) (map b))))
+
+(defn debug [x]
+  (prn x) x)

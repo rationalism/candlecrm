@@ -15,7 +15,9 @@
             CoreAnnotations$EntityTypeAnnotation
             CoreAnnotations$TokensAnnotation
             CoreAnnotations$PartOfSpeechAnnotation
-            CoreAnnotations$LemmaAnnotation]
+            CoreAnnotations$LemmaAnnotation
+            CoreAnnotations$TrueCaseTextAnnotation
+            CoreLabel]
            [edu.stanford.nlp.naturalli
             NaturalLogicAnnotations$RelationTriplesAnnotation]
            [edu.stanford.nlp.dcoref
@@ -30,6 +32,8 @@
           ["depparse" "natlog" "openie" "entitymentions"]))
 (def recurse-annotators
   (concat token-annotators ["depparse" "natlog" "openie"]))
+(def truecase-annotators
+  (concat token-annotators ["truecase"]))
 
 (def ner-model-dir "edu/stanford/nlp/models/ner/")
 (def ner-models
@@ -70,10 +74,6 @@
   (def ^:dynamic *pipeline*
     (make-pipeline ner-annotators pcfg-parse-model)))
 
-(defn load-recurse-pipeline! []
-  (def ^:dynamic *recurse-pipeline*
-    (make-pipeline recurse-annotators pcfg-parse-model)))
-
 (defn run-nlp-simple [pipeline text]
   ;; Global var needed for mutating Java method
   (def parsed-text (Annotation. text))
@@ -103,6 +103,9 @@
   
 (defn get-coref [parsed-text]
   (.get parsed-text CorefCoreAnnotations$CorefChainAnnotation))
+
+(defn true-case [token]
+  (.get token CoreAnnotations$TrueCaseTextAnnotation))
 
 (defn chain-sentences [chain]
   (->> (keys (.getMentionMap chain))
@@ -163,16 +166,17 @@
 (defn tokens-pos [sent-num tokens]
   (map #(vector sent-num (.index %)) tokens))
 
-(defn token-pos-map [sent-num tokens]
+(defn tokens-pos-map [sent-num tokens]
   (zipmap (->> tokens
                count
                inc
                (range 1)
-               (map #(vector 1 %)))
+               (map #(vector sent-num %)))
           (tokens-pos sent-num tokens)))
 
 (defn tokens-str [tokens]
-  (str/join " " tokens))
+  (->> (map #(.originalText %) tokens)
+       (str/join " ")))
 
 (defn mention-hash [mention]
   (->> (range (.startIndex mention)
@@ -183,8 +187,7 @@
        com/sha1))
 
 (defn mention-nodes [nodes]
-  (zipmap (map mention-hash nodes)
-          (map #(.mentionSpan %) nodes)))
+  (map #(.mentionSpan %) nodes))
 
 (defn filter-singles [nodes]
   (if (< (count nodes) 2)
@@ -197,12 +200,11 @@
        (map #(into '() %))
        (apply concat)
        mention-nodes
-       split-map
        filter-singles))
 
 (defn root-node [chain]
   (as-> (.getRepresentativeMention chain) $
-    (hash-map (mention-hash $) (.mentionSpan $))))
+    (.mentionSpan $)))
 
 (defn chain-edges [chain]
   (->> chain
@@ -219,64 +221,174 @@
   (loom/merge-graphs
    (map chain-graph coref)))
 
-(defn ner-node [entity sent-num]
-  (hash-map (->> entity
-                 get-tokens
-                 (tokens-pos sent-num)
-                 pos-hash)
-            (.toString entity)))
+(defn ner-node [entity]
+  (get-tokens entity))
 
-(defn ner-edge [entity sent-num]
-  (vector (ner-node entity sent-num)
-          (as-> (entity-type entity) $
-            (hash-map (com/sha1 $) $))
-            "!type!"))
+(defn ner-edge [entity]
+  (vector (ner-node entity)
+          (entity-type entity)
+          "!type!"))
 
-(defn ner-graph [entity sent-num]
-  (loom/build-graph (list (ner-node entity sent-num))
-                    (list (ner-edge entity sent-num))))
+(defn ner-graph [entity]
+  (loom/build-graph (list (ner-node entity))
+                    (list (ner-edge entity))))
+
+(defn triple-nodes [triple]
+  [(.-subject triple) (.-object triple)])
+
+(defn triple-edge [triple]
+  (assoc (triple-nodes triple)
+         2 (.relationLemmaGloss triple)))
+
+(defn triple-graph [triple]
+  (loom/build-graph (triple-nodes triple)
+                    (list (triple-edge triple))))
+
+(defn triples-graph [triples]
+  (->> triples
+       (map #(triple-graph %))
+       loom/merge-graphs))
 
 (defn replace-val [map f]
   (assoc map (first (keys map))
          (f (first (vals map)))))
 
-(defn recursive-triples [triples]
-  (->> triples
+(defn attach-pos-map [sent-num tokens g]
+  (loom/attach-all
+   g (loom/nodes g)
+   (tokens-pos-map sent-num tokens)
+   "!pos-map!"))
+
+(defn recursive-graph [sent-num tokens triples]
+  (if (empty? triples)
+    nil
+    (->> triples
+         triples-graph
+         (attach-pos-map sent-num tokens))))
+  
+(defn recursive-triples [sent-num tokens]
+  (->> tokens
        tokens-str
-       (run-nlp-simple *recurse-pipeline*)
+       (run-nlp-simple *pipeline*)
        get-sentences
        first
-       get-triples))
+       get-triples
+       (recursive-graph sent-num tokens)))
 
-(defn breakup-node [nodes]
-  (->> nodes
-       loom/sort-nodes
-       (map #(hash-map % (tokens-str %)))
-       (map #(replace-val % recursive-triples))
-       (filter #(-> % vals first empty? not))
+(defn scanned? [g node]
+  (-> (loom/labeled-edges g node "!scanned!")
+      empty? not))
+
+(defn tokens? [tokens]
+  (every? identity (map #(= CoreLabel (type %)) tokens)))
+
+(defn pos-map-node [g node]
+  (->> (loom/labeled-edges g node "!pos-map!")
+       (map #(nth % 1))
        first))
 
-(defn triple-nodes [triple sent-num]
-  (split-map
-   (zipmap
-    (->> [(.-subject triple) (.-object triple)]
-         (map #(tokens-pos sent-num %))
-         (map pos-hash))
-    [(.subjectLemmaGloss triple) (.objectLemmaGloss triple)])))
+(defn pos-map-only [g]
+  (pos-map-node g (first (loom/nodes g))))
+  
+(defn node-hash [g node sent-num]
+  (if-let [pos-map (pos-map-node g node)]
+    (->> node
+         (tokens-pos sent-num)
+         (map #(pos-map %))
+         pos-hash)
+    (pos-hash (tokens-pos sent-num node))))
 
-(defn triple-edge [triple sent-num]
-  (as-> (triple-nodes triple sent-num) $
-    (vector (nth $ 0) (nth $ 1)
-            (.relationLemmaGloss triple))))
+(defn find-dupes [g sent-num]
+  (->> (loom/nodes g)
+       (filter tokens?)
+       (group-by #(node-hash g % sent-num))
+       vals
+       (filter #(> (count %) 1))))
 
-(defn triple-graph [triple sent-num]
-  (loom/build-graph (triple-nodes triple sent-num)
-                    (list (triple-edge triple sent-num))))
+(defn remove-dupes [g dupes]
+  (as-> g $
+    (loom/remove-edges
+     $ (->> dupes
+            rest
+            (map #(loom/labeled-edges g % "!pos-map!"))
+            (apply concat)))
+    (reduce (fn [a b]
+              (loom/replace-node
+               a b (first dupes)))
+            $ (rest dupes))))
 
-(defn triples-graph [sent-num triples]
-  (->> triples
-       (map #(triple-graph % sent-num))
-       loom/merge-graphs))
+(defn dedup-graph [g sent-num]
+  (if-let [dupes (find-dupes g sent-num)]
+    (reduce remove-dupes g dupes) g))
+
+(declare edit-graph breakup-node)
+
+(defn edit-graph [g sent-num edits]
+  (cond
+    (empty? edits) g
+    (-> edits first vals first nil? not)
+    (let [new-graph (-> edits first vals first)
+          old-node (-> edits first keys first)]
+      #(breakup-node 
+        (-> (if-let [pos-map (pos-map-node g old-node)]
+              (as-> new-graph $
+                (loom/replace-node
+                 $ (pos-map-only $)
+                 (com/compose-maps (pos-map-only $) pos-map)))
+              new-graph)
+            vector
+            (conj (loom/remove-edges
+                   g (loom/labeled-edges
+                      g old-node "!pos-map!")))
+            loom/merge-graphs
+            (loom/replace-node
+             old-node
+             (->> (loom/nodes new-graph)
+                  (filter tokens?)
+                  (sort-by (fn [node]
+                             (loom/count-downstream new-graph node))
+                           >)
+                  first))
+            (dedup-graph sent-num))
+        sent-num))
+    :else #(breakup-node
+            (reduce
+             (fn [gr edit]
+               (loom/attach-all
+                gr (vector (first (keys edit)))
+                "yes" "!scanned!"))
+             g (take-while (fn [edit]
+                             (-> edit vals first nil?))
+                           edits))
+            sent-num)))
+
+(defn breakup-node [g sent-num]
+  #(edit-graph
+    g sent-num
+    (->> (loom/nodes g)
+         (filter tokens?)
+         (filter (fn [x] (not (scanned? g x))))
+         (filter (fn [x] (> (count x) 1)))
+         loom/sort-nodes
+         (map (fn [x] (hash-map x (recursive-triples
+                                   sent-num x)))))))
+
+(defn recursion-cleanup [g]
+  (as-> g $
+    (loom/remove-edges-label $ "!scanned!")
+    (loom/remove-edges-label $ "!pos-map!")
+    (loom/remove-nodes $ (loom/loners $))))
+
+(defn stringify-node [node]
+  (if (tokens? node)
+    (tokens-str node) node))
+
+(defn stringify-graph [g]
+  (loom/build-graph
+   (map stringify-node (loom/nodes g))
+   (->> (loom/weighted-edges g)
+        (map #(assoc % 0 (stringify-node (nth % 0))))
+        (map #(assoc % 1 (stringify-node (nth % 1)))))))
 
 (defn pronoun-node []
   (as-> "!PRONOUN!" $
@@ -289,18 +401,17 @@
   (loom/build-graph nodes (map pronoun-edge nodes)))
 
 (defn sentence-graph [sent-pair]
-  (loom/merge-graphs
-   [(->> (get-triples (val sent-pair))
-         (triples-graph (key sent-pair)))
-    (->> (entity-mentions (val sent-pair))
-         (map #(ner-graph % (key sent-pair)))
-         loom/merge-graphs)
-    (->> (get-tokens (val sent-pair))
-         (map list)
-         (filter pronoun?)
-         (map #(hash-map (pos-hash (tokens-pos (key sent-pair) %))
-                         (.originalText (first %))))
-         pronoun-graph)]))
+  (-> (loom/merge-graphs
+       [(-> (get-triples (val sent-pair))
+            triples-graph
+            (breakup-node (key sent-pair))
+            trampoline)
+        (->> (entity-mentions (val sent-pair))
+             (map #(ner-graph %))
+             loom/merge-graphs)])
+      (dedup-graph (key sent-pair))
+      recursion-cleanup
+      stringify-graph))
 
 (defn shorten-node [node]
   (hash-map (subs (key node) 0 5)
@@ -406,7 +517,21 @@
   (cond-> (run-nlp-simple pipeline text)
     true nlp-graph
     (env :coreference) rewrite-pronouns
-    true strip-graph))
+    false strip-graph))
+
+(defn fix-punct [text]
+  (str/replace text #" [,\.']" #(subs %1 1)))
+
+(defn correct-case [text]
+  (->> (str/lower-case text)
+       (run-nlp-simple (make-default-pipeline
+                        truecase-annotators))
+       get-sentences
+       (map get-tokens)
+       (apply concat)
+       (map true-case)
+       (str/join " ")
+       fix-punct))
 
 (defn triple-string [triple]
   (str/join "\t"

@@ -47,8 +47,19 @@
 (defn add-edges [g edges]
   (apply graph/add-edges g edges))
 
+(defn loners [g]
+  (galg/loners g))
+
 (defn remove-nodes [g nodes]
   (apply graph/remove-nodes g nodes))
+
+(defn remove-edges [g edges]
+  (apply graph/remove-edges g edges))
+
+(defn remove-edges-label [g label]
+  (remove-edges
+   g (filter #(= label (nth % 2))
+             (weighted-edges g))))
 
 (defn up-nodes [g node]
   (->> (graph/in-edges g node)
@@ -59,7 +70,11 @@
        (map first)))
 
 (defn sort-nodes [g]
-  (sort-by count > (graph/nodes g)))
+  (sort-by count > g))
+
+(defn labeled-edges [g node label]
+  (->> (out-edges g node)
+       (filter #(= label (nth % 2)))))
 
 (defn replace-node [g old-node new-node]
   (-> g
@@ -89,6 +104,14 @@
 (defn reverse-graph [g]
    (build-graph (nodes g)
                 (reverse-edges (weighted-edges g))))
+
+(defn attach-all [g old-nodes new-node label]
+  (-> g
+      (add-nodes [new-node])
+      (add-edges (->> old-nodes
+                      (map vector)
+                      (map #(assoc % 1 new-node))
+                      (map #(assoc % 2 label))))))
 
 (defn subgraphs [g]
   (->> (galg/connected-components g)
