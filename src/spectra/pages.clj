@@ -66,6 +66,6 @@
       (html/base-template (html/not-found-error)))
     (html/base-template (html/unauthorized-error))))
 
-(defn alerts [req]
+(defn ajax-test [req]
   (html/base-template
-   (html/alerts)))
+   (html/ajax-test)))

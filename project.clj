@@ -21,7 +21,8 @@
                  [com.cemerick/friend "0.2.1"
                   :exclusions [slingshot commons-codec commons-logging
                                org.apache.httpcomponents/httpclient
-                               org.apache.httpcomponents/httpcore]]
+                               org.apache.httpcomponents/httpcore
+                               org.clojure/core.cache]]
                  [com.google.api-client/google-api-client "1.20.0"
                   :exclusions [com.fasterxml.jackson.core/jackson-core
                                com.google.code.findbugs/jsr305]]
@@ -55,7 +56,8 @@
                   :exclusions [commons-logging commons-codec]]
                  [clojurewerkz/neocons "3.1.0"]
                  [pandect "0.5.4"]
-                 [aysylu/loom "0.5.4"]]
+                 [aysylu/loom "0.5.4"]
+                 [com.taoensso/sente "1.7.0-RC1"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]
             [lein-cljsbuild "1.1.0"]
@@ -65,7 +67,7 @@
   :source-paths ["src" "src/spectra_cljs"]
   :cljsbuild {:builds
               [{:source-paths ["src/spectra_cljs"]
-                :compiler {:output-to "resources/public/js/modern.js"
+                :compiler {:output-to "resources/public/js/main.js"
                            :optimizations :whitespace
                            :pretty-print true}}]}
   :main spectra.web

@@ -8,10 +8,10 @@
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "Spectra"]
-          (include-css "/css/screen.css")
-          (include-js "/js/modern.js")]
+          (include-css "/css/screen.css")]
          [:body [:h1 "Hi there! Welcome :)"]
-          (into [:div.content] content)]))
+          (into [:div.content] content)
+          (include-js "/js/main.js")]))
 
 (defn user-welcome [flash username]
   [:div {:class "columns small-12"}
@@ -133,7 +133,20 @@
   [:div {:class "columns small-12"}
    [:h2 "Error: No such object can be found."]])
 
-(defn alerts []
+(defn ajax-test []
   [:div {:class "columns small-12"}
-   [:h2 "This alerts page is for testing purposes"]
-   [:div {:id "alertTable"}]])
+   [:h1 "Sente reference example"]
+   [:p "An Ajax/WebSocket connection has been configured (random)."]
+   [:hr]
+   [:p [:strong "Step 1: "] "Open browser's JavaScript console."]
+   [:p [:strong "Step 2: "] "Try: "
+    [:button#btn1 {:type "button"} "chsk-send! (w/o reply)"]
+    [:button#btn2 {:type "button"} "chsk-send! (with reply)"]]
+   ;;
+   [:p [:strong "Step 3: "] "See browser's console + nREPL's std-out." ]
+   ;;
+   [:hr]
+   [:h2 "Login with a user-id"]
+   [:p  "The server can use this id to send events to *you* specifically."]
+   [:p [:input#input-login {:type :text :placeholder "User-id"}]
+    [:button#btn-login {:type "button"} "Secure login!"]]])
