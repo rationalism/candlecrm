@@ -43,8 +43,7 @@
                  [com.joestelmach/natty "0.12"]
                  [clojurewerkz/neocons "3.1.0"]
                  [pandect "0.5.4"]
-                 [aysylu/loom "0.5.4"]
-                 [com.taoensso/sente "1.6.0"]]
+                 [aysylu/loom "0.5.4"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]
             [lein-cljsbuild "1.1.0"]

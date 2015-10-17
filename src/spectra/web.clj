@@ -41,11 +41,6 @@
    :body body})
 
 (defroutes app
-  ;; chsk routes are for Sente AJAX/WebSockets calls
-  (GET "/chsk" req
-       (ajax/ring-ajax-get-or-ws-handshake req))
-  (POST "/chsk" req
-        (ajax/ring-ajax-post req))
   (GET "/" req
        (html-wrapper (pages/homepage req)))
   ;; TODO: Make this return an error message when credentials are invalid
@@ -106,7 +101,6 @@
 (defn app-init! []
   (neo4j/define-graph!)
   (nlp/load-pipeline!)
-  (ajax/start-router!)
   (email/define-imap-lookup)
   (nrepl-server/start-server
    :port 9998

@@ -34,7 +34,6 @@
   (if (and js/document
            (.-getElementById js/document))
     (do
-      (ajax/start-router!)
       (let [signup-form (dom/getElement "signupForm")
             login-form (dom/getElement "loginForm")]
         (set! (.-onsubmit signup-form) validate-signup-form)
