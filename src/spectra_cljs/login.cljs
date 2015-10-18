@@ -35,6 +35,7 @@
   (if (and js/document (.-getElementById js/document))
     (do
       (ajax/start!)
+      (ajax/listen!)
       (when-let [signup-form (dom/getElement "signupForm")]
         (set! (.-onsubmit signup-form) validate-signup-form))
       (when-let [login-form (dom/getElement "loginForm")]

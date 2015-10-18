@@ -45,9 +45,29 @@
      (pages/insert-table-body! (pages/table-body table)
                                people-html))))
 
-(defn chsk-init! []
+(defn update-people! []
   (when-let [people-table (dom/getElement "people-table")]
-    (fetch-people! people-table 0 20)))
+    (fetch-people! people-table
+                   (* pages/people-count @pages/page-counter)
+                   pages/people-count)))
+
+(defn prev-people! []
+  (when (< 0 @pages/page-counter)
+    (swap! pages/page-counter dec)
+    (update-people!)))
+
+(defn next-people! []
+  (swap! pages/page-counter inc)
+  (update-people!))
+
+(defn listen! []
+  (when-let [prev-page (dom/getElement "prev-people-page")]
+    (set! (.-onclick prev-page) prev-people!))
+  (when-let [next-page (dom/getElement "next-people-page")]
+    (set! (.-onclick next-page) next-people!)))
+
+(defn chsk-init! []
+  (update-people!))
 
 (defmulti event-msg-handler :id) ; Dispatch on event-id
 

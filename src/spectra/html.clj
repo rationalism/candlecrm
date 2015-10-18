@@ -48,7 +48,11 @@
    [:table {:id "people-table"}
     [:thead {:id "people-header"}
      (map header-cell person-attrs)]
-    [:tbody {:id "people-rows"}]]])
+    [:tbody {:id "people-rows"}]]
+   [:a {:href "#" :onclick "return false;"
+        :id "prev-people-page"} "<-- Previous"]
+   [:a {:href "#" :onclick "return false;"
+        :id "next-people-page"} "Next -->"]])
 
 (defn gmail-setup [flash username auth-url]
   [:div {:class "columns small-12"}

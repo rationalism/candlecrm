@@ -3,6 +3,7 @@
             [goog.events :as events]))
 
 (def page-counter (atom 0))
+(def people-count 20)
 
 (defn insert-rows! [table n]
   (dotimes [i n]

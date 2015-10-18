@@ -45,3 +45,7 @@ form, .error {
 	position: relative;
   background: white;
 }
+
+a#next-people-page {
+    margin-left: 300px;
+}

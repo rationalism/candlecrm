@@ -58,7 +58,6 @@
   [{:as ev-msg :keys [id ?data event]}]
   (debugf "Event: %s" event)
   (debugf "ID: %s" id)
-  (prn "Doggies!")
   (event-msg-handler ev-msg))
 
 (do ; Server-side methods
