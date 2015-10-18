@@ -9,24 +9,13 @@
    [taoensso.encore    :as encore :refer ()]
    [taoensso.timbre    :as timbre :refer (tracef debugf infof warnf errorf)]
    [taoensso.sente     :as sente]
-
    [org.httpkit.server :as http-kit]
-   [taoensso.sente.server-adapters.http-kit :refer (sente-web-server-adapter)]
-   
-   ;; Optional, for Transit encoding:
-   ;;[taoensso.sente.packers.transit :as sente-transit]
-   ))
+   [taoensso.sente.server-adapters.http-kit :refer (sente-web-server-adapter)]))
+;; Optional, for Transit encoding:
+;;[taoensso.sente.packers.transit :as sente-transit]
 
 ;;;; Logging config
-
-(sente/set-logging-level! :trace) ; Uncomment for more logging
-
-(defn start-web-server!* [ring-handler port]
-  (println "Starting http-kit...")
-  (let [http-kit-stop-fn (http-kit/run-server ring-handler {:port port})]
-    {:server  nil ; http-kit doesn't expose this
-     :port    (:local-port (meta http-kit-stop-fn))
-     :stop-fn (fn [] (http-kit-stop-fn :timeout 100))}))
+; (sente/set-logging-level! :trace) ; Uncomment for more logging
 
 ;;;; Packer (client<->server serializtion format) config
 
@@ -48,8 +37,7 @@
   (def ring-ajax-get-or-ws-handshake ajax-get-or-ws-handshake-fn)
   (def ch-chsk                       ch-recv) ; ChannelSocket's receive channel
   (def chsk-send!                    send-fn) ; ChannelSocket's send API fn
-  (def connected-uids                connected-uids) ; Watchable, read-only atom
-  )
+  (def connected-uids                connected-uids)) ; Watchable, read-only atom
 
 (defn login!
   "Here's where you'll add your server-side login/auth procedure (Friend, etc.).
@@ -62,8 +50,10 @@
     {:status 200 :session (assoc session :uid user-id)}))
 
 (defmulti event-msg-handler :id) ; Dispatch on event-id
+
 ;; Wrap for logging, catching, etc.:
-(defn     event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
+(defn event-msg-handler*
+  [{:as ev-msg :keys [id ?data event]}]
   (debugf "Event: %s" event)
   (event-msg-handler ev-msg))
 
@@ -74,10 +64,9 @@
           uid     (:uid     session)]
       (debugf "Unhandled event: %s" event)
       (when ?reply-fn
-        (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
+        (?reply-fn {:umatched-event-as-echoed-from-from-server event})))))
 
-  ;; Add your (defmethod event-msg-handler <event-id> [ev-msg] <body>)s here...
-  )
+;; Add your (defmethod event-msg-handler <event-id> [ev-msg] <body>)s here...
 
 ;;;; Example: broadcast server>user
 
@@ -104,16 +93,14 @@
 
 (defonce router_ (atom nil))
 
-(defn  stop-router! [] (when-let [stop-f @router_] (stop-f)))
+(defn stop-router! []
+  (when-let [stop-f @router_] (stop-f)))
+
 (defn start-router! []
   (stop-router!)
-  (reset! router_ (sente/start-chsk-router! ch-chsk event-msg-handler*)))
+  (reset! router_ (sente/start-chsk-router!
+                   ch-chsk event-msg-handler*)))
 
 (defn start! []
   (start-router!)
   (start-broadcaster!))
-
-(defn -main [] (start!)) ; For `lein run`, etc.
-
-(comment (start!)
-         (test-fast-server>user-pushes))

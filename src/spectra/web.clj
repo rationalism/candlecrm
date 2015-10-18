@@ -47,7 +47,6 @@
   (GET "/login" req
        (html-wrapper (pages/homepage req)))
   (GET "/ajax-test" req
-       (prn req)
        (html-wrapper (pages/ajax-test req)))
   (GET "/chsk" req
        (ajax/ring-ajax-get-or-ws-handshake req))
