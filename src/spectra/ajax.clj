@@ -35,9 +35,15 @@
 
 ;;;; Server-side setup
 
+(defn make-channel-socket! []
+  (sente/make-channel-socket!
+   sente-web-server-adapter
+   {:packer packer
+    :user-id-fn (fn [ring-req] (:client-id ring-req))}))
+
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
-      (sente/make-channel-socket! sente-web-server-adapter {:packer packer})]
+      (make-channel-socket!)]
   (def ring-ajax-post                ajax-post-fn)
   (def ring-ajax-get-or-ws-handshake ajax-get-or-ws-handshake-fn)
   (def ch-chsk                       ch-recv) ; ChannelSocket's receive channel

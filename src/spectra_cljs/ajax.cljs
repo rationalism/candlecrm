@@ -126,5 +126,3 @@
 
 (defn start! []
   (start-router!))
-
-(comment (start!) (test-fast-server>user-pushes))
