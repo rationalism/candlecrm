@@ -42,10 +42,12 @@
                             " ) WHERE ID(root)= " id
                             " RETURN root")))
 
-(defn person-from-user [user]
+(defn person-from-user [user start limit]
    (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
                             ":" schema/person-type
-                            " ) RETURN root")))
+                            ") RETURN root"
+                            " ORDER BY root." (neo4j/cypher-esc-token schema/name-type)
+                            "[0] SKIP " start " LIMIT " limit)))
 
 (def person-match-attrs
   [[:email schema/email-address-type]

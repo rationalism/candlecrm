@@ -1,7 +1,8 @@
 (ns spectra-cljs.login
   (:require [goog.dom :as dom]
             [goog.events :as events]
-            [spectra-cljs.ajax :as ajax]))
+            [spectra-cljs.ajax :as ajax]
+            [spectra-cljs.pages :as pages]))
 
 (defn validate-signup-form []
   (let [email (dom/getElement "signupUsername")

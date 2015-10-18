@@ -7,7 +7,8 @@
             [spectra.google :as google]
             [spectra.html :as html]
             [spectra.schema :as schema]
-            [cemerick.friend :as friend]))
+            [cemerick.friend :as friend]
+            [hiccup.core :as hiccup]))
 
 (defn first-if-coll [coll]
   (if (coll? coll) (first coll) coll))
@@ -22,27 +23,27 @@
   (merge (:data node)
          (hash-map :id (:id node))))
 
-(defn people-table [people]
-  (->> people
+(defn people-table [user start limit]
+  (->> (recon/person-from-user user start limit)
        (map node-attrs)
        (filter #(not (empty? %)))
        (filter #(contains? % schema/name-type))
-       (map first-table-vals)))
+       (map first-table-vals)
+       (map html/person-row)
+       hiccup/html))
 
 (defn homepage [req]
-  (if-let [user (auth/get-user-obj (friend/identity req))]
+  (if-let [user (auth/user-from-req req)]
     (html/base-template
      (html/user-welcome (:flash req) (auth/get-username user))
-     (-> user recon/person-from-user
-         people-table
-         html/people-table)
+     (html/people-table)
      (html/user-footer))
     (html/base-template
      (html/signup-form (:flash req))
      (html/login-form))))
 
 (defn gmail [req]
-  (let [user (auth/get-user-obj (friend/identity req))]
+  (let [user (auth/user-from-req req)]
     (html/base-template
      (if (google/lookup-token user)
        (html/gmail-finished (:flash req)
@@ -58,7 +59,7 @@
    (html/login-needed uri)))
 
 (defn show-person [req id]
-  (if-let [user (auth/get-user-obj (friend/identity req))]
+  (if-let [user (auth/user-from-req req)]
     (if-let [person (-> user (recon/person-from-id id) first)]
       (html/base-template
        (html/show-person (-> person :data :name)

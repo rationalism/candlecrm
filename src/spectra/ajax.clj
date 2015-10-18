@@ -1,5 +1,7 @@
 (ns spectra.ajax
   (:require
+   [spectra.auth       :as auth]
+   [spectra.pages      :as pages]
    [clojure.string     :as str]
    [ring.middleware.defaults]
    [compojure.core     :as comp :refer (defroutes GET POST)]
@@ -55,9 +57,17 @@
 (defn event-msg-handler*
   [{:as ev-msg :keys [id ?data event]}]
   (debugf "Event: %s" event)
+  (debugf "ID: %s" id)
+  (prn "Doggies!")
   (event-msg-handler ev-msg))
 
 (do ; Server-side methods
+  (defmethod event-msg-handler :pages/fetch-people
+    [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+    (when-let [user (auth/user-from-req ring-req)] 
+      (when ?reply-fn
+        (?reply-fn (pages/people-table user (:start ?data) (:limit ?data))))))
+
   (defmethod event-msg-handler :default ; Fallback
     [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
     (let [session (:session ring-req)

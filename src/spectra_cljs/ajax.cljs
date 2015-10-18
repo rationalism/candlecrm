@@ -1,10 +1,12 @@
 (ns spectra-cljs.ajax
   (:require
    [clojure.string  :as str]
+   [goog.dom :as dom]
    [cljs.core.async :as async  :refer (<! >! put! chan)]
    [taoensso.encore :as encore :refer ()]
    [taoensso.timbre :as timbre :refer-macros (tracef debugf infof warnf errorf)]
-   [taoensso.sente  :as sente  :refer (cb-success?)])
+   [taoensso.sente  :as sente  :refer (cb-success?)]
+   [spectra-cljs.pages :as pages])
    ;; Optional, for Transit encoding:
    ;;[taoensso.sente.packers.transit :as sente-transit]
   (:require-macros
@@ -36,6 +38,17 @@
 ;; alternatives include a simple `case`/`cond`/`condp` against event-ids, or
 ;; `core.match` against events.
 
+(defn fetch-people! [table start limit]
+  (chsk-send!
+   [:pages/fetch-people {:start start :limit limit}] 5000
+   (fn [people-html]
+     (pages/insert-table-body! (pages/table-body table)
+                               people-html))))
+
+(defn chsk-init! []
+  (when-let [people-table (dom/getElement "people-table")]
+    (fetch-people! people-table 0 20)))
+
 (defmulti event-msg-handler :id) ; Dispatch on event-id
 
 ;; Wrap for logging, catching, etc.:
@@ -51,8 +64,9 @@
   
   (defmethod event-msg-handler :chsk/state
     [{:as ev-msg :keys [?data]}]
-    (if (= ?data {:first-open? true})
-      (debugf "Channel socket successfully established!")
+    (if (?data :first-open?)
+      (do (debugf "Channel socket successfully established!")
+          (chsk-init!))
       (debugf "Channel socket state change: %s" ?data)))
   
   (defmethod event-msg-handler :chsk/recv

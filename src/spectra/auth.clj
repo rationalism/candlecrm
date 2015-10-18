@@ -41,6 +41,9 @@
     (lookup-user (:current friend-map))
     nil))
 
+(defn user-from-req [req]
+  (get-user-obj (friend/identity req)))
+
 (defn list-users []
   (neo4j/get-vertices-class schema/user-type))
 

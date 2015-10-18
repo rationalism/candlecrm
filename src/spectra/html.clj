@@ -43,12 +43,12 @@
 (defn person-row [person]
   [:tr (map #(person-cell person %) person-attrs)])
 
-(defn people-table [people]
+(defn people-table []
   [:div {:class "columns small-12"}
-   [:table {:class "people-table"}
-    [:tr {:class "people-header"}
+   [:table {:id "people-table"}
+    [:thead {:id "people-header"}
      (map header-cell person-attrs)]
-    (map person-row people)]])
+    [:tbody {:id "people-rows"}]]])
 
 (defn gmail-setup [flash username auth-url]
   [:div {:class "columns small-12"}

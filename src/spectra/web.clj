@@ -71,7 +71,7 @@
           (if-let [auth-err (.getError auth-response)]
             (assoc (resp/redirect "/gmail") :flash auth-err)
             (if-let [token (google/get-token! (.getCode auth-response))]
-              (do (let [user (auth/get-user-obj (friend/identity req))]
+              (do (let [user (auth/user-from-req req)]
                     (google/write-token! user token))
                   (assoc (resp/redirect "/gmail")
                          :flash "Congrats! Authentication successful"))
@@ -79,7 +79,7 @@
                      :flash "Error: Could not get auth token"))))))
   (POST "/load-emails" {{:keys [lower upper] :as params} :params :as req}
         (friend/authenticated
-         (if-let [user (auth/get-user-obj (friend/identity req))]
+         (if-let [user (auth/user-from-req req)]
            (do (email/insert-email-range!
                 user (Integer/parseInt lower) (Integer/parseInt upper))
                (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
