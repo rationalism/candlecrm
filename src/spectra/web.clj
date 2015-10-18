@@ -55,7 +55,6 @@
   (POST "/login-test" req
         (ajax/login! req))
   (POST "/create-account" {{:keys [username password confirm] :as params} :params :as req}
-        (prn req)
         (if-let [err-msg (auth/new-user-check username password confirm)]
           (home-with-message err-msg)
           (let [user (auth/create-user! (select-keys params [:username :password]))]
@@ -91,7 +90,7 @@
   (route/resources "/")
   (route/not-found (slurp (io/resource "public/404.html"))))
 
-(defn- form-params [req]
+(defn form-params [req]
   (merge (:form-params req)
          (:multipart-params req)))
 
@@ -107,17 +106,24 @@
       (assoc-in [:security :anti-forgery]
                 {:read-token csrf-token})))
 
+(defn unauthorized-handler []
+  (fn [uri]
+    (-> (pages/login-needed (:uri uri))
+        resp/response
+        (resp/status 401))))
+
+(defn friend-authenticate [app]
+  (friend/authenticate app
+   {:allow-anon? true
+    :login-uri "/login"
+    :default-landing-uri "/"
+    :unauthorized-handler unauthorized-handler
+    :credential-fn (partial creds/bcrypt-credential-fn auth/get-user-pwd)
+    :workflows [(workflows/interactive-form)]}))
+  
 (def secure-app
   (-> app
-      (friend/authenticate
-              {:allow-anon? true
-               :login-uri "/login"
-               :default-landing-uri "/"
-               :unauthorized-handler #(-> (pages/login-needed (:uri %))
-                                          resp/response
-                                          (resp/status 401))
-               :credential-fn (partial creds/bcrypt-credential-fn auth/get-user-pwd)
-               :workflows [(workflows/interactive-form)]})
+      friend-authenticate
       (wrap-defaults (middleware-config))))
 
 (defn app-init! []
