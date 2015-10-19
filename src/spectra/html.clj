@@ -59,7 +59,7 @@
    [:h2 "Connect your account to GMail"]
    [:p [:span {:style "padding:0 0 0 10px;color:red;"} flash]]
    [:h3 (str "Welcome. Your username is: " username)]
-   [:a {:href auth-url} "Get started here"]])
+   [:h3 [:a {:href auth-url} "Connect to GMail"]]])
 
 (defn gmail-finished [flash username email-total]
   [:div {:class "columns small-12"}

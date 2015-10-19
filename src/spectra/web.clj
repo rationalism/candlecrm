@@ -58,7 +58,7 @@
         (if-let [err-msg (auth/new-user-check username password confirm)]
           (home-with-message err-msg)
           (let [user (auth/create-user! (select-keys params [:username :password]))]
-            (friend/merge-authentication (home-with-message nil) user))))
+            (friend/merge-authentication (resp/redirect "/gmail") user))))
   (GET "/logout" req (friend/logout* (logout req)))
   (GET "/gmail" req
        (friend/authenticated
