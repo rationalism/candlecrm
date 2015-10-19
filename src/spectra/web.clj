@@ -6,7 +6,6 @@
             [ring.middleware.defaults :refer :all]
             [ring.middleware.reload :as reload]
             [clojure.java.io :as io]
-            [clojure.string :as str]
             [spectra.ajax :as ajax]
             [spectra.auth :as auth]
             [spectra.contacts :as contacts]
@@ -15,6 +14,7 @@
             [spectra.neo4j :as neo4j]
             [spectra.corenlp :as nlp]
             [spectra.pages :as pages]
+            [spectra.quartz :as quartz]
             [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
                              [credentials :as creds])
@@ -130,7 +130,9 @@
   (neo4j/define-graph!)
   (nlp/load-pipeline!)
   (ajax/start!)
+  (quartz/start!)
   (email/define-imap-lookup)
+  (println "Ready to start server")
   (nrepl-server/start-server
    :port 9998
    :handler cider-nrepl-handler))
