@@ -65,14 +65,14 @@
         (html-wrapper (pages/gmail req))))
   (GET google/callback-url req
        (friend/authenticated
-        (let [auth-response
-              (google/auth-response
-               (google/make-response-url req))]
+        (let [auth-response (google/response-from-req req)
+              user (auth/user-from-req req)]
           (if-let [auth-err (.getError auth-response)]
             (assoc (resp/redirect "/gmail") :flash auth-err)
             (if-let [token (google/get-token! (.getCode auth-response))]
-              (do (let [user (auth/user-from-req req)]
-                    (google/write-token! user token))
+              (do (google/write-token! user token)
+                  (contacts/load-all-contacts! user)
+                  (email/insert-first-n! user 5)
                   (assoc (resp/redirect "/gmail")
                          :flash "Congrats! Authentication successful"))
               (assoc (resp/redirect "/gmail")

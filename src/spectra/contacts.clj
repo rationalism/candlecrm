@@ -57,3 +57,6 @@
     (map #(hash-map :props %))
     (map #(assoc % :labels (person-labels user)))
     neo4j/batch-insert!))
+
+(defn load-all-contacts! [user]
+  (batch-insert! user (all-contacts user)))

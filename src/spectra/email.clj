@@ -363,3 +363,7 @@
                            lower upper)
         (pmap full-parse)
         (map #(insert-emails! user %)))))
+
+(defn insert-first-n! [user n]
+  (let [limit (message-count (fetch-imap-folder user))]
+    (insert-email-range! user (- limit n) limit)))

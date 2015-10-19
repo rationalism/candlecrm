@@ -48,6 +48,9 @@
 (defn auth-response [url]
   (AuthorizationCodeResponseUrl. url))
 
+(defn response-from-req [req]
+  (auth-response (make-response-url req)))
+
 (defn get-token! [code]
   (try (let [token-response
              (.execute
