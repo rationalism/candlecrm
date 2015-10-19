@@ -63,6 +63,12 @@
   (GET "/gmail" req
        (friend/authenticated
         (html-wrapper (pages/gmail req))))
+  (GET "/init-account" req
+       (friend/authenticated
+        (let [user (auth/user-from-req req)]
+          (contacts/load-all-contacts! user)
+          (email/insert-first-n! user 5)
+          (home-with-message "Congrats! Authentication successful"))))
   (GET google/callback-url req
        (friend/authenticated
         (let [auth-response (google/response-from-req req)
@@ -71,10 +77,7 @@
             (assoc (resp/redirect "/gmail") :flash auth-err)
             (if-let [token (google/get-token! (.getCode auth-response))]
               (do (google/write-token! user token)
-                  (contacts/load-all-contacts! user)
-                  (email/insert-first-n! user 5)
-                  (assoc (resp/redirect "/gmail")
-                         :flash "Congrats! Authentication successful"))
+                  (resp/redirect "/init-account"))
               (assoc (resp/redirect "/gmail")
                      :flash "Error: Could not get auth token"))))))
   (POST "/load-emails" {{:keys [lower upper] :as params} :params :as req}
@@ -83,7 +86,7 @@
            (do (email/insert-email-range!
                 user (Integer/parseInt lower) (Integer/parseInt upper))
                (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
-           (assoc (resp/redirect "/") :flash "Error: Could not log in"))))
+           (home-with-message "Error: Could not log in"))))
   (GET "/person/:id" [id :as req]
        (friend/authenticated
         (html-wrapper (pages/show-person req id))))

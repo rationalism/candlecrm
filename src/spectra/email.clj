@@ -358,11 +358,12 @@
              (prn e) nil)))))
   
 (defn insert-email-range! [user lower upper]
-  (dorun
+  (doall
    (->> (messages-in-range (fetch-imap-folder user)
                            lower upper)
         (pmap full-parse)
-        (map #(insert-emails! user %)))))
+        (map #(insert-emails! user %))))
+  :success)
 
 (defn insert-first-n! [user n]
   (let [limit (message-count (fetch-imap-folder user))]

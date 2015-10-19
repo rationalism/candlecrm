@@ -108,10 +108,8 @@
 
 (defn batch-insert! [items]
   (p :batch-insert
-     (let [nodes
-           (nn/create-batch *graph*
-                            (map #(filter-props (:props %))
-                                 items))]
+     (let [nodes (nn/create-batch
+                  *graph* (map #(filter-props (:props %)) items))]
        (map #(nl/add *graph* %1 (:labels %2))
             nodes items))))
 
