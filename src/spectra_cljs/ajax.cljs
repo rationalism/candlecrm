@@ -6,6 +6,7 @@
    [taoensso.encore :as encore :refer ()]
    [taoensso.timbre :as timbre :refer-macros (tracef debugf infof warnf errorf)]
    [taoensso.sente  :as sente  :refer (cb-success?)]
+   [spectra-cljs.ajax-demo :as ajax-demo]
    [spectra-cljs.pages :as pages])
    ;; Optional, for Transit encoding:
    ;;[taoensso.sente.packers.transit :as sente-transit]
@@ -38,36 +39,12 @@
 ;; alternatives include a simple `case`/`cond`/`condp` against event-ids, or
 ;; `core.match` against events.
 
-(defn fetch-people! [table start limit]
-  (chsk-send!
-   [:pages/fetch-people {:start start :limit limit}] 5000
-   (fn [people-html]
-     (pages/insert-table-body! (pages/table-body table)
-                               people-html))))
-
-(defn update-people! []
-  (when-let [people-table (dom/getElement "people-table")]
-    (fetch-people! people-table
-                   (* pages/people-count @pages/page-counter)
-                   pages/people-count)))
-
-(defn prev-people! []
-  (when (< 0 @pages/page-counter)
-    (swap! pages/page-counter dec)
-    (update-people!)))
-
-(defn next-people! []
-  (swap! pages/page-counter inc)
-  (update-people!))
-
 (defn listen! []
-  (when-let [prev-page (dom/getElement "prev-people-page")]
-    (set! (.-onclick prev-page) prev-people!))
-  (when-let [next-page (dom/getElement "next-people-page")]
-    (set! (.-onclick next-page) next-people!)))
+  (pages/listen! chsk-send!)
+  (ajax-demo/listen! chsk chsk-state chsk-send!))
 
 (defn chsk-init! []
-  (update-people!))
+  (pages/update-people! chsk-send!))
 
 (defmulti event-msg-handler :id) ; Dispatch on event-id
 
@@ -97,49 +74,6 @@
     [{:as ev-msg :keys [?data]}]
     (let [[?uid ?csrf-token ?handshake-data] ?data]
       (debugf "Handshake: %s" ?data))))
-
-;;;; Client-side UI
-
-(when-let [target-el (.getElementById js/document "btn1")]
-  (.addEventListener target-el "click"
-    (fn [ev]
-      (debugf "Button 1 was clicked (won't receive any reply from server)")
-      (chsk-send! [:example/button1 {:had-a-callback? "nope"}]))))
-
-(when-let [target-el (.getElementById js/document "btn2")]
-  (.addEventListener target-el "click"
-    (fn [ev]
-      (debugf "Button 2 was clicked (will receive reply from server)")
-      (chsk-send! [:example/button2 {:had-a-callback? "indeed"}] 5000
-        (fn [cb-reply] (debugf "Callback reply: %s" cb-reply))))))
-
-(when-let [target-el (.getElementById js/document "btn-login")]
-  (.addEventListener target-el "click"
-    (fn [ev]
-      (let [user-id (.-value (.getElementById js/document "input-login"))]
-        (if (str/blank? user-id)
-          (js/alert "Please enter a user-id first")
-          (do
-            (debugf "Logging in with user-id %s" user-id)
-
-            ;;; Use any login procedure you'd like. Here we'll trigger an Ajax
-            ;;; POST request that resets our server-side session. Then we ask
-            ;;; our channel socket to reconnect, thereby picking up the new
-            ;;; session.
-
-            (sente/ajax-call "/login-test"
-              {:method :post
-               :params {:user-id    (str user-id)
-                        :csrf-token (:csrf-token @chsk-state)}}
-              (fn [ajax-resp]
-                (debugf "Ajax login response: %s" ajax-resp)
-                (let [login-successful? true ; Your logic here
-                      ]
-                  (if-not login-successful?
-                    (debugf "Login failed")
-                    (do
-                      (debugf "Login successful")
-                      (sente/chsk-reconnect! chsk))))))))))))
 
 (def router_ (atom nil))
 
