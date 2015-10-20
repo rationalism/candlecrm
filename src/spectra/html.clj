@@ -1,7 +1,7 @@
 (ns spectra.html
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
-            [spectra.schema :as schema])
+            [spectra.schema :as s])
   (:use [hiccup.core] [hiccup.page]
         [ring.util.anti-forgery]))
 
@@ -24,9 +24,9 @@
    [:p [:a {:href "/gmail"} "Connect to GMail here"]]
    [:p [:a {:href "/logout"} "Logout here"]]])
 
-(def person-attrs {schema/name-type "Name"
-                   schema/email-address-type "Email"
-                   schema/phone-num-type "Phone number"})
+(def person-attrs {s/name "Name"
+                   s/email-addr "Email"
+                   s/phone-num "Phone number"})
 
 (defn header-cell [attr]
   [:td (val attr)])
@@ -36,7 +36,7 @@
    (person attr)])
 
 (defn person-cell [person attr]
-  [:td (if (= schema/name-type (key attr))
+  [:td (if (= s/name (key attr))
          (person-link person (key attr))
          (person (key attr)))])
 

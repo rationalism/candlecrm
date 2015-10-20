@@ -4,7 +4,7 @@
             [spectra.common :as com]
             [spectra.datetime :as dt]
             [spectra.neo4j :as neo4j]
-            [spectra.schema :as schema]
+            [spectra.schema :as s]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
@@ -14,53 +14,57 @@
 
 (defn create-user! [user]
   (neo4j/create-vertex!
-   schema/user-type 
-   {schema/email-address-type (:identity user)
-    schema/pwd-hash-type (:password user)}))
+   s/user 
+   {s/email-addr (:identity user)
+    s/pwd-hash (:password user)}))
   
 (defn create-person! [user person]
   (neo4j/create-vertex!
-   [schema/person-type (user-label user)]
-   {schema/name-type [(:name person)]
-    schema/email-address-type [(:email person)]
-    schema/phone-num-type [(:phone person)]}))
-
+   [s/person (user-label user)]
+   (as-> person $
+       (select-keys $ [s/name s/email-addr s/phone-num])
+       (com/map-values $ (keys $) vector))))
+       
 (defn add-user-graph! [user]
   (let [new-user (create-user! user)
-        new-person (create-person! new-user {:email (:identity user)})]
-    (neo4j/create-edge! new-user new-person schema/user-person-edge)))
+        new-person (create-person! new-user {s/email (:identity user)})]
+    (neo4j/create-edge! new-user new-person s/user-person)))
 
-(defn person-from-props [user props]
-   (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
-                            ":" schema/person-type
-                            " ) WHERE " (neo4j/cypher-props-coll props)
-                            " RETURN root")))
+(defn person-query [user filters]
+  (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
+                          ":" s/person
+                          " ) WHERE " filters
+                          " RETURN root")))
+
+(defn people-from-props [user props]
+  (person-query user (neo4j/cypher-props-any props)))
+
+(defn person-from-props [user props]       
+  (person-query user (neo4j/cypher-props-coll props)))
 
 (defn person-from-id [user id]
    (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
-                            ":" schema/person-type
+                            ":" s/person
                             " ) WHERE ID(root)= " id
                             " RETURN root")))
 
 (defn person-from-user [user start limit]
    (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
-                            ":" schema/person-type
+                            ":" s/person
                             ") RETURN root"
-                            " ORDER BY root." (neo4j/cypher-esc-token schema/name-type)
+                            " ORDER BY root." (neo4j/cypher-esc-token s/name)
                             "[0] SKIP " start " LIMIT " limit)))
 
 (def person-match-attrs
-  [[:email schema/email-address-type]
-   [:phone schema/phone-num-type]
-   [:name schema/name-type]])
+  [s/email-addr s/phone-num s/name])
 
 (defn find-person [attr user person]
   (if (nil? person) nil
-      (let [value (person (nth attr 0))]
+      (let [value (person attr)]
         (if (or (nil? value) (empty? value))
           nil
           (first (person-from-props
-                  user {(nth attr 1) value}))))))
+                  user {attr value}))))))
 
 (defn person-match [user person]
   (p :person-match
@@ -79,28 +83,26 @@
           (nil? (:id person-from)))
     []
     (neo4j/cypher-list
-     (str "MATCH (root:" schema/email-type
+     (str "MATCH (root:" s/email
           " " (neo4j/cypher-properties
-               {schema/email-sub-hash
-                (com/end-hash (:subject message))})
-          ")-[:" (neo4j/cypher-esc-token schema/email-from-edge)
+               {s/email-sub-hash
+                (com/end-hash (s/email-subject message))})
+          ")-[:" (neo4j/cypher-esc-token s/email-from)
           "]->(f) WHERE ID (f)=" (:id person-from)
-          " AND (root." (neo4j/cypher-esc-token schema/email-sent)
-          " < (" (dt/to-ms (:time-sent message)) " + " sent-tolerance
-          ")) AND (root." (neo4j/cypher-esc-token schema/email-sent)
-          " > (" (dt/to-ms (:time-sent message)) " - " sent-tolerance 
+          " AND (root." (neo4j/cypher-esc-token s/email-sent)
+          " < (" (dt/to-ms (s/email-sent message)) " + " sent-tolerance
+          ")) AND (root." (neo4j/cypher-esc-token s/email-sent)
+          " > (" (dt/to-ms (s/email-sent message)) " - " sent-tolerance 
           ")) RETURN root"))))
 
 (defn recon-person! [old-person new-person]
-  (doseq [param {:name schema/name-type
-                 :email schema/email-address-type
-                 :phone schema/phone-num-type}]
-    (if (nil? (new-person (key param)))
-      nil (neo4j/recon-property-list! old-person (val param)
-                                      (new-person (key param)))))
+  (doseq [param [s/name s/email-addr s/phone-num]]
+    (if (nil? (new-person param))
+      nil (neo4j/recon-property-list! old-person param
+                                      (new-person param))))
   (neo4j/refresh-vertex old-person))
 
-(defn add-email-link! [user email link-type person]
+(defn add-email-link! [user email link person]
   (p :add-email-link
      (let [old-person (person-match user person)]
        (neo4j/create-edge!
@@ -108,7 +110,7 @@
         (if (nil? old-person)
           (p :create-person (create-person! user person))
           (p :recon-person (recon-person! old-person person)))
-        link-type))))
+        link))))
 
 (defn list-entities [entity-class]
   (neo4j/get-vertices-class entity-class))
@@ -121,3 +123,13 @@
 (defn list-entities-full [entity-class properties]
   (let [entities (list-entities entity-class)]
     (map #(expand-entity % properties) entities)))
+
+(defn lookup-hash [prop-name node]
+  (->> node :data prop-name
+       (map #(hash-map % node))
+       (apply merge)))
+
+(defn lookup-map [prop-name nodes]
+  (->> nodes
+       (map #(lookup-hash prop-name %))
+       (apply merge)))

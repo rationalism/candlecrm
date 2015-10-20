@@ -144,12 +144,6 @@
     candidate
     (blank-coref candidate)))
 
-(defn single-map [pair]
-  {(key pair) (val pair)})
-
-(defn split-map [m]
-  (map single-map m))
-
 (defn pronoun? [tokens]
   (cond
     (not= (count tokens) 1) false

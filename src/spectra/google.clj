@@ -3,7 +3,7 @@
             [environ.core :refer [env]]
             [spectra.auth :as auth]
             [spectra.neo4j :as neo4j]
-            [spectra.schema :as schema]
+            [spectra.schema :as s]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [com.google.api.client.googleapis.auth.oauth2 GoogleAuthorizationCodeRequestUrl
@@ -69,13 +69,13 @@
              nil))))
 
 (defn lookup-token [user]
-  (neo4j/get-property user schema/google-token-type))
+  (neo4j/get-property user s/google-token))
 
 (defn write-token! [user token]
-  (neo4j/set-property! user schema/google-token-type token))
+  (neo4j/set-property! user s/google-token token))
 
 (defn delete-token! [user]
-  (neo4j/delete-property! user schema/google-token-type))
+  (neo4j/delete-property! user s/google-token))
 
 (defn build-google-cred! [refresh-token]
   (doto (-> (GoogleCredential$Builder. )

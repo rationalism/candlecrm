@@ -6,7 +6,7 @@
             [spectra.email :as email]
             [spectra.google :as google]
             [spectra.html :as html]
-            [spectra.schema :as schema]
+            [spectra.schema :as s]
             [cemerick.friend :as friend]
             [hiccup.core :as hiccup]))
 
@@ -27,7 +27,7 @@
   (->> (recon/person-from-user user start limit)
        (map node-attrs)
        (filter #(not (empty? %)))
-       (filter #(contains? % schema/name-type))
+       (filter #(contains? % s/name))
        (map first-table-vals)
        (map html/person-row)
        hiccup/html))

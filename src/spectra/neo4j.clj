@@ -30,6 +30,12 @@
           dt/catch-dates
           (str/replace #"[\\'\"]" #(str "\\" %1)))))
 
+(defn cypher-esc-coll [coll]
+  (->> coll
+       (map cypher-esc)
+       (map str)
+       (str/join "', '")))
+
 (defn cypher-esc-token [token]
   (str "`" (name token) "`"))
 
@@ -45,6 +51,13 @@
 (defn cypher-query [query]
   (->> (cy/tquery *graph* query)
        (map cypher-map-to-node)))
+
+(defn cypher-prop-any [prop]
+  (str " ANY (x in root." (cypher-esc-token (key prop))
+       " where x in ['" (cypher-esc-coll (val prop)) "']) "))
+
+(defn cypher-props-any [props]
+  (->> props (map cypher-prop-any) (str/join "OR")))
 
 (defn cypher-prop-coll [prop]
   (str " ANY (x in root." (cypher-esc-token (key prop))

@@ -5,7 +5,7 @@
             [spectra.recon :as recon]
             [spectra.google :as google]
             [spectra.neo4j :as neo4j]
-            [spectra.schema :as schema]
+            [spectra.schema :as s]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [com.google.gdata.client Query]
@@ -32,7 +32,7 @@
     ContactFeed)))
 
 (defn contact-to-map [contact]
-  {schema/name-type
+  {s/name
    (cond-> []
      (and (.hasName contact)
           (.hasFullName (.getName contact)))
@@ -40,16 +40,15 @@
      (and (.hasName contact)
           (.hasAdditionalName (.getName contact)))
      (conj (.getValue (.getAdditionalName (.getName contact)))))
-   schema/email-address-type
+   s/email-addr
    (->> (.getEmailAddresses contact)
         (mapv #(.getAddress %)))
-   schema/phone-num-type
+   s/phone-num
    (->> (.getPhoneNumbers contact)
         (mapv #(.getPhoneNumber %)))})
 
 (defn person-labels [user]
-  [schema/person-type
-   (recon/user-label user)])
+  [s/person (recon/user-label user)])
   
 (defn batch-insert! [user contacts]
   (->> contacts 

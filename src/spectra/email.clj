@@ -10,7 +10,7 @@
             [spectra.corenlp :as nlp]
             [spectra.recon :as recon]
             [spectra.regex :as regex]
-            [spectra.schema :as schema]
+            [spectra.schema :as s]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -55,8 +55,8 @@
   (.getMessages folder begin end))
 
 (defn decode-address [address]
-  {:name (.getPersonal address)
-   :email (.getAddress address)})
+  {s/name (.getPersonal address)
+   s/email-addr (.getAddress address)})
 
 (defn decode-header [header]
   {(.getName header) (.getValue header)})
@@ -70,16 +70,19 @@
 (defn sent-time [message]
   (.getSentDate message))
 
+(defn get-recipients [message field]
+  (map decode-address (.getRecipients message field)))
+
 (defn decode-recipients [message]
-  {:to (map decode-address (.getRecipients message Message$RecipientType/TO))
-   :cc (map decode-address (.getRecipients message Message$RecipientType/CC))
-   :bcc (map decode-address (.getRecipients message Message$RecipientType/BCC))})
+  {s/email-to (get-recipients message Message$RecipientType/TO)
+   s/email-cc (get-recipients message Message$RecipientType/CC)
+   s/email-bcc (get-recipients message Message$RecipientType/BCC)})
 
 (defn decode-sender [message]
-  {:from (map decode-address (.getFrom message))})
+  {s/email-from (map decode-address (.getFrom message))})
 
 (defn decode-replyto [message]
-  {:reply-to (map decode-address (.getReplyTo message))})
+  {s/email-replyto (map decode-address (.getReplyTo message))})
 
 (defn headers [message]
   (->> (.getAllHeaders message)
@@ -91,8 +94,8 @@
   (p :get-content
      (.getContent message)))
 
-(defn content-type [message]
-  (p :content-type
+(defn content [message]
+  (p :content
      (.getContentType message)))
 
 (defn get-parts [multipart]
@@ -131,13 +134,13 @@
 
 (defn find-bottom [chain]
   (->> chain loom/nodes
-       (filter #(contains? % :body))
-       (filter #(not (loom/out-edge-label chain % "reply")))
+       (filter #(contains? % s/email-body))
+       (filter #(not (loom/out-edge-label chain % s/email-reply)))
        first))
 
 (defn split-email [depth chain]
   (let [bottom (find-bottom chain)
-        lines (:body bottom)]
+        lines (s/email-body bottom)]
     (def start-body (atom 0))
     (while (in-block? lines start-body #(> depth %))
       (do (swap! start-body inc)))
@@ -145,36 +148,40 @@
     (while (in-block? lines end-body #(= depth %))
       (do (swap! end-body inc)))
     (def start-header (atom @start-body))
-    (def header {:time-sent (atom nil) :from (atom nil)})
+    (def header {s/email-sent (atom nil) s/email-from (atom nil)})
     (while (and (> @start-header 0)
-                (not (and (deref (:time-sent header)) (deref (:from header)))))
+                (not (and (deref (s/email-sent header))
+                          (deref (s/email-from header)))))
       (do (swap! start-header dec)
           (let [this-line (nth lines @start-header)]
-            (com/reset-if-found! (dt/dates-in-text this-line) header :time-sent)
-            (com/merge-if-found! (regex/find-email-people this-line) header :from)
+            (com/reset-if-found! (dt/dates-in-text this-line) header s/email-sent)
+            (com/merge-if-found! (regex/find-email-people this-line) header s/email-from)
             ;; TODO: Use a less compute-intensive version of NLP here
             (com/merge-if-found! (->> (nlp/run-nlp nlp/*pipeline* this-line)
                                       nlp/graph-entities
-                                      nlp/nlp-people) header :from))))
-    (let [new-node (assoc {:time-sent (-> header :time-sent deref)}
-                          :body (->> lines
-                                     (com/slice @start-body @end-body)
-                                     (map #(strip-arrows % depth))
-                                     merge-lines))]
+                                      nlp/nlp-people) header s/email-from))))
+    (let [new-node {s/email-sent (-> header s/email-sent deref)
+                    s/type-label s/email
+                    s/email-body (->> lines
+                                      (com/slice @start-body @end-body)
+                                      (map #(strip-arrows % depth))
+                                      merge-lines)}]
       (-> chain
           (loom/replace-node bottom new-node)
-          (loom/add-edges [[new-node (-> header :from deref) "from"]
-                           [new-node {:body (com/slice-not @start-header @end-body lines)}
-                            "reply"]])))))
+          (loom/add-edges [[new-node (-> header s/email-from deref
+                                         (assoc s/type-label s/person)) s/email-from]
+                           [new-node {s/email-body (com/slice-not @start-header @end-body lines)}
+                            s/email-reply]])))))
 
 (defn recursive-split [depth chain]
   (if (<= depth 0)
     (loom/replace-node chain (find-bottom chain)
-                       {:body (-> chain find-bottom :body merge-lines)})
+                       {s/email-body (-> chain find-bottom s/email-body merge-lines)
+                        s/type-label s/email})
     (recur (dec depth) (split-email depth chain))))
 
 (defn start-email-graph [body]
-  (loom/build-graph [{:body body}] []))
+  (loom/build-graph [{s/email-body body}] []))
 
 (defn raw-msg-chain [body]
   (p :raw-msg-chain
@@ -187,9 +194,9 @@
 (defn get-text-recursive [message]
   (p :get-text-recursive
      (cond
-       (.contains (content-type message) plain-type)
+       (.contains (content message) plain-type)
        (content message)
-       (.contains (content-type message) multi-type)
+       (.contains (content message) multi-type)
        (->> (-> message content get-parts)
             (map get-text-recursive)
             (filter #(not= "" %))
@@ -206,20 +213,20 @@
      (p :nlp-text (nlp/graph-entities
                    (nlp/run-nlp nlp/*pipeline* text)))))))
 
-(defn make-header-edges [pair root]
+(defn make-headers [pair root]
   (map #(vector root % (-> pair key name)) (val pair)))
 
 (defn headers-parse [message]
-  (let [root {:time-received (received-time message)
-              :time-sent (sent-time message)
-              :subject (subject message)}]
+  (let [root {s/email-received (received-time message)
+              s/email-sent (sent-time message)
+              s/email-subject (subject message)}]
     (loom/build-graph
      [root]
      (->> [(decode-recipients message)
            (decode-sender message)
            (decode-replyto message)]
           (apply merge)
-          (map #(make-header-edges % root))
+          (map #(make-headers % root))
           (apply concat)))))
 
 (defn headers-for-last [raw-msgs headers]
@@ -227,32 +234,32 @@
           (dec (count raw-msgs))
           (merge (last raw-msgs) headers)))
 
-(defn make-to-edge [node chain]
+(defn make-to [node chain]
   (vector node
           (as-> node $
-            (loom/out-edge-label chain $ "reply")
+            (loom/out-edge-label chain $ s/email-reply)
             (second $)
-            (loom/out-edge-label chain $ "from")
+            (loom/out-edge-label chain $ s/email-from)
             (second $))
-          "to"))
+          s/email-to))
 
 (defn infer-email-chain [chain]
   (loom/add-edges chain
                   (->> chain loom/nodes
-                       (filter #(loom/out-edge-label chain % "reply"))
-                       (map #(make-to-edge % chain)))))
+                       (filter #(loom/out-edge-label chain % s/email-reply))
+                       (map #(make-to % chain)))))
 
 (defn replace-subject [subject chain node]
   (loom/replace-node
    chain node
-   (assoc node :subject subject
-               :sub-hash (com/end-hash subject))))
+   (assoc node s/email-subject subject
+               s/email-sub-hash (com/end-hash subject))))
 
 (defn infer-subject [chain]
   (reduce (partial replace-subject
-                   (-> chain find-bottom :subject))
+                   (-> chain find-bottom s/email-subject))
           chain (->> chain loom/nodes
-                     (filter #(loom/out-edge-label chain % "from")))))
+                     (filter #(loom/out-edge-label chain % s/email-from)))))
 
 (defn message-inference [chain]
   (p :message-inference
@@ -317,8 +324,8 @@
   inbox)
 
 (defn has-valid-from? [chain node]
-  (when-let [from-edge (loom/out-edge-label chain node "from")]    
-    (let [from (from-edge second :email)]
+  (when-let [from (loom/out-edge-label chain node s/email-from)]    
+    (let [from (from second s/email)]
       (and (not (nil? from)) (> (count from) 3)))))
 
 (defn remove-invalid-from [chain]
@@ -329,7 +336,7 @@
   (p :from-lookup
      (assoc message :from-database
              (recon/person-match
-              user (:from message)))))
+              user (s/email-from message)))))
 
 (defn already-found? [message]
   (p :already-found
@@ -344,12 +351,10 @@
   (p :create-email
      (assoc parsed-email :email-vertex
             (neo4j/create-vertex!
-             schema/email-type
-             {schema/email-received (:time-received parsed-email)
-              schema/email-sent (:time-sent parsed-email)
-              schema/email-subject (:subject parsed-email)
-              schema/email-sub-hash (:sub-hash parsed-email)
-              schema/email-body (:body parsed-email)}))))
+             s/email
+             (select-keys parsed-email
+                          [s/email-received s/email-sent s/email-subject
+                           s/email-sub-hash s/email-body])))))
 
 (defn create-link [parsed-email user]
   (p :create-link
@@ -357,21 +362,17 @@
             (partial recon/add-email-link!
                      user (:email-vertex parsed-email)))))
 
-;; TODO: Replace this with something more consistent
-(def email-keys {:to schema/email-to-edge
-                 :cc schema/email-cc-edge
-                 :bcc schema/email-bcc-edge
-                 :replyto schema/email-replyto-edge
-                 :people-mentioned schema/email-mentions-edge})
+(def email-keys [s/email-to s/email-cc s/email-bcc
+                 s/email-replyto s/email-mentions])
 
 (defn insert-links! [parsed-email keys]
   (p :insert-links
      ;; Only one "from" per email
-     ((:link parsed-email) schema/email-from-edge
-      (:from parsed-email))
+     ((:link parsed-email) s/email-from
+      (s/email-from parsed-email))
      (doseq [k keys]
-       (doseq [p ((key k) parsed-email)]
-         ((:link parsed-email) (val k) p)))))
+       (doseq [p (k parsed-email)]
+         ((:link parsed-email) k p)))))
 
 ;; Assumes emails are already parsed
 (defn insert-emails! [user emails]
