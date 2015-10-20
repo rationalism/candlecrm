@@ -440,12 +440,6 @@
    (->> g loom/weighted-edges
         (map strip-edge))))
 
-(defn referenced? [g pronoun]
-  (->> (loom/out-edges g pronoun)
-       (filter #(= "!is!" (nth % 2)))
-       count
-       (= 1)))
-
 (defn lonely? [g pronoun]
   (as-> (loom/out-edges g pronoun) $
     (and (= (count $) 1)
@@ -454,12 +448,10 @@
 
 (defn find-pronouns [g]
   (->> (loom/up-nodes g (pronoun-node))
-       (filter #(referenced? g %))))
+       (filter #(loom/out-edge-label g % "!is!"))))
 
 (defn find-referent [g pronoun]
-  (->> (loom/out-edges g pronoun)
-       (filter #(= "!is!" (nth % 2)))
-       first second))
+  (second (loom/out-edge-label g pronoun "!is!")))
 
 (defn rewrite-edges [g pronoun]
   (->> (loom/out-edges g pronoun)

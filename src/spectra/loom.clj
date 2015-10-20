@@ -27,11 +27,21 @@
   (->> (graph/in-edges g node)
        (map #(weighted-edge g %))))
 
+(defn out-edge-label [g node label]
+  (->> (out-edges g node)
+       (filter #(= (nth % 2) label))
+       first))
+
+(defn in-edge-label [g node label]
+  (->> (in-edges g node)
+       (filter #(= (nth % 2) label))
+       first))
+
 (defn fan-in [g node]
   (count (graph/in-edges g node)))
 
 (defn fan-out [g node]
-  (count (graph/in-edges g node)))
+  (count (graph/out-edges g node)))
 
 (defn top-nodes [g]
   (filter #(= 0 (fan-in g %))
@@ -132,3 +142,16 @@
 
 (defn display-graph [g]
   (gviz/view g))
+
+(defn replace-inc [i g old-node]
+  (swap! i inc)
+  (replace-node g old-node @i))
+
+(defn structure [g]
+  (let [i (atom 0)]
+    (-> replace-inc
+        (partial i)
+        (reduce g (nodes g)))))
+
+(defn display-structure [g]
+  (display-graph (structure g)))
