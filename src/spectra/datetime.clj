@@ -3,24 +3,29 @@
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
-  (:import [com.joestelmach.natty Parser]))
+  (:import [com.joestelmach.natty CalendarSource Parser]))
 
-(defn parse-dates [text]
+(defn parse-dates [text reference]
   (p :find-dates
+     (CalendarSource/setBaseDate reference)
      ;; This try-catch block needed in case of parse errors
      (try (.parse (Parser. ) text)
           (catch Exception e []))))
 
-(defn dates-in-text [text]
-  (->> (parse-dates text)
-       (map #(.getDates %))
-       flatten
-       (map first)
-       distinct))
+(defn dates-in-text
+  ([text] (dates-in-text text (java.util.Date. )))
+  ([text reference]
+   (->> (parse-dates text reference)
+        (map #(.getDates %))
+        flatten
+        (map first)
+        distinct)))
 
-(defn find-dates [text]
-  (->> (parse-dates text)
-       (map #(.getText %))))
+(defn find-dates
+  ([text] (find-dates text (java.util.Date. )))
+  ([text reference]
+   (->> (parse-dates text reference)
+        (map #(.getText %)))))
 
 (defn to-ms [some-date]
   (.getTime some-date))

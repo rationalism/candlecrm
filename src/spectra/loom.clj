@@ -86,6 +86,10 @@
   (->> (out-edges g node)
        (filter #(= label (nth % 2)))))
 
+(defn select-edges [g edge-type]
+  (->> (weighted-edges g)
+       (filter #(= edge-type (nth % 2)))))
+
 (defn replace-node [g old-node new-node]
   (-> g
       (add-nodes [new-node])
@@ -139,6 +143,21 @@
 
 (defn count-upstream [g node]
   (count-downstream (reverse-graph g) node))
+
+(defn spider-path [g path node]
+  (if (-> g (out-edges node) count (= 0))
+    (conj path g)
+    (let [edge (-> g (out-edges node) first)]
+      (recur (remove-edges g [edge])
+             (conj path edge)
+             (second edge)))))
+
+(defn spider-edges [g edges]
+  (if (-> g weighted-edges count (= 0))
+    edges (let [new-path (->> g nodes (sort-by (partial fan-out g) >)
+                              first (spider-path g '()))]
+            (recur (first new-path)
+                   (->> new-path rest reverse (conj edges))))))
 
 (defn display-graph [g]
   (gviz/view g))

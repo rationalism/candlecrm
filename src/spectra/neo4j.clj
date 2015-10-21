@@ -115,13 +115,14 @@
                (zipmap nodes)
                (map #(str (val %) (key %)))
                (str/join " AND "))
-          " CREATE root = (a0)"
-          (->> (map cypher-esc-token links)
+          " CREATE root = (a0"
+          (->> (map #(nth % 2) links)
+               (map cypher-esc-token)
                (zipmap (drop 1 id-list))
-               (map #(str "-[:" (val %)
-                         "]->(" (key %)))
-               (str/join "->"))
-          " RETURN root"))))
+               (map #(str ")-[:" (val %)
+                          "]->(" (key %)))
+               str/join)
+          ") RETURN root"))))
 
 (defn find-by-id [id]
   (first
@@ -165,10 +166,13 @@
   (p :batch-insert
      (let [nodes (nn/create-batch
                   *graph* (map #(filter-props (:props %)) items))]
-       (map #(nl/add *graph* %1 (:labels %2)) nodes items)
+       (doall (map #(nl/add *graph* %1 (:labels %2)) nodes items))
        nodes)))
 
 (defn replace-labels! [vertex labels]
+  (prn "replace-labels!")
+  (prn vertex)
+  (prn labels)
   (p :replace-labels
      (nl/replace *graph* vertex labels)))
 

@@ -1,6 +1,7 @@
 (ns spectra.regex
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [spectra.schema :as s]
             [environ.core :refer [env]])
   (:import [com.google.i18n.phonenumbers PhoneNumberUtil]))
 
@@ -11,7 +12,8 @@
   (re-seq email-regex text))
 
 (defn email-person [addr]
-  (assoc {} :email addr))
+  (assoc {} s/email-addr (vector addr)
+         :label s/person))
 
 (defn find-email-people [text]
   (->> (find-email-addrs text)

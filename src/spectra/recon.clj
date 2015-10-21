@@ -46,9 +46,10 @@
        neo4j/cypher-list))
 
 (defn labeled-list-from-props [user type-name props]
-  (->> (neo4j/cypher-props-any props)
-       (type-query user type-name)
-       neo4j/cypher-labeled-list))
+  (if (or (nil? props) (empty? props)) []
+      (->> (neo4j/cypher-props-any props)
+           (type-query user type-name)
+           neo4j/cypher-labeled-list)))
 
 (defn person-from-props [user props]       
   (->> (neo4j/cypher-props-coll props)
@@ -141,7 +142,7 @@
        (map #(expand-entity % properties))))
 
 (defn lookup-hash [prop-name node]
-  (->> node val :data prop-name
+  (->> node key :data prop-name
        (map #(hash-map % (hash-map (key node) (val node))))
        (apply merge)))
 
@@ -151,21 +152,29 @@
        (apply merge)))
 
 (defn recon-labels [node old-labels]
-  (when (and (contains? node s/name)
-             (some #{s/person} old-labels)
-             (= s/organization (:label node)))
-    (conj (remove #(= s/person %) old-labels) s/organization)))
+  (if (and (contains? node s/name)
+           (some #{s/person} old-labels)
+           (= s/organization (:label node)))
+    (conj (remove #(= s/person %) old-labels) s/organization)
+    (:label node)))
+
+(defn node-match [prop node-map]
+  (if (coll? prop)
+    (->> prop (map #(node-map %)) first first)
+    (-> prop node-map first)))
 
 (defn link-node [prop-name node-map g old-node]
-  (let [new-node (-> old-node prop-name node-map first)
-        new-labels (->> new-node val (recon-labels old-node))]
-    (-> (loom/add-edges g [[old-node (key new-node) :database-match]])
-        (loom/replace-node old-node (assoc old-node :label new-labels)))))
+  (if (or (nil? node-map) (empty? node-map)) g
+      (if-let [new-node (-> old-node prop-name (node-match node-map))]
+        (-> (loom/add-edges g [[old-node (key new-node) :database-match]])
+            (loom/replace-node old-node (->> new-node val (recon-labels old-node)
+                                             (assoc old-node :label))))
+        g)))
 
 (defn merged-props [chain types]
   (->> (loom/nodes chain)
        (filter #(some #{(:label %)} types))
-       (map #(dissoc :label %))
+       (map #(dissoc % :label :hyperlink :hash))
        (apply merge-with concat)))
 
 (defn link-graph [type-names nodes g prop-name]
@@ -194,13 +203,13 @@
        (map #(neo4j/merge-property-list!
               (second match-edge) %
               (-> match-edge first %))))
-  (if-let [labels (-> match-edge first :label)]
+  (if-let [labels (-> match-edge first :label coll?)]
     (neo4j/replace-labels! (second match-edge) labels)))
 
 (defn merge-graph! [g]
   (let [match-edges (->> (loom/weighted-edges g)
                          (filter #(= (nth % 2) :database-match)))]
-    (doall (pmap merge-edge! match-edges))
+    (doall (map merge-edge! match-edges))
     (reduce #(loom/replace-node %1 (first %2) (second %2)) g match-edges)))
 
 (defn filter-memory [g type-name]
@@ -231,7 +240,7 @@
 
 (defn find-old-emails [g]
   (let [emails (filter-memory g s/email)]
-    (reduce #(when (-> %2 val nil? not)
+    (reduce #(if (-> %2 val nil?) %1
                (loom/replace-node %1 (key %2) (val %2)))
             g (->> emails
                    (pmap #(find-old-email g %))

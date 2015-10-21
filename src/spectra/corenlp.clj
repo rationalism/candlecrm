@@ -509,10 +509,9 @@
                 (apply merge-with concat))]
     entity-map {}))
 
-(defn nlp-people [entities]
-  (->> (concat (entities s/person-name)
-               (entities s/org-name))
-       (map regex/parse-name-email)
+(defn nlp-people [graph]
+  (->> (loom/select-edges graph "!type!")
+       (filter #(some #{(second %)} [s/person-name s/org-name]))
        distinct))
 
 (defn run-nlp [pipeline text]
