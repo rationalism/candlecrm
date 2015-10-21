@@ -8,6 +8,8 @@
 (def pwd-hash :pwd-hash)
 (def google-token :google-token)
 (def type-label :label)
+(def date-time :date-time)
+(def hash :hash)
 
 (def person "person")
 (def email-addr :email-addr)
@@ -29,7 +31,16 @@
 (def email-sub-hash :sub-hash)
 (def email-reply :reply)
 
-(def location-type "location")
+(def location "location")
+(def loc-name :loc-name)
+
+(def organization "org")
+(def person-name :person-name)
+(def org-name :org-name)
+
+(def money "money")
+(def amount :amount)
+(def event "event")
 
 (defn prop
   ([arg1 arg2 arg3]
@@ -119,7 +130,7 @@
 ;    (prop email email-sent OType/DATETIME))
 ;  
 ;  (let [email (get-vertex g email-type)
-;        location (vertex g location-type)]
+;        location (vertex g location)]
 ;    (prop location name-type OType/STRING))
 ;    
 ;  ;; This composite index needed for fast search on multiple properties
@@ -143,5 +154,5 @@
 ;  (drop-vertex! g user-type)
 ;  (drop-vertex! g person-type)
 ;  (drop-vertex! g email-type)
-;  (drop-vertex! g location-type))
+;  (drop-vertex! g location))
 ;

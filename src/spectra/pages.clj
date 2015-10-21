@@ -67,6 +67,21 @@
       (html/base-template (html/not-found-error)))
     (html/base-template (html/unauthorized-error))))
 
+(defn show-email [req id]
+  (show-person req id))
+
+(defn show-organization [req id]
+  (show-person req id))
+
+(defn show-location [req id]
+  (show-person req id))
+
+(defn show-event [req id]
+  (show-person req id))
+
+(defn show-money [req id]
+  (show-person req id))
+
 (defn ajax-test [req]
   (html/base-template
    (html/ajax-test)))

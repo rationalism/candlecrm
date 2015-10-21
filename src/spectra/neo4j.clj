@@ -43,14 +43,27 @@
   [(key pair)
    (rec/instantiate-node-from (val pair))])
 
+(defn cypher-pair-labeled [pair]
+  [(rec/instantiate-node-from (val pair))
+   (-> pair val :metadata :labels)])
+
 (defn cypher-map-to-node [cymap]
   (->> cymap
        (map cypher-pair-to-node)
        (into {})))
 
+(defn cypher-map-node-labeled [cymap]
+  (->> cymap
+       (map cypher-pair-labeled)
+       (into {})))
+
 (defn cypher-query [query]
   (->> (cy/tquery *graph* query)
        (map cypher-map-to-node)))
+
+(defn cypher-query-labeled [query]
+  (->> (cy/tquery *graph* query)
+       (map cypher-map-node-labeled)))
 
 (defn cypher-prop-any [prop]
   (str " ANY (x in root." (cypher-esc-token (key prop))
@@ -80,6 +93,10 @@
        (map first)
        (map val)))
 
+(defn cypher-labeled-list [query]
+  (->> (cypher-query-labeled query)
+       (apply merge)))
+
 (defn get-property [vertex property]
   (let [value (property (:data vertex))]
     (if (coll? value) (into #{} value) value)))
@@ -87,6 +104,24 @@
 (defn set-property! [vertex property value]
   (nn/set-property *graph* vertex property
                    (dt/catch-dates value)))
+
+(defn create-links! [nodes links]
+  (let [id-list (->> nodes count range
+                     (map #(str "a" %)))]
+    (cypher-query
+     (str "MATCH (" (str/join "), (" id-list)
+          ") WHERE "
+          (->> (map #(str "ID(" % ")= ") id-list)
+               (zipmap nodes)
+               (map #(str (val %) (key %)))
+               (str/join " AND "))
+          " CREATE root = (a0)"
+          (->> (map cypher-esc-token links)
+               (zipmap (drop 1 id-list))
+               (map #(str "-[:" (val %)
+                         "]->(" (key %)))
+               (str/join "->"))
+          " RETURN root"))))
 
 (defn find-by-id [id]
   (first
@@ -101,6 +136,13 @@
   (let [old-props (get-property vertex property)]
     (if (some #{value} old-props)
       nil (set-property! vertex property (conj old-props value)))))
+
+(defn merge-property-list! [vertex property values]
+  (->> property
+       (get-property vertex)
+       (concat values)
+       distinct
+       (set-property! vertex property)))
 
 ;; TODO: fix this, it's obsolete
 (defn delete-property! [vertex property]
@@ -123,8 +165,12 @@
   (p :batch-insert
      (let [nodes (nn/create-batch
                   *graph* (map #(filter-props (:props %)) items))]
-       (map #(nl/add *graph* %1 (:labels %2))
-            nodes items))))
+       (map #(nl/add *graph* %1 (:labels %2)) nodes items)
+       nodes)))
+
+(defn replace-labels! [vertex labels]
+  (p :replace-labels
+     (nl/replace *graph* vertex labels)))
 
 (defn delete-vertex! [vertex]
   (nn/destroy *graph* vertex))

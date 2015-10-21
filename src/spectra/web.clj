@@ -90,6 +90,21 @@
   (GET "/person/:id" [id :as req]
        (friend/authenticated
         (html-wrapper (pages/show-person req id))))
+  (GET "/email/:id" [id :as req]
+       (friend/authenticated
+        (html-wrapper (pages/show-email req id))))
+  (GET "/organization/:id" [id :as req]
+       (friend/authenticated
+        (html-wrapper (pages/show-organization req id))))
+  (GET "/location/:id" [id :as req]
+       (friend/authenticated
+        (html-wrapper (pages/show-location req id))))
+  (GET "/event/:id" [id :as req]
+       (friend/authenticated
+        (html-wrapper (pages/show-event req id))))
+  (GET "/finance/:id" [id :as req]
+       (friend/authenticated
+        (html-wrapper (pages/show-money req id))))
   (route/resources "/")
   (route/not-found (slurp (io/resource "public/404.html"))))
 

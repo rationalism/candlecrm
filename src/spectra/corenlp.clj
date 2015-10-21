@@ -2,8 +2,10 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [spectra.common :as com]
+            [spectra.datetime :as dt]
             [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
+            [spectra.schema :as s]
             [spectra.regex :as regex]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
@@ -26,10 +28,11 @@
 
 (def sentence-annotators ["tokenize" "ssplit"])
 (def token-annotators ["tokenize" "ssplit" "pos" "lemma"])
-(def ner-annotators
-  (concat ["tokenize" "ssplit" "pos" "lemma" "ner"]
+(def ner-annotators (concat token-annotators ["ner" "entitymentions"]))
+(def full-annotators
+  (concat ner-annotators
           (if (env :coreference) ["parse" "dcoref"] [])
-          ["depparse" "natlog" "openie" "entitymentions"]))
+          ["depparse" "natlog" "openie"]))
 (def recurse-annotators
   (concat token-annotators ["depparse" "natlog" "openie"]))
 (def truecase-annotators
@@ -46,12 +49,9 @@
 (def shift-parse-model "edu/stanford/nlp/models/srparser/englishSR.ser.gz")
 (def pcfg-parse-model "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
 
-(def misc-key "MISC")
-(def number-key "NUMBER")
-(def location-key "LOCATION")
-(def person-key "PERSON")
-(def date-key "DATE")
-(def organization-key "ORGANIZATION")
+(def schema-map {"PERSON" s/person-name "DATE" s/date-time
+                 "TIME" s/date-time "LOCATION" s/loc-name
+                 "ORGANIZATION" s/org-name "MONEY" s/amount})
 
 (def pronoun-parts ["PRP" "PRP$"])
 
@@ -217,12 +217,11 @@
    (map chain-graph coref)))
 
 (defn ner-node [entity]
-  (get-tokens entity))
+  (into [] (get-tokens entity)))
 
 (defn ner-edge [entity]
-  (vector (ner-node entity)
-          (entity-type entity)
-          "!type!"))
+  (when-let [schema-type (-> entity entity-type schema-map)]
+    (vector (ner-node entity) schema-type "!type!")))
 
 (defn ner-graph [entity]
   (loom/build-graph (list (ner-node entity))
@@ -275,7 +274,9 @@
       empty? not))
 
 (defn tokens? [tokens]
-  (every? identity (map #(= CoreLabel (type %)) tokens)))
+  (cond (not (coll? tokens)) false
+        :else (every? identity (map #(= CoreLabel (type %))
+                                    tokens))))
 
 (defn pos-map-node [g node]
   (->> (loom/labeled-edges g node "!pos-map!")
@@ -395,6 +396,19 @@
 (defn pronoun-graph [nodes]
   (loom/build-graph nodes (map pronoun-edge nodes)))
 
+(defn library-edge [text label]
+  [text label "!type!"])
+
+(defn library-ner [text]
+  (loom/build-graph
+   [] (concat
+       (map #(library-edge % s/email-addr)
+            (regex/find-email-addrs text))
+       (map #(library-edge % s/phone-num)
+            (regex/find-phone-nums text))
+       (map #(library-edge % s/date-time)
+            (dt/find-dates text)))))
+
 (defn sentence-graph [sent-pair]
   (-> (loom/merge-graphs
        [(-> (get-triples (val sent-pair))
@@ -403,7 +417,8 @@
             trampoline)
         (->> (entity-mentions (val sent-pair))
              (map #(ner-graph %))
-             loom/merge-graphs)])
+             loom/merge-graphs)
+        (-> sent-pair val .toString library-ner)])
       (dedup-graph (key sent-pair))
       recursion-cleanup
       stringify-graph))
@@ -495,8 +510,8 @@
     entity-map {}))
 
 (defn nlp-people [entities]
-  (->> (concat (entities person-key)
-               (entities organization-key))
+  (->> (concat (entities s/person-name)
+               (entities s/org-name))
        (map regex/parse-name-email)
        distinct))
 

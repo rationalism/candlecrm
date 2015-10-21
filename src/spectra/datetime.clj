@@ -5,15 +5,22 @@
              :refer (pspy pspy* profile defnp p p*)])
   (:import [com.joestelmach.natty Parser]))
 
-(defn dates-in-text [text]
+(defn parse-dates [text]
   (p :find-dates
      ;; This try-catch block needed in case of parse errors
-     (->> (try (.parse (Parser. ) text)
-               (catch Exception e []))
-          (map #(.getDates %))
-          flatten
-          (map first)
-          distinct)))
+     (try (.parse (Parser. ) text)
+          (catch Exception e []))))
+
+(defn dates-in-text [text]
+  (->> (parse-dates text)
+       (map #(.getDates %))
+       flatten
+       (map first)
+       distinct))
+
+(defn find-dates [text]
+  (->> (parse-dates text)
+       (map #(.getText %))))
 
 (defn to-ms [some-date]
   (.getTime some-date))

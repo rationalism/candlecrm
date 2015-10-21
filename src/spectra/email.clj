@@ -159,7 +159,8 @@
             ;; TODO: Use a less compute-intensive version of NLP here
             (com/merge-if-found! (->> (nlp/run-nlp nlp/*pipeline* this-line)
                                       nlp/graph-entities
-                                      nlp/nlp-people) header s/email-from))))
+                                      nlp/nlp-people)
+                                 header s/email-from))))
     (let [new-node {s/email-sent (-> header s/email-sent deref)
                     s/type-label s/email
                     s/email-body (->> lines
@@ -286,6 +287,97 @@
          (do (prn "Email parse error")
              (prn e) {}))))
 
+(def label-type {s/person-name s/person s/org-name s/organization
+                 s/email-addr s/person s/phone-num s/person
+                 s/loc-name s/location s/date-time s/event
+                 s/amount s/money})
+
+(def label-correction {s/person-name s/name s/org-name s/name
+                       s/loc-name s/name s/email-addr s/email-addr
+                       s/phone-num s/phone-num s/date-time s/date-time
+                       s/amount s/amount})
+
+(defn label-edge [edge]
+  (assoc
+   {} (label-correction (second edge)) (first edge)
+   :label (label-type (second edge))
+   :hash (com/sha1 (first edge))))
+
+(defn import-label [chain edge]
+  (loom/replace-node chain (first edge)
+                     (assoc (first edge) :label (second edge))))
+
+(defn hash-brackets [text]
+  (str "<a href='" (com/sha1 text) "'>" text "</a>"))
+
+(defn hyperlink-text [text mentions]
+  (reduce #(str/replace %1 %2 (hash-brackets %2))
+          text mentions))
+
+(defn mention-nodes [chain]
+  (->> (loom/nodes chain)
+       (filter #(loom/out-edge-label % "!type!"))))
+
+(defn use-nlp [chain message]
+  (as-> (->> (s/email-body message)
+             (nlp/run-nlp nlp/*pipeline*)
+             (conj [chain])
+             loom/merge-graphs) $
+    (loom/replace-node $ message
+                       (assoc message s/email-body
+                              (hyperlink-text (s/email-body message)
+                                              (mention-nodes $))))
+    (loom/add-edges $ (->> (mention-nodes $)
+                           (map #(vector message % "!mentions!"))))
+    (reduce import-label $ (->> (loom/weighted-edges $)
+                                (filter #(= "!type!" (nth % 2)))))))
+
+(def url-map {s/person "/person/" s/email "/email/"
+              s/organization "/organization/" s/location "/location/"
+              s/money "/finance/" s/event "/event/"})
+
+(defn add-hyperlink [g edge]
+  (loom/replace-node
+   g (first edge)
+   (assoc (first edge) :hyperlink
+          (str (-> edge first :label url-map)
+               (-> edge second :id)))))
+
+(defn make-hyperlinks [g]
+  (reduce add-hyperlink g
+          (->> (loom/weighted-edges g)
+               (filter #(= :database-match (nth % 2))))))
+
+(defn switch-hyperlinks [text link-map]
+  (reduce #(str/replace %1 %2 (link-map %2))
+          text (keys link-map)))
+
+(defn switch-message [g message]
+  (->> (loom/labeled-edges g message "!mentions!")
+       (map second)
+       (map #(hash-map (:hash %) (:hyperlink %)))
+       (switch-hyperlinks (:body message))
+       (assoc message :body)
+       (loom/replace-node g message)))
+
+(defn spider-path [g node]
+  (if (-> g (loom/out-edges node) count (= 0))
+    [g] (let [edge (-> g (loom/out-edges node) first)]
+          (conj (spider-path (loom/remove-edges g [edge])
+                             (second edge))
+                edge))))
+
+(defn spider-edges [g]
+  (if (-> g loom/weighted-edges count (= 0))
+    [] (let [new-path (->> g loom/top-nodes first
+                           (spider-path g))]
+         (conj (spider-edges (first new-path))
+               (rest new-path)))))
+
+(defn nodes-of-edges [edges]
+  (-> (map second edges)
+      (conj (first (first edges)))))
+
 (defn define-imap-lookup []
   (def ^:dynamic *imap-lookup* {}))
 
@@ -343,7 +435,7 @@
      (let [from (:from-database message)]
        (if (or (nil? from) (empty? from))
          false
-         (not (empty?
+         (not (nil?
                (recon/lookup-old-email
                 message from)))))))
 
@@ -379,13 +471,31 @@
   (p :insert-emails
      (try
        (dorun
-        (->> emails
-             (filter has-valid-from?)
-             (pmap #(from-lookup % user))
-             (filter #(not (already-found? %)))
-             (pmap create-email!)
-             (map #(create-link % user))
-             (map #(insert-links! % email-keys))))
+        (as-> emails $
+            (recon/link-people $ (recon/labeled-people-orgs
+                                  user (recon/merged-props $ [s/people s/organization])))
+            (recon/merge-graph! $)
+            (recon/load-new! $ s/person
+                             [s/person (recon/user-label user)])
+            (recon/load-new! $ s/organization
+                             [s/organization (recon/user-label user)])
+            (recon/find-old-emails $)
+            (reduce use-nlp $ (recon/filter-memory $ s/email))
+            (recon/link-people $ (recon/labeled-people-orgs
+                                  user (recon/merged-props $ [s/people s/organization])))
+            (recon/link-one-prop s/location s/name user $)
+            (recon/link-one-prop s/event s/date-time user $)
+            (recon/link-one-prop s/money s/amount user $)
+            (reduce #(recon/link-new! %1 %2 [%2 (recon/user-label user)])
+                    $ [s/people s/organization s/location s/event s/money])
+            (make-hyperlinks $)
+            (reduce switch-message $ (recon/filter-memory $ s/email))
+            (recon/link-new! $ s/email [s/email (recon/user-label user)])
+            (recon/merge-graph! $)
+            (reduce #(loom/replace-node %1 %2 (:id %2))
+                    $ (loom/nodes $))
+            (spider-edges $)
+            (pmap #(loom/create-links! (nodes-of-edges %) %) $)))
        (catch Exception e
          (do (prn "Email insertion error")
              (prn e) nil)))))

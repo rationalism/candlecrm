@@ -3,6 +3,7 @@
             [clojure.string :as str]
             [spectra.common :as com]
             [spectra.datetime :as dt]
+            [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra.schema :as s]
             [environ.core :refer [env]]
@@ -11,6 +12,9 @@
 
 (defn user-label [user]
   (str "user_" (:id user)))
+
+(defn person-labels [user]
+  [s/person (user-label user)])
 
 (defn create-user! [user]
   (neo4j/create-vertex!
@@ -30,17 +34,30 @@
         new-person (create-person! new-user {s/email (:identity user)})]
     (neo4j/create-edge! new-user new-person s/user-person)))
 
-(defn person-query [user filters]
-  (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
-                          ":" s/person
-                          " ) WHERE " filters
-                          " RETURN root")))
+(defn type-query [user type-name filters]
+  (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
+       ":" type-name
+       " ) WHERE " filters
+       " RETURN root"))
 
-(defn people-from-props [user props]
-  (person-query user (neo4j/cypher-props-any props)))
+(defn list-from-props [user type-name props]
+  (->> (neo4j/cypher-props-any props)
+       (type-query user type-name)
+       neo4j/cypher-list))
+
+(defn labeled-list-from-props [user type-name props]
+  (->> (neo4j/cypher-props-any props)
+       (type-query user type-name)
+       neo4j/cypher-labeled-list))
 
 (defn person-from-props [user props]       
-  (person-query user (neo4j/cypher-props-coll props)))
+  (->> (neo4j/cypher-props-coll props)
+       (type-query user s/person)
+       neo4j/cypher-list))
+
+(defn labeled-people-orgs [user props]
+  (merge (labeled-list-from-props user s/person props)
+         (labeled-list-from-props user s/organization props)))
 
 (defn person-from-id [user id]
    (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
@@ -50,10 +67,10 @@
 
 (defn person-from-user [user start limit]
    (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
-                            ":" s/person
-                            ") RETURN root"
-                            " ORDER BY root." (neo4j/cypher-esc-token s/name)
-                            "[0] SKIP " start " LIMIT " limit)))
+                           ":" s/person
+                           ") RETURN root"
+                           " ORDER BY root." (neo4j/cypher-esc-token s/name)
+                           "[0] SKIP " start " LIMIT " limit)))
 
 (def person-match-attrs
   [s/email-addr s/phone-num s/name])
@@ -78,22 +95,21 @@
 (def sent-tolerance 300000)
 
 (defn lookup-old-email [message person-from]
-  (if (or (nil? person-from)
-          (empty? person-from)
-          (nil? (:id person-from)))
-    []
-    (neo4j/cypher-list
-     (str "MATCH (root:" s/email
-          " " (neo4j/cypher-properties
-               {s/email-sub-hash
-                (com/end-hash (s/email-subject message))})
-          ")-[:" (neo4j/cypher-esc-token s/email-from)
-          "]->(f) WHERE ID (f)=" (:id person-from)
-          " AND (root." (neo4j/cypher-esc-token s/email-sent)
-          " < (" (dt/to-ms (s/email-sent message)) " + " sent-tolerance
-          ")) AND (root." (neo4j/cypher-esc-token s/email-sent)
-          " > (" (dt/to-ms (s/email-sent message)) " - " sent-tolerance 
-          ")) RETURN root"))))
+  (when (not (or (nil? person-from)
+                 (empty? person-from)
+                 (nil? (:id person-from))))
+    (-> (str "MATCH (root:" s/email
+             " " (neo4j/cypher-properties
+                  {s/email-sub-hash
+                   (com/end-hash (s/email-subject message))})
+             ")-[:" (neo4j/cypher-esc-token s/email-from)
+             "]->(f) WHERE ID (f)=" (:id person-from)
+             " AND (root." (neo4j/cypher-esc-token s/email-sent)
+             " < (" (dt/to-ms (s/email-sent message)) " + " sent-tolerance
+             ")) AND (root." (neo4j/cypher-esc-token s/email-sent)
+             " > (" (dt/to-ms (s/email-sent message)) " - " sent-tolerance 
+             ")) RETURN root")
+        neo4j/cypher-list first)))
 
 (defn recon-person! [old-person new-person]
   (doseq [param [s/name s/email-addr s/phone-num]]
@@ -121,15 +137,107 @@
         properties)))
 
 (defn list-entities-full [entity-class properties]
-  (let [entities (list-entities entity-class)]
-    (map #(expand-entity % properties) entities)))
+  (->> (list-entities entity-class)
+       (map #(expand-entity % properties))))
 
 (defn lookup-hash [prop-name node]
-  (->> node :data prop-name
-       (map #(hash-map % node))
+  (->> node val :data prop-name
+       (map #(hash-map % (hash-map (key node) (val node))))
        (apply merge)))
 
 (defn lookup-map [prop-name nodes]
   (->> nodes
        (map #(lookup-hash prop-name %))
        (apply merge)))
+
+(defn recon-labels [node old-labels]
+  (when (and (contains? node s/name)
+             (some #{s/person} old-labels)
+             (= s/organization (:label node)))
+    (conj (remove #(= s/person %) old-labels) s/organization)))
+
+(defn link-node [prop-name node-map g old-node]
+  (let [new-node (-> old-node prop-name node-map first)
+        new-labels (->> new-node val (recon-labels old-node))]
+    (-> (loom/add-edges g [[old-node (key new-node) :database-match]])
+        (loom/replace-node old-node (assoc old-node :label new-labels)))))
+
+(defn merged-props [chain types]
+  (->> (loom/nodes chain)
+       (filter #(some #{(:label %)} types))
+       (map #(dissoc :label %))
+       (apply merge-with concat)))
+
+(defn link-graph [type-names nodes g prop-name]
+  (reduce (partial link-node prop-name
+                   (lookup-map prop-name nodes))
+          g (->> (loom/nodes g)
+                 (filter #(some #{(:label %)} type-names)))))
+
+(defn link-one-prop [type-name prop-name user graph]
+  (link-graph [type-name]
+              (labeled-list-from-props
+               user type-name (merged-props graph [type-name]))
+              graph prop-name))
+
+(defn link-people [g nodes]
+  (reduce (partial link-graph [s/person s/organization] nodes)
+          g [s/email-addr s/phone-num s/name]))
+
+(defn merge-edge! [match-edge]
+  (->> match-edge second :data keys
+       (concat (-> match-edge first keys))
+       distinct
+       (remove #(some #{%} [:label :hyperlink :hash]))
+       (filter #(not= (-> match-edge second :data %)
+                      (-> match-edge first %)))
+       (map #(neo4j/merge-property-list!
+              (second match-edge) %
+              (-> match-edge first %))))
+  (if-let [labels (-> match-edge first :label)]
+    (neo4j/replace-labels! (second match-edge) labels)))
+
+(defn merge-graph! [g]
+  (let [match-edges (->> (loom/weighted-edges g)
+                         (filter #(= (nth % 2) :database-match)))]
+    (doall (pmap merge-edge! match-edges))
+    (reduce #(loom/replace-node %1 (first %2) (second %2)) g match-edges)))
+
+(defn filter-memory [g type-name]
+  (->> (loom/nodes g)
+       (filter #(= (s/type-label %) type-name))
+       (filter #(nil? (:data %)))))
+
+(defn push-new! [labels old-nodes]
+  (->> old-nodes
+       (map #(dissoc % :label :hyperlink :hash))
+       (map #(hash-map :props %))
+       (map #(assoc % :labels labels))
+       neo4j/batch-insert!
+       (zipmap old-nodes)))
+
+(defn load-new! [g type-name labels]
+  (reduce #(loom/replace-node %1 (key %2) (val %2))
+          g (push-new! labels (filter-memory g type-name))))
+
+(defn link-new! [g type-name labels]
+  (loom/add-edges g (->> (filter-memory g type-name)
+                         (push-new! labels)
+                         (map #(vector (key %) (val %) :database-match)))))
+
+(defn find-old-email [g message]
+   (->> (loom/out-edge-label g message s/email-from)
+        second (lookup-old-email message)))
+
+(defn find-old-emails [g]
+  (let [emails (filter-memory g s/email)]
+    (reduce #(when (-> %2 val nil? not)
+               (loom/replace-node %1 (key %2) (val %2)))
+            g (->> emails
+                   (pmap #(find-old-email g %))
+                   (zipmap emails)))))
+
+
+    
+                        
+                                     

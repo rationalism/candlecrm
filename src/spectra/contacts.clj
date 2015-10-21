@@ -47,14 +47,11 @@
    (->> (.getPhoneNumbers contact)
         (mapv #(.getPhoneNumber %)))})
 
-(defn person-labels [user]
-  [s/person (recon/user-label user)])
-  
 (defn batch-insert! [user contacts]
   (->> contacts 
     (map contact-to-map)
     (map #(hash-map :props %))
-    (map #(assoc % :labels (person-labels user)))
+    (map #(assoc % :labels (recon/person-labels user)))
     neo4j/batch-insert!))
 
 (defn load-all-contacts! [user]
