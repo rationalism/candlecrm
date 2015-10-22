@@ -48,6 +48,15 @@
                   loc-name location date-time event
                   amount money})
 
+(def attr-names {name "Name" amount "Amount"
+                 email-addr "Address" email-subject "Subject"
+                 email-to "Email to" email-from "Email from"
+                 email-reply "Reply to" email-body "Email body"
+                 date-time "Time" email-received "Email received"
+                 email-sent "Email sent" phone-num "Phone number"})
+
+(def person-attrs [name email-addr phone-num])
+
 (defn prop
   ([arg1 arg2 arg3]
    (.createProperty arg1 arg2 arg3))

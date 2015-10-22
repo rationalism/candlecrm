@@ -25,10 +25,6 @@
    [:p [:a {:href "/gmail"} "Connect to GMail here"]]
    [:p [:a {:href "/logout"} "Logout here"]]])
 
-(def person-attrs {s/name "Name"
-                   s/email-addr "Email"
-                   s/phone-num "Phone number"})
-
 (defn header-cell [attr]
   [:td (val attr)])
 
@@ -42,13 +38,15 @@
          (person (key attr)))])
 
 (defn person-row [person]
-  [:tr (map #(person-cell person %) person-attrs)])
+  [:tr (map #(person-cell person %) s/attr-names)])
 
 (defn people-table []
   [:div {:class "columns small-12"}
    [:table {:id "people-table"}
     [:thead {:id "people-header"}
-     (map header-cell person-attrs)]
+     (->> s/person-attrs
+          (map s/attr-names)
+          (map header-cell))]
     [:tbody {:id "people-rows"}]]
    [:a {:href "#" :onclick "return false;"
         :id "prev-people-page"} "<-- Previous"]
@@ -140,7 +138,7 @@
     (str/join ", " item) item))
 
 (defn info-item [item]
-  [:p.infoitem (str (-> item key person-attrs) ": "
+  [:p.infoitem (str (-> item key s/attr-names) ": "
                     (-> item val string-item))])
 
 (defn show-person [person-name attrs emails-to emails-from]

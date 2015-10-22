@@ -6,6 +6,7 @@
                  [org.clojure/clojurescript "1.7.145"
                   :exclusions [args4j com.google.code.findbugs/jsr305]]
                  [org.clojure/tools.nrepl "0.2.11"]
+                 [clj-time "0.11.0"]
                  [http-kit "2.1.19"]
                  [ring/ring-core "1.4.0"
                   :exclusions [joda-time commons-codec]]

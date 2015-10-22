@@ -1,6 +1,8 @@
 (ns spectra.datetime
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
+            [clj-time.coerce :as coerce]
+            [clj-time.format :as format]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [com.joestelmach.natty CalendarSource Parser]))
@@ -37,3 +39,11 @@
 (defn catch-dates-map [pair]
   [(key pair)
    (catch-dates (val pair))])
+
+(def formatter (format/formatters :rfc822))
+
+(defn format-date [value]
+  (->> value (java.util.Date. )
+       coerce/from-date
+       (format/unparse formatter)))
+      
