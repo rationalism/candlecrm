@@ -63,7 +63,7 @@
 (do ; Server-side methods
   (defmethod event-msg-handler :pages/fetch-people
     [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-    (when-let [user (auth/user-from-req ring-req)] 
+    (when-let [user (auth/user-from-req ring-req)]
       (when ?reply-fn
         (?reply-fn (pages/people-table user (:start ?data) (:limit ?data))))))
 

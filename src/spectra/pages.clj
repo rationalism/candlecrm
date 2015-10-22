@@ -34,6 +34,7 @@
        hiccup/html))
 
 (defn homepage [req]
+  (prn "homepage")
   (if-let [user (auth/user-from-req req)]
     (html/base-template
      (html/user-welcome (:flash req) (auth/get-username user))
@@ -60,8 +61,6 @@
    (html/login-needed uri)))
 
 (defn show-person [person]
-  (prn "show-person")
-  (prn person)
   (html/show-person (-> person :data :name first)
                     (-> person :data)
                     (-> person :id (neo4j/one-hop-out s/email-to))

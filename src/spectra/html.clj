@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [environ.core :refer [env]]
+            [spectra.datetime :as dt]
             [spectra.schema :as s])
   (:use [hiccup.core] [hiccup.page]
         [ring.util.anti-forgery]))
@@ -25,20 +26,20 @@
    [:p [:a {:href "/gmail"} "Connect to GMail here"]]
    [:p [:a {:href "/logout"} "Logout here"]]])
 
-(defn header-cell [attr]
-  [:td (val attr)])
+(defn header-cell [attr] [:td attr])
 
 (defn person-link [person attr]
   [:a {:href (str "/person/" (person :id))}
    (person attr)])
 
 (defn person-cell [person attr]
-  [:td (if (= s/name (key attr))
-         (person-link person (key attr))
-         (person (key attr)))])
+  [:td (if (= s/name attr)
+         (person-link person attr)
+         (person attr))])
 
 (defn person-row [person]
-  [:tr (map #(person-cell person %) s/attr-names)])
+  (prn "person-row")
+  [:tr (map #(person-cell person %) s/person-attrs)])
 
 (defn people-table []
   [:div {:class "columns small-12"}
@@ -133,13 +134,14 @@
 (defn login-needed [uri]
   [:h2 "You do not have sufficient privileges to access " uri])
 
-(defn string-item [item]
-  (if (coll? item)
-    (str/join ", " item) item))
+(defn string-item [item prop]
+  (cond (coll? item) (str/join ", " item)
+        (= prop s/date-time) (dt/format-date item)
+        :else item))
 
 (defn info-item [item]
   [:p.infoitem (str (-> item key s/attr-names) ": "
-                    (-> item val string-item))])
+                    (-> item val (string-item (key item))))])
 
 (defn show-person [person-name attrs emails-to emails-from]
   [:div {:class "columns small-12"}
