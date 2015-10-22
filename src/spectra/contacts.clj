@@ -51,7 +51,7 @@
   (->> contacts 
     (map contact-to-map)
     (map #(hash-map :props %))
-    (map #(assoc % :labels (recon/person-labels user)))
+    (map #(assoc % :labels (neo4j/person-labels user)))
     neo4j/batch-insert!))
 
 (defn load-all-contacts! [user]

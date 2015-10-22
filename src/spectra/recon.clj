@@ -159,10 +159,20 @@
                                              (assoc old-node :label))))
         g)))
 
+(defn vectorize-pair [pair]
+  (hash-map (key pair)
+            (if (coll? (val pair)) (val pair)
+                       (vector (val pair)))))
+
+(defn vectorize-map [props]
+  (->> (map vectorize-pair props)
+       (apply merge)))
+
 (defn merged-props [chain types]
   (->> (loom/nodes chain)
        (filter #(some #{(:label %)} types))
        (map #(dissoc % :label :hyperlink :hash))
+       (map vectorize-map)
        (apply merge-with concat)))
 
 (defn link-graph [type-names nodes g prop-name]

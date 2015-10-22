@@ -63,20 +63,20 @@
 (defn sent-time [message]
   (.getSentDate message))
 
-(def label-type {s/person-name s/person s/org-name s/organization
-                 s/email-addr s/person s/phone-num s/person
-                 s/loc-name s/location s/date-time s/event
-                 s/amount s/money})
-
 (def label-correction {s/person-name s/name s/org-name s/name
                        s/loc-name s/name s/email-addr s/email-addr
                        s/phone-num s/phone-num s/date-time s/date-time
                        s/amount s/amount})
 
+(defn format-value [edge]
+  (let [new-label (-> edge second label-correction)]
+    (if (some #{new-label} s/repeated-attr)
+      (vector (first edge)) (first edge))))
+
 (defn label-edge [edge]
   (assoc
-   {} (label-correction (second edge)) (vector (first edge))
-   :label (label-type (second edge))
+   {} (label-correction (second edge)) (format-value edge)
+   :label (s/attr-entity (second edge))
    :hash (com/sha1 (first edge))))
 
 (defn import-label [chain edge]
@@ -303,6 +303,7 @@
 (defn full-parse [message]
   (try (-> message
            get-text-recursive
+           regex/strip-javascript
            raw-msg-chain
            (merge-bottom-headers (headers-parse message))
            message-inference)
@@ -322,12 +323,14 @@
        (filter #(loom/out-edge-label chain % "!type!"))))
 
 (defn parse-datetime [chain event]
-  (->> (loom/in-edge-label chain event "!mentions!")
-       s/email-sent
-       (dt/dates-in-text (s/date-time event))
-       first
-       (assoc event s/date-time)
-       (loom/replace-node chain event)))
+  (if (-> event s/date-time type (= java.util.Date)) chain
+      (->> (loom/in-edge-label chain event "!mentions!")
+           first
+           s/email-sent
+           (dt/dates-in-text (s/date-time event))
+           first
+           (assoc event s/date-time)
+           (loom/replace-node chain event))))
   
 (defn use-nlp [chain message]
   (as-> (->> (s/email-body message)
@@ -474,9 +477,9 @@
                                   user (recon/merged-props $ [s/person s/organization])))
             (recon/merge-graph! $)
             (recon/load-new! $ s/person
-                             [s/person (recon/user-label user)])
+                             [s/person (neo4j/user-label user)])
             (recon/load-new! $ s/organization
-                             [s/organization (recon/user-label user)])
+                             [s/organization (neo4j/user-label user)])
             (recon/find-old-emails $)
             (reduce use-nlp $ (recon/filter-memory $ s/email))
             (recon/link-people $ (recon/labeled-people-orgs
@@ -484,11 +487,11 @@
             (recon/link-one-prop s/location s/name user $)
             (recon/link-one-prop s/event s/date-time user $)
             (recon/link-one-prop s/money s/amount user $)
-            (reduce #(recon/link-new! %1 %2 [%2 (recon/user-label user)])
+            (reduce #(recon/link-new! %1 %2 [%2 (neo4j/user-label user)])
                     $ [s/person s/organization s/location s/event s/money])
             (make-hyperlinks $)
             (reduce switch-message $ (recon/filter-memory $ s/email))
-            (recon/link-new! $ s/email [s/email (recon/user-label user)])
+            (recon/link-new! $ s/email [s/email (neo4j/user-label user)])
             (recon/merge-graph! $)
             (reduce #(loom/replace-node %1 %2 (:id %2))
                     $ (loom/nodes $))

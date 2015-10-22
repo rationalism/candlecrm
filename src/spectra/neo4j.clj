@@ -190,9 +190,6 @@
        nodes)))
 
 (defn replace-labels! [vertex labels]
-  (prn "replace-labels!")
-  (prn vertex)
-  (prn labels)
   (p :replace-labels
      (nl/replace *graph* vertex labels)))
 

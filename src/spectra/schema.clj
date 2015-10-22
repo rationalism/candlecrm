@@ -1,6 +1,5 @@
 (ns spectra.schema
   (:require [clojure.java.io :as io]
-            [spectra.neo4j :as neo4j]
             [environ.core :refer [env]]))
 
 (def user "user")
@@ -41,6 +40,13 @@
 (def money "money")
 (def amount :amount)
 (def event "event")
+
+(def repeated-attr [person-name org-name email-addr phone-num])
+
+(def attr-entity {person-name person org-name organization
+                  email-addr person phone-num person
+                  loc-name location date-time event
+                  amount money})
 
 (defn prop
   ([arg1 arg2 arg3]
@@ -134,7 +140,7 @@
 ;    (prop location name-type OType/STRING))
 ;    
 ;  ;; This composite index needed for fast search on multiple properties
-;  ;; See https://github.com/orientechnologies/orientdb/issues/4862
+;  ;; See https://github.com/orientechnologieorientdb/issue4862
 ;  (neo4j/sql-command! g (str "CREATE INDEX "
 ;                             user-person-index
 ;                             " ON "
