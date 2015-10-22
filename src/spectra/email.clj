@@ -86,9 +86,11 @@
   (merge
    {s/email-addr (vector (.getAddress address))}
    (let [personal (.getPersonal address)]
-     (if (nil? personal) {:label s/person}
-         (->> (nlp/run-nlp nlp/*pipeline* personal)
-              nlp/nlp-people first label-edge)))))
+     (if (or (nil? personal)
+             (-> personal regex/find-email-addrs empty? not))
+       {:label s/person}
+       (->> (nlp/run-nlp nlp/*pipeline* personal)
+            nlp/nlp-people first label-edge)))))
 
 (defn decode-header [header]
   {(.getName header) (.getValue header)})
