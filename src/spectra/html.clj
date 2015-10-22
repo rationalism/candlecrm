@@ -1,5 +1,6 @@
 (ns spectra.html
   (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [environ.core :refer [env]]
             [spectra.schema :as s])
   (:use [hiccup.core] [hiccup.page]
@@ -53,6 +54,19 @@
         :id "prev-people-page"} "<-- Previous"]
    [:a {:href "#" :onclick "return false;"
         :id "next-people-page"} "Next -->"]])
+
+(def email-attrs {s/email-sent "Date"
+                  s/email-subject "Subject"})
+
+(defn email-table [emails]
+  [:table {:id "email-table"}
+   [:thead {:id "email-header"}
+    (map header-cell email-attrs)]
+   [:tbody {:id "email-rows"}]]
+  [:a {:href "#" :onclick "return false;"
+       :id "prev-email-page"} "<-- Previous"]
+  [:a {:href "#" :onclick "return false;"
+       :id "next-email-page"} "Next -->"])
 
 (defn gmail-setup [flash username auth-url]
   [:div {:class "columns small-12"}
@@ -121,13 +135,46 @@
 (defn login-needed [uri]
   [:h2 "You do not have sufficient privileges to access " uri])
 
-(defn info-item [item]
-  [:p.infoitem (str (key item) ": "
-                    (val item))])
+(defn string-item [item]
+  (if (coll? item)
+    (str/join ", " item) item))
 
-(defn show-person [person-name attrs]
+(defn info-item [item]
+  [:p.infoitem (str (-> item key person-attrs) ": "
+                    (-> item val string-item))])
+
+(defn show-person [person-name attrs emails-to emails-from]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str person-name " (Person)")]
+   (map info-item attrs)
+   [:h3.infotitle (str "Emails to " person-name)]
+   (email-table emails-to)
+   [:h3.infotitle (str "Emails from " person-name)]
+   (email-table emails-from)])
+
+(defn show-email [email-name attrs]
+  [:div {:class "columns small-12"}
+   [:h3.infotitle (str email-name " (Email)")]
+   (map info-item attrs)])
+
+(defn show-organization [organization-name attrs]
+  [:div {:class "columns small-12"}
+   [:h3.infotitle (str organization-name " (Organization)")]
+   (map info-item attrs)])
+
+(defn show-location [location-name attrs]
+  [:div {:class "columns small-12"}
+   [:h3.infotitle (str location-name " (Location)")]
+   (map info-item attrs)])
+
+(defn show-event [event-name attrs]
+  [:div {:class "columns small-12"}
+   [:h3.infotitle (str event-name " (Event)")]
+   (map info-item attrs)])
+
+(defn show-money [money-name attrs]
+  [:div {:class "columns small-12"}
+   [:h3.infotitle (str money-name " (Finance)")]
    (map info-item attrs)])
 
 (defn unauthorized-error []

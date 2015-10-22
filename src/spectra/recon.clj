@@ -10,12 +10,6 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
-(defn user-label [user]
-  (str "user_" (:id user)))
-
-(defn person-labels [user]
-  [s/person (user-label user)])
-
 (defn create-user! [user]
   (neo4j/create-vertex!
    s/user 
@@ -24,7 +18,7 @@
   
 (defn create-person! [user person]
   (neo4j/create-vertex!
-   [s/person (user-label user)]
+   [s/person (neo4j/user-label user)]
    (as-> person $
        (select-keys $ [s/name s/email-addr s/phone-num])
        (com/map-values $ (keys $) vector))))
@@ -35,7 +29,7 @@
     (neo4j/create-edge! new-user new-person s/user-person)))
 
 (defn type-query [user type-name filters]
-  (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
+  (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
        ":" type-name
        " ) WHERE " filters
        " RETURN root"))
@@ -60,14 +54,8 @@
   (merge (labeled-list-from-props user s/person props)
          (labeled-list-from-props user s/organization props)))
 
-(defn person-from-id [user id]
-   (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
-                            ":" s/person
-                            " ) WHERE ID(root)= " id
-                            " RETURN root")))
-
 (defn person-from-user [user start limit]
-   (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (user-label user))
+   (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
                            ":" s/person
                            ") RETURN root"
                            " ORDER BY root." (neo4j/cypher-esc-token s/name)

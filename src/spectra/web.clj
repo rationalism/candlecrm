@@ -15,6 +15,7 @@
             [spectra.corenlp :as nlp]
             [spectra.pages :as pages]
             [spectra.quartz :as quartz]
+            [spectra.schema :as s]
             [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
                              [credentials :as creds])
@@ -89,22 +90,22 @@
            (home-with-message "Error: Could not log in"))))
   (GET "/person/:id" [id :as req]
        (friend/authenticated
-        (html-wrapper (pages/show-person req id))))
+        (html-wrapper (pages/show-node req id s/person))))
   (GET "/email/:id" [id :as req]
        (friend/authenticated
-        (html-wrapper (pages/show-email req id))))
+        (html-wrapper (pages/show-node req id s/email))))
   (GET "/organization/:id" [id :as req]
        (friend/authenticated
-        (html-wrapper (pages/show-organization req id))))
+        (html-wrapper (pages/show-node req id s/organization))))
   (GET "/location/:id" [id :as req]
        (friend/authenticated
-        (html-wrapper (pages/show-location req id))))
+        (html-wrapper (pages/show-node req id s/location))))
   (GET "/event/:id" [id :as req]
        (friend/authenticated
-        (html-wrapper (pages/show-event req id))))
+        (html-wrapper (pages/show-node req id s/event))))
   (GET "/finance/:id" [id :as req]
        (friend/authenticated
-        (html-wrapper (pages/show-money req id))))
+        (html-wrapper (pages/show-node req id s/money))))
   (route/resources "/")
   (route/not-found (slurp (io/resource "public/404.html"))))
 

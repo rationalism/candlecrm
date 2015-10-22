@@ -6,6 +6,7 @@
             [spectra.email :as email]
             [spectra.google :as google]
             [spectra.html :as html]
+            [spectra.neo4j :as neo4j]
             [spectra.schema :as s]
             [cemerick.friend :as friend]
             [hiccup.core :as hiccup]))
@@ -58,30 +59,46 @@
   (html/base-template
    (html/login-needed uri)))
 
-(defn show-person [req id]
+(defn show-person [person]
+  (prn "show-person")
+  (prn person)
+  (html/show-person (-> person :data :name first)
+                    (-> person :data)
+                    (-> person :id (neo4j/one-hop-out s/email-to))
+                    (-> person :id (neo4j/one-hop-out s/email-from))))
+
+(defn show-email [email]
+  (html/show-email (-> email :data :name first)
+                   (-> email :data)))
+
+(defn show-organization [organization]
+  (html/show-organization (-> organization :data :name first)
+                          (-> organization :data)))
+
+(defn show-location [location]
+  (html/show-location (-> location :data :name first)
+                      (-> location :data)))
+
+(defn show-event [event]
+  (html/show-event (-> event :data :name first)
+                   (-> event :data)))
+
+(defn show-money [money]
+  (html/show-money (-> money :data :name first)
+                   (-> money :data)))
+
+(def node-page {s/person show-person s/email show-email
+                s/organization show-organization s/location show-location
+                s/event show-event s/money show-money})
+
+(defn show-node [req id node-type]
   (if-let [user (auth/user-from-req req)]
-    (if-let [person (-> user (recon/person-from-id id) first)]
+    (if-let [node (neo4j/node-from-id user id node-type)]
       (html/base-template
-       (html/show-person (-> person :data :name)
-                         (-> person :data)))
+       ((node-page node-type) node))
       (html/base-template (html/not-found-error)))
     (html/base-template (html/unauthorized-error))))
-
-(defn show-email [req id]
-  (show-person req id))
-
-(defn show-organization [req id]
-  (show-person req id))
-
-(defn show-location [req id]
-  (show-person req id))
-
-(defn show-event [req id]
-  (show-person req id))
-
-(defn show-money [req id]
-  (show-person req id))
-
+  
 (defn ajax-test [req]
   (html/base-template
    (html/ajax-test)))

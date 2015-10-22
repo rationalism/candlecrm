@@ -3,6 +3,7 @@
             [clojure.string :as str]
             [spectra.common :as com]
             [spectra.datetime :as dt]
+            [spectra.schema :as s]
             [environ.core :refer [env]]
             [clojurewerkz.neocons.rest :as nr]
             [clojurewerkz.neocons.rest.cypher :as cy]
@@ -12,6 +13,12 @@
             [clojurewerkz.neocons.rest.relationships :as nrl]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
+
+(defn user-label [user]
+  (str "user_" (:id user)))
+
+(defn person-labels [user]
+  [s/person (user-label user)])
 
 (defn make-graph-url []
   (str "http://" (env :database-username)
@@ -129,6 +136,19 @@
    (cypher-list
     (str "MATCH (a) where ID(a)= " id
          " RETURN a"))))
+
+(defn node-from-id [user id node-type]
+  (-> (str "MATCH (root:" (cypher-esc (user-label user))
+           ":" node-type
+           " ) WHERE ID(root)= " id
+           " RETURN root")
+      cypher-list first))
+
+(defn one-hop-out [id property]
+  (cypher-list
+   (str "MATCH (a)-[:" (cypher-esc-token property)
+        "]->(b) WHERE ID(a)= " id
+        " RETURN b")))
 
 (defn refresh-vertex [vertex]
   (find-by-id (:id vertex)))
