@@ -224,8 +224,9 @@
     (vector (ner-node entity) schema-type "!type!")))
 
 (defn ner-graph [entity]
-  (loom/build-graph (list (ner-node entity))
-                    (list (ner-edge entity))))
+  (when (ner-edge entity)
+    (loom/build-graph (list (ner-node entity))
+                      (list (ner-edge entity)))))
 
 (defn triple-nodes [triple]
   [(.-subject triple) (.-object triple)])
@@ -396,6 +397,22 @@
 (defn pronoun-graph [nodes]
   (loom/build-graph nodes (map pronoun-edge nodes)))
 
+(def label-correction {s/person-name s/name s/org-name s/name
+                       s/loc-name s/name s/email-addr s/email-addr
+                       s/phone-num s/phone-num s/date-time s/date-time
+                       s/amount s/amount})
+
+(defn format-value [edge]
+  (let [new-label (-> edge second label-correction)]
+    (if (some #{new-label} s/repeated-attr)
+      (vector (first edge)) (first edge))))
+
+(defn label-edge [edge]
+  (assoc
+   {} (label-correction (second edge)) (format-value edge)
+   :label (s/attr-entity (second edge))
+   :hash (com/sha1 (first edge))))
+
 (defn library-edge [text label]
   [text label "!type!"])
 
@@ -509,10 +526,25 @@
                 (apply merge-with concat))]
     entity-map {}))
 
-(defn nlp-people [graph]
-  (->> (loom/select-edges graph "!type!")
-       (filter #(some #{(second %)} [s/person-name s/org-name]))
-       distinct))
+(defn capitalize-words [text]
+  (->> (str/split text #" ")
+       (map str/capitalize)
+       (str/join " ")))
+
+(defn vectorize [node]
+  (cond-> node
+    (:label node) (assoc :label (-> node :label vector))
+    (:hash node) (assoc :hash (-> node :hash vector))))
+
+(defn devectorize [node]
+  (cond-> node
+    (:label node) (assoc :label (-> node :label first))
+    (:hash node) (assoc :hash (-> node :hash first))))
+
+(defn merge-people [people]
+  (->> (map vectorize people)
+       (apply merge-with concat)
+       devectorize))
 
 (defn run-nlp [pipeline text]
   (cond-> (run-nlp-simple pipeline text)
@@ -520,8 +552,16 @@
     (env :coreference) rewrite-pronouns
     false strip-graph))
 
+(defn run-nlp-default [text]
+  (run-nlp *pipeline* text))
+
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))
+
+(defn nlp-names [graph]
+  (->> (loom/select-edges graph "!type!")
+       (filter #(some #{(second %)} [s/person-name s/org-name]))
+       distinct))
 
 (defn correct-case [text]
   (->> (str/lower-case text)
@@ -533,6 +573,36 @@
        (map true-case)
        (str/join " ")
        fix-punct))
+
+(defn name-from-email [email]
+  (as-> (-> (str/split email #"@")
+            first (str/replace #"[-\.\+]" " ")) $
+    (when (-> $ (str/split #" ") count (> 1))
+      (-> $ capitalize-words run-nlp-default nlp-names first))))
+
+(defn normalize-person [name email default]
+  (cond
+    (and (com/nil-or-empty? name)
+         (com/nil-or-empty? email))
+    {:label default}
+    (not (com/nil-or-empty? name))
+    (if (com/nil-or-empty? email)
+      (if-let [inferred-email (-> name regex/find-email-addrs first)]
+        (if-let [parsed-name (-> name (regex/parse-name inferred-email)
+                                 run-nlp-default nlp-names first)]
+          (assoc (label-edge parsed-name) s/email-addr [inferred-email])
+          {:label default s/email-addr [inferred-email]
+           s/name (-> inferred-email regex/parse-name vector)})
+        (if-let [parsed-name (-> name run-nlp-default nlp-names first)]
+          (label-edge parsed-name) {:label default s/name [name]}))
+      (if-let [parsed-name (-> name (regex/parse-name email)
+                               run-nlp-default nlp-names first)]
+        (assoc (label-edge parsed-name) s/email-addr [email])
+        {:label default s/name [(regex/parse-name name email)] s/email-addr [email]}))
+    :else
+    (if-let [inferred-name (name-from-email email)]
+      (assoc (label-edge inferred-name) s/email-addr [email])
+      {:label default s/email-addr [email] :hash (com/sha1 email)})))
 
 (defn triple-string [triple]
   (str/join "\t"

@@ -91,13 +91,14 @@
        (filter #(= edge-type (nth % 2)))))
 
 (defn replace-node [g old-node new-node]
-  (-> g
-      (add-nodes [new-node])
-      (add-edges (->> (out-edges g old-node)
-                      (map #(assoc % 0 new-node))))
-      (add-edges (->> (in-edges g old-node)
-                      (map #(assoc % 1 new-node))))
-      (remove-nodes [old-node])))
+  (if (= old-node new-node) g
+      (-> g
+          (add-nodes [new-node])
+          (add-edges (->> (out-edges g old-node)
+                          (map #(assoc % 0 new-node))))
+          (add-edges (->> (in-edges g old-node)
+                          (map #(assoc % 1 new-node))))
+          (remove-nodes [old-node]))))
 
 (defn split-node [g old-node new-node-up new-node-down]
   (-> g
@@ -106,6 +107,10 @@
       (add-edges (->> (in-edges g old-node)
                       (map #(assoc % 1 new-node-up))))
       (remove-nodes [old-node])))  
+
+(defn crash-if-nil [g]
+  (if (->> (nodes g) (filter nil?) count (not= 0))
+    (/ 1 0) g))
 
 (defn build-graph [nodes edges]
   (-> (graph/weighted-digraph)

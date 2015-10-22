@@ -63,34 +63,13 @@
 (defn sent-time [message]
   (.getSentDate message))
 
-(def label-correction {s/person-name s/name s/org-name s/name
-                       s/loc-name s/name s/email-addr s/email-addr
-                       s/phone-num s/phone-num s/date-time s/date-time
-                       s/amount s/amount})
-
-(defn format-value [edge]
-  (let [new-label (-> edge second label-correction)]
-    (if (some #{new-label} s/repeated-attr)
-      (vector (first edge)) (first edge))))
-
-(defn label-edge [edge]
-  (assoc
-   {} (label-correction (second edge)) (format-value edge)
-   :label (s/attr-entity (second edge))
-   :hash (com/sha1 (first edge))))
-
 (defn import-label [chain edge]
-  (loom/replace-node chain (first edge) (label-edge edge)))
+  (loom/replace-node chain (first edge) (nlp/label-edge edge)))
 
 (defn decode-address [address]
-  (merge
-   {s/email-addr (vector (.getAddress address))}
-   (let [personal (.getPersonal address)]
-     (if (or (nil? personal)
-             (-> personal regex/find-email-addrs empty? not))
-       {:label s/person}
-       (->> (nlp/run-nlp nlp/*pipeline* personal)
-            nlp/nlp-people first label-edge)))))
+  (nlp/normalize-person (.getPersonal address)
+                        (.getAddress address)
+                        s/person))
 
 (defn decode-header [header]
   {(.getName header) (.getValue header)})
@@ -154,8 +133,7 @@
 (defn in-block? [lines index f]
   (cond (< @index 0) false
         (>= @index (count lines)) false
-        :else (f (count-nested
-                  (nth lines @index)))))
+        :else (f (count-nested (nth lines @index)))))
 
 (defn find-bottom [chain]
   (->> chain loom/nodes
@@ -163,37 +141,57 @@
        (filter #(not (loom/out-edge-label chain % s/email-reply)))
        first))
 
+(defn header-to-person [header]
+  (nlp/normalize-person
+   (-> header :email-from-name deref)
+   (-> header :email-from-addr deref)
+   s/person))
+
+(defn find-header! [lines header start-header]
+  (let [this-line (nth lines @start-header)]
+    (com/reset-if-found! (dt/dates-in-text this-line) header s/email-sent)
+    (com/reset-if-found! (regex/find-email-addrs this-line) header :email-from-addr)
+    (com/reset-if-found! (->> this-line nlp/run-nlp-default nlp/nlp-names
+                              first first vector) header :email-from-name)))
+
+(defn header-ready? [header start-header date-found]
+  (when (deref (s/email-sent header))
+    (swap! date-found inc))
+  (or (< @start-header 0)
+      (> @date-found 1)
+      (and (deref (s/email-sent header))
+           (or (deref (:email-from-addr header))
+               (deref (:email-from-name header))))))
+ 
+(defn sub-email [depth header lines]
+  {s/email-sent (-> header s/email-sent deref)
+   s/type-label s/email
+   s/email-body (->> lines (map #(strip-arrows % depth)) merge-lines)})
+  
 (defn split-email [depth chain]
   (let [bottom (find-bottom chain)
         lines (s/email-body bottom)]
     (def start-body (atom 0))
     (while (in-block? lines start-body #(> depth %))
-      (do (swap! start-body inc)))
+      (swap! start-body inc))
     (def end-body (atom @start-body))
     (while (in-block? lines end-body #(= depth %))
-      (do (swap! end-body inc)))
+      (swap! end-body inc))
     (def start-header (atom @start-body))
-    (def header {s/email-sent (atom nil) s/email-from (atom nil)})
-    (while (and (> @start-header 0)
-                (not (and (deref (s/email-sent header))
-                          (deref (s/email-from header)))))
-      (do (swap! start-header dec)
-          (let [this-line (nth lines @start-header)]
-            (com/reset-if-found! (dt/dates-in-text this-line) header s/email-sent)
-            (com/merge-if-found! (regex/find-email-people this-line) header s/email-from)
-            (com/merge-if-found! (->> (nlp/run-nlp nlp/*pipeline* this-line)
-                                      nlp/nlp-people (map label-edge))
-                                 header s/email-from))))
-    (let [new-node {s/email-sent (-> header s/email-sent deref)
-                    s/type-label s/email
-                    s/email-body (->> lines
-                                      (com/slice @start-body @end-body)
-                                      (map #(strip-arrows % depth))
-                                      merge-lines)}]
+    (def header {s/email-sent (atom nil) :email-from-name (atom nil)
+                 :email-from-addr (atom nil)})
+    (def date-found (atom 0))
+    (while (not (header-ready? header start-header date-found))
+      (find-header! lines header start-header)
+      (swap! start-header dec))
+    (swap! start-header inc)
+    (when (= @start-header @start-body)
+      (swap! start-body inc))
+    (let [new-node (->> lines (com/slice @start-body @end-body)
+                        (sub-email depth header))]
       (-> chain
           (loom/replace-node bottom new-node)
-          (loom/add-edges [[new-node (-> header s/email-from deref
-                                         (assoc s/type-label s/person)) s/email-from]
+          (loom/add-edges [[new-node (header-to-person header) s/email-from]
                            [new-node {s/email-body (com/slice-not @start-header @end-body lines)}
                             s/email-reply]])))))
 
@@ -227,15 +225,6 @@
             (cons "")
             last)
        :else "")))
-
-(defn people-from-text [text]
-  (distinct
-   (concat
-    (p :email-regex (regex/find-email-people text))
-    (p :phone-regex (regex/find-phone-people text))
-    (nlp/nlp-people
-     (p :nlp-text (nlp/graph-entities
-                   (nlp/run-nlp nlp/*pipeline* text)))))))
 
 (defn make-headers [pair root]
   (map #(vector root % (-> pair key)) (val pair)))
@@ -331,7 +320,13 @@
            first
            (assoc event s/date-time)
            (loom/replace-node chain event))))
-  
+
+(defn parse-email-addr [chain node]
+  (->> (s/email-addr node)
+       (map #(nlp/normalize-person nil % s/person))
+       nlp/merge-people
+       (loom/replace-node chain node)))
+
 (defn use-nlp [chain message]
   (as-> (->> (s/email-body message)
              (nlp/run-nlp nlp/*pipeline*)
@@ -346,6 +341,8 @@
     (reduce import-label $ (loom/select-edges $ "!type!"))
     (reduce parse-datetime $ (->> (loom/nodes $)
                                   (filter #(= s/event (:label %)))))
+    (reduce parse-email-addr $ (->> (loom/nodes $)
+                                    (filter #(and (s/email-addr %) (not (s/name %))))))
     (loom/remove-nodes $ (->> "!type!" (loom/select-edges $) (map second)))))
 
 (def url-map {s/person "/person/" s/email "/email/"
@@ -473,30 +470,30 @@
      (try
        (dorun
         (as-> emails $
-            (recon/link-people $ (recon/labeled-people-orgs
-                                  user (recon/merged-props $ [s/person s/organization])))
-            (recon/merge-graph! $)
-            (recon/load-new! $ s/person
-                             [s/person (neo4j/user-label user)])
-            (recon/load-new! $ s/organization
-                             [s/organization (neo4j/user-label user)])
-            (recon/find-old-emails $)
-            (reduce use-nlp $ (recon/filter-memory $ s/email))
-            (recon/link-people $ (recon/labeled-people-orgs
-                                  user (recon/merged-props $ [s/person s/organization])))
-            (recon/link-one-prop s/location s/name user $)
-            (recon/link-one-prop s/event s/date-time user $)
-            (recon/link-one-prop s/money s/amount user $)
-            (reduce #(recon/link-new! %1 %2 [%2 (neo4j/user-label user)])
-                    $ [s/person s/organization s/location s/event s/money])
-            (make-hyperlinks $)
-            (reduce switch-message $ (recon/filter-memory $ s/email))
-            (recon/link-new! $ s/email [s/email (neo4j/user-label user)])
-            (recon/merge-graph! $)
-            (reduce #(loom/replace-node %1 %2 (:id %2))
-                    $ (loom/nodes $))
-            (loom/spider-edges $ '())
-            (map #(neo4j/create-links! (nodes-of-edges %) %) $)))
+          (recon/link-people $ (recon/labeled-people-orgs
+                                user (recon/merged-props $ [s/person s/organization])))
+          (recon/merge-graph! $)
+          (recon/load-new! $ s/person
+                           [s/person (neo4j/user-label user)])
+          (recon/load-new! $ s/organization
+                           [s/organization (neo4j/user-label user)])
+          (recon/find-old-emails $)
+          (reduce use-nlp $ (recon/filter-memory $ s/email))
+          (recon/link-people $ (recon/labeled-people-orgs
+                                user (recon/merged-props $ [s/person s/organization])))
+          (recon/link-one-prop s/location s/name user $)
+          (recon/link-one-prop s/event s/date-time user $)
+          (recon/link-one-prop s/money s/amount user $)
+          (reduce #(recon/link-new! %1 %2 [%2 (neo4j/user-label user)])
+                  $ [s/person s/organization s/location s/event s/money])
+          (make-hyperlinks $)
+          (reduce switch-message $ (recon/filter-memory $ s/email))
+          (recon/link-new! $ s/email [s/email (neo4j/user-label user)])
+          (recon/merge-graph! $)
+          (reduce #(loom/replace-node %1 %2 (:id %2))
+                  $ (loom/nodes $))
+          (loom/spider-edges $ '())
+          (map #(neo4j/create-links! (nodes-of-edges %) %) $)))
        (catch Exception e
          (do (prn "Email insertion error")
              (prn e) nil)))))
@@ -508,6 +505,9 @@
         (map full-parse)
         (map #(insert-emails! user %))))
   :success)
+
+(defn insert-one-email! [user email-num]
+  (insert-email-range! user email-num email-num))
 
 (defn insert-first-n! [user n]
   (let [limit (message-count (fetch-imap-folder user))]

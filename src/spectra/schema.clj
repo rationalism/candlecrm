@@ -41,7 +41,7 @@
 (def amount :amount)
 (def event "event")
 
-(def repeated-attr [person-name org-name email-addr phone-num])
+(def repeated-attr [name person-name org-name email-addr phone-num])
 
 (def attr-entity {person-name person org-name organization
                   email-addr person phone-num person

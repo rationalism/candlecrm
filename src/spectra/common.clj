@@ -39,6 +39,9 @@
     (empty? property)
     (nil? property)))
 
+(defn nil-or-empty? [item]
+  (or (nil? item) (empty? item)))
+
 (defn not-nil-ext? [item]
   (if (coll? item)
     (and (not (empty? item))

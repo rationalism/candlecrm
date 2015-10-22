@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [spectra.auth :as auth]
-            [spectra.recon :as recon]
+            [spectra.corenlp :as nlp]
             [spectra.google :as google]
             [spectra.neo4j :as neo4j]
             [spectra.schema :as s]
@@ -31,25 +31,48 @@
     (all-contacts-query)
     ContactFeed)))
 
-(defn contact-to-map [contact]
-  {s/name
-   (cond-> []
-     (and (.hasName contact)
-          (.hasFullName (.getName contact)))
-     (conj (.getValue (.getFullName (.getName contact))))
-     (and (.hasName contact)
-          (.hasAdditionalName (.getName contact)))
-     (conj (.getValue (.getAdditionalName (.getName contact)))))
-   s/email-addr
-   (->> (.getEmailAddresses contact)
-        (mapv #(.getAddress %)))
-   s/phone-num
-   (->> (.getPhoneNumbers contact)
-        (mapv #(.getPhoneNumber %)))})
+(defn contact-names [contact]
+  (cond-> []
+    (and (.hasName contact)
+         (.hasFullName (.getName contact)))
+    (conj (.getValue (.getFullName (.getName contact))))
+    (and (.hasName contact)
+         (.hasAdditionalName (.getName contact)))
+    (conj (.getValue (.getAdditionalName (.getName contact))))))
+
+(defn contact-emails [contact]
+  (->> (.getEmailAddresses contact)
+       (mapv #(.getAddress %))))
+
+(defn contact-phones [contact]
+  (->> (.getPhoneNumbers contact)
+       (mapv #(.getPhoneNumber %))))
+
+(defn name-email-map [names emails]
+  (cond
+    (> (count names) (count emails))
+    (as-> (count names) $
+      (- $ (count emails)) (repeat $ nil)
+      (reduce conj emails $)
+      (zipmap names $))
+    (< (count names) (count emails))
+    (as-> (count emails) $
+      (- $ (count names)) (repeat $ nil)
+      (reduce conj names $)
+      (zipmap $ emails))
+    :else (zipmap names emails)))
+
+(defn contact-to-person [contact]
+  (->> (contact-emails contact)
+       (name-email-map (contact-names contact))
+       (map #(nlp/normalize-person (key %) (val %) s/person))
+       nlp/merge-people
+       (conj [{s/phone-num (contact-phones contact)}])
+       (apply merge)))
 
 (defn batch-insert! [user contacts]
   (->> contacts 
-    (map contact-to-map)
+    (map contact-to-person)
     (map #(hash-map :props %))
     (map #(assoc % :labels (neo4j/person-labels user)))
     neo4j/batch-insert!))

@@ -40,7 +40,7 @@
        neo4j/cypher-list))
 
 (defn labeled-list-from-props [user type-name props]
-  (if (or (nil? props) (empty? props)) []
+  (if (or (nil? props) (empty? props)) nil
       (->> (neo4j/cypher-props-any props)
            (type-query user type-name)
            neo4j/cypher-labeled-list)))
@@ -201,8 +201,9 @@
        (map #(neo4j/merge-property-list!
               (second match-edge) %
               (-> match-edge first %))))
-  (if-let [labels (-> match-edge first :label coll?)]
-    (neo4j/replace-labels! (second match-edge) labels)))
+  (let [labels (-> match-edge first :label)]
+    (when (coll? labels)
+      (neo4j/replace-labels! (second match-edge) labels))))
 
 (defn merge-graph! [g]
   (let [match-edges (->> (loom/weighted-edges g)
@@ -241,7 +242,7 @@
     (reduce #(if (-> %2 val nil?) %1
                (loom/replace-node %1 (key %2) (val %2)))
             g (->> emails
-                   (pmap #(find-old-email g %))
+                   (map #(find-old-email g %))
                    (zipmap emails)))))
 
 
