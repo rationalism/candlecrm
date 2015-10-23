@@ -20,7 +20,6 @@
 (def plain-type "TEXT/PLAIN")
 (def html-type "TEXT/HTML")
 (def multi-type "multipart")
-(def graph-counter (atom 0))
 
 (defn get-folder [store folder-name]
   (.getFolder store folder-name))
@@ -165,9 +164,9 @@
   (str/join "\r\n" lines))
 
 (defn in-block? [lines index f]
-  (cond (< @index 0) false
-        (>= @index (count lines)) false
-        :else (f (count-nested (nth lines @index)))))
+  (cond (< index 0) false
+        (>= index (count lines)) false
+        :else (f (count-nested (nth lines index)))))
 
 (defn find-bottom [chain]
   (->> chain loom/nodes
@@ -177,64 +176,99 @@
 
 (defn header-to-person [header]
   (nlp/normalize-person
-   (-> header :email-from-name deref)
-   (-> header :email-from-addr deref)
+   (-> header :email-from-name)
+   (-> header :email-from-addr)
    s/person))
 
-(defn find-header! [lines header start-header]
-  (let [this-line (nth lines @start-header)]
-    (com/reset-if-found! (dt/dates-in-text this-line) header s/email-sent)
-    (com/reset-if-found! (regex/find-email-addrs this-line) header :email-from-addr)
-    (com/reset-if-found! (->> this-line nlp/run-nlp-default nlp/nlp-names
-                              first first vector) header :email-from-name)))
+(defn assoc-if-found [marks map-key coll]
+  (if (or (nil? coll) (empty? coll)) marks
+      (assoc marks map-key (first coll))))
 
-(defn header-ready? [header start-header date-found]
-  (when (deref (s/email-sent header))
-    (swap! date-found inc))
-  (or (< @start-header 0)
-      (> @date-found 1)
-      (and (deref (s/email-sent header))
-           (or (deref (:email-from-addr header))
-               (deref (:email-from-name header))))))
+(defn header-ready? [marks]  
+  (or (< (:start-header marks) 0)
+      (> (:date-found marks) 3)
+      (and (s/email-sent marks)
+           (or (:email-from-addr marks))
+               (:email-from-name marks))))
  
-(defn sub-email [depth header lines]
-  {s/email-sent (-> header s/email-sent deref)
+(defn sub-email [marks lines]
+  {s/email-sent (-> marks s/email-sent)
    s/type-label s/email
-   s/email-body (->> lines (map #(strip-arrows % depth)) merge-lines)})
+   s/email-body (->> lines
+                     (map #(strip-arrows % (:depth marks)))
+                     merge-lines)})
 
-(defn split-email [depth chain]
-  (let [bottom (find-bottom chain)
-        lines (s/email-body bottom)]
-    (def start-body (atom 0))
-    (while (in-block? lines start-body #(> depth %))
-      (swap! start-body inc))
-    (def end-body (atom @start-body))
-    (while (in-block? lines end-body #(= depth %))
-      (swap! end-body inc))
-    (def start-header (atom @start-body))
-    (def header {s/email-sent (atom nil) :email-from-name (atom nil)
-                 :email-from-addr (atom nil)})
-    (def date-found (atom 0))
-    (while (not (header-ready? header start-header date-found))
-      (find-header! lines header start-header)
-      (swap! start-header dec))
-    (swap! start-header inc)
-    (when (= @start-header @start-body)
-      (swap! start-body inc))
-    (let [new-node (->> lines (com/slice @start-body @end-body)
-                        (sub-email depth header))]
-      (-> chain
-          (loom/replace-node bottom new-node)
-          (loom/add-edges [[new-node (header-to-person header) s/email-from]
-                           [new-node {s/email-body (com/slice-not @start-header @end-body lines)}
-                            s/email-reply]])))))
+(defn find-start-body [marks lines]
+  (assoc marks :start-body
+         (-> (fn [x] (in-block? lines x #(> (:depth marks) %)))
+             (drop-while (range))
+             first)))
+
+(defn find-end-body [marks lines]
+  (assoc marks :end-body
+         (-> (fn [x] (in-block? lines x #(= (:depth marks) %)))
+             (drop-while (drop (:start-body marks) (range)))
+             first)))
+
+(defn inc-date-found [marks]
+  (if (s/email-sent marks)
+    (assoc marks :date-found (-> marks :date-found inc))
+    marks))
+
+(defn find-header [lines marks line-num]
+  (if (header-ready? marks) marks
+      (let [this-line (nth lines line-num)]
+        (-> (inc-date-found marks)
+            (assoc :start-header line-num)
+            (assoc-if-found s/email-sent (dt/dates-in-text this-line))
+            (assoc-if-found :email-from-addr (regex/find-email-addrs this-line))
+            (assoc-if-found :email-from-name (->> this-line nlp/run-nlp-default
+                                                  nlp/nlp-names first))))))
+
+(defn find-start-header [marks lines]
+  (reduce (partial find-header lines) marks
+          (range (:start-body marks) -1 -1)))
+
+(defn body-check [marks]
+  (if (= (:start-header marks) (:start-body marks))
+    (assoc marks :start-body (-> marks :start-body inc))
+    marks))
+
+(defn chain-lines [chain]
+  (-> chain find-bottom s/email-body))
+
+(defn find-marks [depth chain]
+  (let [lines (chain-lines chain)]
+    (-> {:depth depth s/email-sent nil :email-from-name nil
+         :email-from-addr nil :date-found 0 :start-header 0}
+        (find-start-body lines)
+        (find-end-body lines)
+        (find-start-header lines)))) 
+
+(defn new-bottom [marks chain]
+  {s/email-body
+   (com/slice-not (:start-header marks) (:end-body marks)
+                  (chain-lines chain))})
+
+(defn end-bottom [chain]
+  {s/email-body (-> chain chain-lines merge-lines)
+   s/type-label s/email})
+
+(defn make-new-node [marks chain]
+  (sub-email marks (->> chain chain-lines
+                        (com/slice (:start-body marks)
+                                   (:end-body marks)))))
+
+(defn split-email [marks chain]
+  (let [new-node (make-new-node marks chain)]
+    (-> (loom/replace-node chain (find-bottom chain) new-node)
+        (loom/add-edges [[new-node (header-to-person marks) s/email-from]
+                         [new-node (new-bottom marks chain) s/email-reply]]))))
 
 (defn recursive-split [depth chain]
   (if (<= depth 0)
-    (loom/replace-node chain (find-bottom chain)
-                       {s/email-body (-> chain find-bottom s/email-body merge-lines)
-                        s/type-label s/email})
-    (recur (dec depth) (split-email depth chain))))
+    (loom/replace-node chain (find-bottom chain) (end-bottom chain))
+    (recur (dec depth) (-> depth (find-marks chain) (split-email chain)))))
 
 (defn start-email-graph [body]
   (loom/build-graph [{s/email-body body}] []))
@@ -321,15 +355,16 @@
                        (find-bottom $))))
 
 (defn full-parse [message]
-  (try (-> message
-           get-text-recursive
-           regex/strip-javascript
-           raw-msg-chain
-           (merge-bottom-headers (headers-parse message))
-           message-inference)
-       (catch Exception e
-         (do (prn "Email parse error")
-             (prn e) {}))))
+  (p :full-parse
+     (try (-> message
+              get-text-recursive
+              regex/strip-javascript
+              raw-msg-chain
+              (merge-bottom-headers (headers-parse message))
+              message-inference)
+          (catch Exception e
+            (do (prn "Email parse error")
+                (prn e) {})))))
 
 (defn hash-brackets [text]
   (str "<a href='" (com/sha1 text) "'>" text "</a>"))
@@ -441,7 +476,7 @@
 (defn insert-email-range! [user lower upper]
   (doall
    (->> (messages-in-range (fetch-imap-folder user) lower upper)
-        (map full-parse)
+        (pmap full-parse)
         (map #(insert-emails! user %))))
   :success)
 

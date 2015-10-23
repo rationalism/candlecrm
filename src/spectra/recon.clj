@@ -134,10 +134,11 @@
        (apply merge-with concat)))
 
 (defn link-graph [type-names nodes g prop-name]
-  (reduce (partial link-node prop-name
-                   (lookup-map prop-name nodes))
-          g (->> (loom/nodes g)
-                 (filter #(some #{(:label %)} type-names)))))
+  (p :link-graph
+     (reduce (partial link-node prop-name
+                      (lookup-map prop-name nodes))
+             g (->> (loom/nodes g)
+                    (filter #(some #{(:label %)} type-names))))))
 
 (defn link-one-prop [type-name prop-name user graph]
   (link-graph [type-name]
@@ -146,8 +147,9 @@
               graph prop-name))
 
 (defn link-people [g nodes]
-  (reduce (partial link-graph [s/person s/organization] nodes)
-          g [s/email-addr s/phone-num s/name]))
+  (p :link-people
+     (reduce (partial link-graph [s/person s/organization] nodes)
+             g [s/email-addr s/phone-num s/name])))
 
 (defn merge-edge! [match-edge]
   (->> match-edge second :data keys
@@ -164,12 +166,13 @@
       (neo4j/replace-labels! (second match-edge) labels))))
 
 (defn merge-graph! [g]
-  (let [match-edges (->> (loom/multi-edges g)
-                         (filter #(= (nth % 2) :database-match)))]
-    (doall (map merge-edge! match-edges))
-    (reduce #(loom/replace-node %1 (first %2) (second %2))
-            (loom/remove-edges g match-edges)
-            match-edges)))
+  (p :merge-graph
+     (let [match-edges (->> (loom/multi-edges g)
+                            (filter #(= (nth % 2) :database-match)))]
+       (doall (map merge-edge! match-edges))
+       (reduce #(loom/replace-node %1 (first %2) (second %2))
+               (loom/remove-edges g match-edges)
+               match-edges))))
 
 (defn filter-memory [g type-name]
   (->> (loom/nodes g)
@@ -199,9 +202,10 @@
         second (lookup-old-email message)))
 
 (defn find-old-emails [g]
-  (let [emails (filter-memory g s/email)]
-    (reduce #(if (-> %2 val nil?) %1
-               (loom/replace-node %1 (key %2) (val %2)))
-            g (->> emails
-                   (map #(find-old-email g %))
-                   (zipmap emails)))))
+  (p :find-old-emails
+     (let [emails (filter-memory g s/email)]
+       (reduce #(if (-> %2 val nil?) %1
+                    (loom/replace-node %1 (key %2) (val %2)))
+               g (->> emails
+                      (map #(find-old-email g %))
+                      (zipmap emails))))))

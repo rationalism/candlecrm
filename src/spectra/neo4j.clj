@@ -113,23 +113,24 @@
                    (dt/catch-dates value)))
 
 (defn create-links! [nodes links]
-  (let [id-list (->> nodes count range
-                     (map #(str "a" %)))]
-    (cypher-query
-     (str "MATCH (" (str/join "), (" id-list)
-          ") WHERE "
-          (->> (map #(str "ID(" % ")= ") id-list)
-               (zipmap nodes)
-               (map #(str (val %) (key %)))
-               (str/join " AND "))
-          " CREATE root = (a0"
-          (->> (map #(nth % 2) links)
-               (map cypher-esc-token)
-               (zipmap (drop 1 id-list))
-               (map #(str ")-[:" (val %)
-                          "]->(" (key %)))
-               str/join)
-          ") RETURN root"))))
+  (p :create-links
+     (let [id-list (->> nodes count range
+                        (map #(str "a" %)))]
+       (cypher-query
+        (str "MATCH (" (str/join "), (" id-list)
+             ") WHERE "
+             (->> (map #(str "ID(" % ")= ") id-list)
+                  (zipmap nodes)
+                  (map #(str (val %) (key %)))
+                  (str/join " AND "))
+             " CREATE root = (a0"
+             (->> (map #(nth % 2) links)
+                  (map cypher-esc-token)
+                  (zipmap (drop 1 id-list))
+                  (map #(str ")-[:" (val %)
+                             "]->(" (key %)))
+                  str/join)
+             ") RETURN root")))))
 
 (defn link-query [link]
   (str "ID(a)= " (first link)
