@@ -64,6 +64,56 @@
 (defn sent-time [message]
   (.getSentDate message))
 
+(defn define-imap-lookup []
+  (def ^:dynamic *imap-lookup* {}))
+
+(defn update-imap-lookup! [user inbox]
+  (def ^:dynamic *imap-lookup*
+    (assoc *imap-lookup* user inbox)))
+
+(defn shut-folder! [folder]
+  (def store (folder-store folder))
+  (close-folder! folder)
+  (close-store! store))
+
+(defn close-imap-lookup! []
+  (->> (keys *imap-lookup*)
+       (map #(*imap-lookup* %))
+       (map shut-folder!))
+  (define-imap-lookup))
+
+(defn refresh-inbox [user]
+  (-> user google/lookup-token
+      google/get-access-token!
+      (google/get-imap-store! (auth/get-username user))
+      get-inbox))
+  
+;; TODO: support IMAP stores other than GMail
+(defn fetch-imap-folder [user]
+  (def inbox (if (contains? *imap-lookup* user)
+               (*imap-lookup* user)
+               (refresh-inbox user)))
+  (if (folder-open? inbox) nil
+      (try (open-folder-read! inbox)
+           (catch Exception e
+             (do (def inbox (refresh-inbox user))
+                 (open-folder-read! inbox)))))
+  (update-imap-lookup! user inbox)
+  inbox)
+
+(defn content [message]
+  (p :get-content
+     (.getContent message)))
+
+(defn content-type [message]
+  (p :content-type
+     (.getContentType message)))
+
+(defn get-parts [multipart]
+  (p :get-parts
+     (map #(.getBodyPart multipart %)
+          (range (.getCount multipart)))))
+
 (defn import-label [chain edge]
   (loom/replace-node chain (first edge) (nlp/label-edge edge)))
 
@@ -94,19 +144,6 @@
        enumeration-seq
        (map decode-header)
        (apply merge)))
-
-(defn content [message]
-  (p :get-content
-     (.getContent message)))
-
-(defn content-type [message]
-  (p :content-type
-     (.getContentType message)))
-
-(defn get-parts [multipart]
-  (p :get-parts
-     (map #(.getBodyPart multipart %)
-          (range (.getCount multipart)))))
 
 (defn strip-arrows [line num]
   (str/replace-first line (apply str (repeat num ">")) ""))
@@ -368,94 +405,6 @@
 (defn nodes-of-edges [edges]
   (-> (map second edges)
       (conj (first (first edges)))))
-
-(defn define-imap-lookup []
-  (def ^:dynamic *imap-lookup* {}))
-
-(defn update-imap-lookup! [user inbox]
-  (def ^:dynamic *imap-lookup*
-    (assoc *imap-lookup* user inbox)))
-
-(defn shut-folder! [folder]
-  (def store (folder-store folder))
-  (close-folder! folder)
-  (close-store! store))
-
-(defn close-imap-lookup! []
-  (->> (keys *imap-lookup*)
-       (map #(*imap-lookup* %))
-       (map shut-folder!))
-  (define-imap-lookup))
-
-(defn refresh-inbox [user]
-  (-> user google/lookup-token
-      google/get-access-token!
-      (google/get-imap-store! (auth/get-username user))
-      get-inbox))
-  
-;; TODO: support IMAP stores other than GMail
-(defn fetch-imap-folder [user]
-  (def inbox (if (contains? *imap-lookup* user)
-               (*imap-lookup* user)
-               (refresh-inbox user)))
-  (if (folder-open? inbox) nil
-      (try (open-folder-read! inbox)
-           (catch Exception e
-             (do (def inbox (refresh-inbox user))
-                 (open-folder-read! inbox)))))
-  (update-imap-lookup! user inbox)
-  inbox)
-
-(defn has-valid-from? [chain node]
-  (when-let [from (loom/out-edge-label chain node s/email-from)]    
-    (let [from (from second s/email)]
-      (and (not (nil? from)) (> (count from) 3)))))
-
-(defn remove-invalid-from [chain]
-  (loom/remove-nodes chain (filter #(not (has-valid-from? chain %))
-                                   (loom/nodes chain))))
-
-(defn from-lookup [message user]
-  (p :from-lookup
-     (assoc message :from-database
-             (recon/person-match
-              user (s/email-from message)))))
-
-(defn already-found? [message]
-  (p :already-found
-     (let [from (:from-database message)]
-       (if (or (nil? from) (empty? from))
-         false
-         (not (nil?
-               (recon/lookup-old-email
-                message from)))))))
-
-(defn create-email! [parsed-email]
-  (p :create-email
-     (assoc parsed-email :email-vertex
-            (neo4j/create-vertex!
-             s/email
-             (select-keys parsed-email
-                          [s/email-received s/email-sent s/email-subject
-                           s/email-sub-hash s/email-body])))))
-
-(defn create-link [parsed-email user]
-  (p :create-link
-     (assoc parsed-email :link
-            (partial recon/add-email-link!
-                     user (:email-vertex parsed-email)))))
-
-(def email-keys [s/email-to s/email-cc s/email-bcc
-                 s/email-replyto s/email-mentions])
-
-(defn insert-links! [parsed-email keys]
-  (p :insert-links
-     ;; Only one "from" per email
-     ((:link parsed-email) s/email-from
-      (s/email-from parsed-email))
-     (doseq [k keys]
-       (doseq [p (k parsed-email)]
-         ((:link parsed-email) k p)))))
 
 ;; Assumes emails are already parsed
 (defn insert-emails! [user emails]

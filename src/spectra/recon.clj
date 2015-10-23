@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [spectra.common :as com]
+            [spectra.corenlp :as nlp]
             [spectra.datetime :as dt]
             [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
@@ -11,22 +12,19 @@
              :refer (pspy pspy* profile defnp p p*)]))
 
 (defn create-user! [user]
-  (neo4j/create-vertex!
-   s/user 
+  (neo4j/create-vertex! s/user 
    {s/email-addr (:identity user)
     s/pwd-hash (:password user)}))
   
 (defn create-person! [user person]
-  (neo4j/create-vertex!
-   [s/person (neo4j/user-label user)]
-   (as-> person $
-       (select-keys $ [s/name s/email-addr s/phone-num])
-       (com/map-values $ (keys $) vector))))
+  (neo4j/create-vertex! [s/person (neo4j/user-label user)] person))
        
 (defn add-user-graph! [user]
-  (let [new-user (create-user! user)
-        new-person (create-person! new-user {s/email (:identity user)})]
-    (neo4j/create-edge! new-user new-person s/user-person)))
+  (let [new-user (create-user! user)]
+    (neo4j/create-edge! new-user
+                        (->> (nlp/normalize-person nil (:identity user) s/person)
+                             (create-person! new-user))
+                        s/user-person)))
 
 (defn type-query [user type-name filters]
   (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
@@ -45,11 +43,6 @@
            (type-query user type-name)
            neo4j/cypher-labeled-list)))
 
-(defn person-from-props [user props]       
-  (->> (neo4j/cypher-props-coll props)
-       (type-query user s/person)
-       neo4j/cypher-list))
-
 (defn labeled-people-orgs [user props]
   (merge (labeled-list-from-props user s/person props)
          (labeled-list-from-props user s/organization props)))
@@ -60,25 +53,6 @@
                            ") RETURN root"
                            " ORDER BY root." (neo4j/cypher-esc-token s/name)
                            "[0] SKIP " start " LIMIT " limit)))
-
-(def person-match-attrs
-  [s/email-addr s/phone-num s/name])
-
-(defn find-person [attr user person]
-  (if (nil? person) nil
-      (let [value (person attr)]
-        (if (or (nil? value) (empty? value))
-          nil
-          (first (person-from-props
-                  user {attr value}))))))
-
-(defn person-match [user person]
-  (p :person-match
-     (first
-      (conj (->> person-match-attrs
-                 (mapv #(find-person % user person))
-                 (filterv #(not (nil? %))))
-            nil))))
 
 ;; For searching emails, in milliseconds
 (def sent-tolerance 300000)
@@ -99,23 +73,6 @@
              " > (" (dt/to-ms (s/email-sent message)) " - " sent-tolerance 
              ")) RETURN root")
         neo4j/cypher-list first)))
-
-(defn recon-person! [old-person new-person]
-  (doseq [param [s/name s/email-addr s/phone-num]]
-    (if (nil? (new-person param))
-      nil (neo4j/recon-property-list! old-person param
-                                      (new-person param))))
-  (neo4j/refresh-vertex old-person))
-
-(defn add-email-link! [user email link person]
-  (p :add-email-link
-     (let [old-person (person-match user person)]
-       (neo4j/create-edge!
-        email
-        (if (nil? old-person)
-          (p :create-person (create-person! user person))
-          (p :recon-person (recon-person! old-person person)))
-        link))))
 
 (defn list-entities [entity-class]
   (neo4j/get-vertices-class entity-class))

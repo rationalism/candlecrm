@@ -13,6 +13,6 @@
 
 (deftest email-splitting
   (testing "Split an email"
-    (is (split-email (str/split-lines test-email) 3)))
+    (is (split-email 3 (start-email-graph (str/split-lines test-email)))))
   (testing "Split recursively"
-    (is (recursive-split (str/split-lines test-email) 3))))
+    (is (recursive-split 3 (start-email-graph (str/split-lines test-email))))))

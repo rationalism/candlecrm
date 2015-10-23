@@ -57,6 +57,9 @@
 
 (def person-attrs [name email-addr phone-num])
 
+(def email-links [email-to email-cc email-bcc
+                  email-reply email-replyto email-mentions])
+
 (defn prop
   ([arg1 arg2 arg3]
    (.createProperty arg1 arg2 arg3))
