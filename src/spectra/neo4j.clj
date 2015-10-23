@@ -142,13 +142,16 @@
           (result "ID(b)")
           (keyword (result "type(r)"))))
 
-(defn find-links [links]
+(defn find-link [link]
   (->> (str "MATCH (a)-[r]->(b) WHERE ("
-            (->> (map link-query links)
-                 (str/join ") OR ("))
+            (link-query link)
             ") RETURN ID(a), ID(b), type(r)")
        (cy/tquery *graph*)
        (map link-result)))
+
+(defn find-links [links]
+  (->> (pmap find-link links)
+       (apply concat)))
   
 (defn find-by-id [id]
   (first
