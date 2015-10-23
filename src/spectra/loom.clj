@@ -44,6 +44,10 @@
        (map #(multi-edge g %))
        (apply concat)))
 
+(defn all-edges [g node]
+  (concat (out-edges g node)
+          (in-edges g node)))
+
 (defn out-edge-label [g node label]
   (->> (out-edges g node)
        (filter #(= (nth % 2) label))
@@ -77,9 +81,6 @@
 (defn loners [g]
   (galg/loners g))
 
-(defn remove-nodes [g nodes]
-  (apply graph/remove-nodes g nodes))
-
 (defn one-label-left? [g edge]
   (let [label (attr/attr g (vec (take 2 edge)) :label)]
     (and (= 1 (count label))
@@ -94,7 +95,7 @@
     (-> (attr/remove-attr g (vec (take 2 edge)) :label)
         (graph/remove-edges (vec (take 2 edge))))
     :else (->> (attr/attr g (vec (take 2 edge)) :label)
-               (remove (nth edge 2)) 
+               (filter #(not= (nth edge 2) %))
                (attr/add-attr g edge :label))))
 
 (defn remove-edges [g edges]
@@ -104,6 +105,13 @@
   (remove-edges
    g (filter #(= label (nth % 2))
              (multi-edges g))))
+
+(defn remove-nodes [g nodes]
+  (as-> nodes $
+    (map #(all-edges g %) $)
+    (apply concat $)
+    (remove-edges g $)
+    (apply graph/remove-nodes $ nodes)))
 
 (defn up-nodes [g node]
   (->> (graph/in-edges g node)

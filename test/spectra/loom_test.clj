@@ -47,4 +47,8 @@
              [42 43 :pig] [43 44 :goat] [44 5 :bear] [44 5 :rat] [44 6 :fox])
            (sort (multi-edges g))))))
     
-    
+(deftest spider
+  (testing "Spidering a graph"
+    (def g (build-graph test-nodes test-edges))
+    (is (= (spider-edges g '())
+           '(([3 5 :bear]) ([1 2 :cat]) ([3 5 :rat]) ([1 2 :horse] [2 4 :fish]) ([1 3 :dog] [3 6 :fox] [6 7 :cow]))))))

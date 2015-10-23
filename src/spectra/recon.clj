@@ -109,7 +109,8 @@
     (-> prop node-map first)))
 
 (defn link-node [prop-name node-map g old-node]
-  (if (or (nil? node-map) (empty? node-map)) g
+  (if (or (nil? node-map) (empty? node-map)
+          (loom/out-edge-label g old-node :database-match)) g
       (if-let [new-node (-> old-node prop-name (node-match node-map))]
         (-> (loom/add-edges g [[old-node (key new-node) :database-match]])
             (loom/replace-node old-node (->> new-node val (recon-labels old-node)
@@ -173,7 +174,8 @@
 (defn filter-memory [g type-name]
   (->> (loom/nodes g)
        (filter #(= (s/type-label %) type-name))
-       (filter #(nil? (:data %)))))
+       (filter #(nil? (:data %)))
+       (filter #(not (loom/out-edge-label g % :database-match)))))
 
 (defn push-new! [labels old-nodes]
   (->> old-nodes

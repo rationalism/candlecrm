@@ -415,10 +415,8 @@
           (recon/link-people $ (recon/labeled-people-orgs
                                 user (recon/merged-props $ [s/person s/organization])))
           (recon/merge-graph! $)
-          (recon/load-new! $ s/person
-                           [s/person (neo4j/user-label user)])
-          (recon/load-new! $ s/organization
-                           [s/organization (neo4j/user-label user)])
+          (recon/load-new! $ s/person [s/person (neo4j/user-label user)])
+          (recon/load-new! $ s/organization [s/organization (neo4j/user-label user)])
           (recon/find-old-emails $)
           (reduce use-nlp $ (recon/filter-memory $ s/email))
           (recon/link-people $ (recon/labeled-people-orgs
@@ -432,8 +430,7 @@
           (reduce switch-message $ (recon/filter-memory $ s/email))
           (recon/link-new! $ s/email [s/email (neo4j/user-label user)])
           (recon/merge-graph! $)
-          (reduce #(loom/replace-node %1 %2 (:id %2))
-                  $ (loom/nodes $))
+          (reduce #(loom/replace-node %1 %2 (:id %2)) $ (loom/nodes $))
           (loom/remove-edges $ (neo4j/find-links (loom/multi-edges $)))
           (loom/spider-edges $ '())
           (map #(neo4j/create-links! (nodes-of-edges %) %) $)))
