@@ -114,13 +114,11 @@
        distinct))
 
 (defn chain-maps [chain]
-  (->> chain
-       chain-sentences
+  (->> chain chain-sentences
        (map #(hash-map % [chain]))))
 
 (defn bucket-coref [coref]
-  (->> coref
-       (map chain-maps)
+  (->> coref (map chain-maps)
        (apply concat)
        (apply merge-with concat)))
 
@@ -141,8 +139,7 @@
 
 (defn fill-in-corefs [candidate]
   (if (map? candidate)
-    candidate
-    (blank-coref candidate)))
+    candidate (blank-coref candidate)))
 
 (defn pronoun? [tokens]
   (cond
@@ -155,17 +152,13 @@
   (->> pos-list
        (map #(mapv str %))
        (map #(str/join " " %))
-       (str/join " ")
-       com/sha1))
+       (str/join " ") com/sha1))
 
 (defn tokens-pos [sent-num tokens]
   (map #(vector sent-num (.index %)) tokens))
 
 (defn tokens-pos-map [sent-num tokens]
-  (zipmap (->> tokens
-               count
-               inc
-               (range 1)
+  (zipmap (->> tokens count inc (range 1)
                (map #(vector sent-num %)))
           (tokens-pos sent-num tokens)))
 
@@ -178,35 +171,27 @@
               (.endIndex mention))
        (map str)
        (map #(str (.sentNum mention) " " %))
-       (str/join " ")
-       com/sha1))
+       (str/join " ") com/sha1))
 
 (defn mention-nodes [nodes]
   (map #(.mentionSpan %) nodes))
 
 (defn filter-singles [nodes]
-  (if (< (count nodes) 2)
-    '() nodes))
+  (if (< (count nodes) 2) '() nodes))
 
 (defn chain-nodes [chain]
-  (->> chain
-       (.getMentionMap)
-       vals
-       (map #(into '() %))
-       (apply concat)
-       mention-nodes
-       filter-singles))
+  (->> chain (.getMentionMap) vals
+       (map #(into '() %)) (apply concat)
+       mention-nodes filter-singles))
 
 (defn root-node [chain]
   (as-> (.getRepresentativeMention chain) $
     (.mentionSpan $)))
 
 (defn chain-edges [chain]
-  (->> chain
-       chain-nodes
+  (->> chain chain-nodes
        (map #(vector % (root-node chain) "!is!"))
-       (filter #(not= (nth % 0)
-                      (nth % 1)))))
+       (filter #(not= (nth % 0) (nth % 1)))))
 
 (defn chain-graph [chain]
   (loom/build-graph (chain-nodes chain)
@@ -257,17 +242,13 @@
 (defn recursive-graph [sent-num tokens triples]
   (if (empty? triples)
     nil
-    (->> triples
-         triples-graph
+    (->> triples triples-graph
          (attach-pos-map sent-num tokens))))
   
 (defn recursive-triples [sent-num tokens]
-  (->> tokens
-       tokens-str
+  (->> tokens tokens-str
        (run-nlp-simple *pipeline*)
-       get-sentences
-       first
-       get-triples
+       get-sentences first get-triples
        (recursive-graph sent-num tokens)))
 
 (defn scanned? [g node]
@@ -281,32 +262,26 @@
 
 (defn pos-map-node [g node]
   (->> (loom/labeled-edges g node "!pos-map!")
-       (map #(nth % 1))
-       first))
+       (map #(nth % 1)) first))
 
 (defn pos-map-only [g]
   (pos-map-node g (first (loom/nodes g))))
   
 (defn node-hash [g node sent-num]
   (if-let [pos-map (pos-map-node g node)]
-    (->> node
-         (tokens-pos sent-num)
-         (map #(pos-map %))
-         pos-hash)
+    (->> node (tokens-pos sent-num)
+         (map #(pos-map %)) pos-hash)
     (pos-hash (tokens-pos sent-num node))))
 
 (defn find-dupes [g sent-num]
-  (->> (loom/nodes g)
-       (filter tokens?)
+  (->> (loom/nodes g) (filter tokens?)
        (group-by #(node-hash g % sent-num))
-       vals
-       (filter #(> (count %) 1))))
+       vals (filter #(> (count %) 1))))
 
 (defn remove-dupes [g dupes]
   (as-> g $
     (loom/remove-edges
-     $ (->> dupes
-            rest
+     $ (->> dupes rest
             (map #(loom/labeled-edges g % "!pos-map!"))
             (apply concat)))
     (reduce (fn [a b]
@@ -383,7 +358,7 @@
 (defn stringify-graph [g]
   (loom/build-graph
    (map stringify-node (loom/nodes g))
-   (->> (loom/weighted-edges g)
+   (->> (loom/multi-edges g)
         (map #(assoc % 0 (stringify-node (nth % 0))))
         (map #(assoc % 1 (stringify-node (nth % 1)))))))
 
@@ -448,8 +423,7 @@
   (map #(shorten-node (first %)) nodes))
 
 (defn shorten-edge [edge]
-  (-> edge
-      (assoc 0 (shorten-node (nth edge 0)))
+  (-> (assoc edge 0 (shorten-node (nth edge 0)))
       (assoc 1 (shorten-node (nth edge 1)))))
 
 (defn strip-nodes [nodes]
@@ -463,8 +437,7 @@
 (defn strip-graph [g]
   (loom/build-graph
    (->> g loom/nodes strip-nodes)
-   (->> g loom/weighted-edges
-        (map strip-edge))))
+   (->> g loom/multi-edges (map strip-edge))))
 
 (defn lonely? [g pronoun]
   (as-> (loom/out-edges g pronoun) $
@@ -504,27 +477,13 @@
 
 (defn nlp-graph [parsed-text]
   (cond->
-      (->> parsed-text
-           get-sentences
-           number-items
-           (map sentence-graph)
-           loom/merge-graphs)
+      (->> parsed-text get-sentences number-items
+           (map sentence-graph) loom/merge-graphs)
     (env :coreference)
     (vector
-     (-> parsed-text
-         get-coref
-         vals
-         coref-graph))
+     (-> parsed-text get-coref vals coref-graph))
     (env :coreference)
     loom/merge-graphs))
-
-(defn graph-entities [g]
-  (if-let [entity-map
-           (->> g loom/weighted-edges
-                (filter #(= "!type!" (nth % 2)))
-                (map #(hash-map (nth % 1) (list (nth % 0))))
-                (apply merge-with concat))]
-    entity-map {}))
 
 (defn capitalize-words [text]
   (->> (str/split text #" ")
@@ -565,14 +524,9 @@
 
 (defn correct-case [text]
   (->> (str/lower-case text)
-       (run-nlp-simple (make-default-pipeline
-                        truecase-annotators))
-       get-sentences
-       (map get-tokens)
-       (apply concat)
-       (map true-case)
-       (str/join " ")
-       fix-punct))
+       (run-nlp-simple (make-default-pipeline truecase-annotators))
+       get-sentences (map get-tokens) (apply concat)
+       (map true-case) (str/join " ") fix-punct))
 
 (defn name-from-email [email]
   (as-> (-> (str/split email #"@")
@@ -612,6 +566,5 @@
              (.objectLemmaGloss triple)]))
 
 (defn print-triples [triples]
-  (->> triples
-       (map triple-string)
+  (->> (map triple-string triples)
        (map #(print (str % "\n")))))

@@ -1,14 +1,27 @@
 (ns spectra.loom
   (:require [clojure.java.io :as io]
             [loom.alg :as galg]
+            [loom.attr :as attr]
             [loom.graph :as graph]
             [loom.io :as gviz]
+            [spectra.common :as com]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
-(defn weighted-edge [g edge]
-  (conj edge (graph/weight g edge)))
+(defn multi-edge [g edge]
+  (->> (attr/attr g edge :label)
+       (map #(conj edge %))))
+
+(defn add-edge [g edge]
+  {:pre [(= 3 (count edge))]}
+  (cond
+    (graph/has-edge? g (first edge) (second edge))
+    (->> (attr/attr g (vec (take 2 edge)) :label)
+         (cons (nth edge 2)) distinct
+         (attr/add-attr g edge :label))
+    :else (-> (graph/add-edges g (vec (take 2 edge)))
+              (attr/add-attr edge :label (vector (nth edge 2))))))
 
 (defn nodes [g]
   (graph/nodes g))
@@ -16,16 +29,20 @@
 (defn edges [g]
   (graph/edges g))
 
-(defn weighted-edges [g]
-  (->> g edges (map #(weighted-edge g %))))
+(defn multi-edges [g]
+  (->> (edges g)
+       (map #(multi-edge g %))
+       (apply concat)))
 
 (defn out-edges [g node]
   (->> (graph/out-edges g node)
-       (map #(weighted-edge g %))))
+       (map #(multi-edge g %))
+       (apply concat)))
 
 (defn in-edges [g node]
   (->> (graph/in-edges g node)
-       (map #(weighted-edge g %))))
+       (map #(multi-edge g %))
+       (apply concat)))
 
 (defn out-edge-label [g node label]
   (->> (out-edges g node)
@@ -38,10 +55,10 @@
        first))
 
 (defn fan-in [g node]
-  (count (graph/in-edges g node)))
+  (count (in-edges g node)))
 
 (defn fan-out [g node]
-  (count (graph/out-edges g node)))
+  (count (out-edges g node)))
 
 (defn top-nodes [g]
   (filter #(= 0 (fan-in g %))
@@ -55,7 +72,7 @@
   (apply graph/add-nodes g nodes))
 
 (defn add-edges [g edges]
-  (apply graph/add-edges g edges))
+  (reduce add-edge g edges))
 
 (defn loners [g]
   (galg/loners g))
@@ -63,13 +80,28 @@
 (defn remove-nodes [g nodes]
   (apply graph/remove-nodes g nodes))
 
+(defn one-label-left? [g edge]
+  (let [label (attr/attr g (vec (take 2 edge)) :label)]
+    (and (= 1 (count label))
+         (= (first label) (nth edge 2)))))
+
+(defn remove-edge [g edge]
+  {:pre [(= 3 (count edge))]}
+  (cond
+    (not (graph/has-edge? g (first edge) (second edge))) g
+    (not (some #{(nth edge 2)} (attr/attr g (vec (take 2 edge)) :label))) g
+    (one-label-left? g edge) (graph/remove-edges g (vec (take 2 edge)))
+    :else (->> (attr/attr g (vec (take 2 edge)) :label)
+               (remove (nth edge 2)) 
+               (attr/add-attr g edge :label))))
+
 (defn remove-edges [g edges]
-  (apply graph/remove-edges g edges))
+  (reduce remove-edge g edges))
 
 (defn remove-edges-label [g label]
   (remove-edges
    g (filter #(= label (nth % 2))
-             (weighted-edges g))))
+             (multi-edges g))))
 
 (defn up-nodes [g node]
   (->> (graph/in-edges g node)
@@ -87,13 +119,12 @@
        (filter #(= label (nth % 2)))))
 
 (defn select-edges [g edge-type]
-  (->> (weighted-edges g)
+  (->> (multi-edges g)
        (filter #(= edge-type (nth % 2)))))
 
 (defn replace-node [g old-node new-node]
   (if (= old-node new-node) g
-      (-> g
-          (add-nodes [new-node])
+      (-> (add-nodes g [new-node])
           (add-edges (->> (out-edges g old-node)
                           (map #(assoc % 0 new-node))))
           (add-edges (->> (in-edges g old-node)
@@ -101,32 +132,25 @@
           (remove-nodes [old-node]))))
 
 (defn split-node [g old-node new-node-up new-node-down]
-  (-> g
-      (add-edges (->> (out-edges g old-node)
-                      (map #(assoc % 0 new-node-down))))
+  (-> (add-edges g (->> (out-edges g old-node)
+                        (map #(assoc % 0 new-node-down))))
       (add-edges (->> (in-edges g old-node)
                       (map #(assoc % 1 new-node-up))))
       (remove-nodes [old-node])))  
 
-(defn crash-if-nil [g]
-  (if (->> (nodes g) (filter nil?) count (not= 0))
-    (/ 1 0) g))
-
 (defn build-graph [nodes edges]
-  (-> (graph/weighted-digraph)
-      (add-nodes nodes)
-      (add-edges edges)))
+  {:pre [(coll? nodes) (coll? edges)]}
+  (-> (graph/digraph) (add-nodes nodes) (add-edges edges)))
 
 (defn reverse-edges [edges]
   (map #(assoc % 1 (% 0) 0 (% 1)) edges))
 
 (defn reverse-graph [g]
    (build-graph (nodes g)
-                (reverse-edges (weighted-edges g))))
+                (reverse-edges (multi-edges g))))
 
 (defn attach-all [g old-nodes new-node label]
-  (-> g
-      (add-nodes [new-node])
+  (-> (add-nodes g [new-node])
       (add-edges (->> old-nodes
                       (map vector)
                       (map #(assoc % 1 new-node))
@@ -137,14 +161,12 @@
        (map #(graph/subgraph g %))))
 
 (defn merge-graphs [graphs]
-  (apply graph/weighted-digraph graphs))
+  (apply graph/digraph graphs))
 
 (defn count-downstream [g node]
   (->> (galg/bf-span g node)
-       vals
-       (apply concat)
-       distinct
-       count))
+       vals (apply concat)
+       distinct count))
 
 (defn count-upstream [g node]
   (count-downstream (reverse-graph g) node))
@@ -158,7 +180,7 @@
              (second edge)))))
 
 (defn spider-edges [g edges]
-  (if (-> g weighted-edges count (= 0))
+  (if (-> g multi-edges count (= 0))
     edges (let [new-path (->> g nodes (sort-by (partial fan-out g) >)
                               first (spider-path g '()))]
             (recur (first new-path)

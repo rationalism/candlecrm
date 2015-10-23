@@ -20,6 +20,7 @@
 (def plain-type "TEXT/PLAIN")
 (def html-type "TEXT/HTML")
 (def multi-type "multipart")
+(def graph-counter (atom 0))
 
 (defn get-folder [store folder-name]
   (.getFolder store folder-name))
@@ -121,11 +122,7 @@
 (defn count-depth [lines]
   (let [arrows (count-arrows lines)]
     (if (or (nil? arrows) (empty? arrows))
-      0
-      (->> arrows
-           (map first)
-           (map count)
-           (apply max)))))
+      0 (->> arrows (map first) (map count) (apply max)))))
 
 (defn merge-lines [lines]
   (str/join "\r\n" lines))
@@ -167,7 +164,7 @@
   {s/email-sent (-> header s/email-sent deref)
    s/type-label s/email
    s/email-body (->> lines (map #(strip-arrows % depth)) merge-lines)})
-  
+
 (defn split-email [depth chain]
   (let [bottom (find-bottom chain)
         lines (s/email-body bottom)]
@@ -207,9 +204,7 @@
 
 (defn raw-msg-chain [body]
   (p :raw-msg-chain
-     (-> body
-         str/split-lines
-         count-depth
+     (-> body str/split-lines count-depth
          (recursive-split (start-email-graph
                            (str/split-lines body))))))
 
@@ -222,8 +217,7 @@
        (->> (-> message content get-parts)
             (map get-text-recursive)
             (filter #(not= "" %))
-            (cons "")
-            last)
+            (cons "") last)
        :else "")))
 
 (defn make-headers [pair root]
@@ -314,11 +308,9 @@
 (defn parse-datetime [chain event]
   (if (-> event s/date-time type (= java.util.Date)) chain
       (->> (loom/in-edge-label chain event "!mentions!")
-           first
-           s/email-sent
+           first s/email-sent
            (dt/dates-in-text (s/date-time event))
-           first
-           (assoc event s/date-time)
+           first (assoc event s/date-time)
            (loom/replace-node chain event))))
 
 (defn parse-email-addr [chain node]
@@ -335,14 +327,15 @@
     (loom/add-edges $ (->> (mention-nodes $)
                            (map #(vector message % "!mentions!"))))
     (loom/replace-node $ message
-                       (assoc message s/email-body
-                              (hyperlink-text (s/email-body message)
-                                              (mention-nodes $))))
+                       (->> (mention-nodes $)
+                            (hyperlink-text (s/email-body message))
+                            (assoc message s/email-body)))
     (reduce import-label $ (loom/select-edges $ "!type!"))
     (reduce parse-datetime $ (->> (loom/nodes $)
                                   (filter #(= s/event (:label %)))))
-    (reduce parse-email-addr $ (->> (loom/nodes $)
-                                    (filter #(and (s/email-addr %) (not (s/name %))))))
+    (reduce parse-email-addr $
+            (->> (loom/nodes $)
+                 (filter #(and (s/email-addr %) (not (s/name %))))))
     (loom/remove-nodes $ (->> "!type!" (loom/select-edges $) (map second)))))
 
 (def url-map {s/person "/person/" s/email "/email/"
@@ -500,8 +493,7 @@
   
 (defn insert-email-range! [user lower upper]
   (doall
-   (->> (messages-in-range (fetch-imap-folder user)
-                           lower upper)
+   (->> (messages-in-range (fetch-imap-folder user) lower upper)
         (map full-parse)
         (map #(insert-emails! user %))))
   :success)

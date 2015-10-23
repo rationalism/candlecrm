@@ -206,10 +206,12 @@
       (neo4j/replace-labels! (second match-edge) labels))))
 
 (defn merge-graph! [g]
-  (let [match-edges (->> (loom/weighted-edges g)
+  (let [match-edges (->> (loom/multi-edges g)
                          (filter #(= (nth % 2) :database-match)))]
     (doall (map merge-edge! match-edges))
-    (reduce #(loom/replace-node %1 (first %2) (second %2)) g match-edges)))
+    (reduce #(loom/replace-node %1 (first %2) (second %2))
+            (loom/remove-edges g match-edges)
+            match-edges)))
 
 (defn filter-memory [g type-name]
   (->> (loom/nodes g)
