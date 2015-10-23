@@ -1,5 +1,7 @@
 (ns spectra.corenlp-test
   (:require [clojure.test :refer :all]
+            [spectra.loom :as loom]
+            [spectra.schema :as s]
             [clojure.set :as set]
             [spectra.corenlp :refer :all]))
 
@@ -14,23 +16,17 @@
 (def wikipedia-dates #{"1824" "1893" "1821" "1900" "1813" "1878" "1822" "1888"})
 (def wikipedia-locations #{"Sierra Nevada" "Rocky Mountains" "United States" "Mississippi River" "Pacific Ocean"})
 
-(def wikipedia-parsed-people #{{:name "Collis Potter Huntington"} {:name "Mark Hopkins"} {:name "Charles Crocker"}})
-
 (deftest nlp
   (testing "all types of entities"
-    (let [entities (graph-entities (run-nlp *pipeline* wikipedia-blurb))]
-      (is (set/subset? wikipedia-people (set (entities person-key))))
+    (let [entities (as-> wikipedia-blurb $
+                     (run-nlp-default $)
+                     (loom/select-edges $ "!type!")
+                     (map #(hash-map (second %) (vector (first %))) $)
+                     (apply merge-with concat $))]
+      (is (set/subset? wikipedia-people (set (s/person-name entities))))
       ;; TODO: move date testing to natty when that's installed
       ;; (is (set/subset? wikipedia-dates (set (entities date-key))))
-      (is (set/subset? wikipedia-locations (set (entities location-key))))))
-  (testing "people detection"
-    (let [people (nlp-people (graph-entities (run-nlp *pipeline* wikipedia-blurb)))]
-      (is (set/subset? wikipedia-parsed-people (set people)))))
+      (is (set/subset? wikipedia-locations (set (s/loc-name entities))))))
   (testing "empty set"
-    (is (= {} (graph-entities (run-nlp *pipeline* ""))))
-    (is (= {} (graph-entities (run-nlp *pipeline* ">>"))))))
-
-(deftest people
-  (testing "making people from empty"
-    (is (= '() (->> (graph-entities (run-nlp *pipeline* ""))
-                    nlp-people)))))
+    (def empty-graph (loom/build-graph [] []))
+    (is (= empty-graph (run-nlp-default "")))))

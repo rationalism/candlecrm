@@ -90,7 +90,9 @@
   (cond
     (not (graph/has-edge? g (first edge) (second edge))) g
     (not (some #{(nth edge 2)} (attr/attr g (vec (take 2 edge)) :label))) g
-    (one-label-left? g edge) (graph/remove-edges g (vec (take 2 edge)))
+    (one-label-left? g edge)
+    (-> (attr/remove-attr g (vec (take 2 edge)) :label)
+        (graph/remove-edges (vec (take 2 edge))))
     :else (->> (attr/attr g (vec (take 2 edge)) :label)
                (remove (nth edge 2)) 
                (attr/add-attr g edge :label))))
