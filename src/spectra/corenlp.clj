@@ -190,7 +190,7 @@
 
 (defn chain-edges [chain]
   (->> chain chain-nodes
-       (map #(vector % (root-node chain) "!is!"))
+       (map #(vector % (root-node chain) s/coref-is))
        (filter #(not= (nth % 0) (nth % 1)))))
 
 (defn chain-graph [chain]
@@ -206,7 +206,7 @@
 
 (defn ner-edge [entity]
   (when-let [schema-type (-> entity entity-type schema-map)]
-    (vector (ner-node entity) schema-type "!type!")))
+    (vector (ner-node entity) schema-type s/has-type)))
 
 (defn ner-graph [entity]
   (when (ner-edge entity)
@@ -237,7 +237,7 @@
   (loom/attach-all
    g (loom/nodes g)
    (tokens-pos-map sent-num tokens)
-   "!pos-map!"))
+   s/pos-map))
 
 (defn recursive-graph [sent-num tokens triples]
   (if (empty? triples)
@@ -252,7 +252,7 @@
        (recursive-graph sent-num tokens)))
 
 (defn scanned? [g node]
-  (-> (loom/labeled-edges g node "!scanned!")
+  (-> (loom/labeled-edges g node s/scanned)
       empty? not))
 
 (defn tokens? [tokens]
@@ -261,7 +261,7 @@
                                     tokens))))
 
 (defn pos-map-node [g node]
-  (->> (loom/labeled-edges g node "!pos-map!")
+  (->> (loom/labeled-edges g node s/pos-map)
        (map #(nth % 1)) first))
 
 (defn pos-map-only [g]
@@ -282,7 +282,7 @@
   (as-> g $
     (loom/remove-edges
      $ (->> dupes rest
-            (map #(loom/labeled-edges g % "!pos-map!"))
+            (map #(loom/labeled-edges g % s/pos-map))
             (apply concat)))
     (reduce (fn [a b]
               (loom/replace-node
@@ -309,9 +309,8 @@
                  (com/compose-maps (pos-map-only $) pos-map)))
               new-graph)
             vector
-            (conj (loom/remove-edges
-                   g (loom/labeled-edges
-                      g old-node "!pos-map!")))
+            (->> (loom/labeled-edges g old-node s/pos-map)
+                 (loom/remove-edges g) conj)
             loom/merge-graphs
             (loom/replace-node
              old-node
@@ -328,7 +327,7 @@
              (fn [gr edit]
                (loom/attach-all
                 gr (vector (first (keys edit)))
-                "yes" "!scanned!"))
+                "yes" s/scanned))
              g (take-while (fn [edit]
                              (-> edit vals first nil?))
                            edits))
@@ -347,8 +346,8 @@
 
 (defn recursion-cleanup [g]
   (as-> g $
-    (loom/remove-edges-label $ "!scanned!")
-    (loom/remove-edges-label $ "!pos-map!")
+    (loom/remove-edges-label $ s/scanned)
+    (loom/remove-edges-label $ s/pos-map)
     (loom/remove-nodes $ (loom/loners $))))
 
 (defn stringify-node [node]
@@ -367,7 +366,7 @@
     (hash-map (com/sha1 $) $)))
 
 (defn pronoun-edge [node]
-  [node (pronoun-node) "!type!"])
+  [node (pronoun-node) s/has-type])
 
 (defn pronoun-graph [nodes]
   (loom/build-graph nodes (map pronoun-edge nodes)))
@@ -389,7 +388,7 @@
    :hash (com/sha1 (first edge))))
 
 (defn library-edge [text label]
-  [text label "!type!"])
+  [text label s/has-type])
 
 (defn library-ner [text]
   (loom/build-graph
@@ -442,23 +441,21 @@
 (defn lonely? [g pronoun]
   (as-> (loom/out-edges g pronoun) $
     (and (= (count $) 1)
-         (= "!type!"
-            (nth (first $) 2)))))
+         (= s/has-type (nth (first $) 2)))))
 
 (defn find-pronouns [g]
   (->> (loom/up-nodes g (pronoun-node))
-       (filter #(loom/out-edge-label g % "!is!"))))
+       (filter #(loom/out-edge-label g % s/coref-is))))
 
 (defn find-referent [g pronoun]
-  (second (loom/out-edge-label g pronoun "!is!")))
+  (second (loom/out-edge-label g pronoun s/coref-is)))
 
 (defn rewrite-edges [g pronoun]
   (->> (loom/out-edges g pronoun)
-       (filter #(not= "!is!" (nth % 2)))
-       (filter #(not= "!type!" (nth % 2)))
+       (filter #(not= s/coref-is (nth % 2)))
+       (filter #(not= s/has-type (nth % 2)))
        (map #(com/slice 1 3 %))
-       (map #(into (vector (find-referent g pronoun))
-                   %))))
+       (map #(into (vector (find-referent g pronoun)) %))))
 
 (defn rewrite-pronouns [g]
   (as-> g $
@@ -518,7 +515,7 @@
   (str/replace text #" [,\.']" #(subs %1 1)))
 
 (defn nlp-names [graph]
-  (->> (loom/select-edges graph "!type!")
+  (->> (loom/select-edges graph s/has-type)
        (filter #(some #{(second %)} [s/person-name s/org-name]))
        distinct))
 

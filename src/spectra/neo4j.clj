@@ -131,6 +131,25 @@
                str/join)
           ") RETURN root"))))
 
+(defn link-query [link]
+  (str "ID(a)= " (first link)
+       " AND ID(b)= " (second link)
+       " AND type(r)= '" (name (nth link 2))
+       "'"))
+
+(defn link-result [result]
+  (vector (result "ID(a)")
+          (result "ID(b)")
+          (keyword (result "type(r)"))))
+
+(defn find-links [links]
+  (->> (str "MATCH (a)-[r]->(b) WHERE ("
+            (->> (map link-query links)
+                 (str/join ") OR ("))
+            ") RETURN ID(a), ID(b), type(r)")
+       (cy/tquery *graph*)
+       (map link-result)))
+  
 (defn find-by-id [id]
   (first
    (cypher-list

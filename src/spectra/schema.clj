@@ -41,6 +41,11 @@
 (def amount :amount)
 (def event "event")
 
+(def coref-is :coref-is)
+(def has-type :has-type)
+(def pos-map :pos-map)
+(def scanned :scanned)
+
 (def repeated-attr [name person-name org-name email-addr phone-num])
 
 (def attr-entity {person-name person org-name organization

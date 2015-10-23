@@ -19,7 +19,7 @@
   (testing "all types of entities"
     (let [entities (as-> wikipedia-blurb $
                      (run-nlp-default $)
-                     (loom/select-edges $ "!type!")
+                     (loom/select-edges $ s/has-type)
                      (map #(hash-map (second %) (vector (first %))) $)
                      (apply merge-with concat $))]
       (is (set/subset? wikipedia-people (set (s/person-name entities))))

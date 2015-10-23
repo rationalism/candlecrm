@@ -203,8 +203,3 @@
             g (->> emails
                    (map #(find-old-email g %))
                    (zipmap emails)))))
-
-
-    
-                        
-                                     

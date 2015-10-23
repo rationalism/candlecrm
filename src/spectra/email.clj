@@ -340,11 +340,11 @@
 
 (defn mention-nodes [chain]
   (->> (loom/nodes chain)
-       (filter #(loom/out-edge-label chain % "!type!"))))
+       (filter #(loom/out-edge-label chain % s/has-type))))
 
 (defn parse-datetime [chain event]
   (if (-> event s/date-time type (= java.util.Date)) chain
-      (->> (loom/in-edge-label chain event "!mentions!")
+      (->> (loom/in-edge-label chain event s/email-mentions)
            first s/email-sent
            (dt/dates-in-text (s/date-time event))
            first (assoc event s/date-time)
@@ -362,18 +362,18 @@
              (conj [chain])
              loom/merge-graphs) $
     (loom/add-edges $ (->> (mention-nodes $)
-                           (map #(vector message % "!mentions!"))))
+                           (map #(vector message % s/email-mentions))))
     (loom/replace-node $ message
                        (->> (mention-nodes $)
                             (hyperlink-text (s/email-body message))
                             (assoc message s/email-body)))
-    (reduce import-label $ (loom/select-edges $ "!type!"))
+    (reduce import-label $ (loom/select-edges $ s/has-type))
     (reduce parse-datetime $ (->> (loom/nodes $)
                                   (filter #(= s/event (:label %)))))
     (reduce parse-email-addr $
             (->> (loom/nodes $)
                  (filter #(and (s/email-addr %) (not (s/name %))))))
-    (loom/remove-nodes $ (->> "!type!" (loom/select-edges $) (map second)))))
+    (loom/remove-nodes $ (->> s/has-type (loom/select-edges $) (map second)))))
 
 (def url-map {s/person "/person/" s/email "/email/"
               s/organization "/organization/" s/location "/location/"
@@ -394,7 +394,7 @@
           text (keys link-map)))
 
 (defn switch-message [g message]
-  (->> (loom/labeled-edges g message "!mentions!")
+  (->> (loom/labeled-edges g message s/email-mentions)
        (map second)
        (map #(hash-map (:hash %) (:hyperlink %)))
        (apply merge)
@@ -434,6 +434,7 @@
           (recon/merge-graph! $)
           (reduce #(loom/replace-node %1 %2 (:id %2))
                   $ (loom/nodes $))
+          (loom/remove-edges $ (neo4j/find-links (loom/multi-edges $)))
           (loom/spider-edges $ '())
           (map #(neo4j/create-links! (nodes-of-edges %) %) $)))
        (catch Exception e
