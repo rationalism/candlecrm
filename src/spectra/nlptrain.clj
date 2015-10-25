@@ -12,8 +12,7 @@
        (nlp/run-nlp-simple (nlp/make-default-pipeline
                             nlp/sentence-annotators))
        (nlp/get-sentences)
-       (map nlp/get-tokens)
-       (apply concat)
+       (mapcat nlp/get-tokens)
        (map #(.originalText %))
        (str/join "\t\n")
        (spit outfile)))

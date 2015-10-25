@@ -31,18 +31,15 @@
 
 (defn multi-edges [g]
   (->> (edges g)
-       (map #(multi-edge g %))
-       (apply concat)))
+       (mapcat #(multi-edge g %))))
 
 (defn out-edges [g node]
   (->> (graph/out-edges g node)
-       (map #(multi-edge g %))
-       (apply concat)))
+       (mapcat #(multi-edge g %))))
 
 (defn in-edges [g node]
   (->> (graph/in-edges g node)
-       (map #(multi-edge g %))
-       (apply concat)))
+       (mapcat #(multi-edge g %))))
 
 (defn all-edges [g node]
   (concat (out-edges g node)
@@ -108,8 +105,7 @@
 
 (defn remove-nodes [g nodes]
   (as-> nodes $
-    (map #(all-edges g %) $)
-    (apply concat $)
+    (mapcat #(all-edges g %) $)
     (remove-edges g $)
     (apply graph/remove-nodes $ nodes)))
 

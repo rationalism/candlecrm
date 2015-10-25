@@ -118,8 +118,7 @@
        (map #(hash-map % [chain]))))
 
 (defn bucket-coref [coref]
-  (->> coref (map chain-maps)
-       (apply concat)
+  (->> (mapcat chain-maps coref)
        (apply merge-with concat)))
 
 (defn number-items [items]
@@ -181,7 +180,7 @@
 
 (defn chain-nodes [chain]
   (->> chain (.getMentionMap) vals
-       (map #(into '() %)) (apply concat)
+       (mapcat #(into '() %))
        mention-nodes filter-singles))
 
 (defn root-node [chain]
@@ -282,8 +281,7 @@
   (as-> g $
     (loom/remove-edges
      $ (->> dupes rest
-            (map #(loom/labeled-edges g % s/pos-map))
-            (apply concat)))
+            (mapcat #(loom/labeled-edges g % s/pos-map))))
     (reduce (fn [a b]
               (loom/replace-node
                a b (first dupes)))
@@ -460,9 +458,8 @@
 (defn rewrite-pronouns [g]
   (as-> g $
     (loom/add-edges $
-           (->> g find-pronouns
-                (map #(rewrite-edges g %))
-                (apply concat)))
+           (->> (find-pronouns g)
+                (mapcat #(rewrite-edges g %))))
     (loom/remove-nodes $
            (find-pronouns g))
     (loom/remove-nodes $
@@ -522,8 +519,8 @@
 (defn correct-case [text]
   (->> (str/lower-case text)
        (run-nlp-simple (make-default-pipeline truecase-annotators))
-       get-sentences (map get-tokens) (apply concat)
-       (map true-case) (str/join " ") fix-punct))
+       get-sentences (mapcat get-tokens) (map true-case)
+       (str/join " ") fix-punct))
 
 (defn name-from-email [email]
   (as-> (-> (str/split email #"@")

@@ -303,8 +303,7 @@
            (decode-sender message)
            (decode-replyto message)]
           (apply merge)
-          (map #(make-headers % root))
-          (apply concat)))))
+          (mapcat #(make-headers % root))))))
 
 (defn headers-for-last [raw-msgs headers]
   (update raw-msgs
