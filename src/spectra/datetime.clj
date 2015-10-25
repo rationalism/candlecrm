@@ -32,6 +32,9 @@
 (defn to-ms [some-date]
   (.getTime some-date))
 
+(defn has-ms? [some-date]
+  (-> some-date .getTime (mod 1000) (not= 0)))
+
 (defn format-year [some-date]
   (-> (SimpleDateFormat. "yyyy")
       (.format some-date)))

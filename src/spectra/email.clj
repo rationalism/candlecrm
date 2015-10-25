@@ -186,10 +186,7 @@
 
 (defn header-ready? [marks]  
   (or (< (:start-header marks) 0)
-      (> (:date-found marks) 3)
-      (and (s/email-sent marks)
-           (or (:email-from-addr marks))
-               (:email-from-name marks))))
+      (s/email-sent marks)))
  
 (defn sub-email [marks lines]
   {s/email-sent (-> marks s/email-sent)
@@ -210,17 +207,19 @@
              (drop-while (drop (:start-body marks) (range)))
              first)))
 
-(defn inc-date-found [marks]
-  (if (s/email-sent marks)
-    (assoc marks :date-found (-> marks :date-found inc))
-    marks))
+;; 1960-01-02 05:11:48.874
+(def ref-date (java.util.Date. -315514073744))
+
+(defn sent-date [line]
+  (->> (dt/dates-in-text line ref-date)
+       (remove dt/has-ms?)
+       (remove #(= "1960" (dt/format-year %)))))
 
 (defn find-header [lines marks line-num]
   (if (header-ready? marks) marks
       (let [this-line (nth lines line-num)]
-        (-> (inc-date-found marks)
-            (assoc :start-header line-num)
-            (assoc-if-found s/email-sent (dt/dates-in-text this-line))
+        (-> (assoc :start-header line-num)
+            (assoc-if-found s/email-sent (sent-date this-line))
             (assoc-if-found :email-from-addr (regex/find-email-addrs this-line))
             (assoc-if-found :email-from-name (->> this-line nlp/run-nlp-default
                                                   nlp/nlp-names first))))))
@@ -240,7 +239,7 @@
 (defn find-marks [depth chain]
   (let [lines (chain-lines chain)]
     (-> {:depth depth s/email-sent nil :email-from-name nil
-         :email-from-addr nil :date-found 0 :start-header 0}
+         :email-from-addr nil :start-header 0}
         (find-start-body lines)
         (find-end-body lines)
         (find-start-header lines)))) 
