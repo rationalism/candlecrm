@@ -524,11 +524,8 @@
       (-> $ capitalize-words run-nlp-default nlp-names first))))
 
 (defn normalize-person [name email default]
-  (cond
-    (and (com/nil-or-empty? name)
-         (com/nil-or-empty? email))
-    {:label default}
-    (not (com/nil-or-empty? name))
+  {:pre [(not (and (com/nil-or-empty? name) (com/nil-or-empty? email)))]}
+  (if (not (com/nil-or-empty? name))
     (if (com/nil-or-empty? email)
       (if-let [inferred-email (-> name regex/find-email-addrs first)]
         (if-let [parsed-name (-> name (regex/parse-name inferred-email)
@@ -542,7 +539,6 @@
                                run-nlp-default nlp-names first)]
         (assoc (label-edge parsed-name) s/email-addr [email])
         {:label default s/name [(regex/parse-name name email)] s/email-addr [email]}))
-    :else
     (if-let [inferred-name (name-from-email email)]
       (assoc (label-edge inferred-name) s/email-addr [email])
       {:label default s/email-addr [email] :hash (com/sha1 email)})))

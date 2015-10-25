@@ -60,7 +60,8 @@
 (defn lookup-old-email [message person-from]
   (when (not (or (nil? person-from)
                  (empty? person-from)
-                 (nil? (:id person-from))))
+                 (nil? (:id person-from))
+                 (nil? (s/email-sent message))))
     (-> (str "MATCH (root:" s/email
              " " (neo4j/cypher-properties
                   {s/email-sub-hash
