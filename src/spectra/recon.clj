@@ -157,8 +157,8 @@
        (concat (-> match-edge first keys))
        distinct
        (remove #(some #{%} [:label :hyperlink :hash]))
-       (remove #(-> match-edge second :data %)
-               (-> match-edge first %))
+       (remove #(= (-> match-edge second :data %)
+                   (-> match-edge first %)))
        (map #(neo4j/merge-property-list!
               (second match-edge) %
               (-> match-edge first %))))
