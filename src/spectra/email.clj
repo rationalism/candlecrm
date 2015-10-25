@@ -230,8 +230,7 @@
 
 (defn body-check [marks]
   (if (= (:start-header marks) (:start-body marks))
-    (assoc marks :start-body (-> marks :start-body inc))
-    marks))
+    (update marks :start-body inc) marks))
 
 (defn chain-lines [chain]
   (-> chain find-bottom s/email-body))

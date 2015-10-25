@@ -33,8 +33,7 @@
   (assoc (resp/redirect "/") :session nil))
 
 (defn home-with-message [message]
-  (assoc (resp/redirect "/")
-         :flash message))
+  (assoc (resp/redirect "/") :flash message))
 
 (defn html-wrapper [body]
   {:status 200

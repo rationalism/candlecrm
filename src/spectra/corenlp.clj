@@ -228,10 +228,6 @@
        (map #(triple-graph %))
        loom/merge-graphs))
 
-(defn replace-val [map f]
-  (assoc map (first (keys map))
-         (f (first (vals map)))))
-
 (defn attach-pos-map [sent-num tokens g]
   (loom/attach-all
    g (loom/nodes g)
@@ -356,8 +352,9 @@
   (loom/build-graph
    (map stringify-node (loom/nodes g))
    (->> (loom/multi-edges g)
-        (map #(assoc % 0 (stringify-node (nth % 0))))
-        (map #(assoc % 1 (stringify-node (nth % 1)))))))
+        (map #(vector (stringify-node (first %))
+                      (stringify-node (second %))
+                      (nth % 2))))))
 
 (defn pronoun-node []
   (as-> "!PRONOUN!" $
@@ -380,10 +377,9 @@
       (vector (first edge)) (first edge))))
 
 (defn label-edge [edge]
-  (assoc
-   {} (label-correction (second edge)) (format-value edge)
+  {(label-correction (second edge)) (format-value edge)
    :label (s/attr-entity (second edge))
-   :hash (com/sha1 (first edge))))
+   :hash (com/sha1 (first edge))})
 
 (defn library-edge [text label]
   [text label s/has-type])
@@ -420,16 +416,15 @@
   (map #(shorten-node (first %)) nodes))
 
 (defn shorten-edge [edge]
-  (-> (assoc edge 0 (shorten-node (nth edge 0)))
-      (assoc 1 (shorten-node (nth edge 1)))))
+  (conj (->> (take 2 edge) (map shorten-node))
+        (nth edge 2)))
 
 (defn strip-nodes [nodes]
   (->> nodes (apply merge) vals))
 
 (defn strip-edge [edge]
-  (-> edge
-      (assoc 0 (first (vals (nth edge 0))))
-      (assoc 1 (first (vals (nth edge 1))))))
+  (conj (->> (take 2 edge) (map vals) (map first))
+        (nth edge 2)))
 
 (defn strip-graph [g]
   (loom/build-graph
