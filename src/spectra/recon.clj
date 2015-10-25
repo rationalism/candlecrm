@@ -156,8 +156,8 @@
        (concat (-> match-edge first keys))
        distinct
        (remove #(some #{%} [:label :hyperlink :hash]))
-       (filter #(not= (-> match-edge second :data %)
-                      (-> match-edge first %)))
+       (remove #(-> match-edge second :data %)
+               (-> match-edge first %))
        (map #(neo4j/merge-property-list!
               (second match-edge) %
               (-> match-edge first %))))
@@ -178,7 +178,7 @@
   (->> (loom/nodes g)
        (filter #(= (s/type-label %) type-name))
        (filter #(nil? (:data %)))
-       (filter #(not (loom/out-edge-label g % :database-match)))))
+       (remove #(loom/out-edge-label g % :database-match))))
 
 (defn push-new! [labels old-nodes]
   (->> old-nodes

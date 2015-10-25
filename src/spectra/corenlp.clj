@@ -190,7 +190,7 @@
 (defn chain-edges [chain]
   (->> chain chain-nodes
        (map #(vector % (root-node chain) s/coref-is))
-       (filter #(not= (nth % 0) (nth % 1)))))
+       (remove #(= (nth % 0) (nth % 1)))))
 
 (defn chain-graph [chain]
   (loom/build-graph (chain-nodes chain)
@@ -336,7 +336,7 @@
     g sent-num
     (->> (loom/nodes g)
          (filter tokens?)
-         (filter (fn [x] (not (scanned? g x))))
+         (remove (fn [x] (scanned? g x)))
          (filter (fn [x] (> (count x) 1)))
          loom/sort-nodes
          (map (fn [x] (hash-map x (recursive-triples
@@ -450,8 +450,8 @@
 
 (defn rewrite-edges [g pronoun]
   (->> (loom/out-edges g pronoun)
-       (filter #(not= s/coref-is (nth % 2)))
-       (filter #(not= s/has-type (nth % 2)))
+       (remove #(= s/coref-is (nth % 2)))
+       (remove #(= s/has-type (nth % 2)))
        (map #(com/slice 1 3 %))
        (map #(into (vector (find-referent g pronoun)) %))))
 

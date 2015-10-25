@@ -92,7 +92,7 @@
     (-> (attr/remove-attr g (vec (take 2 edge)) :label)
         (graph/remove-edges (vec (take 2 edge))))
     :else (->> (attr/attr g (vec (take 2 edge)) :label)
-               (filter #(not= (nth edge 2) %))
+               (remove #(= (nth edge 2) %))
                (attr/add-attr g edge :label))))
 
 (defn remove-edges [g edges]

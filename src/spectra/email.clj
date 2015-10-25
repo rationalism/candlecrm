@@ -153,7 +153,7 @@
 (defn count-arrows [lines]
   (->> lines
        (map #(re-seq #"^>+" %))
-       (filter #(not (nil? %)))))
+       (remove #(nil? %))))
   
 (defn count-depth [lines]
   (let [arrows (count-arrows lines)]
@@ -171,7 +171,7 @@
 (defn find-bottom [chain]
   (->> chain loom/nodes
        (filter #(contains? % s/email-body))
-       (filter #(not (loom/out-edge-label chain % s/email-reply)))
+       (remove #(loom/out-edge-label chain % s/email-reply))
        first))
 
 (defn header-to-person [header]
@@ -286,7 +286,7 @@
        (.contains (content-type message) multi-type)
        (->> (-> message content get-parts)
             (map get-text-recursive)
-            (filter #(not= "" %))
+            (remove #(= "" %))
             (cons "") last)
        :else "")))
 

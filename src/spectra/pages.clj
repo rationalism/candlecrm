@@ -27,7 +27,7 @@
 (defn people-table [user start limit]
   (->> (recon/person-from-user user start limit)
        (map node-attrs)
-       (filter #(not (empty? %)))
+       (remove #(empty? %))
        (filter #(contains? % s/name))
        (map first-table-vals)
        (map html/person-row)
