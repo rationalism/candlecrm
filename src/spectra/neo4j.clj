@@ -143,7 +143,13 @@
           (result "ID(b)")
           (keyword (result "type(r)"))))
 
+(defn is-link-valid? [link]
+  (and (-> link first type (= java.lang.Long))
+       (-> link second type (= java.lang.Long))
+       (-> link (nth 2) type (= clojure.lang.Keyword))))
+
 (defn find-link [link]
+  {:pre [(is-link-valid? link)]}
   (->> (str "MATCH (a)-[r]->(b) WHERE ("
             (link-query link)
             ") RETURN ID(a), ID(b), type(r)")
@@ -151,7 +157,7 @@
        (map link-result)))
 
 (defn find-links [links]
-  (->> (pmap find-link links)
+  (->> (map find-link links)
        (apply concat)))
   
 (defn find-by-id [id]
