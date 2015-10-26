@@ -188,7 +188,9 @@
 
 (defn header-ready? [marks]  
   (or (< (:start-header marks) 0)
-      (s/email-sent marks)))
+      (and (s/email-sent marks)
+           (or (:email-from-addr marks)
+               (:email-from-name marks)))))
  
 (defn sub-email [marks lines]
   {s/email-sent (-> marks s/email-sent)
@@ -209,7 +211,7 @@
              (drop-while (drop (:start-body marks) (range)))
              first)))
 
-;; 1960-01-02 05:11:48.874
+;; Arbitrary date: 1960-01-02 05:11:48.874
 (def ref-date (java.util.Date. -315514073744))
 
 (defn sent-date [line]
@@ -259,14 +261,41 @@
                         (com/slice (:start-body marks)
                                    (:end-body marks)))))
 
-(defn split-email [marks chain]
-  (let [new-node (make-new-node marks chain)
-        email-from (header-to-person marks)]
-    (cond-> chain
-      true (loom/replace-node (find-bottom chain) new-node)
-      email-from (loom/add-edges [[new-node email-from s/email-from]])
-      true (loom/add-edges [[new-node (new-bottom marks chain) s/email-reply]]))))
+(defn depth-match? [marks chain]
+  (if (= 0 (:start-header marks)) false
+      (= (dec (:depth marks))
+         (-> chain chain-lines (nth (dec (:start-header marks)))
+             vector count-depth))))
 
+(defn remove-arrow [line depth]
+  (str/replace-first line (apply str (repeat depth ">"))
+                     (apply str (repeat (dec depth) ">"))))
+
+(defn has-full-arrows? [line depth]
+  (if (< (count line) depth) false
+      (->> ">" (repeat depth) (apply str)
+           (= (subs line 0 depth)))))
+
+(defn remove-arrows [lines]
+  (let [depth (count-depth lines)]
+    (map #(if (has-full-arrows? % depth)
+            (remove-arrow % depth) %)
+         lines)))
+
+(defn dec-depth [chain]
+  (->> (update (find-bottom chain) s/email-body remove-arrows)
+       (loom/replace-node chain (find-bottom chain))))
+      
+(defn split-email [marks chain]
+  (if (depth-match? marks chain)
+    (let [new-node (make-new-node marks chain)
+          email-from (header-to-person marks)]
+      (cond-> chain
+        true (loom/replace-node (find-bottom chain) new-node)
+        email-from (loom/add-edges [[new-node email-from s/email-from]])
+        true (loom/add-edges [[new-node (new-bottom marks chain) s/email-reply]])))
+    (dec-depth chain)))
+  
 (defn recursive-split [depth chain]
   (if (<= depth 0)
     (loom/replace-node chain (find-bottom chain) (end-bottom chain))
@@ -477,7 +506,7 @@
 (defn insert-email-range! [user lower upper]
   (doall
    (->> (messages-in-range (fetch-imap-folder user) lower upper)
-        (pmap full-parse)
+        (map full-parse)
         (map #(insert-emails! user %))))
   :success)
 
