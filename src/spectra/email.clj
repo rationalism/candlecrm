@@ -498,7 +498,7 @@
           (reduce #(loom/replace-node %1 %2 (:id %2)) $ (loom/nodes $))
           (loom/remove-edges $ (neo4j/find-links (loom/multi-edges $)))
           (loom/spider-edges $ '())
-          (map #(neo4j/create-links! (nodes-of-edges %) %) $)))
+          (pmap #(neo4j/create-links! (nodes-of-edges %) %) $)))
        (catch Exception e
          (do (prn "Email insertion error")
              (prn e) nil)))))
@@ -506,7 +506,7 @@
 (defn insert-email-range! [user lower upper]
   (doall
    (->> (messages-in-range (fetch-imap-folder user) lower upper)
-        (map full-parse)
+        (pmap full-parse)
         (map #(insert-emails! user %))))
   :success)
 
