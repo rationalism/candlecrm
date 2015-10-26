@@ -521,7 +521,8 @@
           {:label default s/email-addr [inferred-email]
            s/name (-> inferred-email regex/parse-name vector)})
         (if-let [parsed-name (-> name run-nlp-default nlp-names first)]
-          (label-edge parsed-name) {:label default s/name [name]}))
+          (label-edge parsed-name) {:label default s/name [name]
+                                    :hash (com/sha1 name)}))
       (if-let [parsed-name (-> name (regex/parse-name email)
                                run-nlp-default nlp-names first)]
         (assoc (label-edge parsed-name) s/email-addr [email])
