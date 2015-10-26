@@ -395,18 +395,19 @@
             (dt/find-dates text)))))
 
 (defn sentence-graph [sent-pair]
-  (-> (loom/merge-graphs
-       [(-> (get-triples (val sent-pair))
-            triples-graph
-            (breakup-node (key sent-pair))
-            trampoline)
-        (->> (entity-mentions (val sent-pair))
-             (map #(ner-graph %))
-             loom/merge-graphs)
-        (-> sent-pair val .toString library-ner)])
-      (dedup-graph (key sent-pair))
-      recursion-cleanup
-      stringify-graph))
+  (p :sentence-graph
+     (-> (loom/merge-graphs
+          [(-> (get-triples (val sent-pair))
+               triples-graph
+               (breakup-node (key sent-pair))
+               trampoline)
+           (->> (entity-mentions (val sent-pair))
+                (map #(ner-graph %))
+                loom/merge-graphs)
+           (-> sent-pair val .toString library-ner)])
+         (dedup-graph (key sent-pair))
+         recursion-cleanup
+         stringify-graph)))
 
 (defn shorten-node [node]
   (hash-map (subs (key node) 0 5)

@@ -175,10 +175,12 @@
        first))
 
 (defn header-to-person [header]
-  (nlp/normalize-person
-   (-> header :email-from-name)
-   (-> header :email-from-addr)
-   s/person))
+  (when (or (:email-from-name header)
+            (:email-from-addr header))
+    (nlp/normalize-person
+     (:email-from-name header)
+     (:email-from-addr header)
+     s/person)))
 
 (defn assoc-if-found [marks map-key coll]
   (if (or (nil? coll) (empty? coll)) marks
@@ -218,7 +220,7 @@
 (defn find-header [lines marks line-num]
   (if (header-ready? marks) marks
       (let [this-line (nth lines line-num)]
-        (-> (assoc :start-header line-num)
+        (-> (assoc marks :start-header line-num)
             (assoc-if-found s/email-sent (sent-date this-line))
             (assoc-if-found :email-from-addr (regex/find-email-addrs this-line))
             (assoc-if-found :email-from-name (->> this-line nlp/run-nlp-default
@@ -258,10 +260,12 @@
                                    (:end-body marks)))))
 
 (defn split-email [marks chain]
-  (let [new-node (make-new-node marks chain)]
-    (-> (loom/replace-node chain (find-bottom chain) new-node)
-        (loom/add-edges [[new-node (header-to-person marks) s/email-from]
-                         [new-node (new-bottom marks chain) s/email-reply]]))))
+  (let [new-node (make-new-node marks chain)
+        email-from (header-to-person marks)]
+    (cond-> chain
+      true (loom/replace-node (find-bottom chain) new-node)
+      email-from (loom/add-edges [[new-node email-from s/email-from]])
+      true (loom/add-edges [[new-node (new-bottom marks chain) s/email-reply]]))))
 
 (defn recursive-split [depth chain]
   (if (<= depth 0)
