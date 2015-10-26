@@ -144,9 +144,8 @@
           (keyword (result "type(r)"))))
 
 (defn is-link-valid? [link]
-  (and (-> link first type (= java.lang.Long))
-       (-> link second type (= java.lang.Long))
-       (-> link (nth 2) type (= clojure.lang.Keyword))))
+  (->> (map type link)
+       (= '(java.lang.Long java.lang.Long clojure.lang.Keyword))))
 
 (defn find-link [link]
   {:pre [(is-link-valid? link)]}
@@ -157,8 +156,9 @@
        (map link-result)))
 
 (defn find-links [links]
-  (->> (map find-link links)
-       (apply concat)))
+  (p :find-links
+     (->> (pmap find-link links)
+          (apply concat))))
   
 (defn find-by-id [id]
   (first
