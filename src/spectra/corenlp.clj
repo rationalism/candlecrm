@@ -505,7 +505,8 @@
 
 (defn name-from-email [email]
   (as-> (-> (str/split email #"@")
-            first (str/replace #"[-\.\+]" " ")) $
+            first (str/replace #"[-\.\+]" " ")
+            (str/replace #"[0-9]" "")) $
     (when (-> $ (str/split #" ") count (> 1))
       (-> $ capitalize-words run-nlp-default nlp-names first))))
 
