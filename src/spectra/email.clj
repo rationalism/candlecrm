@@ -415,11 +415,14 @@
            first (assoc event s/date-time)
            (loom/replace-node chain event))))
 
-(defn parse-email-addr [chain node]
-  (->> (s/email-addr node)
-       (map #(nlp/normalize-person nil % s/person))
-       nlp/merge-people
-       (loom/replace-node chain node)))
+(defn parse-person [chain node]
+  (if (or (s/email-addr node) (s/name node))
+    (->> (s/email-addr node)
+         (recon/name-email-map (s/name node))
+         (map #(nlp/normalize-person (key %) (val %) (:label node)))
+         recon/merge-nodes
+         (loom/replace-node chain node))
+    chain))
 
 (defn use-nlp [chain message]
   (as-> (->> (s/email-body message)
@@ -435,9 +438,10 @@
     (reduce import-label $ (loom/select-edges $ s/has-type))
     (reduce parse-datetime $ (->> (loom/nodes $)
                                   (filter #(= s/event (:label %)))))
-    (reduce parse-email-addr $
+    (reduce parse-person $
             (->> (loom/nodes $)
-                 (filter #(and (s/email-addr %) (not (s/name %))))))
+                 (filter #(some #{(:label %)} [s/person s/organization]))))
+    (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/name])
     (loom/remove-nodes $ (->> s/has-type (loom/select-edges $) (map second)))))
 
 (def url-map {s/person "/person/" s/email "/email/"
@@ -498,7 +502,7 @@
           (reduce #(loom/replace-node %1 %2 (:id %2)) $ (loom/nodes $))
           (loom/remove-edges $ (neo4j/find-links (loom/multi-edges $)))
           (loom/spider-edges $ '())
-          (pmap #(neo4j/create-links! (nodes-of-edges %) %) $)))
+          (map #(neo4j/create-links! (nodes-of-edges %) %) $)))
        (catch Exception e
          (do (prn "Email insertion error")
              (prn e) nil)))))

@@ -480,21 +480,6 @@
        (map str/capitalize)
        (str/join " ")))
 
-(defn vectorize [node]
-  (cond-> node
-    (:label node) (assoc :label (-> node :label vector))
-    (:hash node) (assoc :hash (-> node :hash vector))))
-
-(defn devectorize [node]
-  (cond-> node
-    (:label node) (assoc :label (-> node :label first))
-    (:hash node) (assoc :hash (-> node :hash first))))
-
-(defn merge-people [people]
-  (->> (map vectorize people)
-       (apply merge-with concat)
-       devectorize))
-
 (defn run-nlp [pipeline text]
   (cond-> (run-nlp-simple pipeline text)
     true nlp-graph

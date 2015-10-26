@@ -5,6 +5,7 @@
             [spectra.corenlp :as nlp]
             [spectra.google :as google]
             [spectra.neo4j :as neo4j]
+            [spectra.recon :as recon]
             [spectra.schema :as s]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -48,25 +49,11 @@
   (->> (.getPhoneNumbers contact)
        (mapv #(.getPhoneNumber %))))
 
-(defn name-email-map [names emails]
-  (cond
-    (> (count names) (count emails))
-    (as-> (count names) $
-      (- $ (count emails)) (repeat $ nil)
-      (reduce conj emails $)
-      (zipmap names $))
-    (< (count names) (count emails))
-    (as-> (count emails) $
-      (- $ (count names)) (repeat $ nil)
-      (reduce conj names $)
-      (zipmap $ emails))
-    :else (zipmap names emails)))
-
 (defn contact-to-person [contact]
   (->> (contact-emails contact)
-       (name-email-map (contact-names contact))
+       (recon/name-email-map (contact-names contact))
        (map #(nlp/normalize-person (key %) (val %) s/person))
-       nlp/merge-people
+       recon/merge-nodes
        (conj [{s/phone-num (contact-phones contact)}])
        (apply merge)))
 

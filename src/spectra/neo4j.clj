@@ -158,7 +158,7 @@
 
 (defn find-links [links]
   (p :find-links
-     (->> (pmap find-link links)
+     (->> (map find-link links)
           (apply concat))))
   
 (defn find-by-id [id]
