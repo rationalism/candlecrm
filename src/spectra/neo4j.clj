@@ -144,8 +144,9 @@
           (keyword (result "type(r)"))))
 
 (defn is-link-valid? [link]
-  (->> (map type link)
-       (= '(java.lang.Long java.lang.Long clojure.lang.Keyword))))
+  (and (-> link first type (= java.lang.Long))
+       (-> link second type (= java.lang.Long))
+       (-> link (nth 2) type (= clojure.lang.Keyword))))
 
 (defn find-link [link]
   {:pre [(is-link-valid? link)]}
