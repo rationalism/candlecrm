@@ -1,6 +1,7 @@
 (ns spectra.deepnet
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
+            [spectra.common :as com]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [org.deeplearning4j.datasets.iterator DataSetIterator]
@@ -30,8 +31,36 @@
 (def layer-size 200)
 (def dist-bound 0.08)
 
-;;(defn make-zeros [data-size]
-;;  (Nd4j/zeros ((juxt :series-count :dims 
+(defn int-wrap [coll]
+  (into-array Integer/TYPE coll))
+
+(defn dim-array [data-size]
+  (int-wrap ((juxt :series-count :dims :series-length) data-size)))
+
+(defn make-zeros [data-size]
+  (Nd4j/zeros (dim-array data-size)))
+
+(defn inc-mod [pos data-size]
+  (mod (inc pos) (:dims data-size)))
+
+(defn add-low-ones [pos data-size matrix]
+  (doseq [n (range (:series-length data-size))]
+    (.putScalar matrix (int-wrap [pos 0 n]) 1.0))
+  matrix) 
+
+(defn one-pos [pos n data-size matrix]
+  (->> (range (:dims data-size))
+       (map #(if (= 0.0 (.getFloat matrix (int-wrap [pos % n]))) nil %))
+       (drop-while nil?) first))
+
+(defn increment [pos n data-size matrix]
+  (let [old-pos (one-pos pos n data-size matrix)]
+    (.putScalar matrix (int-wrap [pos old-pos n]) 0.0)
+    (.putScalar matrix (int-wrap [pos (inc-mod old-pos data-size) n]) 1.0)
+    matrix))
+
+;(defn dates-to-array [data-size date-sets]
+  
 
 ;; train-data should be a three-dimensional vector here
 (defrecord TimeSeriesIterator [pos data-size train-data]
