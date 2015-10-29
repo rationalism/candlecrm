@@ -57,7 +57,7 @@
 (def email-attrs {s/email-sent "Date"
                   s/email-subject "Subject"})
 
-(defn email-table [emails]
+(defn email-table []
   [:table {:id "email-table"}
    [:thead {:id "email-header"}
     (map header-cell email-attrs)]
@@ -143,14 +143,14 @@
   [:p.infoitem (str (-> item key s/attr-names) ": "
                     (-> item val (string-item (key item))))])
 
-(defn show-person [person-name attrs emails-to emails-from]
+(defn show-person [person-name attrs]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str person-name " (Person)")]
    (map info-item attrs)
    [:h3.infotitle (str "Emails to " person-name)]
-   (email-table emails-to)
+   (email-table)
    [:h3.infotitle (str "Emails from " person-name)]
-   (email-table emails-from)])
+   (email-table)])
 
 (defn show-email [email-name attrs]
   [:div {:class "columns small-12"}

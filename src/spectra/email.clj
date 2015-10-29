@@ -337,6 +337,12 @@
           (apply merge)
           (mapcat #(make-headers % root))))))
 
+(defn label-headers [graph]
+  (let [message (->> graph loom/top-nodes first)]
+    (->> (assoc message :label s/email-headers
+                s/email-sub-hash (com/end-hash subject))
+         (loom/replace-node graph message))))
+
 (defn headers-for-last [raw-msgs headers]
   (update raw-msgs
           (dec (count raw-msgs))
@@ -475,34 +481,53 @@
   (-> (map second edges)
       (conj (first (first edges)))))
 
+(defn insert-links! [g]
+  (as-> g $
+    (reduce #(loom/replace-node %1 %2 (:id %2)) $ (loom/nodes $))
+    (loom/remove-edges $ (neo4j/find-links (loom/multi-edges $)))
+    (loom/spider-edges $ '())
+    (map #(neo4j/create-links! (nodes-of-edges %) %) $)))
+
+(defn link-people [g user]
+  (->> [s/person s/organization]
+       (recon/merged-props g)
+       (recon/labeled-people-orgs user)
+       (recon/link-people g)))
+
+(defn merge-old-people! [g user]
+  (-> (link-people g) recon/merge-graph!
+      (recon/load-new! s/person [s/person (neo4j/user-label user)])
+      (recon/load-new! s/organization [s/organization (neo4j/user-label user)])))
+
+(defn use-nlp-graph [g]
+  (->> (recon/filter-memory g s/email)
+       (reduce use-nlp g)))
+
+(defn switch-message-graph [g]
+  (->> (recon/filter-memory g s/email)
+       (reduce switch-message g)))
+
+(defn link-new-all [g user]
+  (reduce #(recon/link-new! %1 %2 [%2 (neo4j/user-label user)])
+          g [s/person s/organization s/location s/event s/money]))
+
 ;; Assumes emails are already parsed
 (defn insert-emails! [user emails]
   (p :insert-emails
      (try
        (dorun
-        (as-> emails $
-          (recon/link-people $ (recon/labeled-people-orgs
-                                user (recon/merged-props $ [s/person s/organization])))
-          (recon/merge-graph! $)
-          (recon/load-new! $ s/person [s/person (neo4j/user-label user)])
-          (recon/load-new! $ s/organization [s/organization (neo4j/user-label user)])
-          (recon/find-old-emails $)
-          (reduce use-nlp $ (recon/filter-memory $ s/email))
-          (recon/link-people $ (recon/labeled-people-orgs
-                                user (recon/merged-props $ [s/person s/organization])))
-          (recon/link-one-prop s/location s/name user $)
-          (recon/link-one-prop s/event s/date-time user $)
-          (recon/link-one-prop s/money s/amount user $)
-          (reduce #(recon/link-new! %1 %2 [%2 (neo4j/user-label user)])
-                  $ [s/person s/organization s/location s/event s/money])
-          (make-hyperlinks $)
-          (reduce switch-message $ (recon/filter-memory $ s/email))
-          (recon/link-new! $ s/email [s/email (neo4j/user-label user)])
-          (recon/merge-graph! $)
-          (reduce #(loom/replace-node %1 %2 (:id %2)) $ (loom/nodes $))
-          (loom/remove-edges $ (neo4j/find-links (loom/multi-edges $)))
-          (loom/spider-edges $ '())
-          (map #(neo4j/create-links! (nodes-of-edges %) %) $)))
+        (-> (merge-old-people! emails user)
+            (recon/find-old-messages s/email)
+            use-nlp-graph
+            (link-people user)
+            (recon/link-one-prop s/location s/name user)
+            (recon/link-one-prop s/event s/date-time user)
+            (recon/link-one-prop s/money s/amount user)
+            (link-new-all user)
+            make-hyperlinks switch-message-graph
+            (recon/delete-headers! user)
+            (recon/link-new! s/email [s/email (neo4j/user-label user)])
+            recon/merge-graph! insert-links!))
        (catch Exception e
          (do (prn "Email insertion error")
              (prn e) nil)))))
@@ -516,7 +541,28 @@
 
 (defn insert-one-email! [user email-num]
   (insert-email-range! user email-num email-num))
-
+4
 (defn insert-first-n! [user n]
   (let [limit (message-count (fetch-imap-folder user))]
     (insert-email-range! user (- limit n) limit)))
+
+;; Assumes emails are already parsed
+(defn insert-headers! [user headers]
+  (p :insert-headers
+     (try
+       (dorun
+        (-> (merge-old-people! headers user)
+            (recon/find-old-messages s/email-headers)
+            (recon/load-new! s/email-headers [s/email-headers (neo4j/user-label user)])
+            insert-links!))
+       (catch Exception e
+         (do (prn "Email insertion error")
+             (prn e) nil)))))
+
+(defn insert-headers-range! [user lower upper]
+  (doall
+   (->> (messages-in-range (fetch-imap-folder user) lower upper)
+        (pmap headers-parse)
+        (map label-headers)
+        (map #(insert-headers! user %))))
+  :success)

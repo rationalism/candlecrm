@@ -174,10 +174,12 @@
            " RETURN root")
       cypher-list first))
 
-(defn one-hop-out [id property]
+(defn one-hop [id out property]
   (cypher-list
-   (str "MATCH (a)-[:" (cypher-esc-token property)
-        "]->(b) WHERE ID(a)= " id
+   (str "MATCH (a)" (if out "" "<")
+        "(-[:" (cypher-esc-token property)
+        "]-" (if out ">" "")
+        "(b) WHERE ID(a)= " id
         " RETURN b")))
 
 (defn refresh-vertex [vertex]

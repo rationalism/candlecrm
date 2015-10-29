@@ -3,14 +3,17 @@
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
-  (:import [org.deeplearning4j.nn.conf
+  (:import [org.deeplearning4j.datasets.iterator DataSetIterator]
+           [org.deeplearning4j.nn.conf
             NeuralNetConfiguration$Builder Updater]
-           [org.deeplearning4j.nn.conf.distribution
-            UniformDistribution]
+           [org.deeplearning4j.nn.conf.distribution UniformDistribution]
            [org.deeplearning4j.nn.conf.layers
             GravesLSTM$Builder RnnOutputLayer$Builder]
            [org.deeplearning4j.nn.api OptimizationAlgorithm]
            [org.deeplearning4j.nn.weights WeightInit]
+           [org.deeplearning4j.nn.multilayer MultiLayerNetwork]
+           [org.deeplearning4j.optimize.listeners ScoreIterationListener]
+           [org.nd4j.linalg.factory Nd4j]
            [org.nd4j.linalg.lossfunctions
             LossFunctions$LossFunction]))
 
@@ -26,6 +29,23 @@
 (def list-num 3)
 (def layer-size 200)
 (def dist-bound 0.08)
+
+(defn make-zeros [data-size]
+  (Nd4j/zeros ((juxt :series-count :dims 
+
+;; train-data should be a three-dimensional vector here
+(defrecord TimeSeriesIterator [pos data-size train-data]
+  DataSetIterator
+  (batch [this] 1)
+  (cursor [this] @pos)
+  (inputColumns [this] (:dims data-size))
+  (next [this series-count]
+        
+  (numExamples [this] (:series-count data-size))
+  (reset [this] (reset! pos 0))
+  (setPreProcessor [this preprocessor] :default)
+  (totalExamples [this] (:series-count data-size))
+  (totalOutcomes [this] (:dims data-size)))
 
 (defn lstm-layer [input-size]
   (-> (GravesLSTM$Builder. )
@@ -64,5 +84,12 @@
       (.layer 2 (rnn-out-layer (.totalOutcomes input-iter)))
       (.pretrain false)
       (.backprop true)
-      (.build)))
+      (.build)
+      (MultiLayerNetwork. )))
+
+(defn train-lstm [input-iter]
+  (doto (setup-lstm input-iter)
+    (.init)
+    (.setListeners (ScoreIterationListener. 1))
+    (.fit input-iter)))
 

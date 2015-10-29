@@ -62,9 +62,10 @@
 
 (defn show-person [person]
   (html/show-person (-> person :data :name first)
-                    (-> person :data)
-                    (-> person :id (neo4j/one-hop-out s/email-to))
-                    (-> person :id (neo4j/one-hop-out s/email-from))))
+                    (-> person :data)))
+
+;                    (-> person :id (neo4j/one-hop false s/email-to))
+;                    (-> person :id (neo4j/one-hop false s/email-from))))
 
 (defn show-email [email]
   (html/show-email (-> email :data :name first)

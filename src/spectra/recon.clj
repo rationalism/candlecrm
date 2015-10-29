@@ -55,25 +55,34 @@
                            "[0] SKIP " start " LIMIT " limit)))
 
 ;; For searching emails, in milliseconds
-(def sent-tolerance 300000)
+(def sent-tolerance 200000)
 
-(defn lookup-old-email [message person-from]
+(defn email-query [node-type message person-from]
   (when (not (or (nil? person-from)
                  (empty? person-from)
                  (nil? (:id person-from))
                  (nil? (s/email-sent message))))
-    (-> (str "MATCH (root:" s/email
-             " " (neo4j/cypher-properties
-                  {s/email-sub-hash
-                   (com/end-hash (s/email-subject message))})
-             ")-[:" (neo4j/cypher-esc-token s/email-from)
-             "]->(f) WHERE ID (f)=" (:id person-from)
-             " AND (root." (neo4j/cypher-esc-token s/email-sent)
-             " < (" (dt/to-ms (s/email-sent message)) " + " sent-tolerance
-             ")) AND (root." (neo4j/cypher-esc-token s/email-sent)
-             " > (" (dt/to-ms (s/email-sent message)) " - " sent-tolerance 
-             ")) RETURN root")
+    (str "MATCH (root:" node-type
+         " " (neo4j/cypher-properties
+              {s/email-sub-hash
+               (com/end-hash (s/email-subject message))})
+         ")-[:" (neo4j/cypher-esc-token s/email-from)
+         "]->(f) WHERE ID (f)=" (:id person-from)
+         " AND (root." (neo4j/cypher-esc-token s/email-sent)
+         " < (" (dt/to-ms (s/email-sent message)) " + " sent-tolerance
+         ")) AND (root." (neo4j/cypher-esc-token s/email-sent)
+         " > (" (dt/to-ms (s/email-sent message)) " - " sent-tolerance 
+         "))")))
+
+(defn email-find [node-type message person-from]
+  (when-let [query (email-query node-type message person-from)]
+    (-> (str query " RETURN root")
         neo4j/cypher-list first)))
+
+(defn email-delete! [node-type message person-from]
+  (when-let [query (email-query node-type message person-from)]
+    (->> (str query " DETACH DELETE root")
+         neo4j/cypher-query)))
 
 (defn list-entities [entity-class]
   (neo4j/get-vertices-class entity-class))
@@ -141,11 +150,11 @@
              g (->> (loom/nodes g)
                     (filter #(some #{(:label %)} type-names))))))
 
-(defn link-one-prop [type-name prop-name user graph]
+(defn link-one-prop [g type-name prop-name user]
   (link-graph [type-name]
               (labeled-list-from-props
-               user type-name (merged-props graph [type-name]))
-              graph prop-name))
+               user type-name (merged-props g [type-name]))
+              g prop-name))
 
 (defn link-people [g nodes]
   (p :link-people
@@ -198,18 +207,23 @@
                          (push-new! labels)
                          (map #(vector (key %) (val %) :database-match)))))
 
-(defn find-old-email [g message]
+(defn find-old-message [node-type g message]
    (->> (loom/out-edge-label g message s/email-from)
-        second (lookup-old-email message)))
+        second (email-find node-type message)))
 
-(defn find-old-emails [g]
-  (p :find-old-emails
-     (let [emails (filter-memory g s/email)]
+(defn find-old-messages [g node-type]
+  (p :find-old-messages
+     (let [messages (filter-memory g node-type)]
        (reduce #(if (-> %2 val nil?) %1
                     (loom/replace-node %1 (key %2) (val %2)))
-               g (->> emails
-                      (map #(find-old-email g %))
-                      (zipmap emails))))))
+               g (->> messages
+                      (map #(find-old-message node-type g %))
+                      (zipmap messages))))))
+
+(defn delete-headers! [g user]
+  (->> (filter-memory g s/email)
+       (map #(loom/out-edge-label g % s/email-from))
+       (map #(email-delete! s/email-headers (first %) (second %)))))
 
 (defn name-email-map [names emails]
   (cond
