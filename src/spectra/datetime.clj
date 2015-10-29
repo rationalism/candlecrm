@@ -1,6 +1,7 @@
 (ns spectra.datetime
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
+            [clj-time.core :as ctime]
             [clj-time.coerce :as coerce]
             [clj-time.format :as format]
             [taoensso.timbre.profiling :as profiling
@@ -51,3 +52,11 @@
 (defn format-date [value]
   (->> value (Date. ) coerce/from-date
        (format/unparse formatter)))
+
+(defn hours-ago
+  ([date] (hours-ago date (Date. )))
+  ([date ref]
+   (->> (coerce/from-date date) vector
+        (concat [(coerce/from-date ref)])
+        reverse (apply ctime/interval)
+        ctime/in-hours)))

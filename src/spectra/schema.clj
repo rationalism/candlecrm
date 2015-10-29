@@ -14,6 +14,11 @@
 (def email-addr :email-addr)
 (def phone-num :phone-num)
 (def user-person :user-person)
+(def birthday :birthday)
+(def gender :gender)
+(def occupation :occupation)
+(def mail-address :mail-address)
+(def website :website)
 
 (def email "email")
 (def email-headers "email_headers")
@@ -37,6 +42,7 @@
 (def organization "org")
 (def person-name :person-name)
 (def org-name :org-name)
+(def org-member :org-member)
 
 (def money "money")
 (def amount :amount)
@@ -47,21 +53,29 @@
 (def pos-map :pos-map)
 (def scanned :scanned)
 
-(def repeated-attr [name person-name org-name email-addr phone-num])
+(def repeated-attr [name person-name org-name email-addr phone-num
+                    mail-address website org-member])
 
 (def attr-entity {person-name person org-name organization
                   email-addr person phone-num person
                   loc-name location date-time event
-                  amount money})
+                  amount money birthday person
+                  gender person occupation person
+                  mail-address person website person
+                  org-member person})
 
 (def attr-names {name "Name" amount "Amount"
                  email-addr "Address" email-subject "Subject"
                  email-to "Email to" email-from "Email from"
                  email-reply "Reply to" email-body "Email body"
                  date-time "Time" email-received "Email received"
-                 email-sent "Email sent" phone-num "Phone number"})
+                 email-sent "Email sent" phone-num "Phone number"
+                 birthday "Birthday" gender "Gender"
+                 occupation "Occupation" mail-address "Address"
+                 website "Website" org-member "Member of"})
 
-(def person-attrs [name email-addr phone-num])
+(def person-attrs [name email-addr phone-num birthday gender
+                   occupation mail-address website org-member])
 
 (def email-links [email-to email-cc email-bcc
                   email-reply email-replyto email-mentions])
