@@ -70,8 +70,6 @@
           (nodes g)))
        
 (defn add-nodes [g nodes]
-  (prn "add-nodes")
-  (prn nodes)
   (apply graph/add-nodes g nodes))
 
 (defn add-edges [g edges]
