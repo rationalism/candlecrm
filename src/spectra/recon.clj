@@ -144,11 +144,10 @@
        (apply merge-with concat)))
 
 (defn link-graph [type-names nodes g prop-name]
-  (p :link-graph
-     (reduce (partial link-node prop-name
+  (reduce (partial link-node prop-name
                       (lookup-map prop-name nodes))
-             g (->> (loom/nodes g)
-                    (filter #(some #{(:label %)} type-names))))))
+          g (->> (loom/nodes g)
+                 (filter #(some #{(:label %)} type-names)))))
 
 (defn link-one-prop [g type-name prop-name user]
   (link-graph [type-name]
@@ -157,9 +156,8 @@
               g prop-name))
 
 (defn link-people [g nodes]
-  (p :link-people
-     (reduce (partial link-graph [s/person s/organization] nodes)
-             g [s/email-addr s/phone-num s/name])))
+  (reduce (partial link-graph [s/person s/organization] nodes)
+          g [s/email-addr s/phone-num s/name]))
 
 (defn merge-edge! [match-edge]
   (->> match-edge second :data keys

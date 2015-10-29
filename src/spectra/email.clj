@@ -16,7 +16,7 @@
              :refer (pspy pspy* profile defnp p p*)])
   (:import [javax.mail Folder Message Message$RecipientType]))
 
-(def inbox-folder-name "INBOX")
+(def inbox-folder-name "[Gmail]/All Mail")
 (def plain-type "TEXT/PLAIN")
 (def html-type "TEXT/HTML")
 (def multi-type "multipart")
@@ -574,6 +574,5 @@
    (->> (messages-in-range (fetch-imap-folder user) lower upper)
         (pmap headers-parse)
         (map label-headers)
-        (merge-and-recon 10 [s/email-addr s/name])
         (map #(insert-headers! user %))))
   :success)
