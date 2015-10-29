@@ -11,6 +11,7 @@
             [clojurewerkz.neocons.rest.nodes :as nn]
             [clojurewerkz.neocons.rest.records :as rec]
             [clojurewerkz.neocons.rest.relationships :as nrl]
+            [clojurewerkz.neocons.rest.transaction :as tx]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
@@ -104,6 +105,10 @@
   (->> (cypher-query-labeled query)
        (apply merge)))
 
+(defn cypher-combined-tx [queries]
+  (->> (map #(tx/statement % {:props {:unreal "unreal"}}) queries)
+       (apply tx/in-transaction *graph*)))
+
 (defn get-property [vertex property]
   (let [value (property (:data vertex))]
     (if (coll? value) (into #{} value) value)))
@@ -112,25 +117,23 @@
   (nn/set-property *graph* vertex property
                    (dt/catch-dates value)))
 
-(defn create-links! [nodes links]
-  (p :create-links
-     (let [id-list (->> nodes count range
-                        (map #(str "a" %)))]
-       (cypher-query
-        (str "MATCH (" (str/join "), (" id-list)
-             ") WHERE "
-             (->> (map #(str "ID(" % ")= ") id-list)
-                  (zipmap nodes)
-                  (map #(str (val %) (key %)))
-                  (str/join " AND "))
-             " CREATE root = (a0"
-             (->> (map #(nth % 2) links)
-                  (map cypher-esc-token)
-                  (zipmap (drop 1 id-list))
-                  (map #(str ")-[:" (val %)
-                             "]->(" (key %)))
-                  str/join)
-             ") RETURN root")))))
+(defn make-links-query [nodes links]
+  (let [id-list (->> nodes count range
+                     (map #(str "a" %)))]
+    (str "MATCH (" (str/join "), (" id-list)
+         ") WHERE "
+         (->> (map #(str "ID(" % ")= ") id-list)
+              (zipmap nodes)
+              (map #(str (val %) (key %)))
+              (str/join " AND "))
+         " CREATE root = (a0"
+         (->> (map #(nth % 2) links)
+              (map cypher-esc-token)
+              (zipmap (drop 1 id-list))
+              (map #(str ")-[:" (val %)
+                         "]->(" (key %)))
+              str/join)
+         ") RETURN root")))
 
 (defn link-query [link]
   (str "ID(a)= " (first link)

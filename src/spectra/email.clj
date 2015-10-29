@@ -487,7 +487,8 @@
        (reduce #(loom/replace-node %1 %2 (:id %2)) $ (loom/nodes $))
        (loom/remove-edges $ (neo4j/find-links (loom/multi-edges $)))
        (loom/spider-edges $ '())
-       (map #(neo4j/create-links! (nodes-of-edges %) %) $))))
+       (map #(neo4j/make-links-query (nodes-of-edges %) %) $)
+       (neo4j/cypher-combined-tx $))))
 
 (defn link-people [g user]
   (->> [s/person s/organization]
