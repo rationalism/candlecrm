@@ -55,7 +55,9 @@
   (.getMessages folder begin end))
 
 (defn subject [message]
-  (.getSubject message))
+  (let [subject (.getSubject message)]
+    (if (com/nil-or-empty? subject)
+      "(no subject)" subject)))
 
 (defn received-time [message]
   (.getReceivedDate message))
@@ -514,6 +516,11 @@
   (reduce #(recon/link-new! %1 %2 [%2 (neo4j/user-label user)])
           g [s/person s/organization s/location s/event s/money]))
 
+(defn merge-and-recon [block-size attrs graphs]
+  (->> (partition-all 10 graphs)
+       (map loom/merge-graphs)
+       (map #(reduce recon/remove-dupes % attrs))))
+
 ;; Assumes emails are already parsed
 (defn insert-emails! [user emails]
   (p :insert-emails
@@ -567,5 +574,6 @@
    (->> (messages-in-range (fetch-imap-folder user) lower upper)
         (pmap headers-parse)
         (map label-headers)
+        (merge-and-recon 10 [s/email-addr s/name])
         (map #(insert-headers! user %))))
   :success)

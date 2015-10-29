@@ -73,5 +73,5 @@
                            :optimizations :whitespace
                            :pretty-print true}}]}
   :main spectra.web
-  :jvm-opts ["-Xmx4g"]
+  :jvm-opts ["-Xmx3g" "-XX:-OmitStackTraceInFastThrow"]
   :uberjar-name "spectra-standalone.jar")

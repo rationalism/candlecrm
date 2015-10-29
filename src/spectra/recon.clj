@@ -191,13 +191,15 @@
        (remove #(loom/out-edge-label g % :database-match))))
 
 (defn push-new! [labels old-nodes]
-  (p :push-new
-     (->> old-nodes
-          (map #(dissoc % :label :hyperlink :hash))
-          (map #(hash-map :props %))
-          (map #(assoc % :labels labels))
-          neo4j/batch-insert!
-          (zipmap old-nodes))))
+  (if (or (nil? old-nodes) (empty? old-nodes))
+    (list)
+    (p :push-new
+       (->> old-nodes
+            (map #(dissoc % :label :hyperlink :hash))
+            (map #(hash-map :props %))
+            (map #(assoc % :labels labels))
+            neo4j/batch-insert!
+            (zipmap old-nodes)))))
 
 (defn load-new! [g type-name labels]
   (reduce #(loom/replace-node %1 (key %2) (val %2))
@@ -243,6 +245,7 @@
 (defn map-node [node attr]
   (cond
     (nil? (attr node)) nil
+    (empty? (attr node)) nil
     (coll? (attr node))
     (map #(vector % node) (attr node))
     :else (-> (attr node) (vector node) vector)))

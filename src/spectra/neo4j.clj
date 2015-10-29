@@ -106,8 +106,9 @@
        (apply merge)))
 
 (defn cypher-combined-tx [queries]
-  (->> (map #(tx/statement % {:props {:unreal "unreal"}}) queries)
-       (apply tx/in-transaction *graph*)))
+  (->> (map tx/statement queries)
+       (apply tx/in-transaction *graph*)
+       (map cy/tableize)))
 
 (defn get-property [vertex property]
   (let [value (property (:data vertex))]
@@ -141,28 +142,30 @@
        " AND type(r)= '" (name (nth link 2))
        "'"))
 
+(defn keyword-link [link]
+  (assoc link 2 (keyword (nth link 2))))
+
 (defn link-result [result]
-  (vector (result "ID(a)")
-          (result "ID(b)")
-          (keyword (result "type(r)"))))
+  (-> result (get "ID(a)") second keyword-link))
 
 (defn is-link-valid? [link]
   (and (-> link first type (= java.lang.Long))
        (-> link second type (= java.lang.Long))
        (-> link (nth 2) type (= clojure.lang.Keyword))))
 
-(defn find-link [link]
+(defn find-link-query [link]
   {:pre [(is-link-valid? link)]}
-  (->> (str "MATCH (a)-[r]->(b) WHERE ("
-            (link-query link)
-            ") RETURN ID(a), ID(b), type(r)")
-       (cy/tquery *graph*)
-       (map link-result)))
+  (str "MATCH (a)-[r]->(b) WHERE ("
+       (link-query link)
+       ") RETURN ID(a), ID(b), type(r)"))
 
 (defn find-links [links]
   (p :find-links
-     (->> (map find-link links)
-          (apply concat))))
+     (->> (map find-link-query links)
+          cypher-combined-tx
+          (map first)
+          (remove nil?)
+          (map link-result))))
   
 (defn find-by-id [id]
   (first

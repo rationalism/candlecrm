@@ -55,6 +55,7 @@
   (into-array (map param args)))
 
 (defn sha1 [text]
+  {:pre [(not (nil-or-empty? text))]}
   (sha1/sha1 text))
 
 (defn shorten [text]
