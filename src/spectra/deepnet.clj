@@ -30,8 +30,8 @@
 (def layer-size 200)
 (def dist-bound 0.08)
 
-(defn make-zeros [data-size]
-  (Nd4j/zeros ((juxt :series-count :dims 
+;;(defn make-zeros [data-size]
+;;  (Nd4j/zeros ((juxt :series-count :dims 
 
 ;; train-data should be a three-dimensional vector here
 (defrecord TimeSeriesIterator [pos data-size train-data]
@@ -39,8 +39,7 @@
   (batch [this] 1)
   (cursor [this] @pos)
   (inputColumns [this] (:dims data-size))
-  (next [this series-count]
-        
+  (next [this series-count] :default) ;; FIX THIS        
   (numExamples [this] (:series-count data-size))
   (reset [this] (reset! pos 0))
   (setPreProcessor [this preprocessor] :default)
