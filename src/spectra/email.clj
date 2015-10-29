@@ -339,8 +339,8 @@
 
 (defn label-headers [graph]
   (let [message (->> graph loom/top-nodes first)]
-    (->> (assoc message :label s/email-headers
-                s/email-sub-hash (com/end-hash subject))
+    (->> (s/email-subject message) com/end-hash
+         (assoc message :label s/email-headers s/email-sub-hash)
          (loom/replace-node graph message))))
 
 (defn headers-for-last [raw-msgs headers]
@@ -482,11 +482,12 @@
       (conj (first (first edges)))))
 
 (defn insert-links! [g]
-  (as-> g $
-    (reduce #(loom/replace-node %1 %2 (:id %2)) $ (loom/nodes $))
-    (loom/remove-edges $ (neo4j/find-links (loom/multi-edges $)))
-    (loom/spider-edges $ '())
-    (map #(neo4j/create-links! (nodes-of-edges %) %) $)))
+  (p :insert-links
+     (as-> g $
+       (reduce #(loom/replace-node %1 %2 (:id %2)) $ (loom/nodes $))
+       (loom/remove-edges $ (neo4j/find-links (loom/multi-edges $)))
+       (loom/spider-edges $ '())
+       (map #(neo4j/create-links! (nodes-of-edges %) %) $))))
 
 (defn link-people [g user]
   (->> [s/person s/organization]
@@ -495,9 +496,10 @@
        (recon/link-people g)))
 
 (defn merge-old-people! [g user]
-  (-> (link-people g) recon/merge-graph!
-      (recon/load-new! s/person [s/person (neo4j/user-label user)])
-      (recon/load-new! s/organization [s/organization (neo4j/user-label user)])))
+  (p :merge-old-people
+     (-> (link-people g user) recon/merge-graph!
+         (recon/load-new! s/person [s/person (neo4j/user-label user)])
+         (recon/load-new! s/organization [s/organization (neo4j/user-label user)]))))
 
 (defn use-nlp-graph [g]
   (->> (recon/filter-memory g s/email)
