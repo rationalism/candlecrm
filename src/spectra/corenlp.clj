@@ -19,6 +19,7 @@
             CoreAnnotations$PartOfSpeechAnnotation
             CoreAnnotations$LemmaAnnotation
             CoreAnnotations$TrueCaseTextAnnotation
+            CoreAnnotations$CharacterOffsetBeginAnnotation
             CoreLabel]
            [edu.stanford.nlp.naturalli
             NaturalLogicAnnotations$RelationTriplesAnnotation]
@@ -28,7 +29,8 @@
 
 (def sentence-annotators ["tokenize" "ssplit"])
 (def token-annotators ["tokenize" "ssplit" "pos" "lemma"])
-(def ner-annotators (concat token-annotators ["ner" "entitymentions"]))
+(def ner-annotators (concat token-annotators ["ner"]))
+(def mention-annotators ["entitymentions"])
 (def full-annotators
   (concat ner-annotators
           (if (env :coreference) ["parse" "dcoref"] [])
@@ -50,7 +52,9 @@
 
 (def schema-map {"PERSON" s/person-name "DATE" s/date-time
                  "TIME" s/date-time "LOCATION" s/loc-name
-                 "ORGANIZATION" s/org-name "MONEY" s/amount})
+                 "ORGANIZATION" s/org-name "MONEY" s/amount
+                 "DATETIME" s/date-time "EMAIL" s/email-addr
+                 "PHONE" s/phone-num})
 
 (def pronoun-parts ["PRP" "PRP$"])
 
@@ -75,6 +79,7 @@
 
 (defn load-pipeline! []
   (def ner-pipeline (make-pipeline ner-annotators pcfg-parse-model))
+  (def mention-pipeline (make-pipeline mention-annotators pcfg-parse-model))
   (def openie-pipeline (make-pipeline openie-annotators pcfg-parse-model)))
 
 (defn run-nlp [pipeline text]
@@ -85,6 +90,10 @@
 
 (defn run-ner [text]
   (run-nlp ner-pipeline text))
+
+(defn get-mentions [annotation]
+  (p :get-mentions (.annotate mention-pipeline annotation))
+  annotation)
 
 (defn run-openie [annotation]
   (p :run-openie (.annotate openie-pipeline annotation))
@@ -116,6 +125,43 @@
 
 (defn true-case [token]
   (.get token CoreAnnotations$TrueCaseTextAnnotation))
+
+(defn char-token-map [token]
+  (zipmap (range (.beginPosition token)
+                 (.endPosition token))
+          (repeat (- (.endPosition token)
+                     (.beginPosition token))
+                  (dec (.index token)))))
+
+(defn token-boundaries [bottom top token-map]
+  (let [sort-keys (-> token-map keys sort)]
+    (vector (->> sort-keys (drop-while #(< % bottom))
+                 first (get token-map))
+            (->> sort-keys reverse (drop-while #(> % top))
+                 first (get token-map)))))
+
+(defn sentence-char-map [sentence]
+  (->> (get-tokens sentence)
+       (map char-token-map)
+       (apply merge)))
+
+(defn boundary-vector [word start]
+  (vector start (+ start (count word))))
+
+(defn last-boundaries [boundaries sentence]
+  (if (com/nil-or-empty? boundaries)
+    (.get sentence CoreAnnotations$CharacterOffsetBeginAnnotation)
+    (-> boundaries last second)))
+
+(defn boundaries-detect [sentence word]
+  (loop [text (.toString sentence)
+         boundaries []]
+    (let [pieces (->> word re-pattern (str/split text))]
+      (if (= text (first pieces))
+        boundaries
+        (recur (->> pieces first count (+ (count word)) (subs text))
+               (->> pieces first count (+ (last-boundaries boundaries sentence))
+                    (boundary-vector word) (conj boundaries)))))))
 
 (defn chain-sentences [chain]
   (->> (keys (.getMentionMap chain))
@@ -251,7 +297,7 @@
   
 (defn recursive-triples [sent-num tokens]
   (->> tokens tokens-str
-       run-ner run-openie
+       run-ner get-mentions run-openie
        get-sentences first get-triples
        (recursive-graph sent-num tokens)))
 
@@ -390,18 +436,56 @@
    :label (s/attr-entity (second edge))
    :hash (com/sha1 (first edge))})
 
-(defn library-edge [text label]
-  [text label s/has-type])
+(defn label-annotate [label class]
+  (.setNER label class) label)
 
-(defn library-ner [text]
-  (loom/build-graph
-   [] (concat
-       (map #(library-edge % s/email-addr)
-            (regex/find-email-addrs text))
-       (map #(library-edge % s/phone-num)
-            (regex/find-phone-nums text))
-       (map #(library-edge % s/date-time)
-            (dt/find-dates text)))))
+(defn tokens-annotate [tokens index class]
+  (->> (-> tokens (.get index) (label-annotate class))
+       (.set tokens index))
+  tokens)
+
+(defn tokens-annotate-all [tokens class-map]
+  (reduce #(tokens-annotate %1 (key %2) (val %2)) tokens class-map))
+
+(defn sentence-annotate [sentence class-map]
+  (->> class-map (tokens-annotate-all (get-tokens sentence))
+       (.set sentence CoreAnnotations$TokensAnnotation))
+  sentence)
+
+(defn map-attr [attr coll]
+  (->> (map #(hash-map % attr) coll)
+       (apply merge)))
+
+(defn library-map [text]
+  (merge (->> (regex/find-email-addrs text)
+              (map-attr "EMAIL"))
+         (->> (regex/find-phone-nums text)
+              (map-attr "PHONE"))
+         (->> (dt/find-dates text)
+              (map-attr "DATETIME"))))
+
+(defn token-pos-map [sentence pair]
+  (->> pair key (boundaries-detect sentence)
+       (map #(assoc % 1 (dec (second %))))
+       (map #(token-boundaries (first %) (second %)
+                               (sentence-char-map sentence)))
+       (mapcat #(range (first %) (inc (second %))))
+       (map #(hash-map % (val pair)))
+       (apply merge)))
+
+(defn class-map [sentence]
+  (->> sentence (.toString) library-map
+       (map #(token-pos-map sentence %))
+       (apply merge)))
+
+(defn library-annotate [sentence]
+  (sentence-annotate sentence (class-map sentence)))
+
+(defn library-annotate-all [annotation]
+  (->> (get-sentences annotation)
+       (map library-annotate)
+       (.set annotation CoreAnnotations$SentencesAnnotation))
+  annotation)
 
 (defn sentence-graph [sent-pair]
   (p :sentence-graph
@@ -412,8 +496,7 @@
                trampoline)
            (->> (entity-mentions (val sent-pair))
                 (map #(ner-graph %))
-                loom/merge-graphs)
-           (-> sent-pair val .toString library-ner)])
+                loom/merge-graphs)])
          (dedup-graph (key sent-pair))
          recursion-cleanup
          stringify-graph)))
@@ -490,7 +573,8 @@
        (str/join " ")))
 
 (defn run-nlp-default [text]
-  (cond-> (run-ner text)
+  (cond-> (-> text run-ner library-annotate-all
+              get-mentions)
     true nlp-graph
     (env :coreference) rewrite-pronouns
     false strip-graph))
