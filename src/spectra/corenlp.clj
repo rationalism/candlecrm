@@ -268,11 +268,12 @@
                       (list (ner-edge entity)))))
 
 (defn triple-nodes [triple]
-  [(.-subject triple) (.-object triple)])
+  (->> [(.-subject triple) (.-object triple)]
+       (mapv vec)))
 
 (defn triple-edge [triple]
-  (assoc (triple-nodes triple)
-         2 (.relationLemmaGloss triple)))
+  (conj (triple-nodes triple)
+        (.relationLemmaGloss triple)))
 
 (defn triple-graph [triple]
   (loom/build-graph (triple-nodes triple)
@@ -307,8 +308,7 @@
 
 (defn tokens? [tokens]
   (cond (not (coll? tokens)) false
-        :else (every? identity (map #(= CoreLabel (type %))
-                                    tokens))))
+        :else (every? identity (map #(= CoreLabel (type %)) tokens))))
 
 (defn pos-map-node [g node]
   (->> (loom/labeled-edges g node s/pos-map)
@@ -395,13 +395,13 @@
 
 (defn recursion-cleanup [g]
   (as-> g $
+    ; (do (loom/display-graph $) $)
     (loom/remove-edges-label $ s/scanned)
     (loom/remove-edges-label $ s/pos-map)
     (loom/remove-nodes $ (loom/loners $))))
 
 (defn stringify-node [node]
-  (if (tokens? node)
-    (tokens-str node) node))
+  (if (tokens? node) (tokens-str node) node))
 
 (defn stringify-graph [g]
   (loom/build-graph
@@ -497,6 +497,7 @@
            (->> (entity-mentions (val sent-pair))
                 (map #(ner-graph %))
                 loom/merge-graphs)])
+         com/debug
          (dedup-graph (key sent-pair))
          recursion-cleanup
          stringify-graph)))
@@ -574,7 +575,7 @@
 
 (defn run-nlp-default [text]
   (cond-> (-> text run-ner library-annotate-all
-              get-mentions)
+              get-mentions run-openie)
     true nlp-graph
     (env :coreference) rewrite-pronouns
     false strip-graph))
