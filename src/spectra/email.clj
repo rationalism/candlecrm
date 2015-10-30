@@ -434,7 +434,7 @@
 
 (defn use-nlp [chain message]
   (as-> (->> (s/email-body message)
-             (nlp/run-nlp nlp/*pipeline*)
+             nlp/run-nlp-default
              (conj [chain])
              loom/merge-graphs) $
     (loom/add-edges $ (->> (mention-nodes $)

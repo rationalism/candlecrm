@@ -33,8 +33,7 @@
   (concat ner-annotators
           (if (env :coreference) ["parse" "dcoref"] [])
           ["depparse" "natlog" "openie"]))
-(def recurse-annotators
-  (concat token-annotators ["depparse" "natlog" "openie"]))
+(def openie-annotators ["depparse" "natlog" "openie"])
 (def truecase-annotators
   (concat token-annotators ["truecase"]))
 
@@ -71,17 +70,25 @@
      (.setProperty "parse.model" parse-model)
      (.setProperty "openie.resolve_coref"
                    (if (env :coreference) "true" "false"))
-     (.setProperty "openie.triple.all_nominals" "true"))))
+     (.setProperty "openie.triple.all_nominals" "true"))
+   false))
 
 (defn load-pipeline! []
-  (def ^:dynamic *pipeline*
-    (make-pipeline ner-annotators pcfg-parse-model)))
+  (def ner-pipeline (make-pipeline ner-annotators pcfg-parse-model))
+  (def openie-pipeline (make-pipeline openie-annotators pcfg-parse-model)))
 
-(defn run-nlp-simple [pipeline text]
+(defn run-nlp [pipeline text]
   ;; Global var needed for mutating Java method
   (def parsed-text (Annotation. text))
   (p :run-nlp (.annotate pipeline parsed-text))
   parsed-text)
+
+(defn run-ner [text]
+  (run-nlp ner-pipeline text))
+
+(defn run-openie [annotation]
+  (p :run-openie (.annotate openie-pipeline annotation))
+  annotation)
 
 (defn get-tokens [words]
   (.get words CoreAnnotations$TokensAnnotation))
@@ -244,7 +251,7 @@
   
 (defn recursive-triples [sent-num tokens]
   (->> tokens tokens-str
-       (run-nlp-simple *pipeline*)
+       run-ner run-openie
        get-sentences first get-triples
        (recursive-graph sent-num tokens)))
 
@@ -482,14 +489,11 @@
        (map str/capitalize)
        (str/join " ")))
 
-(defn run-nlp [pipeline text]
-  (cond-> (run-nlp-simple pipeline text)
+(defn run-nlp-default [text]
+  (cond-> (run-ner text)
     true nlp-graph
     (env :coreference) rewrite-pronouns
     false strip-graph))
-
-(defn run-nlp-default [text]
-  (run-nlp *pipeline* text))
 
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))
@@ -501,7 +505,7 @@
 
 (defn correct-case [text]
   (->> (str/lower-case text)
-       (run-nlp-simple (make-default-pipeline truecase-annotators))
+       (run-nlp (make-default-pipeline truecase-annotators))
        get-sentences (mapcat get-tokens) (map true-case)
        (str/join " ") fix-punct))
 

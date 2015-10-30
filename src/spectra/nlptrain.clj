@@ -9,8 +9,7 @@
 
 (defn tokenize [infile outfile]
   (->> (slurp infile)
-       (nlp/run-nlp-simple (nlp/make-default-pipeline
-                            nlp/sentence-annotators))
+       (nlp/run-nlp (nlp/make-default-pipeline nlp/sentence-annotators))
        (nlp/get-sentences)
        (mapcat nlp/get-tokens)
        (map #(.originalText %))

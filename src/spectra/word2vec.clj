@@ -1,7 +1,7 @@
 (ns spectra.word2vec
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
-            [spectra.corenlp :as corenlp]
+            [spectra.corenlp :as nlp]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [org.deeplearning4j.text.sentenceiterator
@@ -46,10 +46,10 @@
 (defn SentenceLoaderFactory [filename]
   (->> filename
        slurp
-       (corenlp/run-nlp-simple (corenlp/make-default-pipeline
-                                corenlp/sentence-annotators))
-       corenlp/get-sentences
-       corenlp/sentences-text
+       (nlp/run-nlp (nlp/make-default-pipeline
+                         nlp/sentence-annotators))
+       nlp/get-sentences
+       nlp/sentences-text
        (->SentenceLoader (atom 0))))
 
 (defrecord TokenStore [pos tokens]
@@ -66,9 +66,9 @@
 
 (defn make-token-store [pipeline words]
   (->> words
-       (corenlp/run-nlp-simple pipeline)
-       corenlp/get-tokens
-       (map corenlp/get-lemma)
+       (nlp/run-nlp pipeline)
+       nlp/get-tokens
+       (map nlp/get-lemma)
        (->TokenStore (atom 0))))
   
 (defrecord TokenStoreFactory [pipeline]
@@ -81,8 +81,8 @@
 
 (defn make-token-factory []
   (->TokenStoreFactory
-   (corenlp/make-default-pipeline 
-    corenlp/token-annotators)))
+   (nlp/make-default-pipeline 
+    nlp/token-annotators)))
 
 (defn make-model [filename]
   (def vec-model
