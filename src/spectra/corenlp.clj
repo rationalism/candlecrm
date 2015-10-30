@@ -395,7 +395,6 @@
 
 (defn recursion-cleanup [g]
   (as-> g $
-    ; (do (loom/display-graph $) $)
     (loom/remove-edges-label $ s/scanned)
     (loom/remove-edges-label $ s/pos-map)
     (loom/remove-nodes $ (loom/loners $))))
@@ -493,13 +492,12 @@
           [(-> (get-triples (val sent-pair))
                triples-graph
                (breakup-node (key sent-pair))
-               trampoline)
+               trampoline
+               recursion-cleanup)
            (->> (entity-mentions (val sent-pair))
                 (map #(ner-graph %))
                 loom/merge-graphs)])
-         com/debug
          (dedup-graph (key sent-pair))
-         recursion-cleanup
          stringify-graph)))
 
 (defn shorten-node [node]
