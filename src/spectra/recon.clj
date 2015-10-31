@@ -224,7 +224,8 @@
 (defn delete-headers! [g user]
   (->> (filter-memory g s/email)
        (map #(loom/out-edge-label g % s/email-from))
-       (map #(email-delete! s/email-headers (first %) (second %)))))
+       (map #(email-delete! s/email-headers (first %) (second %))))
+  g)
 
 (defn name-email-map [names emails]
   (cond
