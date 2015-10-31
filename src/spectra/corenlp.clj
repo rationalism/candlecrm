@@ -72,8 +72,8 @@
      (.setProperty "ner.useSUTime" "false")
      (.setProperty "ner.model" (str/join "," ner-models))
      (.setProperty "parse.model" parse-model)
-     (.setProperty "openie.resolve_coref"
-                   (if (env :coreference) "true" "false"))
+     ;(.setProperty "openie.resolve_coref"
+     ;              (if (env :coreference) "true" "false"))
      (.setProperty "openie.triple.all_nominals" "true"))
    false))
 
