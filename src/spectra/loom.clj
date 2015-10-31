@@ -167,7 +167,8 @@
        (map #(graph/subgraph g %))))
 
 (defn merge-graphs [graphs]
-  (apply graph/digraph graphs))
+  (build-graph (mapcat nodes graphs)
+               (mapcat multi-edges graphs)))
 
 (defn count-downstream [g node]
   (->> (galg/bf-span g node)
@@ -193,7 +194,7 @@
                    (->> new-path rest reverse (conj edges))))))
 
 (defn display-graph [g]
-  (gviz/view g))
+  (gviz/view g) g)
 
 (defn replace-inc [i g old-node]
   (swap! i inc)
@@ -206,4 +207,4 @@
         (reduce g (nodes g)))))
 
 (defn display-structure [g]
-  (display-graph (structure g)))
+  (display-graph (structure g)) g)
