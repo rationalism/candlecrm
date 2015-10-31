@@ -53,7 +53,8 @@
 (def schema-map {"PERSON" s/person-name "LOCATION" s/loc-name
                  "ORGANIZATION" s/org-name "MONEY" s/amount
                  "DATETIME" s/date-time "EMAIL" s/email-addr
-                 "PHONE" s/phone-num "URL" s/url})
+                 "PHONE" s/phone-num "URL" s/url
+                 "TIMEINTERVAL" s/time-interval})
 
 (def pronoun-parts ["PRP" "PRP$"])
 
@@ -424,7 +425,8 @@
 (def label-correction {s/person-name s/name s/org-name s/name
                        s/loc-name s/name s/email-addr s/email-addr
                        s/phone-num s/phone-num s/date-time s/date-time
-                       s/amount s/amount})
+                       s/amount s/amount s/time-interval s/time-interval
+                       s/url s/url})
 
 (defn format-value [edge]
   (let [new-label (-> edge second label-correction)]
@@ -458,7 +460,8 @@
 
 (def attr-functions
   [[regex/find-email-addrs "EMAIL"] [regex/find-urls "URL"]
-   [regex/find-phone-nums "PHONE"] [dt/find-dates "DATETIME"]])
+   [regex/find-phone-nums "PHONE"] [dt/find-intervals "TIMEINTERVAL"]
+   [dt/find-dates "DATETIME"]])
 
 (defn replace-all [text coll]
   (reduce #(str/replace %1 %2 "") text coll))

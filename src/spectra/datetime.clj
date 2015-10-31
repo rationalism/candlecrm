@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [spectra.common :as com]
+            [spectra.schema :as s]
             [clj-time.core :as ctime]
             [clj-time.coerce :as coerce]
             [clj-time.format :as format]
@@ -11,11 +12,22 @@
            [java.text SimpleDateFormat]
            [java.util Date]))
 
+(defn interval? [natty-date]
+  (let [parsed-date (-> natty-date (.getDates) vec)]
+    (and (= 2 (count parsed-date))
+         (not= (first parsed-date) (second parsed-date)))))
+
+(defn no-info? [natty-date reference]
+  (and (not (interval? natty-date))
+       (= (first (.getDates natty-date))
+          reference)))
+
 (defn parse-dates [text reference]
   (p :find-dates
      (CalendarSource/setBaseDate reference)
      ;; This try-catch block needed in case of parse errors
-     (try (.parse (Parser. ) text)
+     (try (->> (.parse (Parser. ) text)
+               (remove #(no-info? % reference)))
           (catch Exception e []))))
 
 (defn unix-dates [text reference]
@@ -39,6 +51,13 @@
   ([text] (find-dates text (Date. )))
   ([text reference]
    (->> (parse-dates text reference)
+        (map #(.getText %)))))
+
+(defn find-intervals
+  ([text] (find-intervals text (Date. )))
+  ([text reference]
+   (->> (parse-dates text reference)
+        (filter interval?)
         (map #(.getText %)))))
 
 (defn to-ms [some-date]

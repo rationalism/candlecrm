@@ -47,6 +47,9 @@
 (def money "money")
 (def amount :amount)
 (def event "event")
+(def time-interval :time-interval)
+(def start-time :start-time)
+(def stop-time :stop-time)
 
 (def coref-is :coref-is)
 (def has-type :has-type)
@@ -65,7 +68,8 @@
                   amount money birthday person
                   gender person occupation person
                   mail-address person website person
-                  org-member person url webpage})
+                  org-member person url webpage
+                  time-interval event})
 
 (def attr-names {name "Name" amount "Amount"
                  email-addr "Address" email-subject "Subject"
@@ -76,7 +80,8 @@
                  birthday "Birthday" gender "Gender"
                  occupation "Occupation" mail-address "Address"
                  website "Website" org-member "Member of"
-                 url "Page address"})
+                 url "Page address" start-time "Begins at"
+                 stop-time "Ends at"})
 
 (def person-attrs [name email-addr phone-num birthday gender
                    occupation mail-address website org-member])

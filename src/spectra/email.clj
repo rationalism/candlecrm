@@ -415,12 +415,24 @@
   (->> (loom/nodes chain)
        (filter #(loom/out-edge-label chain % s/has-type))))
 
+(defn map-interval [interval]
+  {s/start-time (first interval)
+   s/stop-time (second interval)})
+
+(defn normalize-event [event]
+  (cond-> event
+    (contains? event s/date-time)
+    (->> (s/date-time event) dt/dates-in-text
+         first (assoc event s/date-time))
+    (contains? event s/time-interval)
+    (->> (s/time-interval event) dt/intervals-in-text
+         first map-interval (merge (dissoc event s/time-interval)))
+    :else event))
+
 (defn parse-datetime [chain event]
   (if (-> event s/date-time type (= java.util.Date)) chain
       (->> (loom/in-edge-label chain event s/email-mentions)
-           first s/email-sent
-           (dt/dates-in-text (s/date-time event))
-           first (assoc event s/date-time)
+           first s/email-sent normalize-event
            (loom/replace-node chain event))))
 
 (defn parse-person [chain node]
