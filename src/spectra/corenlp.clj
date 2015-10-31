@@ -53,7 +53,7 @@
 (def schema-map {"PERSON" s/person-name "LOCATION" s/loc-name
                  "ORGANIZATION" s/org-name "MONEY" s/amount
                  "DATETIME" s/date-time "EMAIL" s/email-addr
-                 "PHONE" s/phone-num})
+                 "PHONE" s/phone-num "URL" s/url})
 
 (def pronoun-parts ["PRP" "PRP$"])
 
@@ -456,13 +456,22 @@
   (->> (map #(hash-map % attr) coll)
        (apply merge)))
 
+(def attr-functions
+  [[regex/find-email-addrs "EMAIL"] [regex/find-urls "URL"]
+   [regex/find-phone-nums "PHONE"] [dt/find-dates "DATETIME"]])
+
+(defn replace-all [text coll]
+  (reduce #(str/replace %1 %2 "") text coll))
+
 (defn library-map [text]
-  (merge (->> (regex/find-email-addrs text)
-              (map-attr "EMAIL"))
-         (->> (regex/find-phone-nums text)
-              (map-attr "PHONE"))
-         (->> (dt/find-dates text)
-              (map-attr "DATETIME"))))
+  (loop [rem-text text lib-map {}
+         attr-map attr-functions]
+    (if (empty? attr-map) lib-map
+        (let [found ((-> attr-map first first) rem-text)]
+          (recur (replace-all rem-text found)
+                 (-> attr-map first second 
+                     (map-attr found) (merge lib-map))
+                 (rest attr-map))))))
 
 (defn token-pos-map [sentence pair]
   (->> pair key (boundaries-detect sentence)
@@ -578,6 +587,10 @@
     true nlp-graph
     (env :coreference) rewrite-pronouns
     false strip-graph))
+
+(defn run-nlp-openie [text]
+  (-> text run-ner library-annotate-all
+      get-mentions run-openie nlp-graph))
 
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))

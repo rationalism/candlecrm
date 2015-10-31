@@ -1,6 +1,7 @@
 (ns spectra.datetime
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
+            [spectra.common :as com]
             [clj-time.core :as ctime]
             [clj-time.coerce :as coerce]
             [clj-time.format :as format]
@@ -17,12 +18,22 @@
      (try (.parse (Parser. ) text)
           (catch Exception e []))))
 
+(defn unix-dates [text reference]
+   (->> (parse-dates text reference)
+        (mapv #(.getDates %)) (map vec)))
+  
 (defn dates-in-text
   ([text] (dates-in-text text (Date. )))
   ([text reference]
-   (->> (parse-dates text reference)
-        (map #(.getDates %))
-        flatten (map first) distinct)))
+   (->> (unix-dates text reference)
+        flatten distinct)))
+
+(defn intervals-in-text 
+  ([text] (intervals-in-text text (Date. )))
+  ([text reference]
+   (->> (unix-dates text reference)
+        (remove #(= (first %) (second %)))
+        distinct)))
 
 (defn find-dates
   ([text] (find-dates text (Date. )))

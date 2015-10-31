@@ -48,11 +48,19 @@
          (labeled-list-from-props user s/organization props)))
 
 (defn person-from-user [user start limit]
-   (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
-                           ":" s/person
-                           ") RETURN root"
-                           " ORDER BY root." (neo4j/cypher-esc-token s/name)
-                           "[0] SKIP " start " LIMIT " limit)))
+  (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
+                          ":" s/person
+                          ") RETURN root"
+                          " ORDER BY root." (neo4j/cypher-esc-token s/name)
+                          "[0] SKIP " start " LIMIT " limit)))
+
+(defn emails-with-dates [user start limit]
+  (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
+                          ":" s/email
+                          ")-[:" (neo4j/cypher-esc-token s/email-mentions)
+                          "]->(d:" s/event
+                          ") RETURN root ORDER BY root." (neo4j/cypher-esc-token s/email-sent)
+                          " SKIP " start " LIMIT " limit)))
 
 ;; For searching emails, in milliseconds
 (def sent-tolerance 200000)

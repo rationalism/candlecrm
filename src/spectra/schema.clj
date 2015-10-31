@@ -53,6 +53,9 @@
 (def pos-map :pos-map)
 (def scanned :scanned)
 
+(def webpage "webpage")
+(def url :url)
+
 (def repeated-attr [name person-name org-name email-addr phone-num
                     mail-address website org-member])
 
@@ -62,7 +65,7 @@
                   amount money birthday person
                   gender person occupation person
                   mail-address person website person
-                  org-member person})
+                  org-member person url webpage})
 
 (def attr-names {name "Name" amount "Amount"
                  email-addr "Address" email-subject "Subject"
@@ -72,7 +75,8 @@
                  email-sent "Email sent" phone-num "Phone number"
                  birthday "Birthday" gender "Gender"
                  occupation "Occupation" mail-address "Address"
-                 website "Website" org-member "Member of"})
+                 website "Website" org-member "Member of"
+                 url "Page address"})
 
 (def person-attrs [name email-addr phone-num birthday gender
                    occupation mail-address website org-member])

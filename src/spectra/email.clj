@@ -576,3 +576,9 @@
         (map label-headers)
         (map #(insert-headers! user %))))
   :success)
+
+(defn date-graphs [user start limit]
+  (->> (recon/emails-with-dates user start limit)
+       (map #(get-in % [:data :body]))
+       (map regex/strip-tags)
+       (map nlp/run-nlp-openie)))

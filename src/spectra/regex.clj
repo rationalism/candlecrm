@@ -7,14 +7,22 @@
 
 ;; Taken from http://stackoverflow.com/questions/201323/using-a-regular-expression-to-validate-an-email-address
 (def email-regex #"[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*")
-
+(def url-regex #"[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?")
 (def javascript-regex #"\<javascript([^\>]+)\>")
+(def tag-regex #"\<([^\>]*)\>")
 
 (defn find-email-addrs [text]
   (re-seq email-regex text))
 
+(defn find-urls [text]
+  (->> (re-seq url-regex text)
+       (map first)))
+
 (defn strip-javascript [text]
   (str/replace text javascript-regex ""))
+
+(defn strip-tags [text]
+  (str/replace text tag-regex ""))
 
 (defn email-person [addr]
   (assoc {} s/email-addr (vector addr)
