@@ -343,6 +343,25 @@
   (if-let [dupes (find-dupes g sent-num)]
     (reduce remove-dupes g dupes) g))
 
+(defn highest-fanout [g]
+  (->> (loom/nodes g)
+       (filter tokens?)
+       (sort-by #(loom/count-downstream g %) >)
+       first))
+
+(defn attach-scanned [g edit]
+  (loom/attach-all
+   g (vector (first (keys edit)))
+   "yes" s/scanned))
+
+(defn scanned-edits [edits]
+  (take-while #(-> % vals first nil?) edits))
+
+(defn pos-map-edit [g pos-map]
+  (loom/replace-node
+   g (pos-map-only g)
+   (com/compose-maps (pos-map-only g) pos-map)))
+
 (declare edit-graph breakup-node)
 
 (defn edit-graph [g sent-num edits]
@@ -353,10 +372,7 @@
           old-node (-> edits first keys first)]
       #(breakup-node 
         (-> (if-let [pos-map (pos-map-node g old-node)]
-              (as-> new-graph $
-                (loom/replace-node
-                 $ (pos-map-only $)
-                 (com/compose-maps (pos-map-only $) pos-map)))
+              (pos-map-edit new-graph pos-map)
               new-graph)
             vector
             (conj (loom/remove-edges
@@ -365,35 +381,25 @@
             loom/merge-graphs
             (loom/replace-node
              old-node
-             (->> (loom/nodes new-graph)
-                  (filter tokens?)
-                  (sort-by (fn [node]
-                             (loom/count-downstream new-graph node))
-                           >)
-                  first))
+             (highest-fanout new-graph))
             (dedup-graph sent-num))
         sent-num))
     :else #(breakup-node
-            (reduce
-             (fn [gr edit]
-               (loom/attach-all
-                gr (vector (first (keys edit)))
-                "yes" s/scanned))
-             g (take-while (fn [edit]
-                             (-> edit vals first nil?))
-                           edits))
+            (reduce attach-scanned
+                    g (scanned-edits edits))
             sent-num)))
 
+(defn breakup-node-impl [g sent-num]
+  (->> (loom/nodes g)
+       (filter tokens?)
+       (remove #(scanned? g %))
+       (filter #(> (count %) 1))
+       loom/sort-nodes
+       (map #(hash-map % (recursive-triples sent-num %)))))
+
 (defn breakup-node [g sent-num]
-  #(edit-graph
-    g sent-num
-    (->> (loom/nodes g)
-         (filter tokens?)
-         (remove (fn [x] (scanned? g x)))
-         (filter (fn [x] (> (count x) 1)))
-         loom/sort-nodes
-         (map (fn [x] (hash-map x (recursive-triples
-                                   sent-num x)))))))
+  #(edit-graph g sent-num
+               (breakup-node-impl g sent-num)))
 
 (defn recursion-cleanup [g]
   (as-> g $
