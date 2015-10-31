@@ -496,8 +496,8 @@
                 (map #(ner-graph %))
                 (remove nil?)
                 loom/merge-graphs)])
-         (breakup-node (key sent-pair))
-         trampoline recursion-cleanup
+         ;(breakup-node (key sent-pair))
+         ;trampoline recursion-cleanup
          (dedup-graph (key sent-pair))
          stringify-graph)))
 
@@ -574,7 +574,7 @@
 
 (defn run-nlp-default [text]
   (cond-> (-> text run-ner library-annotate-all
-              get-mentions run-openie)
+              get-mentions)
     true nlp-graph
     (env :coreference) rewrite-pronouns
     false strip-graph))
