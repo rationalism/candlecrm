@@ -50,8 +50,7 @@
 (def shift-parse-model "edu/stanford/nlp/models/srparser/englishSR.ser.gz")
 (def pcfg-parse-model "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
 
-(def schema-map {"PERSON" s/person-name "DATE" s/date-time
-                 "TIME" s/date-time "LOCATION" s/loc-name
+(def schema-map {"PERSON" s/person-name "LOCATION" s/loc-name
                  "ORGANIZATION" s/org-name "MONEY" s/amount
                  "DATETIME" s/date-time "EMAIL" s/email-addr
                  "PHONE" s/phone-num})
@@ -304,6 +303,7 @@
 
 (defn scanned? [g node]
   (-> (loom/labeled-edges g node s/scanned)
+      (concat (loom/labeled-edges g node s/has-type))
       empty? not))
 
 (defn tokens? [tokens]
@@ -491,13 +491,13 @@
   (p :sentence-graph
      (-> (loom/merge-graphs
           [(-> (get-triples (val sent-pair))
-               triples-graph
-               (breakup-node (key sent-pair))
-               trampoline
-               recursion-cleanup)
+               triples-graph)
            (->> (entity-mentions (val sent-pair))
                 (map #(ner-graph %))
+                (remove nil?)
                 loom/merge-graphs)])
+         (breakup-node (key sent-pair))
+         trampoline recursion-cleanup
          (dedup-graph (key sent-pair))
          stringify-graph)))
 
