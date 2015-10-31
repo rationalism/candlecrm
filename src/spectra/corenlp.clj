@@ -358,8 +358,9 @@
                  (com/compose-maps (pos-map-only $) pos-map)))
               new-graph)
             vector
-            (->> (loom/labeled-edges g old-node s/pos-map)
-                 (loom/remove-edges g) conj)
+            (conj (loom/remove-edges
+                   g (loom/labeled-edges
+                      g old-node s/pos-map)))
             loom/merge-graphs
             (loom/replace-node
              old-node
