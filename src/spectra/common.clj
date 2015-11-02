@@ -28,12 +28,6 @@
   [(key pair)
    (deref (val pair))])
 
-(defn filter-text [text]
-  (-> text
-      (str/replace "\r\n" " ")
-      (str/replace " > " " ")
-      (str/replace #"\s+" " ")))
-
 (defn no-value? [property]
   (if (string? property)
     (empty? property)

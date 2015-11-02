@@ -10,6 +10,20 @@
 (def url-regex #"[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?")
 (def javascript-regex #"\<javascript([^\>]+)\>")
 (def tag-regex #"\<([^\>]*)\>")
+(def esc-char-regex #"\^|\[|\]|\.|\$|\{|\}|\(|\)|\\|\*|\+|\||\?|\<|\>")
+
+(defn filter-text [text]
+  (str/replace text (re-pattern "\r\n| > |\\s+") " "))
+
+(defn regex-escape [text]
+  (str/replace text esc-char-regex #(str "\\" %1)))
+
+(defn regex-or [coll]
+  (->> (map regex-escape coll)
+       (str/join "|") re-pattern))
+
+(defn replace-map [text new-map]
+  (str/replace text (-> new-map keys regex-or) #(new-map %1)))
 
 (defn find-email-addrs [text]
   (re-seq email-regex text))

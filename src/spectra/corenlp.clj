@@ -470,7 +470,7 @@
    [dt/find-dates "DATETIME"]])
 
 (defn replace-all [text coll]
-  (reduce #(str/replace %1 %2 "") text coll))
+  (str/replace text (regex/regex-or coll) ""))
 
 (defn library-map [text]
   (loop [rem-text text lib-map {}

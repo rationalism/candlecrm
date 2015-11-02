@@ -408,8 +408,7 @@
   (str "<a href='" (com/sha1 text) "'>" text "</a>"))
 
 (defn hyperlink-text [text mentions]
-  (reduce #(str/replace %1 %2 (hash-brackets %2))
-          text mentions))
+  (str/replace text (regex/regex-or mentions) #(hash-brackets %1)))
 
 (defn mention-nodes [chain]
   (->> (loom/nodes chain)
@@ -479,8 +478,7 @@
   (reduce add-hyperlink g (loom/select-edges g :database-match)))
 
 (defn switch-hyperlinks [text link-map]
-  (reduce #(str/replace %1 %2 (link-map %2))
-          text (keys link-map)))
+  (str/replace text (-> link-map keys regex/regex-or) #(link-map %1)))
 
 (defn switch-message [g message]
   (->> (loom/labeled-edges g message s/email-mentions)
