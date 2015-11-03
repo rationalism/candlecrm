@@ -78,6 +78,7 @@
    false))
 
 (defn load-pipeline! []
+  (def token-pipeline (make-pipeline sentence-annotators pcfg-parse-model))
   (def ner-pipeline (make-pipeline ner-annotators pcfg-parse-model))
   (def mention-pipeline (make-pipeline mention-annotators pcfg-parse-model))
   (def openie-pipeline (make-pipeline openie-annotators pcfg-parse-model)))
@@ -87,6 +88,9 @@
   (def parsed-text (Annotation. text))
   (p :run-nlp (.annotate pipeline parsed-text))
   parsed-text)
+
+(defn tokenize [text]
+  (run-nlp token-pipeline text))
 
 (defn run-ner [text]
   (run-nlp ner-pipeline text))
@@ -471,6 +475,40 @@
 
 (defn replace-all [text coll]
   (str/replace text (regex/regex-or coll) ""))
+
+(defn strip-parens [text]
+  (replace-all text ["(" ")"]))
+
+(defn is-fpp? [token]
+  (some #{(str/lower-case (.originalText token))}
+        ["i" "me" "my" "mine" "myself"]))
+
+(defn char-pos [token]
+  [(.beginPosition token) (.endPosition token)])
+
+(defn char-ends [text coll]
+  (->> text count vector
+       (concat [0] coll)))
+
+(defn subs-vec [text pos]
+  (subs text (first pos) (second pos)))
+
+(defn swap-fpp [name token]
+  (->> token (.originalText) str/lower-case
+       (get {"i" name "me" name "my" (str name "'s")
+             "mine" (str name "'s") "myself" "themselves"})))
+
+(defn mesh-fpps [name fpps pieces]
+  (interleave pieces
+              (-> (mapv #(swap-fpp name %) fpps)
+                  (conj ""))))
+
+(defn fpp-replace [text name]
+  (let [fpps (->> text tokenize get-tokens (filter is-fpp?))]
+    (->> (mapcat char-pos fpps)
+         (char-ends text) (partition 2)
+         (map #(subs-vec text %))
+         (mesh-fpps name fpps) (str/join ""))))
 
 (defn library-map [text]
   (loop [rem-text text lib-map {}
