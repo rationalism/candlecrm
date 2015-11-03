@@ -73,7 +73,7 @@
        (map #(.getOrgName %))
        (map #(.getValue %))))
 
-(defn contact-to-person [contact]
+(defn contact->person [contact]
   (->> (emails contact)
        (recon/name-email-map (names contact))
        (map #(nlp/normalize-person (key %) (val %) s/person))
@@ -89,7 +89,7 @@
 
 (defn batch-insert! [user contacts]
   (->> contacts 
-    (map contact-to-person)
+    (map contact->person)
     (map #(hash-map :props %))
     (map #(assoc % :labels (neo4j/person-labels user)))
     neo4j/batch-insert!))

@@ -59,7 +59,7 @@
     (.putScalar matrix (int-wrap [pos (inc-mod old-pos data-size) n]) 1.0)
     matrix))
 
-;(defn dates-to-array [data-size date-sets]
+;(defn dates->array [data-size date-sets]
   
 
 ;; train-data should be a three-dimensional vector here

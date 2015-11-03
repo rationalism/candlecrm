@@ -47,7 +47,7 @@
 (defn cypher-esc-token [token]
   (str "`" (name token) "`"))
 
-(defn cypher-pair-to-node [pair]
+(defn cypher-pair->node [pair]
   [(key pair)
    (rec/instantiate-node-from (val pair))])
 
@@ -55,9 +55,9 @@
   [(rec/instantiate-node-from (val pair))
    (-> pair val :metadata :labels)])
 
-(defn cypher-map-to-node [cymap]
+(defn cypher-map->node [cymap]
   (->> cymap
-       (map cypher-pair-to-node)
+       (map cypher-pair->node)
        (into {})))
 
 (defn cypher-map-node-labeled [cymap]
@@ -67,7 +67,7 @@
 
 (defn cypher-query [query]
   (->> (cy/tquery *graph* query)
-       (map cypher-map-to-node)))
+       (map cypher-map->node)))
 
 (defn cypher-query-labeled [query]
   (->> (cy/tquery *graph* query)

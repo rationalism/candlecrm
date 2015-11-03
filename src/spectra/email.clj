@@ -181,7 +181,7 @@
        (remove #(loom/out-edge-label chain % s/email-reply))
        first))
 
-(defn header-to-person [header]
+(defn header->person [header]
   (when (or (:email-from-name header)
             (:email-from-addr header))
     (nlp/normalize-person
@@ -296,7 +296,7 @@
 (defn split-email [marks chain]
   (if (depth-match? marks chain)
     (let [new-node (make-new-node marks chain)
-          email-from (header-to-person marks)]
+          email-from (header->person marks)]
       (cond-> chain
         true (loom/replace-node (find-bottom chain) new-node)
         email-from (loom/add-edges [[new-node email-from s/email-from]])
