@@ -493,22 +493,22 @@
 (defn subs-vec [text pos]
   (subs text (first pos) (second pos)))
 
-(defn swap-fpp [name token]
+(defn swap-fpp [author token]
   (->> token (.originalText) str/lower-case
-       (get {"i" name "me" name "my" (str name "'s")
-             "mine" (str name "'s") "myself" "themselves"})))
+       (get {"i" author "me" author "my" (str author "'s")
+             "mine" (str author "'s") "myself" "themselves"})))
 
-(defn mesh-fpps [name fpps pieces]
+(defn mesh-fpps [author fpps pieces]
   (interleave pieces
-              (-> (mapv #(swap-fpp name %) fpps)
+              (-> (mapv #(swap-fpp author %) fpps)
                   (conj ""))))
 
-(defn fpp-replace [text name]
+(defn fpp-replace [text author]
   (let [fpps (->> text tokenize get-tokens (filter is-fpp?))]
     (->> (mapcat char-pos fpps)
          (char-ends text) (partition 2)
          (map #(subs-vec text %))
-         (mesh-fpps name fpps) (str/join ""))))
+         (mesh-fpps author fpps) (str/join ""))))
 
 (defn library-map [text]
   (loop [rem-text text lib-map {}
@@ -629,11 +629,16 @@
        (str/join " ")))
 
 (defn run-nlp-default [text]
-  (cond-> (-> text run-ner library-annotate-all
+  (-> text run-ner library-annotate-all
+      get-mentions nlp-graph))
+
+(defn run-nlp-full [author text]
+  (cond-> (-> text strip-parens
+              (fpp-replace author)
+              run-ner library-annotate-all
               get-mentions)
     true nlp-graph
-    (env :coreference) rewrite-pronouns
-    false strip-graph))
+    (env :coreference) rewrite-pronouns))
 
 (defn run-nlp-openie [text]
   (-> text run-ner library-annotate-all

@@ -443,9 +443,13 @@
          (loom/replace-node chain node))
     chain))
 
+(defn author-name [chain message]
+  (-> (loom/out-edge-label chain message s/email-from)
+      second (get-in [:data s/name])))
+
 (defn use-nlp [chain message]
   (as-> (->> (s/email-body message)
-             nlp/run-nlp-default
+             (nlp/run-nlp-full (author-name chain message))
              (conj [chain])
              loom/merge-graphs) $
     (loom/add-edges $ (->> (mention-nodes $)
