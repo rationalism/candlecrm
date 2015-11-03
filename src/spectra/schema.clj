@@ -89,6 +89,10 @@
 (def email-links [email-to email-cc email-bcc
                   email-reply email-replyto email-mentions])
 
+(def recon-attrs {location name event start-time
+                  money amount webpage url})
+                  
+
 (defn prop
   ([arg1 arg2 arg3]
    (.createProperty arg1 arg2 arg3))

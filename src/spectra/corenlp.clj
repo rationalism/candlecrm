@@ -53,8 +53,7 @@
 (def schema-map {"PERSON" s/person-name "LOCATION" s/loc-name
                  "ORGANIZATION" s/org-name "MONEY" s/amount
                  "DATETIME" s/date-time "EMAIL" s/email-addr
-                 "PHONE" s/phone-num "URL" s/url
-                 "TIMEINTERVAL" s/time-interval})
+                 "PHONE" s/phone-num "TIMEINTERVAL" s/time-interval})
 
 (def pronoun-parts ["PRP" "PRP$"])
 
@@ -160,7 +159,7 @@
 (defn boundaries-detect [sentence word]
   (loop [text (.toString sentence)
          boundaries []]
-    (let [pieces (->> word re-pattern (str/split text))]
+    (let [pieces (->> word regex/regex-escape re-pattern (str/split text))]
       (if (= text (first pieces))
         boundaries
         (recur (->> pieces first count (+ (count word)) (subs text))
@@ -641,7 +640,8 @@
     (env :coreference) rewrite-pronouns))
 
 (defn run-nlp-openie [text]
-  (-> text run-ner library-annotate-all
+  (-> text strip-parens ;; (fpp-replace author)
+      run-ner library-annotate-all
       get-mentions run-openie nlp-graph))
 
 (defn fix-punct [text]

@@ -118,16 +118,21 @@
 (defn import-label [chain edge]
   (loom/replace-node chain (first edge) (nlp/label-edge edge)))
 
-(defn decode-address [address]
-  (nlp/normalize-person (.getPersonal address)
-                        (.getAddress address)
-                        s/person))
+(defn decode-addresses [addresses]
+  (map #(nlp/normalize-person (.getPersonal %)
+                              (.getAddress %)
+                              s/person)
+       addresses))
+
+(defn decode-addr-map [addr-map]
+  (reduce #(update %1 %2 decode-addresses)
+          addr-map (keys addr-map)))
 
 (defn decode-header [header]
   {(.getName header) (.getValue header)})
 
 (defn get-recipients [message field]
-  (map decode-address (.getRecipients message field)))
+  (.getRecipients message field))
 
 (defn decode-recipients [message]
   {s/email-to (get-recipients message Message$RecipientType/TO)
@@ -135,10 +140,10 @@
    s/email-bcc (get-recipients message Message$RecipientType/BCC)})
 
 (defn decode-sender [message]
-  {s/email-from (map decode-address (.getFrom message))})
+  {s/email-from (.getFrom message)})
 
 (defn decode-replyto [message]
-  {s/email-replyto (map decode-address (.getReplyTo message))})
+  {s/email-replyto (.getReplyTo message)})
 
 (defn headers [message]
   (->> (.getAllHeaders message)
@@ -327,17 +332,20 @@
 (defn make-headers [pair root]
   (map #(vector root % (-> pair key)) (val pair)))
 
-(defn headers-parse [message]
-  (let [root {s/email-received (received-time message)
-              s/email-sent (sent-time message)
-              s/email-subject (subject message)}]
-    (loom/build-graph
-     [root]
-     (->> [(decode-recipients message)
+(defn headers-fetch [message]
+  (vector {s/email-received (received-time message)
+           s/email-sent (sent-time message)
+           s/email-subject (subject message)}
+          [(decode-recipients message)
            (decode-sender message)
-           (decode-replyto message)]
-          (apply merge)
-          (mapcat #(make-headers % root))))))
+           (decode-replyto message)]))
+
+(defn headers-parse [headers]
+  (loom/build-graph
+   [(first headers)]
+   (->> (second headers) (apply merge)
+        decode-addr-map
+        (mapcat #(make-headers % (first headers))))))
 
 (defn label-headers [graph]
   (let [message (->> graph loom/top-nodes first)]
@@ -392,13 +400,16 @@
     (loom/replace-node $ (-> headers loom/top-nodes first)
                        (find-bottom $))))
 
+(defn message-fetch [message]
+  (vector (get-text-recursive message)
+          (headers-fetch message)))
+
 (defn full-parse [message]
   (p :full-parse
-     (try (-> message
-              get-text-recursive
+     (try (-> message first
               regex/strip-javascript
               raw-msg-chain
-              (merge-bottom-headers (headers-parse message))
+              (merge-bottom-headers (headers-parse (second message)))
               message-inference)
           (catch Exception e
             (do (prn "Email parse error")
@@ -408,7 +419,8 @@
   (str "<a href='" (com/sha1 text) "'>" text "</a>"))
 
 (defn hyperlink-text [text mentions]
-  (str/replace text (regex/regex-or mentions) #(hash-brackets %1)))
+  (if (com/nil-or-empty? mentions) text
+      (str/replace text (regex/regex-or mentions) #(hash-brackets %1))))
 
 (defn mention-nodes [chain]
   (->> (loom/nodes chain)
@@ -418,20 +430,22 @@
   {s/start-time (first interval)
    s/stop-time (second interval)})
 
-(defn normalize-event [event]
-  (cond-> event
+(defn normalize-event [event time-ref]
+  (cond
     (contains? event s/date-time)
-    (->> (s/date-time event) dt/dates-in-text
-         first (assoc event s/date-time))
+    (as-> event $
+      (get $ s/date-time) (dt/dates-in-text $ time-ref)
+      (first $) (assoc event s/start-time $)
+      (dissoc $ s/date-time))
     (contains? event s/time-interval)
-    (->> (s/time-interval event) dt/intervals-in-text
-         first map-interval (merge (dissoc event s/time-interval)))
+    (-> event (get s/time-interval) (dt/intervals-in-text time-ref)
+        first map-interval (merge (dissoc event s/time-interval)))
     :else event))
 
 (defn parse-datetime [chain event]
   (if (-> event s/date-time type (= java.util.Date)) chain
       (->> (loom/in-edge-label chain event s/email-mentions)
-           first s/email-sent normalize-event
+           first s/email-sent (normalize-event event)
            (loom/replace-node chain event))))
 
 (defn parse-person [chain node]
@@ -448,28 +462,30 @@
       second (get-in [:data s/name])))
 
 (defn use-nlp [chain message]
-  (as-> (->> (s/email-body message)
-             (nlp/run-nlp-full (author-name chain message))
-             (conj [chain])
-             loom/merge-graphs) $
-    (loom/add-edges $ (->> (mention-nodes $)
+  (if (com/nil-or-empty? (s/email-body message)) chain
+      (as-> (->> (s/email-body message)
+                 (nlp/run-nlp-full (author-name chain message))
+                 (conj [chain])
+                 loom/merge-graphs) $
+        (loom/add-edges $ (->> (mention-nodes $)
                            (map #(vector message % s/email-mentions))))
-    (loom/replace-node $ message
-                       (->> (mention-nodes $)
-                            (hyperlink-text (s/email-body message))
-                            (assoc message s/email-body)))
-    (reduce import-label $ (loom/select-edges $ s/has-type))
-    (reduce parse-datetime $ (->> (loom/nodes $)
-                                  (filter #(= s/event (:label %)))))
-    (reduce parse-person $
-            (->> (loom/nodes $)
-                 (filter #(some #{(:label %)} [s/person s/organization]))))
-    (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/name])
-    (loom/remove-nodes $ (->> s/has-type (loom/select-edges $) (map second)))))
-
+        (loom/replace-node $ message
+                           (->> (mention-nodes $)
+                                (hyperlink-text (s/email-body message))
+                                (assoc message s/email-body)))
+        (reduce import-label $ (loom/select-edges $ s/has-type))
+        (reduce parse-datetime $ (->> (loom/nodes $)
+                                      (filter #(= s/event (:label %)))))
+        (reduce parse-person $
+                (->> (loom/nodes $)
+                     (filter #(some #{(:label %)} [s/person s/organization]))))
+        (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/name])
+        (loom/remove-nodes $ (->> s/has-type (loom/select-edges $) (map second))))))
+  
 (def url-map {s/person "/person/" s/email "/email/"
               s/organization "/organization/" s/location "/location/"
-              s/money "/finance/" s/event "/event/"})
+              s/money "/finance/" s/event "/event/"
+              s/webpage "/webpage/"})
 
 (defn add-hyperlink [g edge]
   (loom/replace-node
@@ -482,16 +498,18 @@
   (reduce add-hyperlink g (loom/select-edges g :database-match)))
 
 (defn switch-hyperlinks [text link-map]
-  (str/replace text (-> link-map keys regex/regex-or) #(link-map %1)))
+  (if (com/nil-or-empty? link-map) text
+      (str/replace text (-> link-map keys regex/regex-or) #(link-map %1))))
 
 (defn switch-message [g message]
-  (->> (loom/labeled-edges g message s/email-mentions)
-       (map second)
-       (map #(hash-map (:hash %) (:hyperlink %)))
-       (apply merge)
-       (switch-hyperlinks (:body message))
-       (assoc message :body)
-       (loom/replace-node g message)))
+  (if (com/nil-or-empty? (s/email-body message)) g
+      (->> (loom/labeled-edges g message s/email-mentions)
+           (map second)
+           (map #(hash-map (:hash %) (:hyperlink %)))
+           (apply merge)
+           (switch-hyperlinks (:body message))
+           (assoc message :body)
+           (loom/replace-node g message))))
 
 (defn nodes-of-edges [edges]
   (-> (map second edges)
@@ -528,7 +546,12 @@
 
 (defn link-new-all [g user]
   (reduce #(recon/link-new! %1 %2 [%2 (neo4j/user-label user)])
-          g [s/person s/organization s/location s/event s/money]))
+          g [s/person s/organization s/location
+             s/event s/money s/webpage]))
+
+(defn link-by-prop [g user]
+  (reduce #(recon/link-one-prop %1 (key %2) (val %2) user)
+          g s/recon-attrs))
 
 (defn merge-and-recon [block-size attrs graphs]
   (->> (partition-all 10 graphs)
@@ -544,9 +567,7 @@
             (recon/find-old-messages s/email)
             use-nlp-graph
             (link-people user)
-            (recon/link-one-prop s/location s/name user)
-            (recon/link-one-prop s/event s/date-time user)
-            (recon/link-one-prop s/money s/amount user)
+            (link-by-prop user)
             (link-new-all user)
             make-hyperlinks switch-message-graph
             (recon/delete-headers! user)
@@ -559,7 +580,8 @@
 (defn insert-email-range! [user lower upper]
   (doall
    (->> (messages-in-range (fetch-imap-folder user) lower upper)
-        (pmap full-parse)
+        (pmap message-fetch)
+        (map full-parse)
         (map #(insert-emails! user %))))
   :success)
 
@@ -586,7 +608,8 @@
 (defn insert-headers-range! [user lower upper]
   (doall
    (->> (messages-in-range (fetch-imap-folder user) lower upper)
-        (pmap headers-parse)
+        (pmap headers-fetch)
+        (map headers-parse)
         (map label-headers)
         (map #(insert-headers! user %))))
   :success)
