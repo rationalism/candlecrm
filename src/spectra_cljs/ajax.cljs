@@ -44,7 +44,8 @@
   (ajax-demo/listen! chsk chsk-state chsk-send!))
 
 (defn chsk-init! []
-  (pages/update-people! chsk-send!))
+  (pages/update-people! chsk-send!)
+  (pages/update-emails! chsk-send!))
 
 (defmulti event-msg-handler :id) ; Dispatch on event-id
 

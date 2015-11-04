@@ -8,6 +8,7 @@
             [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra.corenlp :as nlp]
+            [spectra.queries :as queries]
             [spectra.recon :as recon]
             [spectra.regex :as regex]
             [spectra.schema :as s]
@@ -615,7 +616,7 @@
   :success)
 
 (defn date-graphs [user start limit]
-  (->> (recon/emails-with-dates user start limit)
+  (->> (queries/emails-with-dates user start limit)
        (map #(get-in % [:data :body]))
        (map regex/strip-tags)
        (map nlp/run-nlp-openie)))

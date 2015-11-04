@@ -7,11 +7,13 @@
   (:use [hiccup.core] [hiccup.page]
         [ring.util.anti-forgery]))
 
+;; TODO: Reorganize this by page
+
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "Spectra"]
           (include-css "/css/screen.css")]
-         [:body [:h1 "Hi there! Welcome :)"]
+         [:body 
           (into [:div.content] content)
           (include-js "/js/main.js")]))
 
@@ -20,6 +22,17 @@
    [:h3 "Success! You are logged in now"]
    [:h3 (str "Welcome. Your username is: " username)]
    [:span {:style "padding:0 0 0 10px;color:red;"} flash]])
+
+(defn home-header []
+  [:div.home-header
+   [:table
+    [:tr.tab-row
+     [:td [:h2 "People"]]
+     [:td [:h2 "Emails"]]
+     [:td [:h2 "Calendar"]]]]])
+
+(defn home-content [& content]
+  (into [:div.home-content] content))
 
 (defn user-footer []
   [:div {:class "columns small-12"}
@@ -38,7 +51,6 @@
          (person attr))])
 
 (defn person-row [person]
-  (prn "person-row")
   [:tr (map #(person-cell person %) s/person-attrs)])
 
 (defn people-table []
@@ -57,15 +69,28 @@
 (def email-attrs {s/email-sent "Date"
                   s/email-subject "Subject"})
 
+(defn email-link [email attr]
+  [:a {:href (str "/email/" (email :id))}
+   (email attr)])
+
+(defn email-cell [email attr]
+  [:td (if (= s/email-subject attr)
+         (email-link email attr)
+         (email attr))])
+
+(defn email-row [email]
+  [:tr (map #(email-cell email %) email-attrs)])
+
 (defn email-table []
-  [:table {:id "email-table"}
-   [:thead {:id "email-header"}
-    (map header-cell email-attrs)]
-   [:tbody {:id "email-rows"}]]
-  [:a {:href "#" :onclick "return false;"
-       :id "prev-email-page"} "<-- Previous"]
-  [:a {:href "#" :onclick "return false;"
-       :id "next-email-page"} "Next -->"])
+  [:div
+   [:table {:id "email-table"}
+    [:thead {:id "email-header"}
+     (map header-cell email-attrs)]
+    [:tbody {:id "email-rows"}]]
+   [:a {:href "#" :onclick "return false;"
+        :id "prev-email-page"} "<-- Previous"]
+   [:a {:href "#" :onclick "return false;"
+        :id "next-email-page"} "Next -->"]])
 
 (defn gmail-setup [flash username auth-url]
   [:div {:class "columns small-12"}

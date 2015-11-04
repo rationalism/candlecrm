@@ -67,6 +67,12 @@
       (when ?reply-fn
         (?reply-fn (pages/people-table user (:start ?data) (:limit ?data))))))
 
+  (defmethod event-msg-handler :pages/fetch-emails
+    [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+    (when-let [user (auth/user-from-req ring-req)]
+      (when ?reply-fn
+        (?reply-fn (pages/emails-table user (:start ?data) (:limit ?data))))))
+  
   (defmethod event-msg-handler :default ; Fallback
     [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
     (let [session (:session ring-req)

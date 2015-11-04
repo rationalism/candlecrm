@@ -2,11 +2,11 @@
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [spectra.auth :as auth]
-            [spectra.recon :as recon]
             [spectra.email :as email]
             [spectra.google :as google]
             [spectra.html :as html]
             [spectra.neo4j :as neo4j]
+            [spectra.queries :as queries]
             [spectra.schema :as s]
             [cemerick.friend :as friend]
             [hiccup.core :as hiccup]))
@@ -24,22 +24,29 @@
   (merge (:data node)
          (hash-map :id (:id node))))
 
-(defn people-table [user start limit]
-  (->> (recon/person-from-user user start limit)
-       (map node-attrs)
+(defn tablify-hits [hits]
+  (->> (map node-attrs hits) 
        (remove #(empty? %))
        (filter #(contains? % s/name))
-       (map first-table-vals)
-       (map html/person-row)
-       hiccup/html))
+       (map first-table-vals)))
+
+(defn people-table [user start limit]
+  (->> (queries/person-from-user user start limit)
+       tablify-hits (map html/person-row) hiccup/html))
+
+(defn emails-table [user start limit]
+  (->> (queries/emails-from-user user start limit)
+       tablify-hits (map html/email-row) hiccup/html))
 
 (defn homepage [req]
-  (prn "homepage")
   (if-let [user (auth/user-from-req req)]
     (html/base-template
-     (html/user-welcome (:flash req) (auth/get-username user))
-     (html/people-table)
-     (html/user-footer))
+     (html/home-header)
+     (html/home-content
+      (html/user-welcome (:flash req) (auth/get-username user))
+      (html/people-table)
+      (html/email-table)
+      (html/user-footer)))
     (html/base-template
      (html/signup-form (:flash req))
      (html/login-form))))
