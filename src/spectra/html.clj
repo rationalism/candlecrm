@@ -12,9 +12,13 @@
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "Spectra"]
-          (include-css "/css/screen.css")]
+          (include-css "/css/screen.css")
+          (include-css "/css/fullcalendar/fullcalendar.css")]
          [:body 
           (into [:div.content] content)
+          (include-js "/js/libs/fullcalendar-2.4.0/lib/jquery.min.js")
+          (include-js "/js/libs/fullcalendar-2.4.0/lib/moment.min.js")
+          (include-js "/js/libs/fullcalendar-2.4.0/fullcalendar.js")
           (include-js "/js/main.js")]))
 
 (defn user-welcome [flash username]
@@ -140,6 +144,9 @@
        [:input {:type "submit" :class "button" :value "Sign up"}]
        [:span {:style "padding:0 0 0 10px;color:red;"
                :id "signupError"} flash]]]]]])
+
+(defn calendar []
+  [:div {:id "calendar"}])
 
 (defn login-form []
   [:div {:class "columns small-12"}

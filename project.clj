@@ -59,7 +59,8 @@
                  [pandect "0.5.4"]
                  [aysylu/loom "0.5.4"]
                  [com.taoensso/sente "1.7.0-RC1"]
-                 [clojurewerkz/quartzite "2.0.0"]]
+                 [clojurewerkz/quartzite "2.0.0"]
+                 [jayq "2.5.4"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]
             [lein-cljsbuild "1.1.0"]
@@ -70,7 +71,7 @@
   :cljsbuild {:builds
               [{:source-paths ["src/spectra_cljs"]
                 :compiler {:output-to "resources/public/js/main.js"
-                           :optimizations :whitespace
+                           :optimizations :advanced
                            :pretty-print true}}]}
   :main spectra.web
   :jvm-opts ["-Xmx3g" "-XX:-OmitStackTraceInFastThrow"]
