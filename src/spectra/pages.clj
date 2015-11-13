@@ -46,7 +46,6 @@
       (html/user-welcome (:flash req) (auth/get-username user))
       (html/people-table)
       (html/email-table)
-      (html/calendar)
       (html/user-footer)))
     (html/base-template
      (html/signup-form (:flash req))
