@@ -1,7 +1,7 @@
 (ns spectra.corenlp-test
   (:require [clojure.test :refer :all]
             [spectra.loom :as loom]
-            [spectra.schema :as s]
+            [spectra_cljc.schema :as s]
             [clojure.set :as set]
             [spectra.corenlp :refer :all]))
 

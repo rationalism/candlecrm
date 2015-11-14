@@ -6,7 +6,7 @@
             [spectra.recon :as recon]
             [spectra.neo4j :as neo4j]
             [spectra.regex :as regex]
-            [spectra.schema :as s]
+            [spectra_cljc.schema :as s]
             [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
                              [credentials :as creds]))

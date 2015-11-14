@@ -67,11 +67,11 @@
             [cider/cider-nrepl "0.9.1"]]
   :resource-paths ["config" "resources"]
   :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
-  :source-paths ["src" "src/spectra_cljs"]
+  :source-paths ["src"]
   :cljsbuild {:builds
-              [{:source-paths ["src/spectra_cljs"]
+              [{:source-paths ["src/spectra_cljs" "src/spectra_cljc"]
                 :compiler {:output-to "resources/public/js/main.js"
-                           :optimizations :whitespace
+                           :optimizations :simple
                            :pretty-print true}}]}
   :main spectra.web
   :jvm-opts ["-Xmx3g" "-XX:-OmitStackTraceInFastThrow"]

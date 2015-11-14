@@ -11,7 +11,7 @@
             [spectra.queries :as queries]
             [spectra.recon :as recon]
             [spectra.regex :as regex]
-            [spectra.schema :as s]
+            [spectra_cljc.schema :as s]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])

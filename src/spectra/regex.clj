@@ -1,7 +1,7 @@
 (ns spectra.regex
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [spectra.schema :as s]
+            [spectra_cljc.schema :as s]
             [environ.core :refer [env]])
   (:import [com.google.i18n.phonenumbers PhoneNumberUtil]))
 

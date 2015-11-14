@@ -1,7 +1,7 @@
 (ns spectra.neo4j-test
   (:require [clojure.test :refer :all]
             [spectra.neo4j :refer :all]
-            [spectra.schema :as s]))
+            [spectra_cljc.schema :as s]))
 
 (defn graph-ready [f]
   (intern 'spectra.neo4j '*graph* (get-graph))

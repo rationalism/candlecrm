@@ -1,13 +1,13 @@
-(ns spectra-cljs.ajax
+(ns spectra_cljs.ajax
   (:require
-   [clojure.string  :as str]
+   [clojure.string :as str]
    [goog.dom :as dom]
    [cljs.core.async :as async  :refer (<! >! put! chan)]
    [taoensso.encore :as encore :refer ()]
    [taoensso.timbre :as timbre :refer-macros (tracef debugf infof warnf errorf)]
    [taoensso.sente  :as sente  :refer (cb-success?)]
-   [spectra-cljs.ajax-demo :as ajax-demo]
-   [spectra-cljs.pages :as pages])
+   [spectra_cljs.ajax-demo :as ajax-demo]
+   [spectra_cljs.pages :as pages])
    ;; Optional, for Transit encoding:
    ;;[taoensso.sente.packers.transit :as sente-transit]
   (:require-macros

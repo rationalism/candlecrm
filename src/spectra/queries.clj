@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [spectra.common :as com]
             [spectra.neo4j :as neo4j]
-            [spectra.schema :as s]
+            [spectra_cljc.schema :as s]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))

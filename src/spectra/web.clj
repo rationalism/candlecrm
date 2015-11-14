@@ -15,7 +15,7 @@
             [spectra.corenlp :as nlp]
             [spectra.pages :as pages]
             [spectra.quartz :as quartz]
-            [spectra.schema :as s]
+            [spectra_cljc.schema :as s]
             [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
                              [credentials :as creds])
@@ -42,10 +42,15 @@
 
 (defroutes app
   (GET "/" req
-       (html-wrapper (pages/homepage req)))
+       (if-let [user (auth/user-from-req req)]
+         (resp/redirect "/app")
+         (html-wrapper (pages/login req))))
   ;; TODO: Make this return an error message when credentials are invalid
   (GET "/login" req
-       (html-wrapper (pages/homepage req)))
+       (html-wrapper (pages/login req)))
+  (GET "/app" req
+       (friend/authenticated
+        (html-wrapper (pages/homepage req))))
   (GET "/ajax-test" req
        (html-wrapper (pages/ajax-test req)))
   (GET "/chsk" req
@@ -60,9 +65,9 @@
           (let [user (auth/create-user! (select-keys params [:username :password]))]
             (friend/merge-authentication (resp/redirect "/gmail") user))))
   (GET "/logout" req (friend/logout* (logout req)))
-  (GET "/gmail" req
-       (friend/authenticated
-        (html-wrapper (pages/gmail req))))
+  ;(GET "/gmail" req
+  ;     (friend/authenticated
+  ;      (html-wrapper (pages/gmail req))))
   (GET "/init-account" req
        (friend/authenticated
         (let [user (auth/user-from-req req)]
@@ -87,26 +92,26 @@
                 user (Integer/parseInt lower) (Integer/parseInt upper))
                (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
            (home-with-message "Error: Could not log in"))))
-  (GET "/person/:id" [id :as req]
-       (friend/authenticated
-        (html-wrapper (pages/show-node req id s/person))))
-  (GET "/email/:id" [id :as req]
-       (friend/authenticated
-        (html-wrapper (pages/show-node req id s/email))))
-  (GET "/organization/:id" [id :as req]
-       (friend/authenticated
-        (html-wrapper (pages/show-node req id s/organization))))
-  (GET "/location/:id" [id :as req]
-       (friend/authenticated
-        (html-wrapper (pages/show-node req id s/location))))
-  (GET "/event/:id" [id :as req]
-       (friend/authenticated
-        (html-wrapper (pages/show-node req id s/event))))
-  (GET "/finance/:id" [id :as req]
-       (friend/authenticated
-        (html-wrapper (pages/show-node req id s/money))))
   (route/resources "/")
   (route/not-found (slurp (io/resource "public/404.html"))))
+  ;(GET "/person/:id" [id :as req]
+  ;     (friend/authenticated
+  ;      (html-wrapper (pages/show-node req id s/person))))
+  ;(GET "/email/:id" [id :as req]
+  ;     (friend/authenticated
+  ;      (html-wrapper (pages/show-node req id s/email))))
+  ;(GET "/organization/:id" [id :as req]
+  ;     (friend/authenticated
+  ;      (html-wrapper (pages/show-node req id s/organization))))
+  ;(GET "/location/:id" [id :as req]
+  ;     (friend/authenticated
+  ;      (html-wrapper (pages/show-node req id s/location))))
+  ;(GET "/event/:id" [id :as req]
+  ;     (friend/authenticated
+  ;      (html-wrapper (pages/show-node req id s/event))))
+  ;(GET "/finance/:id" [id :as req]
+  ;     (friend/authenticated
+  ;      (html-wrapper (pages/show-node req id s/money))))
 
 (defn form-params [req]
   (merge (:form-params req)

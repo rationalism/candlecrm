@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [spectra.common :as com]
-            [spectra.schema :as s]
+            [spectra_cljc.schema :as s]
             [clj-time.core :as ctime]
             [clj-time.coerce :as coerce]
             [clj-time.format :as format]

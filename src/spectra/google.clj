@@ -3,7 +3,7 @@
             [environ.core :refer [env]]
             [spectra.auth :as auth]
             [spectra.neo4j :as neo4j]
-            [spectra.schema :as s]
+            [spectra_cljc.schema :as s]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [com.google.api.client.googleapis.auth.oauth2 GoogleAuthorizationCodeRequestUrl

@@ -1,4 +1,4 @@
-(ns spectra-cljs.ajax-demo
+(ns spectra_cljs.ajax-demo
   (:require [clojure.string  :as str]
             [taoensso.timbre :as timbre :refer-macros (debugf)]
             [taoensso.sente :as sente]))

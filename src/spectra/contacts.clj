@@ -7,7 +7,7 @@
             [spectra.google :as google]
             [spectra.neo4j :as neo4j]
             [spectra.recon :as recon]
-            [spectra.schema :as s]
+            [spectra_cljc.schema :as s]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [com.google.gdata.client Query]

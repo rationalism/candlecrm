@@ -1,8 +1,9 @@
-(ns spectra-cljs.login
-  (:require [goog.dom :as dom]
+(ns spectra_cljs.login
+  (:require [clojure.string :as str]
+            [goog.dom :as dom]
             [goog.events :as events]
-            [spectra-cljs.ajax :as ajax]
-            [spectra-cljs.pages :as pages]))
+            [spectra_cljs.ajax :as ajax]
+            [spectra_cljs.pages :as pages]))
 
 (defn validate-signup-form []
   (let [email (dom/getElement "signupUsername")
@@ -39,7 +40,10 @@
       (when-let [signup-form (dom/getElement "signupForm")]
         (set! (.-onsubmit signup-form) validate-signup-form))
       (when-let [login-form (dom/getElement "loginForm")]
-        (set! (.-onsubmit login-form) validate-login-form)))))
+        (set! (.-onsubmit login-form) validate-login-form))
+      (when (-> js/document (.-URL ) (str/split "/") last
+                (= "app"))
+        (pages/render-all!)))))
 
 ;; initialize the HTML page in unobtrusive way
 (set! (.-onload js/window) init)

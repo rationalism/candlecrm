@@ -1,6 +1,4 @@
-(ns spectra.schema
-  (:require [clojure.java.io :as io]
-            [environ.core :refer [env]]))
+(ns spectra_cljc.schema)
 
 (def user "user")
 (def name :name)

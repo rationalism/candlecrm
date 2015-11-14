@@ -3,7 +3,7 @@
             [clojure.string :as str]
             [spectra.common :as com]
             [spectra.datetime :as dt]
-            [spectra.schema :as s]
+            [spectra_cljc.schema :as s]
             [environ.core :refer [env]]
             [clojurewerkz.neocons.rest :as nr]
             [clojurewerkz.neocons.rest.cypher :as cy]
