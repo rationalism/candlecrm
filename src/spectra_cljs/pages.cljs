@@ -5,7 +5,7 @@
             [spectra_cljc.schema :as s]
             [reagent.core :as r]))
 
-(def state
+(defonce state
   (r/atom
    {:counters {:people 0 :email 0}
     :page-lengths {:people 20 :email 20}

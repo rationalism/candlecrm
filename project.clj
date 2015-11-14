@@ -63,15 +63,18 @@
                  [reagent "0.5.1"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]
-            [lein-cljsbuild "1.1.0"]
+            [lein-figwheel "0.5.0"]
             [cider/cider-nrepl "0.9.1"]]
   :resource-paths ["config" "resources"]
   :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
   :source-paths ["src"]
   :cljsbuild {:builds
-              [{:source-paths ["src/spectra_cljs" "src/spectra_cljc"]
-                :compiler {:output-to "resources/public/js/main.js"
-                           :optimizations :simple
+              [{:id "dev"
+                :source-paths ["src/spectra_cljs" "src/spectra_cljc"]
+                :figwheel true
+                :compiler {:main "spectra_cljs.login"
+                           :output-to "resources/public/js/main.js"
+                           :optimizations :none
                            :pretty-print true}}]}
   :main spectra.web
   :jvm-opts ["-Xmx3g" "-XX:-OmitStackTraceInFastThrow"]
