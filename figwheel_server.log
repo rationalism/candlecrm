@@ -1,0 +1,29 @@
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  resources/public/js/out/goog/deps.js
+notifying browser that file changed:  resources/public/js/out/cljs_deps.js
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 1.152 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+[31mCompiling "resources/public/js/main.js" failed.
+[0mERROR: Unmatched delimiter ) on file /home/alyssavance/clojure/spectra/src/spectra_cljs/html.cljs, line 55, column 46
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.115 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  resources/public/js/out/cljs_deps.js
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.952 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.789 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  resources/public/js/out/cljs_deps.js
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.635 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.48 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.627 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.615 seconds.[0m

@@ -9,7 +9,7 @@
   [:div {:class "columns small-12"}
    [:h3 "Success! You are logged in now"]
    [:h3 (str "Welcome. Your username is: " username)]
-   [:span {:style "padding:0 0 0 10px;color:red;"} flash]])
+   [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]])
 
 (defn home-header []
   [:div.home-header
@@ -27,8 +27,6 @@
    [:p [:a {:href "/gmail"} "Connect to GMail here"]]
    [:p [:a {:href "/logout"} "Logout here"]]])
 
-(defn header-cell [attr] [:td attr])
-
 (defn person-link [person attr]
   [:a {:href (str "/person/" (person :id))}
    (person attr)])
@@ -45,9 +43,9 @@
   [:div {:class "columns small-12"}
    [:table {:id "people-table"}
     [:thead {:id "people-header"}
-     (->> s/person-attrs
-          (map s/attr-names)
-          (map header-cell))]
+     (for [attr s/person-attrs]
+       ^{:key attr}
+       [:td (get s/attr-names attr)])]
     [:tbody {:id "people-rows"}]]
    [:a {:href "#" :onclick "return false;"
         :id "prev-people-page"} "<-- Previous"]
@@ -73,7 +71,8 @@
   [:div
    [:table {:id "email-table"}
     [:thead {:id "email-header"}
-     (map header-cell email-attrs)]
+     (for [attr email-attrs]
+       ^{:key attr} [:td attr])]
     [:tbody {:id "email-rows"}]]
    [:a {:href "#" :onclick "return false;"
         :id "prev-email-page"} "<-- Previous"]
@@ -83,14 +82,14 @@
 (defn gmail-setup [flash username auth-url]
   [:div {:class "columns small-12"}
    [:h2 "Connect your account to GMail"]
-   [:p [:span {:style "padding:0 0 0 10px;color:red;"} flash]]
+   [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
    [:h3 (str "Welcome. Your username is: " username)]
    [:h3 [:a {:href auth-url} "Connect to GMail"]]])
 
 (defn gmail-finished [flash username email-total]
   [:div {:class "columns small-12"}
    [:h2 "Congrats - your account is connected to GMail."]
-   [:p [:span {:style "padding:0 0 0 10px;color:red;"} flash]]
+   [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
    [:h3 (str "Welcome. Your username is: " username)]
    [:h3 (str "The number of emails in your inbox is: " email-total)]
    [:h3 "Load emails into database: "
@@ -101,7 +100,7 @@
      [:div.row "End with: " [:input {:type "text" :name "upper" :required "required"}]]
       [:div.row
        [:input {:type "submit" :class "button" :value "Load"}]
-       [:span {:style "padding:0 0 0 10px;color:red;"} flash]]]]
+       [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]]]
    [:a {:href "/"} "Return home"]
    [:p "Currently disabled - do this via Ajax calls"]])
 

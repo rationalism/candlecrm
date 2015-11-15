@@ -150,5 +150,5 @@
     [:span {:style {:color "red"}} " and red "] "text."]])
 
 (defn render-all! []
-  (r/render-component [simple-component]
+  (r/render-component [homepage]
                       (dom/getElement "content")))
