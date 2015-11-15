@@ -92,6 +92,7 @@
                 user (Integer/parseInt lower) (Integer/parseInt upper))
                (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
            (home-with-message "Error: Could not log in"))))
+  (route/files "/resources/public/js" {:root "./resources/public/js"})
   (route/resources "/")
   (route/not-found (slurp (io/resource "public/404.html"))))
   ;(GET "/person/:id" [id :as req]

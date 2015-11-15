@@ -71,7 +71,7 @@
   :cljsbuild {:builds
               [{:id "dev"
                 :source-paths ["src/spectra_cljs" "src/spectra_cljc"]
-                :figwheel true
+                :figwheel {:websocket-url "wss://localhost:3459/figwheel-ws"}
                 :compiler {:main "spectra_cljs.login"
                            :output-to "resources/public/js/main.js"
                            :optimizations :none
