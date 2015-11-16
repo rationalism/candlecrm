@@ -28,3 +28,6 @@
                           ") RETURN root ORDER BY root." (neo4j/cypher-esc-token s/email-sent)
                           " DESC SKIP " start " LIMIT " limit)))
 
+(defn user-data-public [user]
+  (-> user (get :data)
+      (dissoc s/pwd-hash) (dissoc s/google-token)))
