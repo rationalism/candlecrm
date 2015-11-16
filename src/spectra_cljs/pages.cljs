@@ -2,33 +2,27 @@
   (:require [goog.dom :as dom]
             [goog.events :as events]
             [spectra_cljs.html :as html]
+            [spectra_cljs.state :as state]
             [spectra_cljc.schema :as s]
             [reagent.core :as r]))
 
-(defonce state
-  (r/atom
-   {:counters {:people 0 :email 0}
-    :page-lengths {:people 20 :email 20}
-    :user {:username "Joe Bob Smith"}}))
+(defn people-tab []
+  (if (= (state/look :tabid) 1)
+    [:div#tab1.tab-show (html/people-table)]
+    [:div#tab1.tab-hide (html/people-table)]))
 
-(defn get-state [& args]
-  (get-in @state args))
-
-(defn person-pos []
-  (* (get-state :counters :people)
-     (get-state :page-lengths :people)))
-
-(defn email-pos []
-  (* (get-state :counters :email)
-     (get-state :page-lengths :email)))
+(defn email-tab []
+  (if (= (state/look :tabid) 2)
+    [:div#tab2.tab-show (html/email-table)]
+    [:div#tab2.tab-hide (html/email-table)]))
 
 (defn homepage []
   [:div
    (html/home-header)
    (html/home-content
-    (html/user-welcome "" (get-state :user :username))
-    (html/people-table)
-    (html/email-table)
+    (html/user-welcome "" (state/look :user :username))
+    (people-tab)
+    (email-tab)
     (html/user-footer))])
 
 (defn first-if-coll [coll]
@@ -97,38 +91,38 @@
 
 (defn people-req []
   [:pages/fetch-people
-   {:start (person-pos)
-    :limit (get-state :page-lengths :people)}])
+   {:start (state/person-pos)
+    :limit (state/look :page-lengths :people)}])
   
 (defn update-people! [chsk-send!]
   (when-let [people-table (dom/getElement "people-table")]
     (fetch-rows! chsk-send! people-table (people-req))))
 
 (defn prev-people! [chsk-send!]
-  (when (< 0 (get-state :counters :people))
-    (swap! state update-in [:counters :people] dec)
+  (when (< 0 (state/look :counters :people))
+    (state/update! [:counters :people] dec)
     (update-people! chsk-send!)))
 
 (defn next-people! [chsk-send!]
-  (swap! state update-in [:counters :people] inc)
+  (state/update! [:counters :people] inc)
   (update-people! chsk-send!))
 
 (defn email-req []
   [:pages/fetch-emails
-   {:start (email-pos)
-    :limit (get-state [:page-lengths :people])}])
+   {:start (state/email-pos)
+    :limit (state/look [:page-lengths :people])}])
   
 (defn update-emails! [chsk-send!]
   (when-let [email-table (dom/getElement "email-table")]
     (fetch-rows! chsk-send! email-table (email-req))))
 
 (defn prev-emails! [chsk-send!]
-  (when (< 0 (get-state :counters :email))
-    (swap! state update-in [:counters :email] dec)
+  (when (< 0 (state/look :counters :email))
+    (state/update! [:counters :email] dec)
     (update-emails! chsk-send!)))
 
 (defn next-emails! [chsk-send!]
-  (swap! state update-in [:counters :email] inc)
+  (state/update! [:counters :email] inc)
   (update-emails! chsk-send!))
 
 (def listeners {"prev-people-page" prev-people!

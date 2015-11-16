@@ -27,3 +27,294 @@ notifying browser that file changed:  out/spectra_cljs/html.js
 [0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
 notifying browser that file changed:  out/spectra_cljs/html.js
 [32mSuccessfully compiled "resources/public/js/main.js" in 0.615 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.html/people-tab at line 27 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.html/email-tab at line 30 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 1.147 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.html/people-tab at line 27 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.html/email-tab at line 30 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.html/people-tab at line 27 /home/alyssavance/clojure/spectra/src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.html/email-tab at line 30 /home/alyssavance/clojure/spectra/src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 1.217 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.201 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.html/people-tab at line 28 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.html/people-tab at line 29 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.html/email-tab at line 33 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.html/email-tab at line 34 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.714 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.524 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.61 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  resources/public/js/out/cljs_deps.js
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.518 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  resources/public/js/out/cljs_deps.js
+notifying browser that file changed:  out/spectra_cljs/state.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.274 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 9 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 14 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 22 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 93 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 101 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 102 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 106 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 111 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 112 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 119 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 120 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 124 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.636 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/state.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.247 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 10 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 15 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 23 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 95 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 102 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 103 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 107 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 113 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 120 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 121 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 125 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  resources/public/js/out/cljs_deps.js
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.566 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 23 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 95 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 102 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 103 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 107 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 113 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 120 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 121 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 125 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.587 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 10 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 15 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 23 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 95 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 102 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 103 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 107 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 113 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 120 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 121 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 125 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.556 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 103 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 107 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 121 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 125 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.539 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 10 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 15 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 23 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 95 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 102 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 103 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 107 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 113 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 120 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 121 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 125 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.536 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.state/state at line 12 src/spectra_cljs/state.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 10 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 15 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 23 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 95 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 102 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 103 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 107 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 113 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 120 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 121 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 125 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/state.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.576 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 10 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 15 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 23 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 95 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 102 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 103 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 107 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 113 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 120 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 121 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 125 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/state.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.624 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 10 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 15 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 23 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 95 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 102 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 103 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 107 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 113 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 120 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 121 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 125 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/state.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.522 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 103 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 107 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 121 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 125 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.415 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 10 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 15 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 23 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 95 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 102 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 103 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 107 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 113 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 120 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 121 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 125 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.571 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+[31mCompiling "resources/public/js/main.js" failed.
+[0mERROR: EOF while reading, starting at line 23 and column 3 on file /home/alyssavance/clojure/spectra/src/spectra_cljs/state.cljs, line 24, column 1
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.062 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 10 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 15 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 23 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 95 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 102 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 103 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 107 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 113 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/get-state at line 120 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 121 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 125 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  resources/public/js/out/cljs_deps.js
+notifying browser that file changed:  out/spectra_cljs/state.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.52 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 103 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 107 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 121 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/state at line 125 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  resources/public/js/out/cljs_deps.js
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.447 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.55 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/state.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.42 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.406 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/person-pos at line 94 src/spectra_cljs/pages.cljs
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  resources/public/js/out/cljs_deps.js
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.516 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+WARNING: Use of undeclared Var spectra_cljs.pages/email-pos at line 112 src/spectra_cljs/pages.cljs
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.373 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/pages.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.327 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.407 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.372 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/state.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.427 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.519 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.443 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/state.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.435 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.396 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.417 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.394 seconds.[0m
+[0mCompiling "resources/public/js/main.js" from ["src/spectra_cljs" "src/spectra_cljc"]...
+notifying browser that file changed:  resources/public/js/out/cljs_deps.js
+notifying browser that file changed:  out/spectra_cljs/html.js
+[32mSuccessfully compiled "resources/public/js/main.js" in 0.416 seconds.[0m

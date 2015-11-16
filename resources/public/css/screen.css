@@ -21,6 +21,14 @@ div.home-header {
     margin-top: 30px;
 }
 
+div.tab-show {
+    display: block;
+}
+
+div.tab-hide {
+    display: none;
+}
+
 tr.tab-row td {
     display: inline-block;
     margin: 0 30px;

@@ -1,6 +1,7 @@
 (ns spectra_cljs.html
   (:require [clojure.string :as str]
             [spectra_cljc.schema :as s]
+            [spectra_cljs.state :as state]
             [reagent.core :as r]))
 
 ;; TODO: Reorganize this by page
@@ -11,13 +12,18 @@
    [:h3 (str "Welcome. Your username is: " username)]
    [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]])
 
+(defn set-tab-fn [tab-num]
+  (fn []
+    (state/update! [:tabid] (constantly tab-num))))
+
 (defn home-header []
-  [:div.home-header
-   [:table
-    [:tr.tab-row
-     [:td [:h2 "People"]]
-     [:td [:h2 "Emails"]]
-     [:td [:h2 "Calendar"]]]]])
+  [:div.home-header>table>tr.tab-row
+   [:td>h2>a {:href "#" :on-click (set-tab-fn 1)
+              :id "set-tab-1"} "People"]
+   [:td>h2>a {:href "#" :on-click (set-tab-fn 2)
+              :id "set-tab-2"} "Emails"]
+   [:td>h2>a {:href "#" :on-click (set-tab-fn 3)
+              :id "set-tab-3"} "Calendar"]])
 
 (defn home-content [& content]
   (into [:div.home-content] content))
