@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [spectra_cljc.schema :as s]
             [spectra_cljs.state :as state]
+            [spectra_cljs.update :as u]
             [reagent.core :as r]
             [jayq.core :as jq])
   (:use [jayq.core :only [$]]))
@@ -47,17 +48,28 @@
 (defn person-row [person]
   [:tr (map #(person-cell person %) s/person-attrs)])
 
+(defn init-people []
+  [:div#init-people
+   (do (if (state/look :ajax-live)
+         (u/update-people!)
+         :unloaded)
+       nil)])
+
 (defn people-table []
   [:div {:class "columns small-12"}
+   [init-people]
    [:table {:id "people-table"}
     [:thead {:id "people-header"}
      (for [attr s/person-attrs]
        ^{:key attr}
        [:td (get s/attr-names attr)])]
-    [:tbody {:id "people-rows"}]]
-   [:a {:href "#" :onclick "return false;"
+    [:tbody {:id "people-rows"}
+     (for [p-row (state/look :people-rows)]
+       ^{:key p-row}
+       (person-row p-row))]]
+   [:a {:href "#" :on-click (u/prev-people!)
         :id "prev-people-page"} "<-- Previous"]
-   [:a {:href "#" :onclick "return false;"
+   [:a {:href "#" :on-click (u/next-people!)
         :id "next-people-page"} "Next -->"]])
 
 (def email-attrs {s/email-sent "Date"
@@ -75,16 +87,27 @@
 (defn email-row [email]
   [:tr (map #(email-cell email %) email-attrs)])
 
+(defn init-emails []
+  [:div#init-emails
+   (do (if (state/look :ajax-live)
+         (u/update-emails!)
+         :unloaded)
+       nil)])
+
 (defn email-table []
   [:div
+   [init-emails]
    [:table {:id "email-table"}
     [:thead {:id "email-header"}
      (for [attr email-attrs]
        ^{:key attr} [:td attr])]
-    [:tbody {:id "email-rows"}]]
-   [:a {:href "#" :onclick "return false;"
+    [:tbody {:id "email-rows"}
+     (for [e-row (state/look :email-rows)]
+       ^{:key e-row}
+       (email-row e-row))]]
+   [:a {:href "#" :on-click (u/prev-emails!)
         :id "prev-email-page"} "<-- Previous"]
-   [:a {:href "#" :onclick "return false;"
+   [:a {:href "#" :on-click (u/next-emails!)
         :id "next-email-page"} "Next -->"]])
 
 (defn calendar-load! []

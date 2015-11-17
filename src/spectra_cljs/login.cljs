@@ -35,14 +35,13 @@
   ;; property
   (if (and js/document (.-getElementById js/document))
     (do
-      (ajax/start!)
-      (ajax/listen!)
       (when-let [signup-form (dom/getElement "signupForm")]
         (set! (.-onsubmit signup-form) validate-signup-form))
       (when-let [login-form (dom/getElement "loginForm")]
         (set! (.-onsubmit login-form) validate-login-form))
       (when (-> js/document (.-URL ) (str/split "/") last
-                (= "app"))
+                (.indexOf "app") (not= -1))
+        (ajax/start!)
         (pages/render-all!)))))
 
 ;; initialize the HTML page in unobtrusive way

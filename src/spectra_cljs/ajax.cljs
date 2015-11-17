@@ -7,7 +7,7 @@
    [taoensso.timbre :as timbre :refer-macros (tracef debugf infof warnf errorf)]
    [taoensso.sente  :as sente  :refer (cb-success?)]
    [spectra_cljs.ajax-demo :as ajax-demo]
-   [spectra_cljs.pages :as pages])
+   [spectra_cljs.state :as state])
    ;; Optional, for Transit encoding:
    ;;[taoensso.sente.packers.transit :as sente-transit]
   (:require-macros
@@ -37,15 +37,11 @@
 ;; actually do this is entirely up to you. In this example we use a multimethod
 ;; that dispatches to a method based on the `event-msg`'s event-id. Some
 ;; alternatives include a simple `case`/`cond`/`condp` against event-ids, or
-;; `core.match` against events.
+;;`core.match` against events.
 
-(defn listen! []
-  (pages/listen! chsk-send!)
-  (ajax-demo/listen! chsk chsk-state chsk-send!))
-
+;; This fills in initial email values
 (defn chsk-init! []
-  (pages/update-people! chsk-send!)
-  (pages/update-emails! chsk-send!))
+  (state/update! [:ajax-live] (constantly true)))
 
 (defmulti event-msg-handler :id) ; Dispatch on event-id
 

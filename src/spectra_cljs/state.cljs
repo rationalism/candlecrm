@@ -6,7 +6,10 @@
    {:counters {:people 0 :email 0}
     :page-lengths {:people 20 :email 20}
     :user {:username "Joe Bob Smith"}
-    :tabid 1}))
+    :tabid 1
+    :people-rows []
+    :email-rows []
+    :ajax-live false}))
 
 (defn look [& args]
   (get-in @a args))
