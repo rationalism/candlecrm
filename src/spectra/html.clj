@@ -8,13 +8,19 @@
         [ring.util.anti-forgery]))
 
 ;; TODO: Reorganize this by page
+;; TODO: Add CDN local fallback in case something fails
+(def goog-jquery "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js")
 
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "Spectra"]
+          (include-css "/css/fullcalendar.min.css")
           (include-css "/css/screen.css")]
          [:body 
           (into [:div#content] content)
+          (include-js goog-jquery)
+          (include-js "/js/libs/moment.min.js")
+          (include-js "/js/libs/fullcalendar-2.4.0/fullcalendar.js")
           (include-js "/js/main.js")]))
 
 (defn signup-form [flash]

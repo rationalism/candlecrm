@@ -2,7 +2,9 @@
   (:require [clojure.string :as str]
             [spectra_cljc.schema :as s]
             [spectra_cljs.state :as state]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [jayq.core :as jq])
+  (:use [jayq.core :only [$]]))
 
 ;; TODO: Reorganize this by page
 
@@ -84,6 +86,18 @@
         :id "prev-email-page"} "<-- Previous"]
    [:a {:href "#" :onclick "return false;"
         :id "next-email-page"} "Next -->"]])
+
+(defn calendar-load! []
+  (.fullCalendar ($ :#calendar)))
+
+(defn calendar []
+  (r/create-class
+   {:component-did-mount #(calendar-load!)
+    :display-name "calendar-tab"
+    :reagent-render
+    (fn []
+      [:div#calendar
+       [:h2 "Calendar goes here"]])}))
 
 (defn gmail-setup [flash username auth-url]
   [:div {:class "columns small-12"}

@@ -4,17 +4,24 @@
             [spectra_cljs.html :as html]
             [spectra_cljs.state :as state]
             [spectra_cljc.schema :as s]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [jayq.core :as jq])
+  (:use [jayq.core :only [$]]))
 
 (defn people-tab []
   (if (= (state/look :tabid) 1)
-    [:div#tab1.tab-show (html/people-table)]
-    [:div#tab1.tab-hide (html/people-table)]))
+    [:div#tab1.tab-show [html/people-table]]
+    [:div#tab1.tab-hide [html/people-table]]))
 
 (defn email-tab []
   (if (= (state/look :tabid) 2)
-    [:div#tab2.tab-show (html/email-table)]
-    [:div#tab2.tab-hide (html/email-table)]))
+    [:div#tab2.tab-show [html/email-table]]
+    [:div#tab2.tab-hide [html/email-table]]))
+
+(defn calendar-tab []
+  (if (= (state/look :tabid) 3)
+    [:div#tab3.tab-show [html/calendar]]
+    [:div#tab3.tab-hide [html/calendar]]))
 
 (defn homepage []
   [:div
@@ -23,6 +30,7 @@
     (html/user-welcome "" (state/look :user :username))
     (people-tab)
     (email-tab)
+    (calendar-tab)
     (html/user-footer))])
 
 (defn first-if-coll [coll]
