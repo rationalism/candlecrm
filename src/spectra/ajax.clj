@@ -73,6 +73,12 @@
       (when ?reply-fn
         (?reply-fn (queries/emails-from-user user (:start ?data) (:limit ?data))))))
   
+  (defmethod event-msg-handler :update/user-data
+    [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+    (when-let [user (auth/user-from-req ring-req)]
+      (when ?reply-fn
+        (?reply-fn (queries/user-data-public user)))))
+  
   (defmethod event-msg-handler :default ; Fallback
     [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
     (let [session (:session ring-req)

@@ -47,5 +47,5 @@
     (update-emails! chsk-send!)))
 
 (defn update-user! [chsk-send!]
-  (chsk-send! :user-data 5000
+  (chsk-send! [:update/user-data] 5000
               #(state/update! [:user] (constantly %))))
