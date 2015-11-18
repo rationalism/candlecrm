@@ -43,13 +43,13 @@
 
 (defn person-cell [person attr]
   [:td (if (= s/name attr)
-         (person-link person attr)
+         [person-link person attr]
          (person attr))])
 
 (defn person-row [person]
   [:tr (for [attr s/person-attrs]
          ^{:key attr}
-         (person-cell person attr))])
+         [person-cell person attr])])
 
 (defn people-table []
   [:div {:class "columns small-12"}
@@ -61,7 +61,7 @@
     [:tbody {:id "people-rows"}
      (for [p-row (state/look :people-rows)]
        ^{:key p-row}
-       (person-row p-row))]]
+       [person-row p-row])]]
    [:a {:href "#" :on-click (u/prev-people! ajax/chsk-send!)
         :id "prev-people-page"} "<-- Previous"]
    [:a {:href "#" :on-click (u/next-people! ajax/chsk-send!)
@@ -82,7 +82,7 @@
 (defn email-row [email]
   [:tr (for [attr (keys email-attrs)]
          ^{:key attr}
-         (email-cell email attr))])
+         [email-cell email attr])])
 
 (defn email-table []
   [:div
@@ -93,7 +93,7 @@
     [:tbody {:id "email-rows"}
      (for [e-row (state/look :email-rows)]
        ^{:key (:id e-row)}
-       (email-row e-row))]]
+       [email-row e-row])]]
    [:a {:href "#" :on-click (u/prev-emails! ajax/chsk-send!)
         :id "prev-email-page"} "<-- Previous"]
    [:a {:href "#" :on-click (u/next-emails! ajax/chsk-send!)
@@ -153,9 +153,9 @@
    [:h3.infotitle (str person-name " (Person)")]
    (map info-item attrs)
    [:h3.infotitle (str "Emails to " person-name)]
-   (email-table)
+   [email-table]
    [:h3.infotitle (str "Emails from " person-name)]
-   (email-table)])
+   [email-table]])
 
 (defn show-email [email-name attrs]
   [:div {:class "columns small-12"}

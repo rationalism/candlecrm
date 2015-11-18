@@ -8,7 +8,8 @@
     :user {:username "Joe Bob Smith"}
     :tabid 1
     :people-rows []
-    :email-rows []}))
+    :email-rows []
+    :current-node nil}))
 
 (defn look [& args]
   (get-in @a args))

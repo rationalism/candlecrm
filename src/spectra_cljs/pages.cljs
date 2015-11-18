@@ -22,39 +22,45 @@
     [:div#tab3.tab-show [html/calendar]]
     [:div#tab3.tab-hide [html/calendar]]))
 
+(defn main-page []
+  [:div
+   [people-tab]
+   [email-tab]
+   [calendar-tab]])
+
 (defn homepage []
   [:div
-   (html/home-header)
-   (html/home-content
-    (html/user-welcome "" (state/look :user :username))
-    (people-tab)
-    (email-tab)
-    (calendar-tab)
-    (html/user-footer))])
+   [html/home-header]
+   [html/home-content
+    [html/user-welcome "" (state/look :user :username)]
+    (if (state/look :current-node)
+      [:h2 "here is some node"]
+      [main-page])
+    [html/user-footer]]])
 
 (defn show-person [person]
-  (html/show-person (-> person :data :name first)
-                    (-> person :data)))
+  [html/show-person (-> person :data :name first)
+                    (-> person :data)])
 
 (defn show-email [email]
-  (html/show-email (-> email :data :name first)
-                   (-> email :data)))
+  [html/show-email (-> email :data :name first)
+                   (-> email :data)])
 
 (defn show-organization [organization]
-  (html/show-organization (-> organization :data :name first)
-                          (-> organization :data)))
+  [html/show-organization (-> organization :data :name first)
+                          (-> organization :data)])
 
 (defn show-location [location]
-  (html/show-location (-> location :data :name first)
-                      (-> location :data)))
+  [html/show-location (-> location :data :name first)
+                      (-> location :data)])
 
 (defn show-event [event]
-  (html/show-event (-> event :data :name first)
-                   (-> event :data)))
+  [html/show-event (-> event :data :name first)
+                   (-> event :data)])
 
 (defn show-money [money]
-  (html/show-money (-> money :data :name first)
-                   (-> money :data)))
+  [html/show-money (-> money :data :name first)
+                   (-> money :data)])
 
 (defn insert-rows! [table n]
   (dotimes [i n]
