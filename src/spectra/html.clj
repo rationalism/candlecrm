@@ -10,6 +10,8 @@
 ;; TODO: Reorganize this by page
 ;; TODO: Add CDN local fallback in case something fails
 (def goog-jquery "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js")
+(def goog-maps (str "https://maps.googleapis.com/maps/api/js?key="
+                    (env :gmaps-api-key) "&callback=initMap"))
 
 (defn base-template [& content]
   (html5 {:lang "en"}
@@ -18,6 +20,7 @@
           (include-css "/css/screen.css")]
          [:body 
           (into [:div#content] content)
+          ; (include-js goog-maps)
           (include-js goog-jquery)
           (include-js "/js/libs/moment.min.js")
           (include-js "/js/libs/fullcalendar-2.4.0/fullcalendar.js")
