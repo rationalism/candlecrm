@@ -22,11 +22,17 @@
     [:div#tab3.tab-show [html/calendar]]
     [:div#tab3.tab-hide [html/calendar]]))
 
+(defn locations-tab []
+  (if (= (state/look :tabid) 4)
+    [:div#tab4.tab-show [html/locations]]
+    [:div#tab4.tab-hide [html/locations]]))
+
 (defn main-page []
   [:div
    [people-tab]
    [email-tab]
-   [calendar-tab]])
+   [calendar-tab]
+   [locations-tab]])
 
 (defn homepage []
   [:div

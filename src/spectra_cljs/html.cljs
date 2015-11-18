@@ -20,14 +20,16 @@
   (fn []
     (state/update! [:tabid] (constantly tab-num))))
 
+(defn header-tab [num name]
+  [:td>h2>a {:href "#" :on-click (set-tab-fn num)
+             :id (str "set-tab-" num)} name])
+
 (defn home-header []
   [:div.home-header>table>tr.tab-row
-   [:td>h2>a {:href "#" :on-click (set-tab-fn 1)
-              :id "set-tab-1"} "People"]
-   [:td>h2>a {:href "#" :on-click (set-tab-fn 2)
-              :id "set-tab-2"} "Emails"]
-   [:td>h2>a {:href "#" :on-click (set-tab-fn 3)
-              :id "set-tab-3"} "Calendar"]])
+   [header-tab 1 "People"]
+   [header-tab 2 "Emails"]
+   [header-tab 3 "Calendar"]
+   [header-tab 4 "Locations"]])
 
 (defn home-content [& content]
   (into [:div.home-content] content))
@@ -110,6 +112,10 @@
     (fn []
       [:div#calendar
        [:h2 "Calendar goes here"]])}))
+
+(defn locations []
+  [:div#locations
+   [:h2 "Map goes here"]])
 
 (defn gmail-setup [flash username auth-url]
   [:div {:class "columns small-12"}
