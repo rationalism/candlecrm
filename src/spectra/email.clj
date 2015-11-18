@@ -417,7 +417,7 @@
                 (prn e) {})))))
 
 (defn hash-brackets [text]
-  (str "<a href='" (com/sha1 text) "'>" text "</a>"))
+  (str "<node " (com/sha1 text) ">" text "</node>"))
 
 (defn hyperlink-text [text mentions]
   (if (com/nil-or-empty? mentions) text
@@ -483,17 +483,18 @@
         (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/name])
         (loom/remove-nodes $ (->> s/has-type (loom/select-edges $) (map second))))))
   
-(def url-map {s/person "/person/" s/email "/email/"
-              s/organization "/organization/" s/location "/location/"
-              s/money "/finance/" s/event "/event/"
-              s/webpage "/webpage/"})
+(def url-map {s/person "person" s/email "email"
+              s/organization "organization" s/location "location"
+              s/money "finance" s/event "event"
+              s/webpage "webpage"})
 
 (defn add-hyperlink [g edge]
   (loom/replace-node
    g (first edge)
    (assoc (first edge) :hyperlink
-          (str (-> edge first :label url-map)
-               (-> edge second :id)))))
+          (str "{:type "(-> edge first :label url-map)
+               " :id " (-> edge second :id)
+               "}"))))
 
 (defn make-hyperlinks [g]
   (reduce add-hyperlink g (loom/select-edges g :database-match)))

@@ -7,8 +7,15 @@
 
 ;; Taken from http://stackoverflow.com/questions/201323/using-a-regular-expression-to-validate-an-email-address
 (def email-regex #"[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*")
+
+;; Find source for this
 (def url-regex #"[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?")
+
+;; My own regexes
 (def javascript-regex #"\<javascript([^\>]+)\>")
+(def node-param-regex #"\<node([^\>]+)\>")
+(def node-regex #"\<node((.(?!node\>))+)/node\>")
+(def bracket-regex #"\>(.+)\<")
 (def tag-regex #"\<([^\>]*)\>")
 (def esc-char-regex #"\^|\[|\]|\.|\$|\{|\}|\(|\)|\\|\*|\+|\||\?|\<|\>")
 
@@ -24,6 +31,16 @@
 
 (defn replace-map [text new-map]
   (str/replace text (-> new-map keys regex-or) #(new-map %1)))
+
+(defn node-map [hypertext]
+  {:text (-> bracket-regex (re-seq hypertext)
+             first second)
+   :link (-> node-param-regex (re-seq hypertext)
+             first second read-string)})
+
+(defn node-parse [text]
+  (->> text (re-seq node-regex)
+       (map first) (map node-map)))
 
 (defn find-email-addrs [text]
   (re-seq email-regex text))
