@@ -7,7 +7,8 @@
    [taoensso.timbre :as timbre :refer-macros (tracef debugf infof warnf errorf)]
    [taoensso.sente  :as sente  :refer (cb-success?)]
    [spectra_cljs.ajax-demo :as ajax-demo]
-   [spectra_cljs.state :as state])
+   [spectra_cljs.state :as state]
+   [spectra_cljs.update :as u])
    ;; Optional, for Transit encoding:
    ;;[taoensso.sente.packers.transit :as sente-transit]
   (:require-macros
@@ -41,7 +42,8 @@
 
 ;; This fills in initial email values
 (defn chsk-init! []
-  (state/update! [:ajax-live] (constantly true)))
+  (u/update-emails! chsk-send!)
+  (u/update-people! chsk-send!))
 
 (defmulti event-msg-handler :id) ; Dispatch on event-id
 

@@ -1,10 +1,8 @@
 (ns spectra_cljs.pages
   (:require [goog.dom :as dom]
             [goog.events :as events]
-            [spectra_cljs.ajax :as ajax]
             [spectra_cljs.html :as html]
             [spectra_cljs.state :as state]
-            [spectra_cljc.schema :as s]
             [reagent.core :as r]
             [jayq.core :as jq])
   (:use [jayq.core :only [$]]))
@@ -72,17 +70,6 @@
 (defn table-body [table]
   (if (> (.-length (.-tBodies table)) 0)
     (first (array-seq (.-tBodies table))) nil))
-
-;(def listeners {"prev-people-page" prev-people!
-;                "next-people-page" next-people!
-;                "prev-email-page" prev-emails!
-;                "next-email-page" next-emails!})
-
-;(defn listen! [chsk-send!]
-;  (doseq [l listeners]
-;    (when-let [trigger (dom/getElement (key l))]
-;      (set! (.-onclick trigger)
-;            (partial (val l) chsk-send!)))))
 
 (defn render-all! []
   (r/render-component [homepage]

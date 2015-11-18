@@ -54,10 +54,8 @@
   (GET "/ajax-test" req
        (html-wrapper (pages/ajax-test req)))
   (GET "/chsk" req
-       (prn "received get chsk")
        (ajax/ring-ajax-get-or-ws-handshake req))
   (POST "/chsk" req
-       (prn "received post chsk")
         (ajax/ring-ajax-post req))
   (POST "/login-test" req
         (ajax/login! req))

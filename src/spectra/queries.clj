@@ -23,7 +23,6 @@
 (defn tablify-hits [hits]
   (->> (map node-attrs hits) 
        (remove #(empty? %))
-       (filter #(contains? % s/name))
        (map first-table-vals)))
 
 (defn person-from-user [user start limit]
@@ -35,18 +34,20 @@
       neo4j/cypher-list tablify-hits))
 
 (defn emails-from-user [user start limit]
-  (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
-                          ":" s/email
-                          ") RETURN root ORDER BY root." (neo4j/cypher-esc-token s/email-sent)
-                          " DESC SKIP " start " LIMIT " limit)))
+  (-> (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
+           ":" s/email
+           ") RETURN root ORDER BY root." (neo4j/cypher-esc-token s/email-sent)
+           " DESC SKIP " start " LIMIT " limit)
+      neo4j/cypher-list tablify-hits))
 
 (defn emails-with-dates [user start limit]
-  (neo4j/cypher-list (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
-                          ":" s/email
-                          ")-[:" (neo4j/cypher-esc-token s/email-mentions)
-                          "]->(d:" s/event
-                          ") RETURN root ORDER BY root." (neo4j/cypher-esc-token s/email-sent)
-                          " DESC SKIP " start " LIMIT " limit)))
+  (-> (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
+           ":" s/email
+           ")-[:" (neo4j/cypher-esc-token s/email-mentions)
+           "]->(d:" s/event
+           ") RETURN root ORDER BY root." (neo4j/cypher-esc-token s/email-sent)
+           " DESC SKIP " start " LIMIT " limit)
+      neo4j/cypher-list tablify-hits))
 
 (defn user-data-public [user]
   (-> user (get :data)
