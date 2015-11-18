@@ -43,7 +43,8 @@
 ;; This fills in initial email values
 (defn chsk-init! []
   (u/update-emails! chsk-send!)
-  (u/update-people! chsk-send!))
+  (u/update-people! chsk-send!)
+  (u/update-user! chsk-send!))
 
 (defmulti event-msg-handler :id) ; Dispatch on event-id
 
