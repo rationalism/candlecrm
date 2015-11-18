@@ -49,3 +49,15 @@
 (defn update-user! [chsk-send!]
   (chsk-send! [:update/user-data] 5000
               #(state/update! [:user] (constantly %))))
+
+(defn node-req [id type]
+  [:update/fetch-node
+   {:id id :type type}])
+
+(defn new-node [req type]
+  (constantly (assoc req :type type)))
+
+(defn go-node! [id type]
+  (chsk-send! (node-req id type) 5000
+              #(state/update! [:current-node]
+                              (new-node % type))))

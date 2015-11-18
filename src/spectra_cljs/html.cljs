@@ -31,6 +31,11 @@
    [header-tab 3 "Calendar"]
    [header-tab 4 "Locations"]])
 
+(defn node-link [text id type]
+  [:a.go-node
+   {:href "#" :on-click (u/go-node! id type)}
+   text])
+
 (defn home-content [& content]
   (into [:div.home-content] content))
 
@@ -40,8 +45,7 @@
    [:p [:a {:href "/logout"} "Logout here"]]])
 
 (defn person-link [person attr]
-  [:a {:href (str "/person/" (person :id))}
-   (person attr)])
+  [node-link (person attr) (person :id) s/person])
 
 (defn person-cell [person attr]
   [:td (if (= s/name attr)
@@ -73,8 +77,7 @@
                   s/email-subject "Subject"})
 
 (defn email-link [email attr]
-  [:a {:href (str "/email/" (email :id))}
-   (email attr)])
+  [node-link (email attr) (email :id) s/email])
 
 (defn email-cell [email attr]
   [:td (if (= s/email-subject attr)

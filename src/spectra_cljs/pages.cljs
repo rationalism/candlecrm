@@ -27,23 +27,6 @@
     [:div#tab4.tab-show [html/locations]]
     [:div#tab4.tab-hide [html/locations]]))
 
-(defn main-page []
-  [:div
-   [people-tab]
-   [email-tab]
-   [calendar-tab]
-   [locations-tab]])
-
-(defn homepage []
-  [:div
-   [html/home-header]
-   [html/home-content
-    [html/user-welcome "" (state/look :user :username)]
-    (if (state/look :current-node)
-      [:h2 "here is some node"]
-      [main-page])
-    [html/user-footer]]])
-
 (defn show-person [person]
   [html/show-person (-> person :data :name first)
                     (-> person :data)])
@@ -67,6 +50,30 @@
 (defn show-money [money]
   [html/show-money (-> money :data :name first)
                    (-> money :data)])
+
+(def node-fn {s/person show-person s/email show-email
+              s/organization show-organization s/location show-location
+              s/event show-event s/money show-money})
+
+(defn main-page []
+  [:div
+   [people-tab]
+   [email-tab]
+   [calendar-tab]
+   [locations-tab]])
+
+(defn node-page [node]
+  [(get node-fn (:type node)) node])
+
+(defn homepage []
+  [:div
+   [html/home-header]
+   [html/home-content
+    [html/user-welcome "" (state/look :user :username)]
+    (if (state/look :current-node)
+      [node-page (state/look :current-node)]
+      [main-page])
+    [html/user-footer]]])
 
 (defn insert-rows! [table n]
   (dotimes [i n]
