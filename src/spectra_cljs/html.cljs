@@ -18,7 +18,8 @@
 
 (defn set-tab-fn [tab-num]
   (fn []
-    (state/update! [:tabid] (constantly tab-num))))
+    (state/update! [:tabid] (constantly tab-num))
+    (state/update! [:current-node] (constantly nil))))
 
 (defn header-tab [num name]
   [:td>h2>a {:href "#" :on-click (set-tab-fn num)
