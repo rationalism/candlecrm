@@ -35,6 +35,7 @@
   ;; property
   (if (and js/document (.-getElementById js/document))
     (do
+      (enable-console-print!)
       (when-let [signup-form (dom/getElement "signupForm")]
         (set! (.-onsubmit signup-form) validate-signup-form))
       (when-let [login-form (dom/getElement "loginForm")]

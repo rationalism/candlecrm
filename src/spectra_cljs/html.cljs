@@ -33,7 +33,7 @@
 
 (defn node-link [text id type]
   [:a.go-node
-   {:href "#" :on-click (u/go-node! id type)}
+   {:href "#" :on-click #(u/go-node! ajax/chsk-send! id type)}
    text])
 
 (defn home-content [& content]
@@ -116,9 +116,19 @@
       [:div#calendar
        [:h2 "Calendar goes here"]])}))
 
-(defn locations []
-  [:div#locations
+(defn map-did-mount [this]
+  (let [map-canvas (r/dom-node this)
+        map-options (clj->js {"center" (google.maps.LatLng. -34.397, 150.644)
+                              "zoom" 8})]
+        (js/google.maps.Map. map-canvas map-options)))
+
+(defn location-html []
+  [:div#locations {:style {:height "300px"}}
    [:h2 "Map goes here"]])
+
+(defn locations []
+  (r/create-class {:reagent-render location-html
+                   :component-did-mount map-did-mount}))
 
 (defn gmail-setup [flash username auth-url]
   [:div {:class "columns small-12"}

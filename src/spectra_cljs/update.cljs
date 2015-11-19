@@ -57,7 +57,7 @@
 (defn new-node [req type]
   (constantly (assoc req :type type)))
 
-(defn go-node! [id type]
+(defn go-node! [chsk-send! id type]
   (chsk-send! (node-req id type) 5000
               #(state/update! [:current-node]
                               (new-node % type))))

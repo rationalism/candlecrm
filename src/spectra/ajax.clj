@@ -60,6 +60,7 @@
   (debugf "ID: %s" id)
   (event-msg-handler ev-msg))
 
+;; TODO: Clean up redundancy here
 (do ; Server-side methods
   (defmethod event-msg-handler :pages/fetch-people
     [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -78,6 +79,12 @@
     (when-let [user (auth/user-from-req ring-req)]
       (when ?reply-fn
         (?reply-fn (queries/user-data-public user)))))
+
+  (defmethod event-msg-handler :update/fetch-node
+    [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+    (when-let [user (auth/user-from-req ring-req)]
+      (when ?reply-fn
+        (?reply-fn (queries/node-by-id user (:id ?data) (:type ?data))))))
   
   (defmethod event-msg-handler :default ; Fallback
     [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]

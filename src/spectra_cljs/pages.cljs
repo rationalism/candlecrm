@@ -2,6 +2,7 @@
   (:require [goog.dom :as dom]
             [goog.events :as events]
             [spectra_cljs.html :as html]
+            [spectra_cljc.schema :as s]
             [spectra_cljs.state :as state]
             [reagent.core :as r]
             [jayq.core :as jq])

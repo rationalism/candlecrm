@@ -52,3 +52,7 @@
 (defn user-data-public [user]
   (-> user (get :data)
       (dissoc s/pwd-hash) (dissoc s/google-token)))
+
+(defn node-by-id [user id type]
+  (-> (neo4j/node-from-id user id type)
+      (get :data)))
