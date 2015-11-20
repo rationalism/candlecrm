@@ -18,7 +18,7 @@
   (let [new-user
         (-> (dissoc user-data :admin)
             (assoc :identity username
-                   :password (creds/sha1-bcrypt password)))]
+                   :password (creds/hash-bcrypt password)))]
    (recon/add-user-graph! new-user)
    new-user))
 
