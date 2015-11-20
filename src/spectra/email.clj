@@ -450,9 +450,9 @@
            (loom/replace-node chain event))))
 
 (defn parse-person [chain node]
-  (if (or (s/email-addr node) (s/name node))
+  (if (or (s/email-addr node) (s/s-name node))
     (->> (s/email-addr node)
-         (recon/name-email-map (s/name node))
+         (recon/name-email-map (s/s-name node))
          (map #(nlp/normalize-person (key %) (val %) (:label node)))
          recon/merge-nodes
          (loom/replace-node chain node))
@@ -460,7 +460,7 @@
 
 (defn author-name [chain message]
   (-> (loom/out-edge-label chain message s/email-from)
-      second (get-in [:data s/name])))
+      second (get-in [:data s/s-name])))
 
 (defn use-nlp [chain message]
   (if (com/nil-or-empty? (s/email-body message)) chain
@@ -480,7 +480,7 @@
         (reduce parse-person $
                 (->> (loom/nodes $)
                      (filter #(some #{(:label %)} [s/person s/organization]))))
-        (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/name])
+        (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/s-name])
         (loom/remove-nodes $ (->> s/has-type (loom/select-edges $) (map second))))))
   
 (def url-map {s/person "person" s/email "email"

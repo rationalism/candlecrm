@@ -49,7 +49,7 @@
   [node-link (person attr) (person :id) s/person])
 
 (defn person-cell [person attr]
-  [:td (if (= s/name attr)
+  [:td (if (= s/s-name attr)
          [person-link person attr]
          (person attr))])
 

@@ -431,8 +431,8 @@
 (defn pronoun-graph [nodes]
   (loom/build-graph nodes (map pronoun-edge nodes)))
 
-(def label-correction {s/person-name s/name s/org-name s/name
-                       s/loc-name s/name s/email-addr s/email-addr
+(def label-correction {s/person-name s/s-name s/org-name s/s-name
+                       s/loc-name s/s-name s/email-addr s/email-addr
                        s/phone-num s/phone-num s/date-time s/date-time
                        s/amount s/amount s/time-interval s/time-interval
                        s/url s/url})
@@ -673,14 +673,14 @@
                                  run-nlp-default nlp-names first)]
           (assoc (label-edge parsed-name) s/email-addr [inferred-email])
           {:label default s/email-addr [inferred-email]
-           s/name (-> inferred-email regex/parse-name vector)})
+           s/s-name (-> inferred-email regex/parse-name vector)})
         (if-let [parsed-name (-> name run-nlp-default nlp-names first)]
-          (label-edge parsed-name) {:label default s/name [name]
+          (label-edge parsed-name) {:label default s/s-name [name]
                                     :hash (com/sha1 name)}))
       (if-let [parsed-name (-> name (regex/parse-name email)
                                run-nlp-default nlp-names first)]
         (assoc (label-edge parsed-name) s/email-addr [email])
-        {:label default s/name [(regex/parse-name name email)] s/email-addr [email]}))
+        {:label default s/s-name [(regex/parse-name name email)] s/email-addr [email]}))
     (if-let [inferred-name (name-from-email email)]
       (assoc (label-edge inferred-name) s/email-addr [email])
       {:label default s/email-addr [email] :hash (com/sha1 email)})))

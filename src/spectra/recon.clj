@@ -100,7 +100,7 @@
        (apply merge)))
 
 (defn recon-labels [node old-labels]
-  (if (and (contains? node s/name)
+  (if (and (contains? node s/s-name)
            (some #{s/person} old-labels)
            (= s/organization (:label node)))
     (conj (remove #(= s/person %) old-labels) s/organization)
@@ -150,7 +150,7 @@
 
 (defn link-people [g nodes]
   (reduce (partial link-graph [s/person s/organization] nodes)
-          g [s/email-addr s/phone-num s/name]))
+          g [s/email-addr s/phone-num s/s-name]))
 
 (defn merge-edge! [match-edge]
   (->> match-edge second :data keys

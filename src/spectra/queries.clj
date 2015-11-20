@@ -29,7 +29,7 @@
   (-> (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
            ":" s/person
            ") RETURN root"
-           " ORDER BY root." (neo4j/cypher-esc-token s/name)
+           " ORDER BY root." (neo4j/cypher-esc-token s/s-name)
            "[0] SKIP " start " LIMIT " limit)
       neo4j/cypher-list tablify-hits))
 

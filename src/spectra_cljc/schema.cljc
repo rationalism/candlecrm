@@ -1,12 +1,12 @@
 (ns spectra_cljc.schema)
 
 (def user "user")
-(def name :name)
+(def s-name :name)
 (def pwd-hash :pwd-hash)
 (def google-token :google-token)
 (def type-label :label)
 (def date-time :date-time)
-(def hash :hash)
+(def sha1 :hash)
 
 (def person "person")
 (def email-addr :email-addr)
@@ -57,7 +57,10 @@
 (def webpage "webpage")
 (def url :url)
 
-(def repeated-attr [name person-name org-name email-addr phone-num
+(def email-queue "emailqueue")
+(def time-scanned "time-scanned")
+
+(def repeated-attr [s-name person-name org-name email-addr phone-num
                     mail-address website org-member])
 
 (def attr-entity {person-name person org-name organization
@@ -69,7 +72,7 @@
                   org-member person url webpage
                   time-interval event})
 
-(def attr-names {name "Name" amount "Amount"
+(def attr-names {s-name "Name" amount "Amount"
                  email-addr "Address" email-subject "Subject"
                  email-to "Email to" email-from "Email from"
                  email-reply "Reply to" email-body "Email body"
@@ -81,13 +84,13 @@
                  url "Page address" start-time "Begins at"
                  stop-time "Ends at"})
 
-(def person-attrs [name email-addr phone-num birthday gender
+(def person-attrs [s-name email-addr phone-num birthday gender
                    occupation mail-address website org-member])
 
 (def email-links [email-to email-cc email-bcc
                   email-reply email-replyto email-mentions])
 
-(def recon-attrs {location name event start-time
+(def recon-attrs {location s-name event start-time
                   money amount webpage url})
 
 (defn prop
