@@ -67,10 +67,10 @@
 (defn sent-time [message]
   (.getSentDate message))
 
-(defn find-time
-  ([folder num]
-   (find-time folder num 0 (message-count folder)))
-  ([folder num bottom top]
+(defn find-num
+  ([folder time]
+   (find-num folder time 0 (message-count folder)))
+  ([folder time bottom top]
    (if (or (= bottom top) (= bottom (dec top)))
      bottom
      (let [mid (/ (+ top bottom) 2)]

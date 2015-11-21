@@ -6,10 +6,12 @@
              [schedule with-repeat-count with-interval-in-milliseconds]]
             [clojurewerkz.quartzite.scheduler :as qs]
             [clojurewerkz.quartzite.triggers :as triggers]
+            [spectra.common :as com]
             [spectra.datetime :as dt]
             [spectra.email :as email]
             [spectra.neo4j :as neo4j]
             [spectra.queries :as queries]
+            [spectra_cljc.schema :as s]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
@@ -49,17 +51,17 @@
 
 (defn scan-check [queue-user]
   (->> queue-user queue-time 
-       (mapv #(queries/scan-overlaps (second user) %))
+       (mapv #(queries/scan-overlaps (second queue-user) %))
        (mapv com/nil-or-empty?)))
 
 (defn find-ranges [queue-user]
   (->> queue-user second queries/all-scanned
        (map #(:data %))
-       (map #(select-keys % [s/start-time s/end-time]))
+       (map #(select-keys % [s/start-time s/stop-time]))
        (map #(com/map-values % (keys %)
                              (->> queue-user second
                                   email/fetch-imap-folder
-                                  (partial email/find-time))))))
+                                  (partial email/find-num))))))
 
 (defn default-queue [user]
   {s/queue-bottom 0
@@ -82,17 +84,17 @@
         neo4j/batch-insert!
         (map #(neo4j/create-edge! (queries/email-queue) % s/has-queue))
         (map #(neo4j/create-edge! user % s/has-queue)))))
-  
-(defn adjust-times! [queue-user]
-  (if (= [true true false] (scan-check queue-user))
-    (run-insertion! queue-user)
-    (->> queue-user find-ranges
-         (wipe-and-insert! (second queue-user)))))
 
 (defn run-insertion! [queue-user]
   (email/insert-email-range! (second queue-user)
                              (range-bottom (first queue-user))
                              (range-top (first queue-user))))
+
+(defn adjust-times! [queue-user]
+  (if (= [true true false] (scan-check queue-user))
+    (run-insertion! queue-user)
+    (->> queue-user find-ranges
+         (wipe-and-insert! (second queue-user)))))
 
 (jobs/defjob EmailLoad [ctx]
   (let [queue-user (queries/next-email-queue)]

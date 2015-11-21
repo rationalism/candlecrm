@@ -87,7 +87,7 @@
            ") WHERE ID(root)= " (:id user)
            " AND s." (neo4j/cypher-esc-token s/start-time)
            " < " time
-           " AND s." (neo4j/cypher-esc-token s/end-time)
+           " AND s." (neo4j/cypher-esc-token s/stop-time)
            " > " time " RETURN s")
       neo4j/cypher-list))
   
