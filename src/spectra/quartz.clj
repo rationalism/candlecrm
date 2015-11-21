@@ -6,6 +6,7 @@
              [schedule with-repeat-count with-interval-in-milliseconds]]
             [clojurewerkz.quartzite.scheduler :as qs]
             [clojurewerkz.quartzite.triggers :as triggers]
+            [spectra.auth :as auth]
             [spectra.common :as com]
             [spectra.datetime :as dt]
             [spectra.email :as email]
@@ -39,27 +40,27 @@
   (neo4j/set-property! queue s/modified (dt/now)))
 
 (defn email-time [email-num queue-user]
-  (-> queue-user second
+  (-> queue-user :user
       email/fetch-imap-folder
       (email/get-message email-num)
       email/sent-time))
 
 (defn queue-time [queue-user]
-  [(-> queue-user first range-bottom (email-time queue-user))
-   (-> queue-user first range-top (email-time queue-user))
-   (-> queue-user first range-top inc (email-time queue-user))])
+  [(-> queue-user :queue range-bottom (email-time queue-user))
+   (-> queue-user :queue range-top (email-time queue-user))
+   (-> queue-user :queue range-top inc (email-time queue-user))])
 
 (defn scan-check [queue-user]
   (->> queue-user queue-time 
-       (mapv #(queries/scan-overlaps (second queue-user) %))
+       (mapv #(queries/scan-overlaps (:user queue-user) %))
        (mapv com/nil-or-empty?)))
 
 (defn find-ranges [queue-user]
-  (->> queue-user second queries/all-scanned
+  (->> queue-user :user queries/all-scanned
        (map #(:data %))
        (map #(select-keys % [s/start-time s/stop-time]))
        (map #(com/map-values % (keys %)
-                             (->> queue-user second
+                             (->> queue-user :user
                                   email/fetch-imap-folder
                                   (partial email/find-num))))))
 
@@ -68,7 +69,11 @@
    s/queue-top (-> user email/fetch-imap-folder
                    email/message-count)})
 
-(defn wipe-and-insert! [user queues]
+(defn create-edges! [user queue]
+  (neo4j/create-edge! (queries/email-queue) queue s/has-queue)
+  (neo4j/create-edge! user queue s/has-queue))
+  
+(defn wipe-and-insert! [user & queues]
   (-> (str "MATCH (root:" s/email-queue
            ")-[:" (neo4j/cypher-esc-token s/has-queue)
            "]->(d:" s/user-queue
@@ -82,26 +87,28 @@
         (map #(hash-map :props %))
         (map #(assoc % :labels [s/user-queue]))
         neo4j/batch-insert!
-        (map #(neo4j/create-edge! (queries/email-queue) % s/has-queue))
-        (map #(neo4j/create-edge! user % s/has-queue)))))
+        (map #(create-edges! user %)))))
 
 (defn run-insertion! [queue-user]
-  (email/insert-email-range! (second queue-user)
-                             (range-bottom (first queue-user))
-                             (range-top (first queue-user))))
+  (email/insert-email-range! (:user queue-user)
+                             (range-bottom (:queue queue-user))
+                             (range-top (:queue queue-user))))
 
 (defn adjust-times! [queue-user]
   (if (= [true true false] (scan-check queue-user))
     (run-insertion! queue-user)
     (->> queue-user find-ranges
-         (wipe-and-insert! (second queue-user)))))
+         (wipe-and-insert! (:user queue-user)))))
 
-(jobs/defjob EmailLoad [ctx]
+(defn queue-pop! []
   (let [queue-user (queries/next-email-queue)]
-    (queue-reset! (first queue-user))
-    (if (-> queue-user second queries/all-scanned count (= 0))
+    (queue-reset! (:queue queue-user))
+    (if (-> queue-user :user queries/all-scanned count (= 0))
       (run-insertion! queue-user)
       (adjust-times! queue-user))))
+
+(jobs/defjob EmailLoad [ctx]
+  (queue-pop!))
 
 (defn make-job [job-type job-name]
   (jobs/build

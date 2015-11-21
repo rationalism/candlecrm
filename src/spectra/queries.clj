@@ -1,5 +1,6 @@
 (ns spectra.queries
   (:require [clojure.java.io :as io]
+            [clojure.set :as set]
             [spectra.common :as com]
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]
@@ -65,12 +66,13 @@
 (defn next-email-queue []
   (-> (str "MATCH (root:" s/email-queue
            ")-[:" (neo4j/cypher-esc-token s/has-queue)
-           "]->(d:" s/user-queue
+           "]->(q:" s/user-queue
            ")<-[:" (neo4j/cypher-esc-token s/has-queue)
            "]-(u:" s/user 
-           ") RETURN d, u ORDER BY d." (neo4j/cypher-esc-token s/modified)
+           ") RETURN q, u ORDER BY q." (neo4j/cypher-esc-token s/modified)
            " LIMIT 1")
-      neo4j/cypher-list))
+      neo4j/cypher-query first
+      (set/rename-keys {"q" :queue "u" :user})))
 
 (defn all-scanned [user]
   (-> (str "MATCH (root:" s/user
