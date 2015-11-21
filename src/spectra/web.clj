@@ -15,7 +15,6 @@
             [spectra.corenlp :as nlp]
             [spectra.pages :as pages]
             [spectra.quartz :as quartz]
-            [spectra.queue :as queue]
             [spectra_cljc.schema :as s]
             [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
@@ -51,7 +50,7 @@
        (html-wrapper (pages/login req)))
   (GET "/app" req
        (friend/authenticated
-        (html-wrapper (pages/homepage req))))
+        (html-wrapper (pages/app-page req))))
   (GET "/ajax-test" req
        (html-wrapper (pages/ajax-test req)))
   (GET "/chsk" req
@@ -66,9 +65,9 @@
           (let [user (auth/create-user! (select-keys params [:username :password]))]
             (friend/merge-authentication (resp/redirect "/gmail") user))))
   (GET "/logout" req (friend/logout* (logout req)))
-  ;(GET "/gmail" req
-  ;     (friend/authenticated
-  ;      (html-wrapper (pages/gmail req))))
+  (GET "/gmail" req
+       (friend/authenticated
+        (html-wrapper (pages/gmail req))))
   (GET "/init-account" req
        (friend/authenticated
         (let [user (auth/user-from-req req)]

@@ -65,6 +65,7 @@
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]
             [lein-figwheel "0.5.0"]
+            [lein-cljsbuild "1.1.0"]
             [cider/cider-nrepl "0.9.1"]]
   :resource-paths ["config" "resources"]
   :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
@@ -73,8 +74,16 @@
               [{:id "dev"
                 :source-paths ["src/spectra_cljs" "src/spectra_cljc"]
                 :figwheel {:websocket-url "wss://localhost:3459/figwheel-ws"}
-                :compiler {:main "spectra_cljs.login"
+                :compiler {:main "spectra_cljs.init"
+                           :asset-path "/js/out"
                            :output-to "resources/public/js/main.js"
+                           :optimizations :none
+                           :pretty-print true}}
+               {:id "login"
+                :source-paths ["src/spectra_cljs"]
+                :compiler {:main "spectra_cljs.login"
+                           :asset-path "/js/out"
+                           :output-to "resources/public/js/login.js"
                            :optimizations :none
                            :pretty-print true}}]}
   :main spectra.web

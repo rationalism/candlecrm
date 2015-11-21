@@ -16,6 +16,15 @@
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "Spectra"]
+          (include-css "/css/screen.css")]
+         [:body 
+          (into [:div#content] content)
+          (include-js goog-jquery)
+          (include-js "/js/login.js")]))
+
+(defn app-template [& content]
+  (html5 {:lang "en"}
+         [:head [:title "Spectra"]
           (include-css "/css/fullcalendar.min.css")
           (include-css "/css/screen.css")]
          [:body 
@@ -72,6 +81,31 @@
 (defn not-found-error []
   [:div {:class "columns small-12"}
    [:h2 "Error: No such object can be found."]])
+
+(defn gmail-setup [flash username auth-url]
+  [:div {:class "columns small-12"}
+   [:h2 "Connect your account to GMail"]
+   [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
+   [:h3 (str "Welcome. Your username is: " username)]
+   [:h3 [:a {:href auth-url} "Connect to GMail"]]])
+
+(defn gmail-finished [flash username email-total]
+  [:div {:class "columns small-12"}
+   [:h2 "Congrats - your account is connected to GMail."]
+   [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
+   [:h3 (str "Welcome. Your username is: " username)]
+   [:h3 (str "The number of emails in your inbox is: " email-total)]
+   [:h3 "Load emails into database: "
+    [:small "(Enter a range of emails in your inbox to load.)"]]
+   [:div.row
+    [:form {:method "POST" :action "load-emails" :class "columns small-4"}
+     [:div.row "Start with: " [:input {:type "text" :name "lower" :required "required"}]]
+     [:div.row "End with: " [:input {:type "text" :name "upper" :required "required"}]]
+      [:div.row
+       [:input {:type "submit" :class "button" :value "Load"}]
+       [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]]]
+   [:a {:href "/"} "Return home"]
+   [:p "Currently disabled - do this via Ajax calls"]])
 
 (defn ajax-test []
   [:div {:class "columns small-12"}

@@ -16,20 +16,20 @@
    (html/signup-form (:flash req))
    (html/login-form)))
 
-(defn homepage [req]
-  (html/base-template))
+(defn app-page [req]
+  (html/app-template))
 
-;(defn gmail [req]
-;  (let [user (auth/user-from-req req)]
-;    (html/base-template
-;     (if (google/lookup-token user)
-;       (html/gmail-finished (:flash req)
-;                            (auth/get-username user)
-;                            (email/message-count
-;                             (email/fetch-imap-folder user)))
-;       (html/gmail-setup (:flash req)
-;                         (auth/get-username user)
-;                         (google/make-auth-url))))))
+(defn gmail [req]
+  (let [user (auth/user-from-req req)]
+    (html/base-template
+     (if (google/lookup-token user)
+       (html/gmail-finished (:flash req)
+                            (auth/get-username user)
+                            (email/message-count
+                             (email/fetch-imap-folder user)))
+       (html/gmail-setup (:flash req)
+                         (auth/get-username user)
+                         (google/make-auth-url))))))
 
 (defn login-needed [uri]
   (html/base-template
