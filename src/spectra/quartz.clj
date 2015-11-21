@@ -3,7 +3,8 @@
             [environ.core :refer [env]]
             [clojurewerkz.quartzite.jobs :as jobs]
             [clojurewerkz.quartzite.schedule.simple :refer
-             [schedule with-repeat-count with-interval-in-milliseconds]]
+             [schedule repeat-forever with-repeat-count
+              with-interval-in-milliseconds]]
             [clojurewerkz.quartzite.scheduler :as qs]
             [clojurewerkz.quartzite.triggers :as triggers]
             [spectra.auth :as auth]
@@ -15,9 +16,6 @@
             [spectra_cljc.schema :as s]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
-
-(jobs/defjob TestJob [ctx]
-  (println "This is a test Quartz job"))
 
 (defn queue-small? [queue]
   (< (- (-> queue :data s/queue-top)
@@ -102,7 +100,7 @@
          (wipe-and-insert! (:user queue-user)))))
 
 (defn queue-pop! []
-  (let [queue-user (queries/next-email-queue)]
+  (when-let [queue-user (queries/next-email-queue)]
     (queue-reset! (:queue queue-user))
     (if (-> queue-user :user queries/all-scanned count (= 0))
       (run-insertion! queue-user)
@@ -121,13 +119,14 @@
    (triggers/with-identity (triggers/key name))
    (triggers/start-now)
    (triggers/with-schedule
-     (schedule
-      (with-repeat-count limit)
-      (with-interval-in-milliseconds interval)))))
+     (if limit
+       (schedule (with-repeat-count limit)
+                 (with-interval-in-milliseconds interval))
+       (schedule (repeat-forever)
+                 (with-interval-in-milliseconds interval))))))
   
 (defn start! []
-  (def ^:dynamic *scheduler*
-    (-> (qs/initialize) qs/start))
+  (def ^:dynamic *scheduler* (-> (qs/initialize) qs/start))
   (qs/schedule *scheduler*
-               (make-job TestJob "jobs.test.1")
-               (periodic-trigger 2000 5 "triggers.1")))
+               (make-job EmailLoad "jobs.email.load.1")
+               (periodic-trigger 15000 nil "email.trigger.1")))
