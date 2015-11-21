@@ -15,6 +15,7 @@
             [spectra.corenlp :as nlp]
             [spectra.pages :as pages]
             [spectra.quartz :as quartz]
+            [spectra.queue :as queue]
             [spectra_cljc.schema :as s]
             [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
@@ -71,8 +72,8 @@
   (GET "/init-account" req
        (friend/authenticated
         (let [user (auth/user-from-req req)]
+          (quartz/wipe-and-insert! user (quartz/default-queue user))
           (contacts/load-all-contacts! user)
-          (email/insert-first-n! user 5)
           (home-with-message "Congrats! Authentication successful"))))
   (GET google/callback-url req
        (friend/authenticated
@@ -95,24 +96,6 @@
   (route/files "/resources/public/js" {:root "./resources/public/js"})
   (route/resources "/")
   (route/not-found (slurp (io/resource "public/404.html"))))
-  ;(GET "/person/:id" [id :as req]
-  ;     (friend/authenticated
-  ;      (html-wrapper (pages/show-node req id s/person))))
-  ;(GET "/email/:id" [id :as req]
-  ;     (friend/authenticated
-  ;      (html-wrapper (pages/show-node req id s/email))))
-  ;(GET "/organization/:id" [id :as req]
-  ;     (friend/authenticated
-  ;      (html-wrapper (pages/show-node req id s/organization))))
-  ;(GET "/location/:id" [id :as req]
-  ;     (friend/authenticated
-  ;      (html-wrapper (pages/show-node req id s/location))))
-  ;(GET "/event/:id" [id :as req]
-  ;     (friend/authenticated
-  ;      (html-wrapper (pages/show-node req id s/event))))
-  ;(GET "/finance/:id" [id :as req]
-  ;     (friend/authenticated
-  ;      (html-wrapper (pages/show-node req id s/money))))
 
 (defn form-params [req]
   (merge (:form-params req)

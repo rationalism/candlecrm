@@ -203,9 +203,11 @@
        distinct
        (set-property! vertex property)))
 
-;; TODO: fix this, it's obsolete
 (defn delete-property! [vertex property]
-  (.removeProperty vertex property))
+  (-> (str "MATCH (a) where ID(a)= " (:id vertex)
+           " REMOVE a." (cypher-esc-token property)
+           " RETURN a")
+      cypher-query))
 
 (defn filter-props [props]
   (->> props

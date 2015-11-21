@@ -56,3 +56,40 @@
 (defn node-by-id [user id type]
   (-> (neo4j/node-from-id user id type)
       (get :data)))
+
+(defn email-queue []
+  (-> (str "MATCH (root:" s/email-queue
+           ") RETURN root LIMIT 1")
+      neo4j/cypher-list first))
+
+(defn next-email-queue []
+  (-> (str "MATCH (root:" s/email-queue
+           ")-[:" (neo4j/cypher-esc-token s/has-queue)
+           "]->(d:" s/user-queue
+           ")<-[:" (neo4j/cypher-esc-token s/has-queue)
+           "]-(u:" s/user 
+           ") RETURN d, u ORDER BY d." (neo4j/cypher-esc-token s/modified)
+           " LIMIT 1")
+      neo4j/cypher-list))
+
+(defn all-scanned [user]
+  (-> (str "MATCH (root:" s/user
+           ")-[:" (neo4j/cypher-esc-token s/scanned)
+           "]->(s:" s/time-scanned
+           ") WHERE ID(root)= " (:id user)
+           " RETURN s")
+      neo4j/cypher-list))
+
+(defn scan-overlaps [user time]
+  (-> (str "MATCH (root:" s/user
+           ")-[:" (neo4j/cypher-esc-token s/scanned)
+           "]->(s:" s/time-scanned
+           ") WHERE ID(root)= " (:id user)
+           " AND s." (neo4j/cypher-esc-token s/start-time)
+           " < " time
+           " AND s." (neo4j/cypher-esc-token s/end-time)
+           " > " time " RETURN s")
+      neo4j/cypher-list))
+  
+
+

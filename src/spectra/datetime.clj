@@ -33,28 +33,31 @@
 (defn unix-dates [text reference]
    (->> (parse-dates text reference)
         (mapv #(.getDates %)) (map vec)))
-  
+
+(defn now []
+  (Date. ))
+
 (defn dates-in-text
-  ([text] (dates-in-text text (Date. )))
+  ([text] (dates-in-text text (now)))
   ([text reference]
    (->> (unix-dates text reference)
         flatten distinct)))
 
 (defn intervals-in-text 
-  ([text] (intervals-in-text text (Date. )))
+  ([text] (intervals-in-text text (now)))
   ([text reference]
    (->> (unix-dates text reference)
         (remove #(= (first %) (second %)))
         distinct)))
 
 (defn find-dates
-  ([text] (find-dates text (Date. )))
+  ([text] (find-dates text (now)))
   ([text reference]
    (->> (parse-dates text reference)
         (map #(.getText %)))))
 
 (defn find-intervals
-  ([text] (find-intervals text (Date. )))
+  ([text] (find-intervals text (now)))
   ([text reference]
    (->> (parse-dates text reference)
         (filter interval?)
@@ -80,11 +83,11 @@
 (def formatter (format/formatters :rfc822))
 
 (defn format-date [value]
-  (->> value (Date. ) coerce/from-date
+  (->> value (now) coerce/from-date
        (format/unparse formatter)))
 
 (defn hours-ago
-  ([date] (hours-ago date (Date. )))
+  ([date] (hours-ago date (now)))
   ([date ref]
    (->> (coerce/from-date date) vector
         (concat [(coerce/from-date ref)])

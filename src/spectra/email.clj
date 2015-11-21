@@ -21,6 +21,7 @@
 (def plain-type "TEXT/PLAIN")
 (def html-type "TEXT/HTML")
 (def multi-type "multipart")
+(def batch-size 10)
 
 (defn get-folder [store folder-name]
   (.getFolder store folder-name))
@@ -66,6 +67,17 @@
 (defn sent-time [message]
   (.getSentDate message))
 
+(defn find-time
+  ([folder num]
+   (find-time folder num 0 (message-count folder)))
+  ([folder num bottom top]
+   (if (or (= bottom top) (= bottom (dec top)))
+     bottom
+     (let [mid (/ (+ top bottom) 2)]
+       (if (< time (sent-time (get-message folder mid)))
+         (recur folder num bottom mid)
+         (recur folder num mid top))))))
+              
 (defn define-imap-lookup []
   (def ^:dynamic *imap-lookup* {}))
 
@@ -556,7 +568,7 @@
           g s/recon-attrs))
 
 (defn merge-and-recon [block-size attrs graphs]
-  (->> (partition-all 10 graphs)
+  (->> (partition-all batch-size graphs)
        (map loom/merge-graphs)
        (map #(reduce recon/remove-dupes % attrs))))
 

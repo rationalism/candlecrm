@@ -48,6 +48,7 @@
 (def time-interval :time-interval)
 (def start-time :start-time)
 (def stop-time :stop-time)
+(def over-time :over-time)
 
 (def coref-is :coref-is)
 (def has-type :has-type)
@@ -58,7 +59,12 @@
 (def url :url)
 
 (def email-queue "emailqueue")
-(def time-scanned "time-scanned")
+(def time-scanned "time_scanned")
+(def user-queue "user_queue")
+(def has-queue :has-queue)
+(def modified :last-modified)
+(def queue-top :queue-top)
+(def queue-bottom :queue-bottom)
 
 (def repeated-attr [s-name person-name org-name email-addr phone-num
                     mail-address website org-member])
