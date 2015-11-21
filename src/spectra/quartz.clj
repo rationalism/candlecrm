@@ -65,9 +65,10 @@
                                   (partial email/find-num))))))
 
 (defn default-queue [user]
-  {s/queue-bottom 0
-   s/queue-top (-> user email/fetch-imap-folder
-                   email/message-count)})
+  (let [top (-> user email/fetch-imap-folder
+                email/message-count)]
+    {s/queue-bottom (- top 1000)
+     s/queue-top top}))
 
 (defn create-edges! [user queue]
   (neo4j/create-edge! (queries/email-queue) queue s/has-queue)
