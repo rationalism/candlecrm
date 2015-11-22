@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
             [spectra.auth :as auth]
+            [spectra.common :as com]
             [spectra.corenlp :as nlp]
             [spectra.datetime :as dt]
             [spectra.google :as google]
@@ -51,27 +52,36 @@
        (mapv #(.getPhoneNumber %))))
 
 (defn birthday [contact]
-  (-> contact (.getBirthday)
-      (.getWhen) dt/dates-in-text first))
+  (when-let [bdate (.getBirthday contact)]
+    (-> bdate (.getWhen) dt/dates-in-text first)))
 
 (defn gender [contact]
-  (-> contact (.getGender) (.toString)))
+  (when-let [gend (.getGender contact)]
+    (.toString gend)))
 
 (defn occupation [contact]
-  (-> contact (.getOccupation) (.toString)))
+  (when-let [occ (.getOccupation contact)]
+    (.toString occ)))
 
 (defn addresses [contact]
-  (->> contact (.getPostalAddresses)
-       (map #(.getValue %))))
+  (when-let [addrs (.getPostalAddresses contact)]
+    (map #(.getValue %) addrs)))
 
 (defn websites [contact]
-  (->> contact (.getWebsites)
-       (map #(.getHref %))))
+  (when-let [sites (.getWebsites contact)]
+    (map #(.getHref %) sites)))
 
 (defn organizations [contact]
-  (->> contact (.getOrganizations)
-       (map #(.getOrgName %))
-       (map #(.getValue %))))
+  (when-let [orgs (.getOrganizations contact)]
+    (->> orgs
+         (map #(.getOrgName %))
+         (remove nil?)
+         (map #(.getValue %)))))
+
+(defn filter-map [contact-map]
+  (->> contact-map
+       (filter #(-> % val com/not-nil-ext?))
+       (into {})))
 
 (defn contact->person [contact]
   (->> (emails contact)
@@ -85,7 +95,7 @@
                s/mail-address (addresses contact)
                s/website (websites contact)
                s/org-member (organizations contact)}])
-       (apply merge)))
+       (apply merge) filter-map))
 
 (defn batch-insert! [user contacts]
   (->> contacts 
