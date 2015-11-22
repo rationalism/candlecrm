@@ -29,28 +29,28 @@
     [:div#tab4.tab-hide [html/locations]]))
 
 (defn show-person [person]
-  [html/show-person (-> person :data :name first)
-                    (-> person :data)])
+  [html/show-person (-> person :center-node :data :name first)
+                    (-> person :center-node :data)])
 
 (defn show-email [email]
-  [html/show-email (-> email :data :name first)
-                   (-> email :data)])
+  [html/show-email (-> email :center-node :data :subject)
+                   (-> email :center-node :data)])
 
 (defn show-organization [organization]
-  [html/show-organization (-> organization :data :name first)
-                          (-> organization :data)])
+  [html/show-organization (-> organization :center-node :data :name first)
+                          (-> organization :center-node :data)])
 
 (defn show-location [location]
-  [html/show-location (-> location :data :name first)
-                      (-> location :data)])
+  [html/show-location (-> location :center-node :data :name first)
+                      (-> location :center-node :data)])
 
 (defn show-event [event]
-  [html/show-event (-> event :data :name first)
-                   (-> event :data)])
+  [html/show-event (-> event :center-node :data :name first)
+                   (-> event :center-node :data)])
 
 (defn show-money [money]
-  [html/show-money (-> money :data :name first)
-                   (-> money :data)])
+  [html/show-money (-> money :center-node :data :name first)
+                   (-> money :center-node :data)])
 
 (def node-fn {s/person show-person s/email show-email
               s/organization show-organization s/location show-location
