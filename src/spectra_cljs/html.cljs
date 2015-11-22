@@ -1,6 +1,7 @@
 (ns spectra_cljs.html
   (:require [clojure.string :as str]
             [spectra_cljs.ajax :as ajax]
+            [spectra_cljs.regex :as regex]
             [spectra_cljc.schema :as s]
             [spectra_cljs.state :as state]
             [spectra_cljs.update :as u]
@@ -130,16 +131,63 @@
 (defn login-needed [uri]
   [:h2 "You do not have sufficient privileges to access " uri])
 
-(defn string-item [item prop]
-  (cond (coll? item) (str/join ", " item)
-        (= prop s/date-time) item
-        :else item))
+(defn split-regex [s break]
+  (str/split s (-> break regex/regex-escape re-pattern)))
 
+(defn insert-breaks [strs break]
+  (->> break (repeat (count strs))
+       (interleave strs) drop-last))
+
+(defn split-coll [strs break]
+  (->> strs
+       (map #(split-regex % break))
+       (map #(insert-breaks % break))
+       flatten))
+
+(defn split-many [s breaks]
+  (reduce split-coll (vector s) breaks))
+
+(defn text-keys [parsed]
+  (->> parsed (map #(hash-map (:original %) %))
+       (apply merge)))
+
+(defn swap-item [item parsed]
+  (if (contains? parsed item)
+    (get parsed item) item))
+
+(defn link-items [item]
+  (let [parsed (-> item regex/node-parse text-keys)]
+    (->> parsed keys (split-many item)
+         (map #(swap-item % parsed)))))
+
+(defn item-key [item]
+  (if (string? item)
+    item (:text item)))
+
+(defn body-links [item]
+  [:p
+   (for [piece (link-items item)]
+     ^{:key (item-key piece)}
+     (if (string? piece)
+       [:span piece]
+       [node-link (:text piece) (-> piece :link :id)
+        (-> piece :link type)]))])
+
+(defn string-item [item prop]
+  [:span
+   (cond (coll? item) (str/join ", " item)
+         (= prop s/email-body) [body-links item]
+         :else item)])
+
+(defn str-item [attr attr-name]
+  [:span (str attr-name ": ")
+   [string-item (val attr) (key attr)]])
+  
 (defn info-items [attrs]
   (for [attr attrs]
     ^{:key (key attr)}
-    [:p.infoitem (str (-> attr key s/attr-names) ": "
-                      (-> attr val (string-item (key attr))))]))
+    (when-let [attr-name (-> attr key s/attr-names)]
+      [:p.infoitem [str-item attr attr-name]])))
 
 (defn show-person [person-name attrs]
   [:div {:class "columns small-12"}

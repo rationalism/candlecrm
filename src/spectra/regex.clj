@@ -13,9 +13,6 @@
 
 ;; My own regexes
 (def javascript-regex #"\<javascript([^\>]+)\>")
-(def node-param-regex #"\<node([^\>]+)\>")
-(def node-regex #"\<node((.(?!node\>))+)/node\>")
-(def bracket-regex #"\>(.+)\<")
 (def tag-regex #"\<([^\>]*)\>")
 (def esc-char-regex #"\^|\[|\]|\.|\$|\{|\}|\(|\)|\\|\*|\+|\||\?|\<|\>")
 
@@ -31,16 +28,6 @@
 
 (defn replace-map [text new-map]
   (str/replace text (-> new-map keys regex-or) #(new-map %1)))
-
-(defn node-map [hypertext]
-  {:text (-> bracket-regex (re-seq hypertext)
-             first second)
-   :link (-> node-param-regex (re-seq hypertext)
-             first second read-string)})
-
-(defn node-parse [text]
-  (->> text (re-seq node-regex)
-       (map first) (map node-map)))
 
 (defn find-email-addrs [text]
   (re-seq email-regex text))
