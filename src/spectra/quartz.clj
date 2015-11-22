@@ -65,7 +65,7 @@
 (defn default-queue [user]
   (let [top (-> user email/fetch-imap-folder
                 email/message-count)]
-    {s/queue-bottom (- top 1000)
+    {s/queue-bottom (- top 200)
      s/queue-top top}))
 
 (defn create-edges! [user queue]

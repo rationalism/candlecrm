@@ -504,8 +504,8 @@
   (loom/replace-node
    g (first edge)
    (assoc (first edge) :hyperlink
-          (str "{:type "(-> edge first :label url-map)
-               " :id " (-> edge second :id)
+          (str "{:type \""(-> edge first :label url-map)
+               "\" :id " (-> edge second :id)
                "}"))))
 
 (defn make-hyperlinks [g]

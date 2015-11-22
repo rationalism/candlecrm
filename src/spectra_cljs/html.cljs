@@ -171,7 +171,7 @@
      (if (string? piece)
        [:span piece]
        [node-link (:text piece) (-> piece :link :id)
-        (-> piece :link type)]))])
+        (-> piece :link :type)]))])
 
 (defn string-item [item prop]
   [:span
