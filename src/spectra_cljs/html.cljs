@@ -135,14 +135,16 @@
         (= prop s/date-time) item
         :else item))
 
-(defn info-item [item]
-  [:p.infoitem (str (-> item key s/attr-names) ": "
-                    (-> item val (string-item (key item))))])
+(defn info-items [attrs]
+  (for [attr attrs]
+    ^{:key (key attr)}
+    [:p.infoitem (str (-> attr key s/attr-names) ": "
+                      (-> attr val (string-item (key attr))))]))
 
 (defn show-person [person-name attrs]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str person-name " (Person)")]
-   (map info-item attrs)
+   (info-items attrs)
    [:h3.infotitle (str "Emails to " person-name)]
    [email-table]
    [:h3.infotitle (str "Emails from " person-name)]
@@ -151,27 +153,27 @@
 (defn show-email [email-name attrs]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str email-name " (Email)")]
-   (map info-item attrs)])
+   (info-items attrs)])
 
 (defn show-organization [organization-name attrs]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str organization-name " (Organization)")]
-   (map info-item attrs)])
+   (info-items attrs)])
 
 (defn show-location [location-name attrs]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str location-name " (Location)")]
-   (map info-item attrs)])
+   (info-items attrs)])
 
 (defn show-event [event-name attrs]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str event-name " (Event)")]
-   (map info-item attrs)])
+   (info-items attrs)])
 
 (defn show-money [money-name attrs]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str money-name " (Finance)")]
-   (map info-item attrs)])
+   (info-items attrs)])
 
 (defn unauthorized-error []
   [:h2 "Error: Access to this page is unauthorized."])

@@ -55,7 +55,7 @@
    {:id id :type type}])
 
 (defn new-node [req type]
-  (constantly {:center-node (assoc req :type type))})
+  (constantly (assoc {:center-node req} :type type)))
 
 (defn go-node! [chsk-send! id type]
   (chsk-send! (node-req id type) 5000
