@@ -89,18 +89,24 @@
    [:a {:href "#" :on-click (u/next-emails! ajax/chsk-send!)
         :id "next-email-page"} "Next -->"]])
 
-(defn calendar-load! []
+(defn calendar-load! [this]
   (.fullCalendar ($ :#calendar)))
+
+(defn calendar-render! [this]
+  (.fullCalendar ($ :#calendar) "render"))
+
+(defn calendar-html []
+  (if (= (state/look :tabid) 3)
+    [:div#calendar {:style {:height "300px" :width "500px"}}]
+    [:div#calendar {:style {:height "0px" :width "0px"}}]))
 
 (defn calendar []
   (r/create-class
-   {:component-did-mount #(calendar-load!)
+   {:component-did-mount calendar-load!
+    :component-did-update calendar-render!
     :display-name "calendar-tab"
-    :reagent-render
-    (fn []
-      [:div#calendar
-       [:h2 "Calendar goes here"]])}))
-
+    :reagent-render calendar-html}))
+    
 (defn map-did-mount [this]
   (let [map-canvas (r/dom-node this)
         map-options (clj->js {"center" (google.maps.LatLng. 38.397, -120.644)
