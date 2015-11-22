@@ -16,22 +16,6 @@
    [:h3 (str "Welcome. Your username is: " username)]
    [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]])
 
-(defn set-tab-fn [tab-num]
-  (fn []
-    (state/update! [:tabid] (constantly tab-num))
-    (state/update! [:current-node] (constantly nil))))
-
-(defn header-tab [num name]
-  [:td>h2>a {:href "#" :on-click (set-tab-fn num)
-             :id (str "set-tab-" num)} name])
-
-(defn home-header []
-  [:div.home-header>table>tr.tab-row
-   [header-tab 1 "People"]
-   [header-tab 2 "Emails"]
-   [header-tab 3 "Calendar"]
-   [header-tab 4 "Locations"]])
-
 (defn node-link [text id type]
   [:a.go-node
    {:href "#" :on-click #(u/go-node! ajax/chsk-send! id type)}
@@ -119,16 +103,23 @@
 
 (defn map-did-mount [this]
   (let [map-canvas (r/dom-node this)
-        map-options (clj->js {"center" (google.maps.LatLng. -34.397, 150.644)
-                              "zoom" 2})]
+        map-options (clj->js {"center" (google.maps.LatLng. 38.397, -120.644)
+                              "zoom" 8})]
     (js/google.maps.Map. map-canvas map-options)))
 
 (defn location-html []
-  [:div#locations {:style {:height "300px" :width "500px"}}])
+  (if (= (state/look :tabid) 4)
+    [:div#locations {:style {:height "300px" :width "500px"}}]
+    [:div#locations {:style {:height "0px" :width "0px"}}]))
+
+(defn resize-map [this]
+  (-> (. js/document (getElementById "locations"))
+      (js/google.maps.event.trigger "resize")))
 
 (defn locations []
   (r/create-class {:reagent-render location-html
-                   :component-did-mount map-did-mount}))
+                   :component-did-mount map-did-mount
+                   :component-did-update resize-map}))
 
 (defn login-needed [uri]
   [:h2 "You do not have sufficient privileges to access " uri])
@@ -182,3 +173,19 @@
 (defn not-found-error []
   [:div {:class "columns small-12"}
    [:h2 "Error: No such object can be found."]])
+
+(defn set-tab-fn [tab-num]
+  (fn []
+    (state/update! [:tabid] (constantly tab-num))
+    (state/update! [:current-node] (constantly nil))))
+
+(defn header-tab [num name]
+  [:td>h2>a {:href "#" :on-click (set-tab-fn num)
+             :id (str "set-tab-" num)} name])
+
+(defn home-header []
+  [:div.home-header>table>tr.tab-row
+   [header-tab 1 "People"]
+   [header-tab 2 "Emails"]
+   [header-tab 3 "Calendar"]
+   [header-tab 4 "Locations"]])
