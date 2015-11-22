@@ -164,14 +164,17 @@
   (if (string? item)
     item (:text item)))
 
+(defn body-link [piece]
+  (if (string? piece)
+    [:span piece]
+    [node-link (:text piece) (-> piece :link :id)
+     (-> piece :link :type)]))
+
 (defn body-links [item]
   [:p
    (for [piece (link-items item)]
      ^{:key (item-key piece)}
-     (if (string? piece)
-       [:span piece]
-       [node-link (:text piece) (-> piece :link :id)
-        (-> piece :link :type)]))])
+     [body-link piece])])
 
 (defn string-item [item prop]
   [:span
@@ -182,17 +185,20 @@
 (defn str-item [attr attr-name]
   [:span (str attr-name ": ")
    [string-item (val attr) (key attr)]])
-  
+
+(defn filter-display [attrs]
+  (filter #(-> % key s/attr-names) attrs))
+
 (defn info-items [attrs]
-  (for [attr attrs]
-    ^{:key (key attr)}
-    (when-let [attr-name (-> attr key s/attr-names)]
-      [:p.infoitem [str-item attr attr-name]])))
+  [:div
+   (for [attr (filter-display attrs)]
+     ^{:key (key attr)}
+     [:p.infoitem [str-item attr (-> attr key s/attr-names)]])])
 
 (defn show-person [person-name attrs]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str person-name " (Person)")]
-   (info-items attrs)
+   [info-items attrs]
    [:h3.infotitle (str "Emails to " person-name)]
    [email-table]
    [:h3.infotitle (str "Emails from " person-name)]
@@ -201,27 +207,27 @@
 (defn show-email [email-name attrs]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str email-name " (Email)")]
-   (info-items attrs)])
+   [info-items attrs]])
 
 (defn show-organization [organization-name attrs]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str organization-name " (Organization)")]
-   (info-items attrs)])
+   [info-items attrs]])
 
 (defn show-location [location-name attrs]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str location-name " (Location)")]
-   (info-items attrs)])
+   [info-items attrs]])
 
 (defn show-event [event-name attrs]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str event-name " (Event)")]
-   (info-items attrs)])
+   [info-items attrs]])
 
 (defn show-money [money-name attrs]
   [:div {:class "columns small-12"}
    [:h3.infotitle (str money-name " (Finance)")]
-   (info-items attrs)])
+   [info-items attrs]])
 
 (defn unauthorized-error []
   [:h2 "Error: Access to this page is unauthorized."])
