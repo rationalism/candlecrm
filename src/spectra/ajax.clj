@@ -51,50 +51,36 @@
     (debugf "Login request: %s" params)
     {:status 200 :session (assoc session :uid user-id)}))
 
+(defn fetch-people [user req-map]
+  (queries/person-from-user user (:start req-map) (:limit req-map)))
+
+(defn fetch-emails [user req-map]
+  (queries/emails-from-user user (:start req-map) (:limit req-map)))
+
+(defn user-data [user req-map]
+  (queries/user-data-public user))
+
+(defn fetch-node [user req-map]
+  (queries/node-by-id user (:id req-map) (:type req-map)))
+
+(defn no-reply [event]
+  (debugf "Unhandled event: %s" event)
+  {:umatched-event-as-echoed-from-from-server event})
+
+(def reply-map {:pages/fetch-people fetch-people
+                :pages/fetch-emails fetch-emails
+                :update/user-data user-data
+                :update/fetch-node fetch-node})
+
 (defmulti event-msg-handler :id) ; Dispatch on event-id
 
 ;; Wrap for logging, catching, etc.:
 (defn event-msg-handler*
-  [{:as ev-msg :keys [id ?data event]}]
-  (debugf "Event: %s" event)
-  (debugf "ID: %s" id)
-  (event-msg-handler ev-msg))
-
-;; TODO: Clean up redundancy here
-(do ; Server-side methods
-  (defmethod event-msg-handler :pages/fetch-people
-    [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-    (when-let [user (auth/user-from-req ring-req)]
-      (when ?reply-fn
-        (?reply-fn (queries/person-from-user user (:start ?data) (:limit ?data))))))
-
-  (defmethod event-msg-handler :pages/fetch-emails
-    [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-    (when-let [user (auth/user-from-req ring-req)]
-      (when ?reply-fn
-        (?reply-fn (queries/emails-from-user user (:start ?data) (:limit ?data))))))
-  
-  (defmethod event-msg-handler :update/user-data
-    [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-    (when-let [user (auth/user-from-req ring-req)]
-      (when ?reply-fn
-        (?reply-fn (queries/user-data-public user)))))
-
-  (defmethod event-msg-handler :update/fetch-node
-    [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-    (when-let [user (auth/user-from-req ring-req)]
-      (when ?reply-fn
-        (?reply-fn (queries/node-by-id user (:id ?data) (:type ?data))))))
-  
-  (defmethod event-msg-handler :default ; Fallback
-    [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-    (let [session (:session ring-req)
-          uid     (:uid     session)]
-      (debugf "Unhandled event: %s" event)
-      (when ?reply-fn
-        (?reply-fn {:umatched-event-as-echoed-from-from-server event})))))
-
-;; Add your (defmethod event-msg-handler <event-id> [ev-msg] <body>)s here...
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user (auth/user-from-req ring-req)]
+    (if-let [fetch-fn (get reply-map id)]
+      (?reply-fn (fetch-fn user ?data))
+      (when ?reply-fn (?reply-fn (no-reply event))))))
 
 ;;;; Example: broadcast server>user
 
