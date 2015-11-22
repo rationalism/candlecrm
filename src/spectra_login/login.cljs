@@ -1,4 +1,4 @@
-(ns spectra_cljs.login
+(ns spectra_login.login
   (:require [clojure.string :as str]
             [goog.dom :as dom]
             [goog.events :as events]))

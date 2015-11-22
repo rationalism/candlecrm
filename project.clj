@@ -75,14 +75,16 @@
                 :source-paths ["src/spectra_cljs" "src/spectra_cljc"]
                 :figwheel {:websocket-url "wss://localhost:3459/figwheel-ws"}
                 :compiler {:main "spectra_cljs.init"
-                           :asset-path "/js/out"
+                           :asset-path "/js/main"
+                           :output-dir "resources/public/js/main"
                            :output-to "resources/public/js/main.js"
                            :optimizations :none
                            :pretty-print true}}
                {:id "login"
-                :source-paths ["src/spectra_cljs"]
-                :compiler {:main "spectra_cljs.login"
-                           :asset-path "/js/out"
+                :source-paths ["src/spectra_login"]
+                :compiler {:main "spectra_login.login"
+                           :asset-path "/js/login"
+                           :output-dir "resources/public/js/login"
                            :output-to "resources/public/js/login.js"
                            :optimizations :none
                            :pretty-print true}}]}

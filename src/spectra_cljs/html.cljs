@@ -120,12 +120,11 @@
 (defn map-did-mount [this]
   (let [map-canvas (r/dom-node this)
         map-options (clj->js {"center" (google.maps.LatLng. -34.397, 150.644)
-                              "zoom" 8})]
-        (js/google.maps.Map. map-canvas map-options)))
+                              "zoom" 2})]
+    (js/google.maps.Map. map-canvas map-options)))
 
 (defn location-html []
-  [:div#locations {:style {:height "300px"}}
-   [:h2 "Map goes here"]])
+  [:div#locations {:style {:height "300px" :width "500px"}}])
 
 (defn locations []
   (r/create-class {:reagent-render location-html

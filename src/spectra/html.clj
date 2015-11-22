@@ -10,7 +10,7 @@
 ;; TODO: Reorganize this by page
 ;; TODO: Add CDN local fallback in case something fails
 (def goog-jquery "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js")
-(def goog-maps (str "https://maps.googleapis.com/maps/api/js?key="
+(def goog-maps (str "https://maps.googleapis.com/maps/api/js?v=3&key="
                     (env :gmaps-api-key)))
 
 (defn base-template [& content]
