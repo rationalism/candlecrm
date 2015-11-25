@@ -91,7 +91,8 @@
         :id "next-email-page"} "Next -->"]])
 
 (defn calendar-load! [this]
-  (.fullCalendar ($ :#calendar)))
+  (.fullCalendar ($ :#calendar)
+                 (clj->js {:events (state/look :cal-events)})))
 
 (defn calendar-render! [this]
   (.fullCalendar ($ :#calendar) "render"))
@@ -99,7 +100,7 @@
 (defn calendar-html []
   (if (= (state/look :tabid) 3)
     [:div#calendar {:style {:height "300px" :width "500px"}}]
-    [:div#calendar {:style {:height "0px" :width "0px"}}]))
+    [:div#calendar {:style {:height "299px" :width "499px"}}]))
 
 (defn calendar []
   (r/create-class
@@ -107,17 +108,23 @@
     :component-did-update calendar-render!
     :display-name "calendar-tab"
     :reagent-render calendar-html}))
+
+(defn map-marker [vars]
+  (google.maps.Marker. (clj->js vars)))
     
 (defn map-did-mount [this]
-  (let [map-canvas (r/dom-node this)
-        map-options (clj->js {"center" (google.maps.LatLng. 38.397, -120.644)
-                              "zoom" 8})]
-    (js/google.maps.Map. map-canvas map-options)))
+  (let [map-obj (js/google.maps.Map. (r/dom-node this)
+                                     (clj->js {:center (state/look :map-center)
+                                               :zoom (state/look :map-zoom)}))]
+    (->> (state/look :map-markers)
+         (map #(assoc % :map map-obj))
+         (map map-marker) doall)
+    map-obj))
 
 (defn location-html []
   (if (= (state/look :tabid) 4)
     [:div#locations {:style {:height "300px" :width "500px"}}]
-    [:div#locations {:style {:height "0px" :width "0px"}}]))
+    [:div#locations {:style {:height "299px" :width "599px"}}]))
 
 (defn resize-map [this]
   (-> (. js/document (getElementById "locations"))

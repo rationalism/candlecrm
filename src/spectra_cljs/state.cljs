@@ -9,7 +9,13 @@
     :tabid 1
     :people-rows []
     :email-rows []
-    :current-node nil}))
+    :current-node nil
+    :cal-events [{:title "event1" :start "2015-11-05" :end "2015-11-06"}
+                 {:title "event2" :start "2015-11-25" :end "2015-11-29"}]
+    :map-center {:lat 37.953235 :lng -122.433765}
+    :map-zoom 10
+    :map-markers [{:position {:lat 37.953 :lng -122.434} :title "marker 1!"}
+                  {:position {:lat 38.053 :lng -122.534} :title "marker 2!"}]}))
 
 (defn look [& args]
   (get-in @a args))
