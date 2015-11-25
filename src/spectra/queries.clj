@@ -1,6 +1,8 @@
 (ns spectra.queries
   (:require [clojure.java.io :as io]
             [clojure.set :as set]
+            [clojure.string :as str]
+            [spectra.auth :as auth]
             [spectra.common :as com]
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]
@@ -102,6 +104,23 @@
            " AND s." (neo4j/cypher-esc-token s/stop-time)
            " > " time " RETURN s")
       neo4j/cypher-list))
+
+(defn escape-rels [rels]
+  (->> (map neo4j/cypher-esc-token rels)
+       (map #(str ":" %))
+       (str/join "|")))
+
+(defn people-by-reltype [user reltype start limit]
+  (let [user-label (neo4j/cypher-esc (neo4j/user-label user))]
+    (-> (str "MATCH (root:" user-label
+             ":" s/person
+             ")<-[" (escape-rels [s/email-to s/email-from s/email-mentions])
+             "]-(em:" user-label
+           ":" s/email
+           ")-[:" (neo4j/cypher-esc-token s/email-mentions)
+           "]->(ev:" user-label
+           ":" reltype
+           ") WITH root, count(ev) as cev RETURN root ORDER BY cev "
+           " DESC SKIP " start " LIMIT " limit)
+        neo4j/cypher-list)))
   
-
-
