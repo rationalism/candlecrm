@@ -54,9 +54,9 @@
      (for [p-row (state/look :people-rows)]
        ^{:key p-row}
        [person-row p-row])]]
-   [:a {:href "#" :on-click (u/prev-people! ajax/chsk-send!)
+   [:a {:href "#" :on-click (u/prev-fetch! :people u/update-people! ajax/chsk-send!)
         :id "prev-people-page"} "<-- Previous"]
-   [:a {:href "#" :on-click (u/next-people! ajax/chsk-send!)
+   [:a {:href "#" :on-click (u/next-fetch! :people u/update-people! ajax/chsk-send!)
         :id "next-people-page"} "Next -->"]])
 
 (def email-attrs {s/email-sent "Date"
@@ -75,20 +75,20 @@
          ^{:key attr}
          [email-cell email attr])])
 
-(defn email-table []
+(defn email-table [row-keys]
   [:div
    [:table {:id "email-table"}
     [:thead {:id "email-header"}
      (for [attr email-attrs]
        ^{:key attr} [:td attr])]
     [:tbody {:id "email-rows"}
-     (for [e-row (state/look :email-rows)]
+     (for [e-row (apply state/look row-keys)]
        ^{:key (:id e-row)}
        [email-row e-row])]]
-   [:a {:href "#" :on-click (u/prev-emails! ajax/chsk-send!)
-        :id "prev-email-page"} "<-- Previous"]
-   [:a {:href "#" :on-click (u/next-emails! ajax/chsk-send!)
-        :id "next-email-page"} "Next -->"]])
+   [:a {:href "#" :on-click (u/prev-fetch! :email u/update-emails! ajax/chsk-send!)
+        :class "prev-email-page"} "<-- Previous"]
+   [:a {:href "#" :on-click (u/next-fetch! :email u/update-emails! ajax/chsk-send!)
+        :class "next-email-page"} "Next -->"]])
 
 (defn calendar-load! [this]
   (.fullCalendar ($ :#calendar)
@@ -207,9 +207,9 @@
    [:h3.infotitle (str person-name " (Person)")]
    [info-items attrs]
    [:h3.infotitle (str "Emails to " person-name)]
-   [email-table]
+   [email-table [:current-node :emails-to]]
    [:h3.infotitle (str "Emails from " person-name)]
-   [email-table]])
+   [email-table [:current-node :emails-from]]])
 
 (defn show-email [email-name attrs]
   [:div {:class "columns small-12"}

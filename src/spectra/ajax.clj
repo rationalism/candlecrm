@@ -63,12 +63,18 @@
 (defn fetch-node [user req-map]
   (queries/node-by-id user (:id req-map) (:type req-map)))
 
+(defn person-emails [user req-map]
+  (->> [:person-id :link :start :limit]
+       (select-keys req-map)
+       (queries/emails-linked user)))
+
 (defn no-reply [event]
   (debugf "Unhandled event: %s" event)
   {:umatched-event-as-echoed-from-from-server event})
 
 (def reply-map {:pages/fetch-people fetch-people
                 :pages/fetch-emails fetch-emails
+                :pages/person-emails person-emails
                 :update/user-data user-data
                 :update/fetch-node fetch-node})
 

@@ -16,16 +16,16 @@
 (defn update-people! [chsk-send!]
   (fetch-rows! chsk-send! :people-rows (people-req)))
 
-(defn prev-people! [chsk-send!]
+(defn prev-fetch! [counter update-fn chsk-send!]
   (fn []
-    (when (< 0 (state/look :counters :people))
-      (state/update! [:counters :people] dec)
-      (update-people! chsk-send!))))
+    (when (< 0 (state/look :counters counter))
+      (state/update! [:counters counter] dec)
+      (update-fn chsk-send!))))
 
-(defn next-people! [chsk-send!]
+(defn next-fetch! [counter update-fn chsk-send!]
   (fn []
-    (state/update! [:counters :people] inc)
-    (update-people! chsk-send!)))
+    (state/update! [:counters counter] inc)
+    (update-fn chsk-send!)))
 
 (defn email-req []
   [:pages/fetch-emails
@@ -34,17 +34,6 @@
   
 (defn update-emails! [chsk-send!]
   (fetch-rows! chsk-send! :email-rows (email-req)))
-
-(defn prev-emails! [chsk-send!]
-  (fn []
-    (when (< 0 (state/look :counters :email))
-      (state/update! [:counters :email] dec)
-      (update-emails! chsk-send!))))
-
-(defn next-emails! [chsk-send!]
-  (fn []
-    (state/update! [:counters :email] inc)
-    (update-emails! chsk-send!)))
 
 (defn update-user! [chsk-send!]
   (chsk-send! [:update/user-data] 5000

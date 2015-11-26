@@ -43,14 +43,14 @@
            " DESC SKIP " start " LIMIT " limit)
       neo4j/cypher-list tablify-hits))
 
-(defn emails-linked [user person link start limit]
+(defn emails-linked [user query-map]
   (-> (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
            ":" s/email
-           ")-[:" (neo4j/cypher-esc-token link)
+           ")-[:" (neo4j/cypher-esc-token (:link query-map))
            "]->(p:" s/person
-           ") WHERE ID(p)=" (:id person)
+           ") WHERE ID(p)=" (:person-id query-map)
            " RETURN root ORDER BY root." (neo4j/cypher-esc-token s/email-sent)
-           " DESC SKIP " start " LIMIT " limit)
+           " DESC SKIP " (:start query-map) " LIMIT " (:limit query-map))
       neo4j/cypher-list tablify-hits))
 
 (defn emails-with-dates [user start limit]

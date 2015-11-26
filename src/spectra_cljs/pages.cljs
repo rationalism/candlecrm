@@ -15,8 +15,8 @@
 
 (defn email-tab []
   (if (= (state/look :tabid) 2)
-    [:div#tab2.tab-show [html/email-table]]
-    [:div#tab2.tab-hide [html/email-table]]))
+    [:div#tab2.tab-show [html/email-table [:email-rows]]]
+    [:div#tab2.tab-hide [html/email-table [:email-rows]]]))
 
 (defn calendar-tab []
   (if (= (state/look :tabid) 3)
