@@ -68,6 +68,9 @@
        (select-keys req-map)
        (queries/emails-linked user)))
 
+(defn people-ranked [user req-map]
+  (queries/people-by-reltype user (:reltype req-map) (:start req-map) (:limit req-map)))
+
 (defn no-reply [event]
   (debugf "Unhandled event: %s" event)
   {:umatched-event-as-echoed-from-from-server event})
@@ -75,6 +78,7 @@
 (def reply-map {:pages/fetch-people fetch-people
                 :pages/fetch-emails fetch-emails
                 :pages/person-emails person-emails
+                :pages/people-ranked people-ranked
                 :update/user-data user-data
                 :update/fetch-node fetch-node})
 

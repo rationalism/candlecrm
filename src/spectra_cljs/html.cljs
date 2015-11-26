@@ -90,6 +90,13 @@
    [:a {:href "#" :on-click (u/next-fetch! counter update-fn ajax/chsk-send!)
         :class "next-email-page"} "Next -->"]])
 
+(defn people-ranks [rel-type]
+  [:select {:id (str "people-list-" rel-type)}
+   (for [person (state/look :rank-lists rel-type)]
+     ^{:key (:id person)}
+     [:option {:value (:id person)}
+      (s/email-addr person)])])
+
 (defn calendar-load! [this]
   (.fullCalendar ($ :#calendar)
                  (clj->js {:events (state/look :cal-events)})))
@@ -99,8 +106,10 @@
 
 (defn calendar-html []
   (if (= (state/look :tabid) 3)
-    [:div#calendar {:style {:height "300px" :width "500px"}}]
-    [:div#calendar {:style {:height "299px" :width "499px"}}]))
+    [:div#calendar {:style {:height "300px" :width "500px"}}
+     [people-ranks s/event]]
+    [:div#calendar {:style {:height "299px" :width "499px"}}
+     [people-ranks s/event]]))
 
 (defn calendar []
   (r/create-class
@@ -123,8 +132,10 @@
 
 (defn location-html []
   (if (= (state/look :tabid) 4)
-    [:div#locations {:style {:height "300px" :width "500px"}}]
-    [:div#locations {:style {:height "299px" :width "599px"}}]))
+    [:div#locations {:style {:height "300px" :width "500px"}}
+     [people-ranks s/location]]
+    [:div#locations {:style {:height "299px" :width "599px"}}
+     [people-ranks s/location]]))
 
 (defn resize-map [this]
   (-> (. js/document (getElementById "locations"))

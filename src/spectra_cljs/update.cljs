@@ -64,3 +64,16 @@
   (chsk-send! (node-req id type) 5000
               #(state/update! [:current-node]
                               (new-node % type))))
+
+(defn people-ranked-req [rel-type]
+  [:pages/people-ranked
+   {:reltype rel-type
+    :start 0 :limit (state/look :page-lengths rel-type)}])
+
+(defn new-rank-lists! [rel-type]
+  (fn [new-ranks]
+    (state/update! [:rank-lists rel-type] (constantly new-ranks))))
+
+(defn fetch-ranks! [chsk-send! rel-type]
+  (chsk-send! (people-ranked-req rel-type) 5000
+              (new-rank-lists! rel-type)))

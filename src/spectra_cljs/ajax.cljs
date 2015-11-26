@@ -7,6 +7,7 @@
    [taoensso.timbre :as timbre :refer-macros (tracef debugf infof warnf errorf)]
    [taoensso.sente  :as sente  :refer (cb-success?)]
    [spectra_cljs.ajax-demo :as ajax-demo]
+   [spectra_cljc.schema :as s]
    [spectra_cljs.state :as state]
    [spectra_cljs.update :as u])
    ;; Optional, for Transit encoding:
@@ -44,7 +45,9 @@
 (defn chsk-init! []
   (u/update-emails! chsk-send!)
   (u/update-people! chsk-send!)
-  (u/update-user! chsk-send!))
+  (u/update-user! chsk-send!)
+  (u/fetch-ranks! chsk-send! s/event)
+  (u/fetch-ranks! chsk-send! s/location))
 
 (defmulti event-msg-handler :id) ; Dispatch on event-id
 
