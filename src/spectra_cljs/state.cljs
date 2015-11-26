@@ -1,9 +1,10 @@
 (ns spectra_cljs.state
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [spectra_cljc.schema :as s]))
 
 (defonce a
   (r/atom
-   {:counters {:people 0 :email 0}
+   {:counters {:people 0 :email 0 s/email-from 0 s/email-to 0}
     :page-lengths {:people 20 :email 20}
     :user {:username "Joe Bob Smith"}
     :tabid 1
@@ -28,5 +29,10 @@
   (* (look :counters :email)
      (look :page-lengths :email)))
 
+(defn email-person-pos [link-type]
+  (* (look :counters link-type)
+     (look :page-lengths :email)))
+
 (defn update! [& args]
   (apply (partial swap! a update-in) args))
+

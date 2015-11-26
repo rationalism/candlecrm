@@ -4,6 +4,7 @@
             [spectra_cljs.html :as html]
             [spectra_cljc.schema :as s]
             [spectra_cljs.state :as state]
+            [spectra_cljs.update :as u] 
             [reagent.core :as r]
             [jayq.core :as jq])
   (:use [jayq.core :only [$]]))
@@ -13,10 +14,14 @@
     [:div#tab1.tab-show [html/people-table]]
     [:div#tab1.tab-hide [html/people-table]]))
 
+(defn all-email-table []
+  [:div
+   [html/email-table [:email-rows] :email u/update-emails!]])
+
 (defn email-tab []
   (if (= (state/look :tabid) 2)
-    [:div#tab2.tab-show [html/email-table [:email-rows]]]
-    [:div#tab2.tab-hide [html/email-table [:email-rows]]]))
+    [:div#tab2.tab-show [all-email-table]]
+    [:div#tab2.tab-hide [all-email-table]]))
 
 (defn calendar-tab []
   (if (= (state/look :tabid) 3)

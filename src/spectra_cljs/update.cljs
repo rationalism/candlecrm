@@ -5,6 +5,10 @@
   (fn [new-rows]
     (state/update! [rows-type] (constantly new-rows))))
 
+(defn update-node-rows! [rows-type]
+  (fn [new-rows]
+    (state/update! [:current-node rows-type] (constantly new-rows))))
+
 (defn fetch-rows! [chsk-send! rows-type req-type]
   (chsk-send! req-type 5000 (update-rows! rows-type)))
 
@@ -31,9 +35,19 @@
   [:pages/fetch-emails
    {:start (state/email-pos)
     :limit (state/look :page-lengths :email)}])
-  
+
+(defn email-person-req [link-type]
+  [:pages/person-emails
+   {:person-id (state/look :current-node :id)
+    :link link-type
+    :start (state/email-person-pos link-type)
+    :limit (state/look :page-lengths :email)}])
+
 (defn update-emails! [chsk-send!]
   (fetch-rows! chsk-send! :email-rows (email-req)))
+
+(defn update-emails-person! [link-type chsk-send!]
+  (fetch-rows! chsk-send! link-type (email-person-req link-type)))
 
 (defn update-user! [chsk-send!]
   (chsk-send! [:update/user-data] 5000

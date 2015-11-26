@@ -75,7 +75,7 @@
          ^{:key attr}
          [email-cell email attr])])
 
-(defn email-table [row-keys]
+(defn email-table [row-keys counter update-fn]
   [:div
    [:table {:id "email-table"}
     [:thead {:id "email-header"}
@@ -85,9 +85,9 @@
      (for [e-row (apply state/look row-keys)]
        ^{:key (:id e-row)}
        [email-row e-row])]]
-   [:a {:href "#" :on-click (u/prev-fetch! :email u/update-emails! ajax/chsk-send!)
+   [:a {:href "#" :on-click (u/prev-fetch! counter update-fn ajax/chsk-send!)
         :class "prev-email-page"} "<-- Previous"]
-   [:a {:href "#" :on-click (u/next-fetch! :email u/update-emails! ajax/chsk-send!)
+   [:a {:href "#" :on-click (u/next-fetch! counter update-fn ajax/chsk-send!)
         :class "next-email-page"} "Next -->"]])
 
 (defn calendar-load! [this]
@@ -207,9 +207,11 @@
    [:h3.infotitle (str person-name " (Person)")]
    [info-items attrs]
    [:h3.infotitle (str "Emails to " person-name)]
-   [email-table [:current-node :emails-to]]
+   [email-table [:current-node s/email-to] s/email-to
+    (partial u/update-emails-person! s/email-to)]
    [:h3.infotitle (str "Emails from " person-name)]
-   [email-table [:current-node :emails-from]]])
+   [email-table [:current-node s/email-from] s/email-from
+    (partial u/update-emails-person! s/email-from)]])
 
 (defn show-email [email-name attrs]
   [:div {:class "columns small-12"}
