@@ -125,11 +125,11 @@
   (-> (str (reltype-query user reltype)
            ") WITH root, count(ev) as cev RETURN root ORDER BY cev "
            " DESC SKIP " start " LIMIT " limit)
-      neo4j/cypher-list))
+      neo4j/cypher-list tablify-hits))
 
 (defn person-related [user query-map]
   (-> (str (reltype-query user (:reltype query-map))
            ") WHERE ID(root)=" (:person-id query-map)
            " RETURN ev DESC SKIP " (:start query-map)
            " LIMIT " (:limit query-map))
-      neo4j/cypher-list))
+      neo4j/cypher-list tablify-hits))

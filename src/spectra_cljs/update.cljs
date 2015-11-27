@@ -65,10 +65,12 @@
               #(state/update! [:current-node]
                               (new-node % type))))
 
+(defn rel-map [rel-type]
+  {:reltype rel-type
+   :start 0 :limit (state/look :page-lengths rel-type)})
+
 (defn people-ranked-req [rel-type]
-  [:pages/people-ranked
-   {:reltype rel-type
-    :start 0 :limit (state/look :page-lengths rel-type)}])
+  [:pages/people-ranked (rel-map rel-type)])
 
 (defn new-rank-lists! [rel-type]
   (fn [new-ranks]
@@ -77,3 +79,7 @@
 (defn fetch-ranks! [chsk-send! rel-type]
   (chsk-send! (people-ranked-req rel-type) 5000
               (new-rank-lists! rel-type)))
+
+(defn person-rels-req [person-id rel-type]
+  [:pages/person-related
+   (assoc (rel-map rel-type) :person-id person-id)])

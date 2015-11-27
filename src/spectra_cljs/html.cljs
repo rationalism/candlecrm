@@ -91,7 +91,8 @@
         :class "next-email-page"} "Next -->"]])
 
 (defn people-ranks [rel-type]
-  [:select {:id (str "people-list-" rel-type)}
+  [:select {:class (str "people-list-" rel-type)
+            :on-change #(println (.. % -target -value))}
    (for [person (state/look :rank-lists rel-type)]
      ^{:key (:id person)}
      [:option {:value (:id person)}
