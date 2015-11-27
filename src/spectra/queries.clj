@@ -110,17 +110,26 @@
        (map #(str ":" %))
        (str/join "|")))
 
-(defn people-by-reltype [user reltype start limit]
+(defn reltype-query [user reltype]
   (let [user-label (neo4j/cypher-esc (neo4j/user-label user))]
-    (-> (str "MATCH (root:" user-label
-             ":" s/person
-             ")<-[" (escape-rels [s/email-to s/email-from s/email-mentions])
-             "]-(em:" user-label
-           ":" s/email
-           ")-[:" (neo4j/cypher-esc-token s/email-mentions)
-           "]->(ev:" user-label
-           ":" reltype
+    (str "MATCH (root:" user-label
+         ":" s/person
+         ")<-[" (escape-rels [s/email-to s/email-from s/email-mentions])
+         "]-(em:" user-label
+         ":" s/email
+         ")-[:" (neo4j/cypher-esc-token s/email-mentions)
+         "]->(ev:" user-label
+         ":" reltype)))
+
+(defn people-by-reltype [user reltype start limit]
+  (-> (str (reltype-query user reltype)
            ") WITH root, count(ev) as cev RETURN root ORDER BY cev "
            " DESC SKIP " start " LIMIT " limit)
-        neo4j/cypher-list)))
-  
+      neo4j/cypher-list))
+
+(defn person-related [user query-map]
+  (-> (str (reltype-query user (:reltype query-map))
+           ") WHERE ID(root)=" (:person-id query-map)
+           " RETURN ev DESC SKIP " (:start query-map)
+           " LIMIT " (:limit query-map))
+      neo4j/cypher-list))
