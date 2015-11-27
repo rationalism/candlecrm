@@ -25,7 +25,7 @@
 (deftest vertex-create-destroy
   (testing "create, find, destroy vertices"
     (def get-people (partial get-vertices-coll s/person))
-    (def test-name {s/name (first test-names)})
+    (def test-name {s/s-name (first test-names)})
     (def test-email {s/email-addr (first test-emails)})
     (def test-phone {s/phone-num (first test-phones)})
     (def test-fake {fake-prop (first test-fake-prop)})
@@ -35,7 +35,7 @@
     
     (def new-vertex
       (create-vertex! s/person
-                      {s/name test-names
+                      {s/s-name test-names
                        s/email-addr test-emails
                        s/phone-num test-phones
                        fake-prop test-fake-prop}))
@@ -44,7 +44,7 @@
     (is (= 1 (count (get-people test-email))))
     (is (= 1 (count (get-people test-phone))))
     (is (= 0 (count (get-people test-fake))))
-    (is (= 0 (count (get-people {s/name other-name}))))
+    (is (= 0 (count (get-people {s/s-name other-name}))))
     (is (= 0 (count (get-people {s/email-addr other-email}))))
     (is (= 0 (count (get-people {s/phone-num other-phone}))))
     
@@ -59,15 +59,15 @@
   (testing "Reconcile old values of a property with new values"
     (def new-vertex
       (create-vertex! s/person
-                      {s/name test-names}))
+                      {s/s-name test-names}))
     (is (= test-names
-           (get-property new-vertex s/name)))
-    (recon-property-list! new-vertex s/name (first test-names))
+           (get-property new-vertex s/s-name)))
+    (recon-property-list! new-vertex s/s-name (first test-names))
     (def new-vertex (refresh-vertex new-vertex))
     (is (= test-names
-           (get-property new-vertex s/name)))
-    (recon-property-list! new-vertex s/name other-name)
+           (get-property new-vertex s/s-name)))
+    (recon-property-list! new-vertex s/s-name other-name)
     (def new-vertex (refresh-vertex new-vertex))
     (is (= (conj test-names other-name)
-           (get-property new-vertex s/name)))
+           (get-property new-vertex s/s-name)))
     (delete-vertex! new-vertex)))
