@@ -31,11 +31,11 @@
     (-> queue :data s/queue-top (- email/batch-size))))
 
 (defn queue-reset! [queue]
+  (neo4j/set-property! queue s/modified (dt/now))
   (if (queue-small? queue)
     (neo4j/delete-vertex! queue)
     (neo4j/set-property! queue s/queue-top
-                         (- (-> queue :data s/queue-top) 10)))
-  (neo4j/set-property! queue s/modified (dt/now)))
+                         (- (-> queue :data s/queue-top) 10))))
 
 (defn email-time [email-num queue-user]
   (-> queue-user :user
@@ -48,9 +48,9 @@
    (-> queue-user :queue range-top (email-time queue-user))
    (-> queue-user :queue range-top inc (email-time queue-user))])
 
-(defn scan-check [queue-user]
-  (->> queue-user queue-time 
-       (mapv #(queries/scan-overlaps (:user queue-user) %))
+(defn scan-check [user email-times]
+  (->> email-times
+       (mapv #(queries/scan-overlaps user %))
        (mapv com/nil-or-empty?)))
 
 (defn find-ranges [queue-user]
@@ -65,7 +65,7 @@
 (defn default-queue [user]
   (let [top (-> user email/fetch-imap-folder
                 email/message-count)]
-    {s/queue-bottom (- top 200)
+    {s/queue-bottom (- top 50)
      s/queue-top top}))
 
 (defn create-edges! [user queue]
@@ -94,16 +94,28 @@
                              (range-top (:queue queue-user))))
 
 (defn adjust-times! [queue-user]
-  (if (= [true true false] (scan-check queue-user))
-    (run-insertion! queue-user)
-    (->> queue-user find-ranges
-         (wipe-and-insert! (:user queue-user)))))
+  (let [email-times (queue-time queue-user)]
+    (if (= [true true false] (scan-check (:user queue-user) email-times))
+      (do (run-insertion! queue-user) 
+          (neo4j/set-property! (:queue queue-user)
+                               s/start-time (first email-times)))
+      (->> queue-user find-ranges
+           (wipe-and-insert! (:user queue-user))))))
+
+(defn new-time-scanned! [queue-user]
+  (let [email-times (queue-time queue-user)
+        new-node (->> email-times (take 2)
+                      (zipmap [s/start-time s/stop-time])
+                      (neo4j/create-vertex! s/time-scanned))]
+    (neo4j/create-edge! (:user queue-user) new-node s/scanned)))
 
 (defn queue-pop! []
   (when-let [queue-user (queries/next-email-queue)]
     (queue-reset! (:queue queue-user))
-    (if (-> queue-user :user queries/all-scanned count (= 0))
-      (run-insertion! queue-user)
+    (if (-> queue-user :user email/fetch-imap-folder email/message-count
+            (= (-> queue-user :queue :data s/queue-top)))
+      (do (run-insertion! queue-user)
+          (new-time-scanned! queue-user))
       (adjust-times! queue-user))))
 
 (jobs/defjob EmailLoad [ctx]
