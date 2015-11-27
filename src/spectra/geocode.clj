@@ -1,6 +1,7 @@
 (ns spectra.geocode
   (:require [clojure.string :as str]
             [spectra.neo4j :as neo4j]
+            [spectra_cljc.schema :as s]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -14,8 +15,8 @@
   (def ^:dynamic *context* (make-context)))
 
 (defn map-latlng [latlng]
-  {:lat (.lat latlng)
-   :lng (.lng latlng)})
+  {s/lat (.lat latlng)
+   s/lng (.lng latlng)})
 
 (defn geocode-str [s]
   (-> *context*

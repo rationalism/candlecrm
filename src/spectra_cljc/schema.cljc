@@ -36,6 +36,10 @@
 
 (def location "location")
 (def loc-name :loc-name)
+(def lat :lat)
+(def lng :lng)
+(def has-coord :has-coord)
+(def geocode "geocode")
 
 (def organization "org")
 (def person-name :person-name)
