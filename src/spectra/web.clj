@@ -10,6 +10,7 @@
             [spectra.auth :as auth]
             [spectra.contacts :as contacts]
             [spectra.email :as email]
+            [spectra.geocode :as geocode]
             [spectra.google :as google]
             [spectra.neo4j :as neo4j]
             [spectra.corenlp :as nlp]
@@ -137,6 +138,7 @@
   (nlp/load-pipeline!)
   (ajax/start!)
   (quartz/start!)
+  (geocode/define-context!)
   (email/define-imap-lookup)
   (println "Ready to start server")
   (nrepl-server/start-server
