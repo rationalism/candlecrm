@@ -111,7 +111,7 @@
        (map #(str ":" %))
        (str/join "|")))
 
-(defn reltype-query [user reltype]
+(defn rel-query [user]
   (let [user-label (neo4j/cypher-esc (neo4j/user-label user))]
     (str "MATCH (root:" user-label
          ":" s/person
@@ -119,24 +119,45 @@
          "]-(em:" user-label
          ":" s/email
          ")-[:" (neo4j/cypher-esc-token s/email-mentions)
-         "]->(ev:" user-label
-         ":" reltype)))
+         "]->(ev:" user-label)))
 
 (defn people-by-reltype [user query-map]
-  (-> (str (reltype-query user (:reltype query-map))
+  (-> (str (rel-query user)
+           ":" (:reltype query-map)
            ") WITH root, count(ev) as cev RETURN root ORDER BY cev "
            " DESC SKIP " (:start query-map) " LIMIT " (:limit query-map))
       neo4j/cypher-list tablify-hits))
 
-(defn person-related [user query-map]
-  (-> (str (reltype-query user (:reltype query-map))
+(defn event-related [user query-map]
+  (-> (str (rel-query user)
+           ":" (:reltype query-map)
            ") WHERE ID(root)=" (:person-id query-map)
-           " RETURN ev DESC SKIP " (:start query-map)
+           " RETURN ev SKIP " (:start query-map)
            " LIMIT " (:limit query-map))
       neo4j/cypher-list tablify-hits))
 
+(defn loc-related [user query-map]
+  (->> (str (rel-query user)
+            ":" (:reltype query-map)
+            ")-[:" (neo4j/cypher-esc-token s/has-coord)
+            "]->(g:" s/geocode
+            ") WHERE ID(root)=" (:person-id query-map)
+            " RETURN ev, g SKIP " (:start query-map)
+            " LIMIT " (:limit query-map))
+       neo4j/cypher-query
+       (map #(update % "ev" node-attrs))
+       (map #(update % "g" node-attrs))
+       (map #(update-in % ["g"] dissoc :id))
+       (map vals) (map #(apply merge %))))
+  
+(defn person-related [user query-map]
+  (condp = (:reltype query-map)
+    s/event (event-related user query-map)
+    s/location (loc-related user query-map)
+    []))
+
 (defn bare-locations [limit]
   (-> (str "MATCH (root:" s/location
-           ") WHERE NOT (root)-[:"  (neo4j/cypher-esc-token s/has-coord)
+           ") WHERE NOT (root)-[:" (neo4j/cypher-esc-token s/has-coord)
            "]->() RETURN root LIMIT " limit)
       neo4j/cypher-list))
