@@ -69,8 +69,10 @@
                                      :keys [:person-id :link :start :limit]}
                 :pages/people-ranked {:fn queries/people-by-reltype
                                       :keys [:reltype :start :limit]}
-                :pages/person-related {:fn queries/person-related
-                                       :keys [:person-id :reltype :start :limit]}
+                :pages/person-events {:fn queries/event-related
+                                      :keys [:person-id :start :limit]}
+                :pages/person-places {:fn queries/loc-related
+                                       :keys [:person-id :start :limit]}
                 :update/user-data {:fn queries/user-data-public
                                    :keys []}
                 :update/fetch-node {:fn queries/node-by-id

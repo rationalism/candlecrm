@@ -130,7 +130,7 @@
 
 (defn event-related [user query-map]
   (-> (str (rel-query user)
-           ":" (:reltype query-map)
+           ":" s/event
            ") WHERE ID(root)=" (:person-id query-map)
            " RETURN ev SKIP " (:start query-map)
            " LIMIT " (:limit query-map))
@@ -138,7 +138,7 @@
 
 (defn loc-related [user query-map]
   (->> (str (rel-query user)
-            ":" (:reltype query-map)
+            ":" s/location
             ")-[:" (neo4j/cypher-esc-token s/has-coord)
             "]->(g:" s/geocode
             ") WHERE ID(root)=" (:person-id query-map)
@@ -149,12 +149,6 @@
        (map #(update % "g" node-attrs))
        (map #(update-in % ["g"] dissoc :id))
        (map vals) (map #(apply merge %))))
-  
-(defn person-related [user query-map]
-  (condp = (:reltype query-map)
-    s/event (event-related user query-map)
-    s/location (loc-related user query-map)
-    []))
 
 (defn bare-locations [limit]
   (-> (str "MATCH (root:" s/location

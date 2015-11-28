@@ -90,6 +90,11 @@
   (chsk-send! (people-ranked-req rel-type) 5000
               (new-rank-lists! rel-type)))
 
-(defn person-rels-req [person-id rel-type]
-  [:pages/person-related
-   (assoc (rel-map rel-type) :person-id person-id)])
+(defn person-event-req [person-id]
+  [:pages/person-events
+   (assoc (rel-map s/event) :person-id person-id)])
+
+(defn person-place-req [person-id]
+  [:pages/person-places
+   (assoc (rel-map s/location) :person-id person-id)])
+
