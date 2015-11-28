@@ -11,6 +11,7 @@
             [spectra.common :as com]
             [spectra.datetime :as dt]
             [spectra.email :as email]
+            [spectra.geocode :as geocode]
             [spectra.neo4j :as neo4j]
             [spectra.queries :as queries]
             [spectra_cljc.schema :as s]
@@ -121,6 +122,12 @@
 (jobs/defjob EmailLoad [ctx]
   (queue-pop!))
 
+(jobs/defjob NewGeocodes [ctx]
+  (geocode/geocode-batch 10))
+
+(jobs/defjob CachedGeocodes [ctx]
+  (geocode/geocode-cached 20))
+
 (defn make-job [job-type job-name]
   (jobs/build
    (jobs/of-type job-type)
@@ -141,4 +148,10 @@
   (def ^:dynamic *scheduler* (-> (qs/initialize) qs/start))
   (qs/schedule *scheduler*
                (make-job EmailLoad "jobs.email.load.1")
-               (periodic-trigger 15000 nil "email.trigger.1")))
+               (periodic-trigger 15000 nil "email.trigger.1"))
+  (qs/schedule *scheduler*
+               (make-job NewGeocodes "jobs.geocode.load.1")
+               (periodic-trigger 5000 nil "geocode.trigger.1"))
+  (qs/schedule *scheduler*
+               (make-job CachedGeocodes "jobs.geocode.insert.1")
+               (periodic-trigger 5000 nil "geocode.trigger.2")))

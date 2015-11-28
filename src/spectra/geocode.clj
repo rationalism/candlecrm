@@ -30,10 +30,33 @@
     (-> geocode (.geometry)
         (.location) map-latlng)))
 
+(defn geocode-cached [limit]
+  (-> (str "MATCH (aloc:" s/location
+           "),(bloc:" s/location
+           ")-[:" (neo4j/cypher-esc-token s/has-coord)
+           "]->(g:" s/geocode
+           ") WHERE aloc." (neo4j/cypher-esc-token s/s-name)
+           " = bloc." (neo4j/cypher-esc-token s/s-name)
+           " CREATE (aloc)-[:" (neo4j/cypher-esc-token s/has-coord)
+           "]->(g) RETURN saloc LIMIT " limit)
+      neo4j/cypher-list))
+
+(defn insert-query [geocode]
+  (str "MATCH (root:" s/location
+       ") WHERE ID(root) = " (:id geocode)
+       " CREATE (root)-[:" (neo4j/cypher-esc-token s/has-coord)
+       "]->(g:" s/geocode
+       " " (-> geocode (get s/geocode) neo4j/cypher-properties)
+       ") RETURN g"))
+
 (defn geocode-batch [limit]
   (->> (queries/bare-locations limit)
        (map queries/node-attrs)
        (map #(update % s/s-name first))
        (map #(update % s/s-name geocode-str))
-       (map #(set/rename-keys % {s/s-name s/geocode}))))
+       (map #(set/rename-keys % {s/s-name s/geocode}))
+       (map insert-query)
+       neo4j/cypher-combined-tx))
+
+
        
