@@ -82,8 +82,8 @@
 (defn event-msg-handler*
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user (auth/user-from-req ring-req)]
-    (if-let [fetch-fn (-> reply-map (get id) make-fetch-fn)]
-      (?reply-fn (fetch-fn user ?data))
+    (if-let [fetch-spec (get reply-map id)]
+      (?reply-fn ((make-fetch-fn fetch-spec) user ?data))
       (when ?reply-fn (?reply-fn (no-reply event))))))
 
 ;;;; Example: broadcast server>user
