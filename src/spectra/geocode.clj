@@ -38,7 +38,7 @@
            ") WHERE aloc." (neo4j/cypher-esc-token s/s-name)
            " = bloc." (neo4j/cypher-esc-token s/s-name)
            " CREATE (aloc)-[:" (neo4j/cypher-esc-token s/has-coord)
-           "]->(g) RETURN saloc LIMIT " limit)
+           "]->(g) RETURN aloc LIMIT " limit)
       neo4j/cypher-list))
 
 (defn insert-query [geocode]
