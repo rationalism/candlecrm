@@ -98,3 +98,22 @@
   [:pages/person-places
    (assoc (rel-map s/location) :person-id person-id)])
 
+(defn update-cal-rows! []
+  (fn [new-rows]
+    (state/update! [:cal-events] (constantly new-rows))))
+
+(defn update-loc-rows! []
+  (fn [new-rows]
+    (state/update! [:map-markers] (constantly new-rows))))
+
+(defn map-markers [chsk-send! person-id]
+  (chsk-send! (person-place-req person-id) 5000 (update-cal-rows!)))
+
+(defn cal-events [chsk-send! person-id]
+  (chsk-send! (person-event-req person-id) 5000 (update-loc-rows!)))
+
+(defn rel-switch [chsk-send! person-id rel-type]
+  (condp = rel-type
+    s/event (cal-events chsk-send! person-id)
+    s/location (map-markers chsk-send! person-id)
+    nil))

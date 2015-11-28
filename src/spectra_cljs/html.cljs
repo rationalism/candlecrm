@@ -92,7 +92,8 @@
 
 (defn people-ranks [rel-type]
   [:select {:class (str "people-list-" rel-type)
-            :on-change #(println (.. % -target -value))}
+            :on-change #(u/rel-switch ajax/chsk-send! (.. % -target -value)
+                                      rel-type)}
    (for [person (state/look :rank-lists rel-type)]
      ^{:key (:id person)}
      [:option {:value (:id person)}
