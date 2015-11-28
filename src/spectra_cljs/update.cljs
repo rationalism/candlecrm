@@ -1,5 +1,6 @@
 (ns spectra_cljs.update
-  (:require [spectra_cljs.state :as state]))
+  (:require [spectra_cljs.state :as state]
+            [spectra_cljc.schema :as s]))
 
 (defn update-rows! [rows-type]
   (fn [new-rows]
@@ -11,6 +12,9 @@
 
 (defn fetch-rows! [chsk-send! rows-type req-type]
   (chsk-send! req-type 5000 (update-rows! rows-type)))
+
+(defn fetch-node-rows! [chsk-send! rows-type req-type]
+  (chsk-send! req-type 5000 (update-node-rows! rows-type)))
 
 (defn people-req []
   [:pages/fetch-people
@@ -38,7 +42,7 @@
 
 (defn email-person-req [link-type]
   [:pages/person-emails
-   {:person-id (state/look :current-node :id)
+   {:person-id (state/look :current-node :center-node :id)
     :link link-type
     :start (state/email-person-pos link-type)
     :limit (state/look :page-lengths :email)}])
@@ -47,7 +51,7 @@
   (fetch-rows! chsk-send! :email-rows (email-req)))
 
 (defn update-emails-person! [link-type chsk-send!]
-  (fetch-rows! chsk-send! link-type (email-person-req link-type)))
+  (fetch-node-rows! chsk-send! link-type (email-person-req link-type)))
 
 (defn update-user! [chsk-send!]
   (chsk-send! [:update/user-data] 5000
@@ -60,10 +64,16 @@
 (defn new-node [req type]
   (constantly (assoc {:center-node req} :type type)))
 
+(defn update-node [chsk-send! type]
+  (fn [req]
+    (state/update! [:current-node] (new-node req type))
+    (when (= type s/person)
+      (update-emails-person! s/email-to chsk-send!)
+      (update-emails-person! s/email-from chsk-send!))))
+
 (defn go-node! [chsk-send! id type]
   (chsk-send! (node-req id type) 5000
-              #(state/update! [:current-node]
-                              (new-node % type))))
+              (update-node chsk-send! type)))
 
 (defn rel-map [rel-type]
   {:reltype rel-type

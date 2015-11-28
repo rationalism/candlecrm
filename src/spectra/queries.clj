@@ -24,16 +24,17 @@
          (hash-map :id (:id node))))
 
 (defn tablify-hits [hits]
-  (->> (map node-attrs hits) 
+  (->> hits
+       (map node-attrs)
        (remove #(empty? %))
        (map first-table-vals)))
 
 (defn person-from-user [user query-map]
   (-> (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
-           ":" s/person
-           ") RETURN root"
-           " ORDER BY root." (neo4j/cypher-esc-token s/s-name)
-           "[0] SKIP " (:start query-map) " LIMIT " (:limit query-map))
+           ":" s/person ")<-[:" (neo4j/cypher-esc-token s/email-to)
+           "]-(em:" s/email
+           ") WITH root, count(em) as cem RETURN root ORDER BY cem"
+           " SKIP " (:start query-map) " LIMIT " (:limit query-map))
       neo4j/cypher-list tablify-hits))
 
 (defn emails-from-user [user query-map]
@@ -68,7 +69,7 @@
 
 (defn node-by-id [user query-map]
   (-> (neo4j/node-from-id user (:id query-map) (:type query-map))
-      (get :data)))
+      node-attrs))
 
 (defn email-queue []
   (-> (str "MATCH (root:" s/email-queue
