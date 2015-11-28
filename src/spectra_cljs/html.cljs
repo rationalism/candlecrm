@@ -133,10 +133,10 @@
 
 (defn location-html []
   (if (= (state/look :tabid) 4)
-    [:div#locations {:style {:height "300px" :width "500px"}}
-     [people-ranks s/location]]
-    [:div#locations {:style {:height "299px" :width "599px"}}
-     [people-ranks s/location]]))
+    [:div#locations {:style {:height "300px" :width "500px"}}]
+     ;[people-ranks s/location]]
+    [:div#locations {:style {:height "299px" :width "599px"}}]))
+     ;[people-ranks s/location]]))
 
 (defn resize-map [this]
   (-> (. js/document (getElementById "locations"))

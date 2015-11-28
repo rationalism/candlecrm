@@ -28,19 +28,19 @@
        (remove #(empty? %))
        (map first-table-vals)))
 
-(defn person-from-user [user start limit]
+(defn person-from-user [user query-map]
   (-> (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
            ":" s/person
            ") RETURN root"
            " ORDER BY root." (neo4j/cypher-esc-token s/s-name)
-           "[0] SKIP " start " LIMIT " limit)
+           "[0] SKIP " (:start query-map) " LIMIT " (:limit query-map))
       neo4j/cypher-list tablify-hits))
 
-(defn emails-from-user [user start limit]
+(defn emails-from-user [user query-map]
   (-> (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
            ":" s/email
            ") RETURN root ORDER BY root." (neo4j/cypher-esc-token s/email-sent)
-           " DESC SKIP " start " LIMIT " limit)
+           " DESC SKIP " (:start query-map) " LIMIT " (:limit query-map))
       neo4j/cypher-list tablify-hits))
 
 (defn emails-linked [user query-map]
@@ -62,12 +62,12 @@
            " DESC SKIP " start " LIMIT " limit)
       neo4j/cypher-list tablify-hits))
 
-(defn user-data-public [user]
+(defn user-data-public [user query-map]
   (-> user (get :data)
       (dissoc s/pwd-hash) (dissoc s/google-token)))
 
-(defn node-by-id [user id type]
-  (-> (neo4j/node-from-id user id type)
+(defn node-by-id [user query-map]
+  (-> (neo4j/node-from-id user (:id query-map) (:type query-map))
       (get :data)))
 
 (defn email-queue []
@@ -121,10 +121,10 @@
          "]->(ev:" user-label
          ":" reltype)))
 
-(defn people-by-reltype [user reltype start limit]
-  (-> (str (reltype-query user reltype)
+(defn people-by-reltype [user query-map]
+  (-> (str (reltype-query user (:reltype query-map))
            ") WITH root, count(ev) as cev RETURN root ORDER BY cev "
-           " DESC SKIP " start " LIMIT " limit)
+           " DESC SKIP " (:start query-map) " LIMIT " (:limit query-map))
       neo4j/cypher-list tablify-hits))
 
 (defn person-related [user query-map]

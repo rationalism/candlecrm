@@ -51,42 +51,30 @@
     (debugf "Login request: %s" params)
     {:status 200 :session (assoc session :uid user-id)}))
 
-(defn fetch-people [user req-map]
-  (queries/person-from-user user (:start req-map) (:limit req-map)))
-
-(defn fetch-emails [user req-map]
-  (queries/emails-from-user user (:start req-map) (:limit req-map)))
-
-(defn user-data [user req-map]
-  (queries/user-data-public user))
-
-(defn fetch-node [user req-map]
-  (queries/node-by-id user (:id req-map) (:type req-map)))
-
-(defn person-emails [user req-map]
-  (->> [:person-id :link :start :limit]
-       (select-keys req-map)
-       (queries/emails-linked user)))
-
-(defn people-ranked [user req-map]
-  (queries/people-by-reltype user (:reltype req-map) (:start req-map) (:limit req-map)))
-
-(defn person-related [user req-map]
-  (->> [:person-id :reltype :start :limit]
-       (select-keys req-map)
-       (queries/person-related user)))
+(defn make-fetch-fn [specs]
+  (fn [user req-map]
+    (->> (get specs :keys)
+         (select-keys req-map)
+         ((:fn specs) user))))
 
 (defn no-reply [event]
   (debugf "Unhandled event: %s" event)
   {:umatched-event-as-echoed-from-from-server event})
 
-(def reply-map {:pages/fetch-people fetch-people
-                :pages/fetch-emails fetch-emails
-                :pages/person-emails person-emails
-                :pages/people-ranked people-ranked
-                :pages/person-related person-related
-                :update/user-data user-data
-                :update/fetch-node fetch-node})
+(def reply-map {:pages/fetch-people {:fn queries/person-from-user
+                                     :keys [:start :limit]}
+                :pages/fetch-emails {:fn queries/emails-from-user
+                                     :keys [:start :limit]}
+                :pages/person-emails {:fn queries/emails-linked
+                                     :keys [:person-id :link :start :limit]}
+                :pages/people-ranked {:fn queries/people-by-reltype
+                                      :keys [:reltype :start :limit]}
+                :pages/person-related {:fn queries/person-related
+                                       :keys [:person-id :reltype :start :limit]}
+                :update/user-data {:fn queries/user-data-public
+                                   :keys []}
+                :update/fetch-node {:fn queries/node-by-id
+                                    :keys [:id :type]}})
 
 (defmulti event-msg-handler :id) ; Dispatch on event-id
 
@@ -94,7 +82,7 @@
 (defn event-msg-handler*
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user (auth/user-from-req ring-req)]
-    (if-let [fetch-fn (get reply-map id)]
+    (if-let [fetch-fn (-> reply-map (get id) make-fetch-fn)]
       (?reply-fn (fetch-fn user ?data))
       (when ?reply-fn (?reply-fn (no-reply event))))))
 
