@@ -137,7 +137,6 @@
 
 (defn bare-locations [limit]
   (-> (str "MATCH (root:" s/location
-           ") OPTIONAL MATCH (root)-[:"  (neo4j/cypher-esc-token s/has-coord)
-           "]->(g:" s/geocode
-           ") WHERE g = NULL RETURN root LIMIT " limit)
+           ") WHERE NOT (root)-[:"  (neo4j/cypher-esc-token s/has-coord)
+           "]->() RETURN root LIMIT " limit)
       neo4j/cypher-list))
