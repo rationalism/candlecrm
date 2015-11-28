@@ -102,15 +102,21 @@
   (fn [new-rows]
     (state/update! [:cal-events] (constantly new-rows))))
 
+(defn normalize-loc [loc]
+  {:title (-> loc s/s-name first)
+   :position {s/lat (-> loc s/lat (js/parseFloat))
+              s/lng (-> loc s/lng (js/parseFloat))}})
+
 (defn update-loc-rows! []
   (fn [new-rows]
-    (state/update! [:map-markers] (constantly new-rows))))
+    (->> new-rows (map normalize-loc) constantly
+         (state/update! [:map-markers]))))
 
 (defn map-markers [chsk-send! person-id]
-  (chsk-send! (person-place-req person-id) 5000 (update-cal-rows!)))
+  (chsk-send! (person-place-req person-id) 5000 (update-loc-rows!)))
 
 (defn cal-events [chsk-send! person-id]
-  (chsk-send! (person-event-req person-id) 5000 (update-loc-rows!)))
+  (chsk-send! (person-event-req person-id) 5000 (update-cal-rows!)))
 
 (defn rel-switch [chsk-send! person-id rel-type]
   (condp = rel-type
