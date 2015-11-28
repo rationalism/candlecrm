@@ -99,25 +99,28 @@
       (s/email-addr person)])])
 
 (defn calendar-load! [this]
-  (.fullCalendar ($ :#calendar)
+  (.fullCalendar ($ :#calendarbox)
                  (clj->js {:events (state/look :cal-events)})))
 
 (defn calendar-render! [this]
-  (.fullCalendar ($ :#calendar) "render"))
+  (.fullCalendar ($ :#calendarbox) "render"))
 
 (defn calendar-html []
   (if (= (state/look :tabid) 3)
-    [:div#calendar {:style {:height "300px" :width "500px"}}
-     [people-ranks s/event]]
-    [:div#calendar {:style {:height "299px" :width "499px"}}
-     [people-ranks s/event]]))
+    [:div#calendarbox {:style {:height "300px" :width "500px"}}]
+    [:div#calendarbox {:style {:height "299px" :width "499px"}}]))
 
-(defn calendar []
+(defn calendar-box []
   (r/create-class
    {:component-did-mount calendar-load!
     :component-did-update calendar-render!
     :display-name "calendar-tab"
     :reagent-render calendar-html}))
+
+(defn calendar []
+  [:div#calendar
+   [people-ranks s/event]
+   [calendar-box]])
 
 (defn map-marker [vars]
   (google.maps.Marker. (clj->js vars)))
@@ -133,19 +136,22 @@
 
 (defn location-html []
   (if (= (state/look :tabid) 4)
-    [:div#locations {:style {:height "300px" :width "500px"}}]
-     ;[people-ranks s/location]]
-    [:div#locations {:style {:height "299px" :width "599px"}}]))
-     ;[people-ranks s/location]]))
+    [:div#mapbox {:style {:height "300px" :width "500px"}}]
+    [:div#mapbox {:style {:height "299px" :width "599px"}}]))
 
 (defn resize-map [this]
   (-> (. js/document (getElementById "locations"))
       (js/google.maps.event.trigger "resize")))
 
-(defn locations []
+(defn map-box []
   (r/create-class {:reagent-render location-html
                    :component-did-mount map-did-mount
                    :component-did-update resize-map}))
+
+(defn locations []
+  [:div#locations
+   [people-ranks s/location]
+   [map-box]])
 
 (defn login-needed [uri]
   [:h2 "You do not have sufficient privileges to access " uri])
