@@ -1,5 +1,6 @@
 (ns spectra.geocode
-  (:require [clojure.string :as str]
+  (:require [clojure.set :as set]
+            [clojure.string :as str]
             [spectra.neo4j :as neo4j]
             [spectra.queries :as queries]
             [spectra_cljc.schema :as s]
@@ -28,3 +29,11 @@
   (when-let [geocode (fetch-geocode s)]
     (-> geocode (.geometry)
         (.location) map-latlng)))
+
+(defn geocode-batch [limit]
+  (->> (queries/bare-locations limit)
+       (map queries/node-attrs)
+       (map #(update % s/s-name first))
+       (map #(update % s/s-name geocode-str))
+       (map #(set/rename-keys % {s/s-name s/geocode}))))
+       
