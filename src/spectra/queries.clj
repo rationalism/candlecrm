@@ -134,3 +134,11 @@
            " RETURN ev DESC SKIP " (:start query-map)
            " LIMIT " (:limit query-map))
       neo4j/cypher-list tablify-hits))
+
+(defn bare-locations [user limit]
+  (-> (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
+           ":" s/location
+           ") OPTIONAL MATCH (root)-[:"  (neo4j/cypher-esc-token s/has-coord)
+           "]->(g:" s/geocode
+           ") WHERE g = NULL RETURN root LIMIT " limit)
+      neo4j/cypher-list))
