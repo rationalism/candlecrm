@@ -138,7 +138,6 @@
        clj->js))
 
 (defn markers-update []
-  (js/alert "markers-update")
   (state/update! [:map-markers :objs] wipe-markers)
   (state/update! [:map-markers :objs] new-markers)
   (state/update! [:map-markers :updated] (constantly true)))

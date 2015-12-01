@@ -142,13 +142,15 @@
             ")-[:" (neo4j/cypher-esc-token s/has-coord)
             "]->(g:" s/geocode
             ") WHERE ID(root)=" (:person-id query-map)
-            " RETURN ev, g SKIP " (:start query-map)
+            " AND NOT (g." (neo4j/cypher-esc-token s/lat)
+            " IS NULL) RETURN ev, g SKIP " (:start query-map)
             " LIMIT " (:limit query-map))
        neo4j/cypher-query
        (map #(update % "ev" node-attrs))
        (map #(update % "g" node-attrs))
        (map #(update-in % ["g"] dissoc :id))
-       (map vals) (map #(apply merge %))))
+       (map vals) (map #(apply merge %))
+       distinct))
 
 (defn bare-locations [limit]
   (-> (str "MATCH (root:" s/location
