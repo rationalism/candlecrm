@@ -110,7 +110,8 @@
 (defn update-loc-rows! []
   (fn [new-rows]
     (->> new-rows (map normalize-loc) constantly
-         (state/update! [:map-markers]))))
+         (state/update! [:map-markers :data]))
+    (state/update! [:map-markers :updated] (constantly false))))
 
 (defn map-markers [chsk-send! person-id]
   (chsk-send! (person-place-req person-id) 5000 (update-loc-rows!)))

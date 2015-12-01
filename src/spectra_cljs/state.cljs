@@ -15,9 +15,9 @@
                  {:title "event2" :start "2015-11-25" :end "2015-11-29"}]
     :map-center {s/lat 37.953235 s/lng -122.433765}
     :map-zoom 3
-    :map-markers [{:position {s/lat 37.953 s/lng -122.434} :title "marker 1!"}
-                  {:position {s/lat 38.053 s/lng -122.534} :title "marker 2!"}]
-    :rank-lists {s/event [] s/location []}}))
+    :map-markers {:data [] :objs [] :updated true}
+    :rank-lists {s/event [] s/location []}
+    :map-obj nil}))
 
 (defn look [& args]
   (get-in @a args))

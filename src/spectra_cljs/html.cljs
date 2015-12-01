@@ -126,16 +126,30 @@
 (defn map-marker [vars]
   (google.maps.Marker. (clj->js vars)))
 
+(defn wipe-markers [markers]
+  (->> (map #(.setMap % nil) markers)
+       (map #(constantly nil))
+       (remove nil?) clj->js))
+
+(defn new-markers [markers]
+  (->> (state/look :map-markers :data)
+       (map #(assoc % :map (state/look :map-obj)))
+       (map map-marker)
+       clj->js))
+
 (defn markers-update []
-  (->> (state/look :map-markers)
-       (map #(assoc % :map *map*))
-       (map map-marker) doall))
+  (js/alert "markers-update")
+  (state/update! [:map-markers :objs] wipe-markers)
+  (state/update! [:map-markers :objs] new-markers)
+  (state/update! [:map-markers :updated] (constantly true)))
 
 (defn map-did-mount [this]
-  (def *map* (js/google.maps.Map. (r/dom-node this)
-                                  (clj->js {:center (state/look :map-center)
-                                            :zoom (state/look :map-zoom)})))
-  (markers-update) *map*)
+  (->> (map state/look [:map-center :map-zoom])
+       (zipmap [:center :zoom]) clj->js
+       (js/google.maps.Map. (r/dom-node this)) constantly
+       (state/update! [:map-obj]))
+  (markers-update)
+  (state/look :map-obj))
 
 (defn location-html []
   (if (= (state/look :tabid) 4)
@@ -143,7 +157,8 @@
     [:div#mapbox {:style {:height "299px" :width "499px"}}]))
 
 (defn resize-map [this]
-  (markers-update)
+  (when (not (state/look :map-markers :updated))
+    (markers-update))
   (-> (. js/document (getElementById "mapbox"))
       (js/google.maps.event.trigger "resize")))
 
