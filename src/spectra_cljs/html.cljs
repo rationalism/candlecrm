@@ -98,13 +98,23 @@
      ^{:key (:id person)}
      [:option {:value (:id person)}
       (s/email-addr person)])])
+ 
+(defn event-source []
+  (clj->js {:events
+            (fn [start end timezone callback]
+              (-> :cal-events state/look
+                  clj->js callback))}))
 
-(defn calendar-load! [this]
-  (.fullCalendar ($ :#calendarbox)
-                 (clj->js {:events (state/look :cal-events)})))
+(defn calendar-add! [this]
+  (.fullCalendar ($ :#calendarbox) (event-source)))
 
 (defn calendar-render! [this]
-  (.fullCalendar ($ :#calendarbox) "render"))
+  (.fullCalendar ($ :#calendarbox) "render")
+  (when (= (state/look :tabid) 3)
+    (.fullCalendar ($ :#calendarbox) "refetchEvents")))
+
+(defn cal-events []
+  (.fullCalendar ($ :#calendarbox) "clientEvents"))
 
 (defn calendar-html []
   (if (= (state/look :tabid) 3)
@@ -113,7 +123,7 @@
 
 (defn calendar-box []
   (r/create-class
-   {:component-did-mount calendar-load!
+   {:component-did-mount calendar-add!
     :component-did-update calendar-render!
     :display-name "calendar-tab"
     :reagent-render calendar-html}))

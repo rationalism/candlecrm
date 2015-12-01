@@ -1,5 +1,6 @@
 (ns spectra_cljs.update
-  (:require [spectra_cljs.state :as state]
+  (:require [clojure.set :as set]
+            [spectra_cljs.state :as state]
             [spectra_cljc.schema :as s]))
 
 (defn update-rows! [rows-type]
@@ -98,9 +99,14 @@
   [:pages/person-places
    (assoc (rel-map s/location) :person-id person-id)])
 
+(defn normalize-cal [cal]
+  (-> (set/rename-keys cal {s/start-time :start})
+      (assoc :title (str (:id cal)))))
+
 (defn update-cal-rows! []
   (fn [new-rows]
-    (state/update! [:cal-events] (constantly new-rows))))
+    (->> new-rows (map normalize-cal) constantly
+         (state/update! [:cal-events]))))
 
 (defn normalize-loc [loc]
   {:title (-> loc s/s-name first)
