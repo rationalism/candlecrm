@@ -12,6 +12,12 @@
 
 ;; TODO: Reorganize this by page
 
+(defn format-date [date]
+  (.toISOString (js/moment. date)))
+
+(defn date-display [item]
+  [:span (format-date item)])
+
 (defn user-welcome [flash username]
   [:div {:class "columns small-12"}
    [:h3 "Success! You are logged in now"]
@@ -67,9 +73,10 @@
   [node-link (email attr) (email :id) s/email])
 
 (defn email-cell [email attr]
-  [:td (if (= s/email-subject attr)
-         [email-link email attr]
-         (email attr))])
+  [:td (cond
+         (= s/email-subject attr) [email-link email attr]
+         (some #{attr} s/date-times) [date-display (email attr)]
+         :else (email attr))])
 
 (defn email-row [email]
   [:tr (for [attr (keys email-attrs)]
@@ -102,35 +109,47 @@
    (for [person (state/look :rank-lists rel-type)]
      ^{:key (:id person)}
      [person-option person])])
- 
-(defn event-source []
-  (clj->js {:events
-            (fn [start end timezone callback]
-              (-> :cal-events state/look
-                  clj->js callback))}))
 
-(defn calendar-add! [this]
-  (.fullCalendar ($ :#calendarbox) (event-source)))
+(defn cal-adjust
+  ([param] (.fullCalendar ($ :#calendarbox) param))
+  ([param1 param2] (.fullCalendar ($ :#calendarbox) param1 param2)))
 
-(defn calendar-render! [this]
-  (.fullCalendar ($ :#calendarbox) "render")
+(defn day-click [date jsevent view]
+  (if (= "basicDay" (.-name view))
+    (cal-adjust "changeView" "month") 
+    (cal-adjust "changeView" "basicDay"))
+  (cal-adjust "gotoDate" date))
+
+(defn event-click [event jsevent view]
+  (u/go-node! ajax/chsk-send! (.-id event) s/event))
+
+(defn event-source [start end timezone callback]
+  (-> :cal-events state/look clj->js callback))
+  
+(defn cal-params []
+  (clj->js {:events event-source
+            :dayClick day-click
+            :eventClick event-click}))
+
+(defn cal-add! [this]
+  (cal-adjust (cal-params)))
+
+(defn cal-render! [this]
+  (cal-adjust "render")
   (when (= (state/look :tabid) 3)
-    (.fullCalendar ($ :#calendarbox) "refetchEvents")))
+    (cal-adjust "refetchEvents")))
 
-(defn cal-events []
-  (.fullCalendar ($ :#calendarbox) "clientEvents"))
-
-(defn calendar-html []
+(defn cal-html []
   (if (= (state/look :tabid) 3)
     [:div#calendarbox {:style {:height "300px" :width "500px"}}]
     [:div#calendarbox {:style {:height "299px" :width "499px"}}]))
 
 (defn calendar-box []
   (r/create-class
-   {:component-did-mount calendar-add!
-    :component-did-update calendar-render!
+   {:component-did-mount cal-add!
+    :component-did-update cal-render!
     :display-name "calendar-tab"
-    :reagent-render calendar-html}))
+    :reagent-render cal-html}))
 
 (defn calendar []
   [:div#calendar
@@ -261,6 +280,7 @@
   [:span
    (cond (coll? item) (str/join ", " item)
          (= prop s/email-body) [body-links item]
+         (some #{prop} s/date-times) [date-display item]
          :else item)])
 
 (defn str-item [attr attr-name]

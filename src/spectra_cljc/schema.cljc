@@ -103,6 +103,9 @@
 (def recon-attrs {location s-name event start-time
                   money amount webpage url})
 
+(def date-times [start-time stop-time over-time
+                 email-sent email-received])
+
 (defn prop
   ([arg1 arg2 arg3]
    (.createProperty arg1 arg2 arg3))
