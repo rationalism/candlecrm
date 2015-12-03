@@ -139,8 +139,8 @@
 
 (defn event-info-window []
   (let [marker (state/look :map-markers :clicked)]
-    [:div#markerinfo
-     [:h3 (str "Title: " (:title marker))]]))
+    [:div#markerinfo>h3
+     [node-link (:title marker) (:id marker) s/location]]))
 
 (defn render-window []
   (r/render [event-info-window]
