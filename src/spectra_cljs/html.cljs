@@ -136,8 +136,21 @@
    [people-ranks s/event]
    [calendar-box]])
 
+(defn map-window []
+  (fn []
+    (js/google.maps.InfoWindow.
+     (clj->js {"content"
+               (str "<div id='window-info'>blah blah blah</div>")}))))
+
+(defn window-open [marker]
+  (fn []
+    (.open (state/look :map-markers :window)
+           (state/look :map-obj) marker)))
+  
 (defn map-marker [vars]
-  (google.maps.Marker. (clj->js vars)))
+  (let [marker (google.maps.Marker. (clj->js vars))]
+    (.addListener marker "click" (window-open marker))
+    marker))
 
 (defn wipe-markers [markers]
   (->> (map #(.setMap % nil) markers)
@@ -160,6 +173,7 @@
        (zipmap [:center :zoom]) clj->js
        (js/google.maps.Map. (r/dom-node this)) constantly
        (state/update! [:map-obj]))
+  (state/update! [:map-markers :window] (map-window))
   (markers-update)
   (state/look :map-obj))
 

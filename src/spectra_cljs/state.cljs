@@ -15,7 +15,7 @@
                  {:title "event2" :start "2015-11-25" :end "2015-11-29"}]
     :map-center {s/lat 37.953235 s/lng -122.433765}
     :map-zoom 3
-    :map-markers {:data [] :objs [] :updated true}
+    :map-markers {:data [] :objs [] :updated true :window nil}
     :rank-lists {s/event [] s/location []}
     :map-obj nil}))
 
