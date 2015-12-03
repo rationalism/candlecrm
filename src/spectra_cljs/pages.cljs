@@ -97,5 +97,4 @@
     (first (array-seq (.-tBodies table))) nil))
 
 (defn render-all! []
-  (r/render-component [homepage]
-                      (dom/getElement "content")))
+  (r/render [homepage] (dom/getElement "content")))

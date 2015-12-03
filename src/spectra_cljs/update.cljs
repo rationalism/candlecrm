@@ -111,7 +111,8 @@
 (defn normalize-loc [loc]
   {:title (-> loc s/s-name first)
    :position {s/lat (-> loc s/lat (js/parseFloat))
-              s/lng (-> loc s/lng (js/parseFloat))}})
+              s/lng (-> loc s/lng (js/parseFloat))}
+   :id (:id loc)})
 
 (defn update-loc-rows! []
   (fn [new-rows]

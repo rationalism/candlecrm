@@ -6,6 +6,7 @@
             [spectra_cljs.state :as state]
             [spectra_cljs.update :as u]
             [reagent.core :as r]
+            [goog.dom :as dom]
             [jayq.core :as jq])
   (:use [jayq.core :only [$]]))
 
@@ -136,20 +137,30 @@
    [people-ranks s/event]
    [calendar-box]])
 
-(defn map-window []
-  (fn []
-    (js/google.maps.InfoWindow.
-     (clj->js {"content"
-               (str "<div id='window-info'>blah blah blah</div>")}))))
+(defn event-info-window []
+  (let [marker (state/look :map-markers :clicked)]
+    [:div#markerinfo
+     [:h3 (str "Title: " (:title marker))]]))
 
-(defn window-open [marker]
+(defn render-window []
+  (r/render [event-info-window]
+            (dom/getElement "window-info")))
+
+(defn map-window []
+  (let [window (js/google.maps.InfoWindow.
+                (clj->js {"content" "<div id='window-info'></div>"}))]
+    (.addListener window "domready" render-window)
+    window))
+
+(defn window-open [marker vars]
   (fn []
+    (state/update! [:map-markers :clicked] (constantly vars))
     (.open (state/look :map-markers :window)
            (state/look :map-obj) marker)))
   
 (defn map-marker [vars]
   (let [marker (google.maps.Marker. (clj->js vars))]
-    (.addListener marker "click" (window-open marker))
+    (.addListener marker "click" (window-open marker vars))
     marker))
 
 (defn wipe-markers [markers]
@@ -173,7 +184,7 @@
        (zipmap [:center :zoom]) clj->js
        (js/google.maps.Map. (r/dom-node this)) constantly
        (state/update! [:map-obj]))
-  (state/update! [:map-markers :window] (map-window))
+  (state/update! [:map-markers :window] map-window)
   (markers-update)
   (state/look :map-obj))
 
