@@ -18,6 +18,22 @@
 (defn date-display [item]
   [:span (format-date item)])
 
+(defn input-cell [attr]
+  [:div {:class "new-input-field"}
+   [:span (attr s/attr-names)]
+   [:input {:type "text" :name attr}]])
+
+(defn new-entity [type attrs]
+  [:div {:class "columns small-12"}
+   [:form
+    (for [attr attrs]
+     ^{:key attr}
+     [input-cell attr])
+    [:button {:type "button"
+              :class "submit-btn"
+              :on-click #(js/alert "Submitted!")}
+     "Submit"]]])
+
 (defn user-welcome [flash username]
   [:div {:class "columns small-12"}
    [:h3 "Success! You are logged in now"]
@@ -36,6 +52,13 @@
   [:div {:class "columns small-12"}
    [:p [:a {:href "/gmail"} "Connect to GMail here"]]
    [:p [:a {:href "/logout"} "Logout here"]]])
+
+(def new-person-attrs [s/s-name s/email-addr s/phone-num
+                       s/birthday s/gender s/website])
+
+(defn new-person-switch []
+  (state/update! [:input-new :type] (constantly s/person))
+  (state/update! [:input-new :attrs] (constantly new-person-attrs)))
 
 (defn person-link [person attr]
   [node-link (person attr) (person :id) s/person])
@@ -64,7 +87,9 @@
    [:a {:href "#" :on-click (u/prev-fetch! :people u/update-people! ajax/chsk-send!)
         :id "prev-people-page"} "<-- Previous"]
    [:a {:href "#" :on-click (u/next-fetch! :people u/update-people! ajax/chsk-send!)
-        :id "next-people-page"} "Next -->"]])
+        :id "next-people-page"} "Next -->"]
+   [:p>a {:href "#" :on-click new-person-switch
+          :id "add-new-person"} "Add new person"]])
 
 (def email-attrs {s/email-sent "Date"
                   s/email-subject "Subject"})

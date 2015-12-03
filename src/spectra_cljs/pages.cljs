@@ -76,9 +76,13 @@
    [html/home-header]
    [html/home-content
     [html/user-welcome "" (state/look :user :email-addr)]
-    (if (state/look :current-node)
+    (cond
+      (state/look :current-node)
       [node-page (state/look :current-node)]
-      [main-page])
+      (state/look :input-new :type)
+      [html/new-entity (state/look :input-new :type)
+       (state/look :input-new :attrs)]
+      :else [main-page])
     [html/user-footer]]])
 
 (defn insert-rows! [table n]

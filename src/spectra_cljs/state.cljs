@@ -17,7 +17,8 @@
     :map-zoom 3
     :map-markers {:data [] :objs [] :updated true :window nil :clicked nil}
     :rank-lists {s/event [] s/location []}
-    :map-obj nil}))
+    :map-obj nil
+    :input-new {:type nil :attrs nil}}))
 
 (defn look [& args]
   (get-in @a args))

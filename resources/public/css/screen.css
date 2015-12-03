@@ -73,3 +73,11 @@ a#next-people-page {
 a#next-email-page {
     margin-left: 300px;
 }
+
+div.new-input-field {
+    margin-top: 5px;
+}
+
+div.new-input-field input {
+    margin-left: 20px;
+}
