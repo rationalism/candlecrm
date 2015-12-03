@@ -90,14 +90,17 @@
    [:a {:href "#" :on-click (u/next-fetch! counter update-fn ajax/chsk-send!)
         :class "next-email-page"} "Next -->"]])
 
+(defn person-option [person]
+  [:option {:value (:id person)}
+   (str (s/s-name person) " (" (s/email-addr person) ")")])
+
 (defn people-ranks [rel-type]
   [:select {:class (str "people-list-" rel-type)
             :on-change #(u/rel-switch ajax/chsk-send! (.. % -target -value)
                                       rel-type)}
    (for [person (state/look :rank-lists rel-type)]
      ^{:key (:id person)}
-     [:option {:value (:id person)}
-      (s/email-addr person)])])
+     [person-option person])])
  
 (defn event-source []
   (clj->js {:events
