@@ -39,7 +39,7 @@
   (-> queue-user :user
       email/fetch-imap-folder
       (email/get-message email-num)
-      email/sent-time))
+      email/sent-time dt/to-ms))
 
 (defn queue-time [queue-user]
   [(-> queue-user :queue range-bottom (email-time queue-user))

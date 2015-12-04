@@ -219,6 +219,8 @@
        vertex)))
 
 (defn batch-insert! [items]
+  (prn "batch-insert!")
+  (prn items)
   (p :batch-insert
      (let [nodes (nn/create-batch
                   @conn (map #(filter-props (:props %)) items))]
