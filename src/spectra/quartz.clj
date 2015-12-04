@@ -15,6 +15,11 @@
             [spectra.queries :as queries]
             [spectra_cljc.schema :as s]))
 
+(def test-count 50)
+
+(defn message-count [queue-user]
+  (-> queue-user :user email/fetch-imap-folder email/message-count))
+  
 (defn queue-small? [queue]
   (< (- (-> queue :data s/queue-top)
         (-> queue :data s/queue-bottom))
@@ -26,7 +31,7 @@
 (defn range-bottom [queue]
   (if (queue-small? queue)
     (-> queue :data s/queue-bottom)
-    (-> queue :data s/queue-top (- email/batch-size))))
+    (-> queue :data s/queue-top (- email/batch-size) inc)))
 
 (defn queue-reset! [queue]
   (neo4j/set-property! queue s/modified (dt/now))
@@ -55,19 +60,31 @@
        (mapv #(queries/scan-overlaps user %))
        (mapv com/nil-or-empty?)))
 
+(defn incdec [range]
+  [(dec (first range)) (inc (second range))])
+
+(defn queue-ends [queue-user ranges]
+  (let [top-end (message-count queue-user)]
+    (concat [(- top-end test-count)] ranges [top-end])))
+
+(defn range-empty? [range]
+  (> (first range) (second range)))
+
 (defn find-ranges [queue-user]
-  (->> queue-user :user queries/all-scanned
-       (map :data)
-       (map #(select-keys % [s/start-time s/stop-time]))
-       (map #(com/map-values % (keys %)
-                             (->> queue-user :user
-                                  email/fetch-imap-folder
-                                  (partial email/find-num))))))
+  (let [folder (-> queue-user :user email/fetch-imap-folder)]
+    (->> queue-user :user queries/all-scanned
+         (map :data)
+         (mapcat (juxt s/start-time s/stop-time))
+         (map #(email/find-num folder %))
+         (partition 2) (mapcat incdec)
+         (queue-ends queue-user) (partition 2)
+         (remove range-empty?)
+         (map #(zipmap [s/queue-bottom s/queue-top] %)))))
 
 (defn default-queue [user]
   (let [top (-> user email/fetch-imap-folder
                 email/message-count)]
-    {s/queue-bottom (- top 50)
+    {s/queue-bottom (- top test-count)
      s/queue-top top}))
 
 (defn create-edges! [user queue]
@@ -113,8 +130,8 @@
 (defn queue-pop! []
   (when-let [queue-user (queries/next-email-queue)]
     (queue-reset! (:queue queue-user))
-    (if (-> queue-user :user email/fetch-imap-folder email/message-count
-            (= (-> queue-user :queue :data s/queue-top)))
+    (if (= (message-count queue-user)
+           (-> queue-user :queue :data s/queue-top))
       (do (run-insertion! queue-user)
           (new-time-scanned! queue-user))
       (adjust-times! queue-user))))

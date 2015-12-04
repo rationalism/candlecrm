@@ -84,7 +84,7 @@
          (exact-num folder time [bottom (inc bottom)])
          :else 
          (let [mid (quot (+ top bottom) 2)]
-           (if (->> mid (get-message folder)
+           (if (->> mid (get-message folder) 
                     sent-time dt/to-ms (< time))
              (recur folder time bottom mid)
              (recur folder time mid top))))))
