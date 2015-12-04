@@ -1,5 +1,6 @@
 (ns spectra.recon
-  (:require [spectra.common :as com]
+  (:require [clojure.string :as str]
+            [spectra.common :as com]
             [spectra.corenlp :as nlp]
             [spectra.datetime :as dt]
             [spectra.loom :as loom]
@@ -18,10 +19,11 @@
        
 (defn add-user-graph! [user]
   (let [new-user (create-user! user)]
-    (neo4j/create-edge! new-user
-                        (->> (nlp/normalize-person nil (:identity user) s/person)
-                             (create-person! new-user))
-                        s/user-person)))
+    (neo4j/create-edge!
+     new-user
+     (->> s/person (nlp/normalize-person nil (:identity user))
+          (create-person! new-user))
+     s/user-person)))
 
 (defn type-query [user type-name filters]
   (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
@@ -35,10 +37,10 @@
        neo4j/cypher-list))
 
 (defn labeled-list-from-props [user type-name props]
-  (if (or (nil? props) (empty? props)) nil
-      (->> (neo4j/cypher-props-any props)
-           (type-query user type-name)
-           neo4j/cypher-labeled-list)))
+  (when-not (or (nil? props) (empty? props))
+    (->> (neo4j/cypher-props-any props)
+         (type-query user type-name)
+         neo4j/cypher-labeled-list)))
 
 (defn labeled-people-orgs [user props]
   (merge (labeled-list-from-props user s/person props)
@@ -47,44 +49,46 @@
 ;; For searching emails, in milliseconds
 (def sent-tolerance 200000)
 
+(defn message-props [message]
+  (->> message s/email-subject com/end-hash
+       vector (zipmap [s/email-sub-hash])
+       neo4j/cypher-properties))
+
 (defn email-query [node-type message person-from]
-  (when (not (or (nil? person-from)
-                 (empty? person-from)
-                 (nil? (:id person-from))
-                 (nil? (s/email-sent message))))
-    (str "MATCH (root:" node-type
-         " " (neo4j/cypher-properties
-              {s/email-sub-hash
-               (com/end-hash (s/email-subject message))})
-         ")-[:" (neo4j/cypher-esc-token s/email-from)
-         "]->(f) WHERE ID (f)=" (:id person-from)
-         " AND (root." (neo4j/cypher-esc-token s/email-sent)
-         " < (" (dt/to-ms (s/email-sent message)) " + " sent-tolerance
-         ")) AND (root." (neo4j/cypher-esc-token s/email-sent)
-         " > (" (dt/to-ms (s/email-sent message)) " - " sent-tolerance 
-         "))")))
+  (when-not (or (nil? person-from)
+                (empty? person-from)
+                (nil? (:id person-from))
+                (nil? (s/email-sent message)))
+    (str/join
+     ["MATCH (root:" node-type
+      " " (message-props message)
+      ")-[:" (neo4j/cypher-esc-token s/email-from)
+      "]->(f) WHERE ID (f)=" (:id person-from)
+      " AND (root." (neo4j/cypher-esc-token s/email-sent)
+      " < (" (dt/to-ms (s/email-sent message)) " + " sent-tolerance
+      ")) AND (root." (neo4j/cypher-esc-token s/email-sent)
+      " > (" (dt/to-ms (s/email-sent message)) " - " sent-tolerance 
+      "))"])))
 
 (defn email-find [node-type message person-from]
   (when-let [query (email-query node-type message person-from)]
-    (-> (str query " RETURN root")
-        neo4j/cypher-list first)))
+    (-> (str query " RETURN root") neo4j/cypher-list first)))
 
 (defn email-delete! [node-type message person-from]
   (when-let [query (email-query node-type message person-from)]
-    (->> (str query " DETACH DELETE root")
-         neo4j/cypher-query)))
+    (neo4j/cypher-query (str query " DETACH DELETE root"))))
 
 (defn list-entities [entity-class]
   (neo4j/get-vertices-class entity-class))
 
 (defn expand-entity [entity properties]
-  (apply merge
-         (map #(assoc {} % (neo4j/get-property entity %))
-              properties)))
+  (->> properties
+       (map #(assoc {} % (neo4j/get-property entity %)))
+       (apply merge)))
 
 (defn list-entities-full [entity-class properties]
-  (->> (list-entities entity-class)
-       (map #(expand-entity % properties))))
+  (map #(expand-entity % properties)
+       (list-entities entity-class)))
 
 (defn lookup-hash [prop-name node]
   (->> node key :data prop-name
@@ -105,14 +109,14 @@
 
 (defn node-match [prop node-map]
   (if (coll? prop)
-    (->> prop (map #(node-map %)) first first)
+    (->> prop (map node-map) ffirst)
     (-> prop node-map first)))
 
 (defn link-node [prop-name node-map g old-node]
   (if (or (nil? node-map) (empty? node-map)
           (loom/out-edge-label g old-node :database-match)) g
       (if-let [new-node (-> old-node prop-name (node-match node-map))]
-        (-> (loom/add-edges g [[old-node (key new-node) :database-match]])
+        (-> g (loom/add-edges [[old-node (key new-node) :database-match]])
             (loom/replace-node old-node (->> new-node val (recon-labels old-node)
                                              (assoc old-node :label))))
         g)))
@@ -123,8 +127,7 @@
                        (vector (val pair)))))
 
 (defn vectorize-map [props]
-  (->> (map vectorize-pair props)
-       (apply merge)))
+  (apply merge (map vectorize-pair props)))
 
 (defn merged-props [chain types]
   (->> (loom/nodes chain)

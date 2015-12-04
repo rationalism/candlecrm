@@ -238,9 +238,9 @@
     [:div#mapbox {:style {:height "299px" :width "499px"}}]))
 
 (defn resize-map [this]
-  (when (not (state/look :map-markers :updated))
+  (when-not (state/look :map-markers :updated)
     (markers-update))
-  (-> (. js/document (getElementById "mapbox"))
+  (-> js/document (. (getElementById "mapbox"))
       (js/google.maps.event.trigger "resize")))
 
 (defn map-box []

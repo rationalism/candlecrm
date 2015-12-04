@@ -25,14 +25,13 @@
        (str/join "|") re-pattern))
 
 (defn replace-map [text new-map]
-  (str/replace text (-> new-map keys regex-or) #(new-map %1)))
+  (str/replace text (-> new-map keys regex-or) new-map))
 
 (defn find-email-addrs [text]
   (re-seq email-regex text))
 
 (defn find-urls [text]
-  (->> (re-seq url-regex text)
-       (map first)))
+  (map first (re-seq url-regex text)))
 
 (defn strip-javascript [text]
   (str/replace text javascript-regex ""))
@@ -75,8 +74,10 @@
 (def default-region "US")
 
 (defn find-phone-nums [text]
-  (->> (.findNumbers (PhoneNumberUtil/getInstance) text default-region)
-       (map #(.rawString %)))) 
+  (map #(.rawString %) 
+       (.findNumbers
+        (PhoneNumberUtil/getInstance)
+        text default-region)))
 
 (defn phone-person [number]
   (assoc {} :phone number))

@@ -15,13 +15,11 @@
        (reduce merge)))
 
 (defn node-attrs [node]
-  (merge (:data node)
-         (hash-map :id (:id node))))
+  (merge (:data node) (hash-map :id (:id node))))
 
 (defn tablify-hits [hits]
-  (->> hits
-       (map node-attrs)
-       (remove #(empty? %))
+  (->> (map node-attrs hits)
+       (remove empty?)
        (map first-table-vals)))
 
 (defn person-from-user [user query-map]
@@ -63,7 +61,7 @@
       (dissoc s/pwd-hash) (dissoc s/google-token)))
 
 (defn node-by-id [user query-map]
-  (-> (neo4j/node-from-id user (:id query-map) (:type query-map))
+  (-> user (neo4j/node-from-id (:id query-map) (:type query-map))
       node-attrs))
 
 (defn email-queue []
@@ -83,23 +81,23 @@
       (set/rename-keys {"q" :queue "u" :user})))
 
 (defn all-scanned [user]
-  (-> (str "MATCH (root:" s/user
-           ")-[:" (neo4j/cypher-esc-token s/scanned)
-           "]->(s:" s/time-scanned
-           ") WHERE ID(root)= " (:id user)
-           " RETURN s")
-      neo4j/cypher-list))
+  (-> ["MATCH (root:" s/user
+       ")-[:" (neo4j/cypher-esc-token s/scanned)
+       "]->(s:" s/time-scanned
+       ") WHERE ID(root)= " (:id user)
+       " RETURN s"]
+      str/join neo4j/cypher-list))
 
 (defn scan-overlaps [user time]
-  (-> (str "MATCH (root:" s/user
-           ")-[:" (neo4j/cypher-esc-token s/scanned)
-           "]->(s:" s/time-scanned
-           ") WHERE ID(root)= " (:id user)
-           " AND s." (neo4j/cypher-esc-token s/start-time)
-           " < " time
-           " AND s." (neo4j/cypher-esc-token s/stop-time)
-           " > " time " RETURN s")
-      neo4j/cypher-list))
+  (-> ["MATCH (root:" s/user
+       ")-[:" (neo4j/cypher-esc-token s/scanned)
+       "]->(s:" s/time-scanned
+       ") WHERE ID(root)= " (:id user)
+       " AND s." (neo4j/cypher-esc-token s/start-time)
+       " < " time
+       " AND s." (neo4j/cypher-esc-token s/stop-time)
+       " > " time " RETURN s"]
+      str/join neo4j/cypher-list))
 
 (defn escape-rels [rels]
   (->> (map neo4j/cypher-esc-token rels)
@@ -148,7 +146,7 @@
        distinct))
 
 (defn bare-locations [limit]
-  (-> (str "MATCH (root:" s/location
-           ") WHERE NOT (root)-[:" (neo4j/cypher-esc-token s/has-coord)
-           "]->() RETURN root LIMIT " limit)
-      neo4j/cypher-list))
+  (-> ["MATCH (root:" s/location
+       ") WHERE NOT (root)-[:" (neo4j/cypher-esc-token s/has-coord)
+       "]->() RETURN root LIMIT " limit]
+      str/join neo4j/cypher-list))

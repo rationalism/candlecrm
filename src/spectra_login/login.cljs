@@ -31,13 +31,12 @@
 (defn init []
   ;; verify that js/document exists and that it has a getElementById
   ;; property
-  (if (and js/document (.-getElementById js/document))
-    (do
-      (enable-console-print!)
-      (when-let [signup-form (dom/getElement "signupForm")]
-        (set! (.-onsubmit signup-form) validate-signup-form))
-      (when-let [login-form (dom/getElement "loginForm")]
-        (set! (.-onsubmit login-form) validate-login-form)))))
+  (when (and js/document (.-getElementById js/document))
+    (enable-console-print!)
+    (when-let [signup-form (dom/getElement "signupForm")]
+      (set! (.-onsubmit signup-form) validate-signup-form))
+    (when-let [login-form (dom/getElement "loginForm")]
+      (set! (.-onsubmit login-form) validate-login-form))))
 
 ;; initialize the HTML page in unobtrusive way
 (set! (.-onload js/window) init)

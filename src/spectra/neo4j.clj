@@ -34,10 +34,9 @@
   (reset! conn (get-graph)))
 
 (defn cypher-esc [value]
-  (if (nil? value) nil
-      (-> value
-          dt/catch-dates
-          (str/replace #"[\\'\"]" #(str "\\" %1)))))
+  (when-not (nil? value)
+    (-> value dt/catch-dates
+        (str/replace #"[\\'\"]" #(str "\\" %1)))))
 
 (defn cypher-esc-coll [coll]
   (->> coll
@@ -67,12 +66,10 @@
        (into {})))
 
 (defn cypher-query [query]
-  (->> (cy/tquery @conn query)
-       (map cypher-map->node)))
+  (map cypher-map->node (cy/tquery @conn query)))
 
 (defn cypher-query-labeled [query]
-  (->> (cy/tquery @conn query)
-       (map cypher-map-node-labeled)))
+  (map cypher-map-node-labeled (cy/tquery @conn query)))
 
 (defn cypher-prop-any [prop]
   (str " ANY (x in root." (cypher-esc-token (key prop))
@@ -99,12 +96,10 @@
 
 (defn cypher-list [query]
   (->> (cypher-query query)
-       (map first)
-       (map val)))
+       (map first) (map val)))
 
 (defn cypher-labeled-list [query]
-  (->> (cypher-query-labeled query)
-       (apply merge)))
+  (apply merge (cypher-query-labeled query)))
 
 (defn cypher-combined-tx [queries]
   (->> (map tx/statement queries)
@@ -113,7 +108,7 @@
 
 (defn get-property [vertex property]
   (let [value (property (:data vertex))]
-    (if (coll? value) (into #{} value) value)))
+    (if (coll? value) (set value) value)))
 
 (defn set-property! [vertex property value]
   (nn/set-property @conn vertex property

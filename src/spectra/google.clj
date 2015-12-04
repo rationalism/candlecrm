@@ -82,8 +82,7 @@
                                (env :google-client-secret))
             .build
             (.setFromTokenResponse
-             (-> (GoogleTokenResponse. )
-                 (.setRefreshToken refresh-token))))
+             (.setRefreshToken (GoogleTokenResponse. ) refresh-token)))
     .refreshToken))
 
 (defn get-access-token! [refresh-token]
@@ -91,12 +90,13 @@
 
 ;; TODO: get the user's email via a Google API
 (defn get-imap-store! [access-token email]
-  (doto (-> (Session/getInstance
-             (doto (Properties. )           
-               (.put "mail.imap.ssl.enable" "true")
-               (.put "mail.imap.sasl.enable" "true")
-               (.put "mail.imap.sasl.mechanisms" "XOAUTH2")
-               (.put "mail.imap.auth.login.disable" "true")
-               (.put "mail.imap.auth.plain.disable" "true")))
-            (.getStore "imap"))
+  (doto (.getStore
+         (Session/getInstance
+          (doto (Properties. )           
+            (.put "mail.imap.ssl.enable" "true")
+            (.put "mail.imap.sasl.enable" "true")
+            (.put "mail.imap.sasl.mechanisms" "XOAUTH2")
+            (.put "mail.imap.auth.login.disable" "true")
+            (.put "mail.imap.auth.plain.disable" "true")))
+         "imap")
     (.connect "imap.gmail.com" email access-token)))

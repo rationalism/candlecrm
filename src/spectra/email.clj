@@ -105,7 +105,7 @@
   (reset! inbox (if (contains? @imap-lookup user)
                   (get @imap-lookup user)
                   (refresh-inbox user)))
-  (when (not (folder-open? @inbox))
+  (when-not (folder-open? @inbox)
     (try (open-folder-read! @inbox)
          (catch Exception e
            (do (reset! inbox (refresh-inbox user))
@@ -163,7 +163,7 @@
        (apply merge)))
 
 (defn strip-arrows [line num]
-  (str/replace-first line (apply str (repeat num ">")) ""))
+  (str/replace-first line (str/join (repeat num ">")) ""))
 
 (defn count-nested [text]
   (count (first (re-seq #"^>+" text))))
@@ -171,7 +171,7 @@
 (defn count-arrows [lines]
   (->> lines
        (map #(re-seq #"^>+" %))
-       (remove #(nil? %))))
+       (remove nil?)))
   
 (defn count-depth [lines]
   (let [arrows (count-arrows lines)]
@@ -182,7 +182,7 @@
   (str/join "\r\n" lines))
 
 (defn in-block? [lines index f]
-  (cond (< index 0) false
+  (cond (neg? index) false
         (>= index (count lines)) false
         :else (f (count-nested (nth lines index)))))
 
@@ -205,7 +205,7 @@
       (assoc marks map-key (first coll))))
 
 (defn header-ready? [marks]  
-  (or (< (:start-header marks) 0)
+  (or (neg? (:start-header marks))
       (and (s/email-sent marks)
            (or (:email-from-addr marks)
                (:email-from-name marks)))))
@@ -280,14 +280,14 @@
                                    (:end-body marks)))))
 
 (defn depth-match? [marks chain]
-  (if (= 0 (:start-header marks)) false
+  (if (zero? (:start-header marks)) false
       (= (dec (:depth marks))
          (-> chain chain-lines (nth (dec (:start-header marks)))
              vector count-depth))))
 
 (defn remove-arrow [line depth]
-  (str/replace-first line (apply str (repeat depth ">"))
-                     (apply str (repeat (dec depth) ">"))))
+  (str/replace-first line (str/join (repeat depth ">"))
+                     (str/join (repeat (dec depth) ">"))))
 
 (defn has-full-arrows? [line depth]
   (if (< (count line) depth) false
@@ -301,7 +301,7 @@
          lines)))
 
 (defn dec-depth [chain]
-  (->> (update (find-bottom chain) s/email-body remove-arrows)
+  (->> remove-arrows (update (find-bottom chain) s/email-body)
        (loom/replace-node chain (find-bottom chain))))
 
 (defn maybe-add-edges [chain new-node email-from]
@@ -346,7 +346,7 @@
        :else "")))
 
 (defn make-headers [pair root]
-  (map #(vector root % (-> pair key)) (val pair)))
+  (map #(vector root % (key pair)) (val pair)))
 
 (defn headers-fetch [message]
   (vector {s/email-received (received-time message)
@@ -436,11 +436,10 @@
 
 (defn hyperlink-text [text mentions]
   (if (com/nil-or-empty? mentions) text
-      (str/replace text (regex/regex-or mentions) #(hash-brackets %1))))
+      (str/replace text (regex/regex-or mentions) hash-brackets)))
 
 (defn mention-nodes [chain]
-  (->> (loom/nodes chain)
-       (filter #(loom/out-edge-label chain % s/has-type))))
+  (filter #(loom/out-edge-label chain % s/has-type) (loom/nodes chain)))
 
 (defn map-interval [interval]
   {s/start-time (first interval)
@@ -483,17 +482,17 @@
                  (nlp/run-nlp-full (author-name chain message))
                  (conj [chain])
                  loom/merge-graphs) $
-        (loom/add-edges $ (->> (mention-nodes $)
-                           (map #(vector message % s/email-mentions))))
+        (loom/add-edges $ (->> $ mention-nodes
+                               (map #(vector message % s/email-mentions))))
         (loom/replace-node $ message
                            (->> (mention-nodes $)
                                 (hyperlink-text (s/email-body message))
                                 (assoc message s/email-body)))
         (reduce import-label $ (loom/select-edges $ s/has-type))
-        (reduce parse-datetime $ (->> (loom/nodes $)
+        (reduce parse-datetime $ (->> $ loom/nodes
                                       (filter #(= s/event (:label %)))))
         (reduce parse-person $
-                (->> (loom/nodes $)
+                (->> $ loom/nodes
                      (filter #(some #{(:label %)} [s/person s/organization]))))
         (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/s-name])
         (loom/remove-nodes $ (->> s/has-type (loom/select-edges $) (map second))))))
@@ -516,7 +515,7 @@
 
 (defn switch-hyperlinks [text link-map]
   (if (com/nil-or-empty? link-map) text
-      (str/replace text (-> link-map keys regex/regex-or) #(link-map %1))))
+      (str/replace text (-> link-map keys regex/regex-or) link-map)))
 
 (defn switch-message [g message]
   (if (com/nil-or-empty? (s/email-body message)) g
@@ -529,8 +528,7 @@
            (loom/replace-node g message))))
 
 (defn nodes-of-edges [edges]
-  (-> (map second edges)
-      (conj (first (first edges)))))
+  (conj (map second edges) (ffirst edges)))
 
 (defn insert-links! [g]
   (p :insert-links
@@ -554,12 +552,10 @@
          (recon/load-new! s/organization [s/organization (neo4j/user-label user)]))))
 
 (defn use-nlp-graph [g]
-  (->> (recon/filter-memory g s/email)
-       (reduce use-nlp g)))
+  (reduce use-nlp g (recon/filter-memory g s/email)))
 
 (defn switch-message-graph [g]
-  (->> (recon/filter-memory g s/email)
-       (reduce switch-message g)))
+  (reduce switch-message g (recon/filter-memory g s/email)))
 
 (defn link-new-all [g user]
   (reduce #(recon/link-new! %1 %2 [%2 (neo4j/user-label user)])

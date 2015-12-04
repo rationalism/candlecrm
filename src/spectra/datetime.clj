@@ -22,12 +22,12 @@
   (p :find-dates
      (CalendarSource/setBaseDate reference)
      ;; This try-catch block needed in case of parse errors
-     (try (->> (.parse (Parser. ) text)
+     (try (->> text (.parse (Parser. ))
                (remove #(no-info? % reference)))
           (catch Exception e []))))
 
 (defn unix-dates [text reference]
-   (->> (parse-dates text reference)
+   (->> reference (parse-dates text)
         (mapv #(.getDates %)) (map vec)))
 
 (defn now []
@@ -49,7 +49,7 @@
 (defn find-dates
   ([text] (find-dates text (now)))
   ([text reference]
-   (->> (parse-dates text reference)
+   (->> reference (parse-dates text)
         (map #(.getText %)))))
 
 (defn find-intervals
@@ -66,7 +66,7 @@
   (-> some-date .getTime (mod 1000) (not= 0)))
 
 (defn format-year [some-date]
-  (-> (SimpleDateFormat. "yyyy")
+  (-> "yyyy" (SimpleDateFormat.)
       (.format some-date)))
 
 (defn catch-dates [value]

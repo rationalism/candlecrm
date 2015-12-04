@@ -65,6 +65,7 @@
                  [com.google.maps/google-maps-services "0.1.9"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]
+            [lein-kibit "0.1.2"]
             [lein-figwheel "0.5.0"]
             [lein-cljsbuild "1.1.0"]
             [cider/cider-nrepl "0.9.1"]

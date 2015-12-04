@@ -5,8 +5,7 @@
             [loom.io :as gviz]))
 
 (defn multi-edge [g edge]
-  (->> (attr/attr g edge :label)
-       (map #(conj edge %))))
+  (map #(conj edge %) (attr/attr g edge :label)))
 
 (defn add-edge [g edge]
   {:pre [(= 3 (count edge))]}
@@ -15,8 +14,9 @@
     (->> (attr/attr g (vec (take 2 edge)) :label)
          (cons (nth edge 2)) distinct
          (attr/add-attr g edge :label))
-    :else (-> (graph/add-edges g (vec (take 2 edge)))
-              (attr/add-attr edge :label (vector (nth edge 2))))))
+    :else (attr/add-attr
+           (graph/add-edges g (vec (take 2 edge)))
+           edge :label (vector (nth edge 2)))))
 
 (defn nodes [g]
   (graph/nodes g))
@@ -25,16 +25,13 @@
   (graph/edges g))
 
 (defn multi-edges [g]
-  (->> (edges g)
-       (mapcat #(multi-edge g %))))
+  (mapcat #(multi-edge g %) (edges g)))
 
 (defn out-edges [g node]
-  (->> (graph/out-edges g node)
-       (mapcat #(multi-edge g %))))
+  (mapcat #(multi-edge g %) (graph/out-edges g node)))
 
 (defn in-edges [g node]
-  (->> (graph/in-edges g node)
-       (mapcat #(multi-edge g %))))
+  (mapcat #(multi-edge g %) (graph/in-edges g node)))
 
 (defn all-edges [g node]
   (concat (out-edges g node)
@@ -57,12 +54,10 @@
   (count (out-edges g node)))
 
 (defn top-nodes [g]
-  (filter #(= 0 (fan-in g %))
-          (nodes g)))
+  (filter #(zero? (fan-in g %)) (nodes g)))
 
 (defn bottom-nodes [g]
-  (filter #(= 0 (fan-out g %))
-          (nodes g)))
+  (filter #(zero? (fan-out g %)) (nodes g)))
        
 (defn add-nodes [g nodes]
   (apply graph/add-nodes g nodes))

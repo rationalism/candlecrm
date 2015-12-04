@@ -50,7 +50,7 @@
 
 (defn one-pos [pos n data-size matrix]
   (->> (range (:dims data-size))
-       (map #(if (= 0.0 (.getFloat matrix (int-wrap [pos % n]))) nil %))
+       (map #(when-not (= 0.0 (.getFloat matrix (int-wrap [pos % n]))) %))
        (drop-while nil?) first))
 
 (defn increment [pos n data-size matrix]
@@ -61,7 +61,6 @@
 
 ;(defn dates->array [data-size date-sets]
   
-
 ;; train-data should be a three-dimensional vector here
 (defrecord TimeSeriesIterator [pos data-size train-data]
   DataSetIterator

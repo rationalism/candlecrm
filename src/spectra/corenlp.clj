@@ -39,10 +39,10 @@
 
 (def ner-model-dir "edu/stanford/nlp/models/ner/")
 (def ner-models
-  (->> ["english.all.3class.distsim.crf.ser.gz"
-        "english.muc.7class.distsim.crf.ser.gz"]
+  (map #(str ner-model-dir %)
+       ["english.all.3class.distsim.crf.ser.gz"
+        "english.muc.7class.distsim.crf.ser.gz"]))
         ;"english.math.resume.distsim.crf.ser.gz"]
-       (map #(str ner-model-dir %))))
 
 ;; Shift model supposed to be much faster, but takes much longer to load
 (def shift-parse-model "edu/stanford/nlp/models/srparser/englishSR.ser.gz")
@@ -161,7 +161,7 @@
     (-> boundaries last second)))
 
 (defn boundaries-detect [sentence word]
-  (loop [text (.toString sentence)
+  (loop [text (str sentence)
          boundaries []]
     (let [pieces (->> word regex/regex-escape re-pattern (str/split text))]
       (if (= text (first pieces))
@@ -180,7 +180,7 @@
        (map #(hash-map % [chain]))))
 
 (defn bucket-coref [coref]
-  (->> (mapcat chain-maps coref)
+  (->> coref (mapcat chain-maps)
        (apply merge-with concat)))
 
 (defn number-items [items]
@@ -224,7 +224,7 @@
           (tokens-pos sent-num tokens)))
 
 (defn tokens-str [tokens]
-  (->> (map #(.originalText %) tokens)
+  (->> tokens (map #(.originalText %))
        (str/join " ")))
 
 (defn mention-hash [mention]
@@ -263,7 +263,7 @@
    (map chain-graph coref)))
 
 (defn ner-node [entity]
-  (into [] (get-tokens entity)))
+  (vec (get-tokens entity)))
 
 (defn ner-edge [entity]
   (when-let [schema-type (-> entity entity-type schema-map)]
@@ -275,9 +275,8 @@
                       (list (ner-edge entity)))))
 
 (defn triple-nodes [triple]
-  (->> [(.-subject triple) (.-object triple)]
-       (mapv vec)))
-
+  (mapv vec [(.-subject triple) (.-object triple)]))
+      
 (defn triple-edge [triple]
   (conj (triple-nodes triple)
         (.relationLemmaGloss triple)))
@@ -288,7 +287,7 @@
 
 (defn triples-graph [triples]
   (->> triples
-       (map #(triple-graph %))
+       (map triple-graph)
        loom/merge-graphs))
 
 (defn attach-pos-map [sent-num tokens g]
@@ -298,8 +297,7 @@
    s/pos-map))
 
 (defn recursive-graph [sent-num tokens triples]
-  (if (empty? triples)
-    nil
+  (when (seq triples)
     (->> triples triples-graph
          (attach-pos-map sent-num tokens))))
   
@@ -328,7 +326,7 @@
 (defn node-hash [g node sent-num]
   (if-let [pos-map (pos-map-node g node)]
     (->> node (tokens-pos sent-num)
-         (map #(pos-map %)) pos-hash)
+         (map pos-map) pos-hash)
     (pos-hash (tokens-pos sent-num node))))
 
 (defn find-dupes [g sent-num]
@@ -417,13 +415,16 @@
 (defn stringify-node [node]
   (if (tokens? node) (tokens-str node) node))
 
+(defn string-vector [edge]
+  (vector (stringify-node (first edge))
+          (stringify-node (second edge))
+          (nth edge 2)))
+
 (defn stringify-graph [g]
   (loom/build-graph
    (map stringify-node (loom/nodes g))
-   (->> (loom/multi-edges g)
-        (map #(vector (stringify-node (first %))
-                      (stringify-node (second %))
-                      (nth % 2))))))
+   (->> g loom/multi-edges
+        (map string-vector))))
 
 (defn pronoun-node []
   (as-> "!PRONOUN!" $
@@ -455,8 +456,7 @@
   (.setNER label class) label)
 
 (defn tokens-annotate [tokens index class]
-  (->> (-> tokens (.get index) (label-annotate class))
-       (.set tokens index))
+  (.set tokens index (-> tokens (.get index) (label-annotate class)))
   tokens)
 
 (defn tokens-annotate-all [tokens class-map]
@@ -468,7 +468,7 @@
   sentence)
 
 (defn map-attr [attr coll]
-  (->> (map #(hash-map % attr) coll)
+  (->> coll (map #(hash-map % attr))
        (apply merge)))
 
 (def attr-functions
@@ -503,8 +503,7 @@
 
 (defn mesh-fpps [author fpps pieces]
   (interleave pieces
-              (-> (mapv #(swap-fpp author %) fpps)
-                  (conj ""))))
+              (conj (mapv #(swap-fpp author %) fpps) "")))
 
 (defn fpp-replace [text author]
   (let [fpps (->> text tokenize get-tokens (filter is-fpp?))]
@@ -549,11 +548,9 @@
 (defn sentence-graph [sent-pair]
   (p :sentence-graph
      (-> (loom/merge-graphs
-          [(-> (get-triples (val sent-pair))
-               triples-graph)
+          [(-> sent-pair val get-triples triples-graph)
            (->> (entity-mentions (val sent-pair))
-                (map #(ner-graph %))
-                (remove nil?)
+                (map ner-graph) (remove nil?)
                 loom/merge-graphs)])
          ;(breakup-node (key sent-pair))
          ;trampoline recursion-cleanup
@@ -568,7 +565,7 @@
   (map #(shorten-node (first %)) nodes))
 
 (defn shorten-edge [edge]
-  (conj (->> (take 2 edge) (map shorten-node))
+  (conj (map shorten-node (take 2 edge))
         (nth edge 2)))
 
 (defn strip-nodes [nodes]
@@ -589,7 +586,7 @@
          (= s/has-type (nth (first $) 2)))))
 
 (defn find-pronouns [g]
-  (->> (loom/up-nodes g (pronoun-node))
+  (->> (pronoun-node) (loom/up-nodes g)
        (filter #(loom/out-edge-label g % s/coref-is))))
 
 (defn find-referent [g pronoun]
@@ -605,16 +602,14 @@
 (defn rewrite-pronouns [g]
   (as-> g $
     (loom/add-edges $
-           (->> (find-pronouns g)
-                (mapcat #(rewrite-edges g %))))
+       (mapcat #(rewrite-edges g %) (find-pronouns g)))
     (loom/remove-nodes $
-           (find-pronouns g))
+       (find-pronouns g))
     (loom/remove-nodes $
-           (->> (loom/up-nodes g (pronoun-node))
-                (filter #(lonely? g %))))))
+       (filter #(lonely? g %) (loom/up-nodes g (pronoun-node))))))
 
 (defn sentences-text [sentences]
-  (map #(.toString %) sentences))
+  (map str sentences))
 
 (defn nlp-graph [parsed-text]
   (cond->
@@ -669,7 +664,7 @@
       (-> $ capitalize-words run-nlp-default nlp-names first))))
 
 (defn format-person [name email default]
-  (if (not (com/nil-or-empty? name))
+  (if-not (com/nil-or-empty? name)
     (if (com/nil-or-empty? email)
       (if-let [inferred-email (-> name regex/find-email-addrs first)]
         (if-let [parsed-name (-> name (regex/parse-name inferred-email)
@@ -704,5 +699,5 @@
              (.objectLemmaGloss triple)]))
 
 (defn print-triples [triples]
-  (->> (map triple-string triples)
+  (->> triples (map triple-string)
        (map #(print (str % "\n")))))

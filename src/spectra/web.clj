@@ -122,8 +122,7 @@
     :workflows [(workflows/interactive-form)]}))
   
 (def secure-app
-  (-> (friend-authenticate app)
-      (wrap-defaults (middleware-config))))
+  (wrap-defaults (friend-authenticate app) (middleware-config)))
 
 (defn app-init! []
   (neo4j/define-graph!)

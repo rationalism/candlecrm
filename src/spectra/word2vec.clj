@@ -36,16 +36,14 @@
   (hasNext [this] (< @pos (count sentences)))
   (reset [this] (reset! pos 0))
   (nextSentence [this]
-                (if (.hasNext this)
-                  (do (swap! pos inc)
-                      (nth sentences (dec @pos)))
-                  nil)))
+                (when (.hasNext this)
+                  (swap! pos inc)
+                  (nth sentences (dec @pos)))))
 
 (defn SentenceLoaderFactory [filename]
-  (->> filename
-       slurp
+  (->> filename slurp
        (nlp/run-nlp (nlp/make-default-pipeline
-                         nlp/sentence-annotators))
+                     nlp/sentence-annotators))
        nlp/get-sentences
        nlp/sentences-text
        (->SentenceLoader (atom 0))))

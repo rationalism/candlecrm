@@ -12,7 +12,7 @@
 (defn create-user!
   [{:keys [username password] :as user-data}]
   (let [new-user
-        (-> (dissoc user-data :admin)
+        (-> user-data (dissoc :admin)
             (assoc :identity username
                    :password (creds/hash-bcrypt password)))]
    (recon/add-user-graph! new-user)
@@ -26,14 +26,12 @@
 
 (defn get-user-pwd [username]
   (let [user (lookup-user username)]
-    (if user
-      {:username username :password (neo4j/get-property user s/pwd-hash)}
-      nil)))
+    (when user
+      {:username username :password (neo4j/get-property user s/pwd-hash)})))
 
 (defn get-user-obj [friend-map]
-  (if friend-map
-    (lookup-user (:current friend-map))
-    nil))
+  (when friend-map
+    (lookup-user (:current friend-map))))
 
 (defn user-from-req [req]
   (get-user-obj (friend/identity req)))
@@ -65,5 +63,5 @@
     :else
     (let [validator (PasswordValidator. [(LengthRule. 8 64)])
           result (.validate validator (PasswordData. password))]
-      (if (.isValid result) nil
-          (str/join " " (.getMessages validator result))))))
+      (when-not (.isValid result)
+        (str/join " " (.getMessages validator result))))))

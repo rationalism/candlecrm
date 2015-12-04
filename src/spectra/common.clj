@@ -4,11 +4,11 @@
 ;; Common library functions. Shouldn't depend on anything else.
 
 (defn reset-if-found! [list header index]
-  (if (and (not (nil? list)) (> (count list) 0))
+  (if (and (not (nil? list)) (pos? (count list)))
     (reset! (index header) (first list))))
 
 (defn merge-if-found! [list header index]
-  (if (and (not (nil? list)) (> (count list) 0))
+  (if (and (not (nil? list)) (pos? (count list)))
     (reset! (index header)
             (merge (first list)
                    (deref (index header))))))
@@ -33,7 +33,7 @@
 
 (defn not-nil-ext? [item]
   (if (coll? item)
-    (and (not (empty? item))
+    (and (seq item)
          (not-any? nil? item))
     (not (nil? item))))
 

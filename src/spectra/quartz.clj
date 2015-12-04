@@ -5,6 +5,7 @@
               with-interval-in-milliseconds]]
             [clojurewerkz.quartzite.scheduler :as qs]
             [clojurewerkz.quartzite.triggers :as triggers]
+            [clojure.string :as str]
             [spectra.auth :as auth]
             [spectra.common :as com]
             [spectra.datetime :as dt]
@@ -52,7 +53,7 @@
 
 (defn find-ranges [queue-user]
   (->> queue-user :user queries/all-scanned
-       (map #(:data %))
+       (map :data)
        (map #(select-keys % [s/start-time s/stop-time]))
        (map #(com/map-values % (keys %)
                              (->> queue-user :user
@@ -70,14 +71,14 @@
   (neo4j/create-edge! user queue s/has-queue))
   
 (defn wipe-and-insert! [user & queues]
-  (-> (str "MATCH (root:" s/email-queue
-           ")-[:" (neo4j/cypher-esc-token s/has-queue)
-           "]->(d:" s/user-queue
-           ")<-[:" (neo4j/cypher-esc-token s/has-queue)
-           "]-(u:" s/user 
-           ") WHERE ID(u)= " (:id user)
-           " DETACH DELETE d")
-      neo4j/cypher-query)
+  (-> ["MATCH (root:" s/email-queue
+       ")-[:" (neo4j/cypher-esc-token s/has-queue)
+       "]->(d:" s/user-queue
+       ")<-[:" (neo4j/cypher-esc-token s/has-queue)
+       "]-(u:" s/user 
+       ") WHERE ID(u)= " (:id user)
+       " DETACH DELETE d"]
+      str/join neo4j/cypher-query)
   (->> (map #(assoc % s/modified (dt/now)) queues)
        (map #(hash-map :props %))
        (map #(assoc % :labels [s/user-queue]))
@@ -142,7 +143,7 @@
 (def scheduler (atom nil))
 
 (defn start! []
-  (reset! scheduler (-> (qs/initialize) qs/start))
+  (reset! scheduler (qs/start (qs/initialize)))
   (qs/schedule @scheduler
                (make-job EmailLoad "jobs.email.load.1")
                (periodic-trigger 15000 nil "email.trigger.1"))

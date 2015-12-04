@@ -35,27 +35,27 @@
 
 (defn show-person [person]
   [html/show-person (-> person :center-node :name first)
-                    (-> person :center-node)])
+                    (:center-node person)])
 
 (defn show-email [email]
   [html/show-email (-> email :center-node :subject)
-                   (-> email :center-node)])
+                   (:center-node email)])
 
 (defn show-organization [organization]
   [html/show-organization (-> organization :center-node :name first)
-                          (-> organization :center-node)])
+                          (:center-node organization)])
 
 (defn show-location [location]
   [html/show-location (-> location :center-node :name first)
-                      (-> location :center-node)])
+                      (:center-node location)])
 
 (defn show-event [event]
   [html/show-event (-> event :center-node :name first)
-                   (-> event :center-node)])
+                   (:center-node event)])
 
 (defn show-money [money]
   [html/show-money (-> money :center-node :name first)
-                   (-> money :center-node)])
+                   (:center-node money)])
 
 (def node-fn {s/person show-person s/email show-email
               s/organization show-organization s/location show-location
@@ -97,8 +97,8 @@
   (set! (.-innerHTML body) html))
 
 (defn table-body [table]
-  (if (> (.-length (.-tBodies table)) 0)
-    (first (array-seq (.-tBodies table))) nil))
+  (when (-> table #(.-tBodies) #(.-length) (> 0))
+    (-> table #(.-tBodies) array-seq first)))
 
 (defn render-all! []
   (r/render [homepage] (dom/getElement "content")))

@@ -1,5 +1,6 @@
 (ns spectra.geocode
   (:require [clojure.set :as set]
+            [clojure.string :as str]
             [spectra.neo4j :as neo4j]
             [spectra.queries :as queries]
             [spectra_cljc.schema :as s]
@@ -7,8 +8,7 @@
   (:import [com.google.maps GeoApiContext GeocodingApi]))
 
 (defn make-context []
-  (-> (GeoApiContext. )
-      (.setApiKey (env :geocode-api-key))))
+  (.setApiKey (GeoApiContext. ) (env :geocode-api-key)))
 
 (def context (atom nil))
 
@@ -30,24 +30,25 @@
         (.location) map-latlng)))
 
 (defn geocode-cached [limit]
-  (-> (str "MATCH (aloc:" s/location
-           "),(bloc:" s/location
-           ")-[:" (neo4j/cypher-esc-token s/has-coord)
-           "]->(g:" s/geocode
-           ") WHERE aloc." (neo4j/cypher-esc-token s/s-name)
-           " = bloc." (neo4j/cypher-esc-token s/s-name)
-           " AND NOT (aloc)-[:" (neo4j/cypher-esc-token s/has-coord)
-           "]->() CREATE (aloc)-[:" (neo4j/cypher-esc-token s/has-coord)
-           "]->(g) RETURN aloc LIMIT " limit)
-      neo4j/cypher-list))
+  (-> ["MATCH (aloc:" s/location
+       "),(bloc:" s/location
+       ")-[:" (neo4j/cypher-esc-token s/has-coord)
+       "]->(g:" s/geocode
+       ") WHERE aloc." (neo4j/cypher-esc-token s/s-name)
+       " = bloc." (neo4j/cypher-esc-token s/s-name)
+       " AND NOT (aloc)-[:" (neo4j/cypher-esc-token s/has-coord)
+       "]->() CREATE (aloc)-[:" (neo4j/cypher-esc-token s/has-coord)
+       "]->(g) RETURN aloc LIMIT " limit]
+      str/join neo4j/cypher-list))
 
 (defn insert-query [geocode]
-  (str "MATCH (root:" s/location
-       ") WHERE ID(root) = " (:id geocode)
-       " CREATE (root)-[:" (neo4j/cypher-esc-token s/has-coord)
-       "]->(g:" s/geocode
-       " " (-> geocode (get s/geocode) neo4j/cypher-properties)
-       ") RETURN g"))
+  (str/join
+   ["MATCH (root:" s/location
+    ") WHERE ID(root) = " (:id geocode)
+    " CREATE (root)-[:" (neo4j/cypher-esc-token s/has-coord)
+    "]->(g:" s/geocode
+    " " (-> geocode (get s/geocode) neo4j/cypher-properties)
+    ") RETURN g"]))
 
 (defn geocode-batch [limit]
   (->> (queries/bare-locations limit)

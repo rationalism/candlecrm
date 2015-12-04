@@ -40,12 +40,10 @@
     (conj (.getValue (.getAdditionalName (.getName contact))))))
 
 (defn emails [contact]
-  (->> (.getEmailAddresses contact)
-       (mapv #(.getAddress %))))
-
+  (mapv #(.getAddress %) (.getEmailAddresses contact)))
+  
 (defn phones [contact]
-  (->> (.getPhoneNumbers contact)
-       (mapv #(.getPhoneNumber %))))
+  (mapv #(.getPhoneNumber %) (.getPhoneNumbers contact)))
 
 (defn birthday [contact]
   (when-let [bdate (.getBirthday contact)]
@@ -53,11 +51,11 @@
 
 (defn gender [contact]
   (when-let [gend (.getGender contact)]
-    (.toString gend)))
+    (str gend)))
 
 (defn occupation [contact]
   (when-let [occ (.getOccupation contact)]
-    (.toString occ)))
+    (str occ)))
 
 (defn addresses [contact]
   (when-let [addrs (.getPostalAddresses contact)]

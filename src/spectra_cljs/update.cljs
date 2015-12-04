@@ -27,7 +27,7 @@
 
 (defn prev-fetch! [counter update-fn chsk-send!]
   (fn []
-    (when (< 0 (state/look :counters counter))
+    (when (pos? (state/look :counters counter))
       (state/update! [:counters counter] dec)
       (update-fn chsk-send!))))
 
@@ -100,7 +100,7 @@
    (assoc (rel-map s/location) :person-id person-id)])
 
 (defn normalize-cal [cal]
-  (-> (set/rename-keys cal {s/start-time :start})
+  (-> cal (set/rename-keys {s/start-time :start})
       (assoc :title (str (:id cal)))))
 
 (defn update-cal-rows! []
