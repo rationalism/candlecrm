@@ -5,7 +5,7 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.170"
                   :exclusions [args4j com.google.code.findbugs/jsr305]]
-                 [org.clojure/tools.nrepl "0.2.11"]
+                 [org.clojure/tools.nrepl "0.2.12"]
                  [clj-time "0.11.0"]
                  [http-kit "2.1.19"]
                  [ring/ring-core "1.4.0"
@@ -69,7 +69,8 @@
             [lein-cljsbuild "1.1.0"]
             [cider/cider-nrepl "0.9.1"]
             [jonase/eastwood "0.2.2"]
-            [venantius/yagni "0.1.4"]]
+            [venantius/yagni "0.1.4"]
+            [lein-ancient "0.6.8"]]
   :resource-paths ["config" "resources"]
   :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
   :source-paths ["src"]
