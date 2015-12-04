@@ -131,7 +131,6 @@
   (ajax/start!)
   (quartz/start!)
   (geocode/define-context!)
-  (email/define-imap-lookup)
   (println "Ready to start server")
   (nrepl-server/start-server
    :port 9998

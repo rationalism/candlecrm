@@ -2,11 +2,9 @@
   (:require
    [spectra.auth       :as auth]
    [spectra.queries    :as queries]
-   [ring.middleware.defaults]
    [clojure.core.async :as async  :refer (<! <!! >! >!! put! chan go go-loop)]
    [taoensso.timbre    :as timbre :refer (tracef debugf infof warnf errorf)]
    [taoensso.sente     :as sente]
-   [org.httpkit.server :as http-kit]
    [taoensso.sente.server-adapters.http-kit :refer (sente-web-server-adapter)]))
 ;; Optional, for Transit encoding:
 ;;[taoensso.sente.packers.transit :as sente-transit]
@@ -72,8 +70,6 @@
                                    :keys []}
                 :update/fetch-node {:fn queries/node-by-id
                                     :keys [:id :type]}})
-
-(defmulti event-msg-handler :id) ; Dispatch on event-id
 
 ;; Wrap for logging, catching, etc.:
 (defn event-msg-handler*

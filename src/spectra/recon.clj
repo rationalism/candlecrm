@@ -1,13 +1,10 @@
 (ns spectra.recon
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [spectra.common :as com]
+  (:require [spectra.common :as com]
             [spectra.corenlp :as nlp]
             [spectra.datetime :as dt]
             [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]
-            [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
@@ -170,7 +167,7 @@
   (p :merge-graph
      (let [match-edges (->> (loom/multi-edges g)
                             (filter #(= (nth % 2) :database-match)))]
-       (doall (map merge-edge! match-edges))
+       (dorun (map merge-edge! match-edges))
        (reduce #(loom/replace-node %1 (first %2) (second %2))
                (loom/remove-edges g match-edges)
                match-edges))))

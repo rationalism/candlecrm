@@ -75,24 +75,22 @@
        (if (< time (sent-time (get-message folder mid)))
          (recur folder num bottom mid)
          (recur folder num mid top))))))
-              
-(defn define-imap-lookup []
-  (def ^:dynamic *imap-lookup* {}))
+
+(def imap-lookup (atom {}))
 
 (defn update-imap-lookup! [user inbox]
-  (def ^:dynamic *imap-lookup*
-    (assoc *imap-lookup* user inbox)))
+  (swap! imap-lookup assoc user inbox))
 
 (defn shut-folder! [folder]
-  (def store (folder-store folder))
-  (close-folder! folder)
-  (close-store! store))
+  (let [store (folder-store folder)]
+    (close-folder! folder)
+    (close-store! store)))
 
 (defn close-imap-lookup! []
-  (->> (keys *imap-lookup*)
-       (map #(*imap-lookup* %))
+  (->> (keys @imap-lookup)
+       (map #(@imap-lookup %))
        (map shut-folder!))
-  (define-imap-lookup))
+  (reset! imap-lookup {}))
 
 (defn refresh-inbox [user]
   (-> user google/lookup-token
@@ -102,8 +100,8 @@
   
 ;; TODO: support IMAP stores other than GMail
 (defn fetch-imap-folder [user]
-  (def inbox (if (contains? *imap-lookup* user)
-               (*imap-lookup* user)
+  (def inbox (if (contains? @imap-lookup user)
+               (get @imap-lookup user)
                (refresh-inbox user)))
   (if (folder-open? inbox) nil
       (try (open-folder-read! inbox)
@@ -590,7 +588,7 @@
              (prn e) nil)))))
   
 (defn insert-email-range! [user lower upper]
-  (doall
+  (dorun
    (->> (messages-in-range (fetch-imap-folder user) lower upper)
         (pmap message-fetch)
         (map full-parse)
@@ -618,7 +616,7 @@
              (prn e) nil)))))
 
 (defn insert-headers-range! [user lower upper]
-  (doall
+  (dorun
    (->> (messages-in-range (fetch-imap-folder user) lower upper)
         (pmap headers-fetch)
         (map headers-parse)

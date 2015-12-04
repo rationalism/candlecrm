@@ -10,7 +10,7 @@
            [org.passay PasswordData PasswordValidator LengthRule]))
 
 (defn create-user!
-  [{:keys [username password admin] :as user-data}]
+  [{:keys [username password] :as user-data}]
   (let [new-user
         (-> (dissoc user-data :admin)
             (assoc :identity username

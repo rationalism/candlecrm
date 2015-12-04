@@ -1,6 +1,5 @@
 (ns spectra.pages
-  (:require [environ.core :refer [env]]
-            [spectra.auth :as auth]
+  (:require [spectra.auth :as auth]
             [spectra.email :as email]
             [spectra.google :as google]
             [spectra.html :as html]))
@@ -28,18 +27,6 @@
 (defn login-needed [uri]
   (html/base-template
    (html/login-needed uri)))
-
-;(def node-page {s/person show-person s/email show-email
-;                s/organization show-organization s/location show-location
-;                s/event show-event s/money show-money})
-
-;(defn show-node [req id node-type]
-;  (if-let [user (auth/user-from-req req)]
-;    (if-let [node (neo4j/node-from-id user id node-type)]
-;      (html/base-template
-;       ((node-page node-type) node))
-;      (html/base-template (html/not-found-error)))
-;    (html/base-template (html/unauthorized-error))))
   
 (defn ajax-test [req]
   (html/base-template
