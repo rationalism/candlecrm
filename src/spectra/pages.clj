@@ -1,15 +1,9 @@
 (ns spectra.pages
-  (:require [clojure.java.io :as io]
-            [environ.core :refer [env]]
+  (:require [environ.core :refer [env]]
             [spectra.auth :as auth]
             [spectra.email :as email]
             [spectra.google :as google]
-            [spectra.html :as html]
-            [spectra.neo4j :as neo4j]
-            [spectra.queries :as queries]
-            [spectra_cljc.schema :as s]
-            [cemerick.friend :as friend]
-            [hiccup.core :as hiccup]))
+            [spectra.html :as html]))
 
 (defn login [req]
   (html/base-template

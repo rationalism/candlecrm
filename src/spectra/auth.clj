@@ -1,15 +1,11 @@
 (ns spectra.auth
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [environ.core :refer [env]]
-            [clj-time.core :as clj-time]
+  (:require [clojure.string :as str]
             [spectra.recon :as recon]
             [spectra.neo4j :as neo4j]
             [spectra.regex :as regex]
             [spectra_cljc.schema :as s]
             [cemerick.friend :as friend]
-            (cemerick.friend [workflows :as workflows]
-                             [credentials :as creds]))
+            (cemerick.friend [credentials :as creds]))
   (:import java.net.URI
            [org.passay PasswordData PasswordValidator LengthRule]))
 

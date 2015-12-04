@@ -1,13 +1,8 @@
 (ns spectra.loom
-  (:require [clojure.java.io :as io]
-            [loom.alg :as galg]
+  (:require [loom.alg :as galg]
             [loom.attr :as attr]
             [loom.graph :as graph]
-            [loom.io :as gviz]
-            [spectra.common :as com]
-            [environ.core :refer [env]]
-            [taoensso.timbre.profiling :as profiling
-             :refer (pspy pspy* profile defnp p p*)]))
+            [loom.io :as gviz]))
 
 (defn multi-edge [g edge]
   (->> (attr/attr g edge :label)

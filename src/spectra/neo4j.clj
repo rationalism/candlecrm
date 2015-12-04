@@ -1,6 +1,5 @@
 (ns spectra.neo4j
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [spectra.common :as com]
             [spectra.datetime :as dt]
             [spectra_cljc.schema :as s]

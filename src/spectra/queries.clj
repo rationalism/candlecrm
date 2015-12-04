@@ -1,14 +1,9 @@
 (ns spectra.queries
-  (:require [clojure.java.io :as io]
-            [clojure.set :as set]
+  (:require [clojure.set :as set]
             [clojure.string :as str]
             [spectra.auth :as auth]
-            [spectra.common :as com]
             [spectra.neo4j :as neo4j]
-            [spectra_cljc.schema :as s]
-            [environ.core :refer [env]]
-            [taoensso.timbre.profiling :as profiling
-             :refer (pspy pspy* profile defnp p p*)]))
+            [spectra_cljc.schema :as s]))
 
 (defn first-if-coll [coll]
   (if (coll? coll) (first coll) coll))

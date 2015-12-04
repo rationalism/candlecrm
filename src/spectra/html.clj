@@ -1,9 +1,5 @@
 (ns spectra.html
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [environ.core :refer [env]]
-            [spectra.datetime :as dt]
-            [spectra_cljc.schema :as s])
+  (:require [environ.core :refer [env]])
   (:use [hiccup.core] [hiccup.page]
         [ring.util.anti-forgery]))
 

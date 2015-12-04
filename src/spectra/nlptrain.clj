@@ -1,10 +1,6 @@
 (ns spectra.nlptrain
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [spectra.corenlp :as nlp]
-            [environ.core :refer [env]]
-            [taoensso.timbre.profiling :as profiling
-             :refer (pspy pspy* profile defnp p p*)])
+  (:require [clojure.string :as str]
+            [spectra.corenlp :as nlp])
   (:import [edu.stanford.nlp.ie.crf CRFClassifier]))
 
 (defn tokenize [infile outfile]

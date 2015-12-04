@@ -1,8 +1,6 @@
 (ns spectra.regex
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [spectra_cljc.schema :as s]
-            [environ.core :refer [env]])
+  (:require [clojure.string :as str]
+            [spectra_cljc.schema :as s])
   (:import [com.google.i18n.phonenumbers PhoneNumberUtil]))
 
 ;; Taken from http://stackoverflow.com/questions/201323/using-a-regular-expression-to-validate-an-email-address

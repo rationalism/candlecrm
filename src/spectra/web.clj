@@ -25,11 +25,6 @@
             [cider.nrepl :refer (cider-nrepl-handler)])
   (:use [org.httpkit.server :only [run-server]]))
 
-(defn unauthorized-handler [req msg]
-  {:status 401
-   :body {:status :error
-          :message (or msg "User not authorized")}})
-
 (defn logout [req]
   (assoc (resp/redirect "/") :session nil))
 
@@ -43,7 +38,7 @@
 
 (defroutes app
   (GET "/" req
-       (if-let [user (auth/user-from-req req)]
+       (when (auth/user-from-req req)
          (resp/redirect "/app")
          (html-wrapper (pages/login req))))
   ;; TODO: Make this return an error message when credentials are invalid

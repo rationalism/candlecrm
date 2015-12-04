@@ -1,27 +1,26 @@
 (ns spectra.geocode
   (:require [clojure.set :as set]
-            [clojure.string :as str]
             [spectra.neo4j :as neo4j]
             [spectra.queries :as queries]
             [spectra_cljc.schema :as s]
-            [environ.core :refer [env]]
-            [taoensso.timbre.profiling :as profiling
-             :refer (pspy pspy* profile defnp p p*)])
+            [environ.core :refer [env]])
   (:import [com.google.maps GeoApiContext GeocodingApi]))
 
 (defn make-context []
   (-> (GeoApiContext. )
       (.setApiKey (env :geocode-api-key))))
 
+(def context (atom nil))
+
 (defn define-context! []
-  (def ^:dynamic *context* (make-context)))
+  (reset! context (make-context)))
 
 (defn map-latlng [latlng]
   {s/lat (.lat latlng)
    s/lng (.lng latlng)})
 
 (defn fetch-geocode [s]
-  (-> *context*
+  (-> @context
       (GeocodingApi/geocode s)
       (.await) first))
   

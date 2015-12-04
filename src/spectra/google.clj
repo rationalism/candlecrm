@@ -1,11 +1,8 @@
 (ns spectra.google
-  (:require [clojure.java.io :as io]
-            [environ.core :refer [env]]
+  (:require [environ.core :refer [env]]
             [spectra.auth :as auth]
             [spectra.neo4j :as neo4j]
-            [spectra_cljc.schema :as s]
-            [taoensso.timbre.profiling :as profiling
-             :refer (pspy pspy* profile defnp p p*)])
+            [spectra_cljc.schema :as s])
   (:import [com.google.api.client.googleapis.auth.oauth2 GoogleAuthorizationCodeRequestUrl
             GoogleAuthorizationCodeTokenRequest GoogleCredential$Builder GoogleTokenResponse]
            [com.google.api.client.auth.oauth2 AuthorizationCodeResponseUrl

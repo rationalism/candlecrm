@@ -1,7 +1,5 @@
 (ns spectra.quartz
-  (:require [clojure.java.io :as io]
-            [environ.core :refer [env]]
-            [clojurewerkz.quartzite.jobs :as jobs]
+  (:require [clojurewerkz.quartzite.jobs :as jobs]
             [clojurewerkz.quartzite.schedule.simple :refer
              [schedule repeat-forever with-repeat-count
               with-interval-in-milliseconds]]
@@ -14,9 +12,7 @@
             [spectra.geocode :as geocode]
             [spectra.neo4j :as neo4j]
             [spectra.queries :as queries]
-            [spectra_cljc.schema :as s]
-            [taoensso.timbre.profiling :as profiling
-             :refer (pspy pspy* profile defnp p p*)]))
+            [spectra_cljc.schema :as s]))
 
 (defn queue-small? [queue]
   (< (- (-> queue :data s/queue-top)
@@ -143,15 +139,17 @@
                  (with-interval-in-milliseconds interval))
        (schedule (repeat-forever)
                  (with-interval-in-milliseconds interval))))))
-  
+
+(def scheduler (atom nil))
+
 (defn start! []
-  (def ^:dynamic *scheduler* (-> (qs/initialize) qs/start))
-  (qs/schedule *scheduler*
+  (reset! scheduler (-> (qs/initialize) qs/start))
+  (qs/schedule @scheduler
                (make-job EmailLoad "jobs.email.load.1")
                (periodic-trigger 15000 nil "email.trigger.1"))
-  (qs/schedule *scheduler*
+  (qs/schedule @scheduler
                (make-job NewGeocodes "jobs.geocode.load.1")
                (periodic-trigger 5000 nil "geocode.trigger.1"))
-  (qs/schedule *scheduler*
+  (qs/schedule @scheduler
                (make-job CachedGeocodes "jobs.geocode.insert.1")
                (periodic-trigger 5000 nil "geocode.trigger.2")))

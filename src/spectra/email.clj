@@ -1,6 +1,5 @@
 (ns spectra.email
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [spectra.auth :as auth]
             [spectra.common :as com]
             [spectra.datetime :as dt]
@@ -12,7 +11,6 @@
             [spectra.recon :as recon]
             [spectra.regex :as regex]
             [spectra_cljc.schema :as s]
-            [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [javax.mail Folder Message Message$RecipientType]))

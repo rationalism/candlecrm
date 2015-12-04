@@ -1,10 +1,8 @@
 (ns spectra.corenlp
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [spectra.common :as com]
             [spectra.datetime :as dt]
             [spectra.loom :as loom]
-            [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]
             [spectra.regex :as regex]
             [environ.core :refer [env]]

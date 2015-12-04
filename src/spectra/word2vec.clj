@@ -1,7 +1,5 @@
 (ns spectra.word2vec
-  (:require [clojure.java.io :as io]
-            [environ.core :refer [env]]
-            [spectra.corenlp :as nlp]
+  (:require [spectra.corenlp :as nlp]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [org.deeplearning4j.text.sentenceiterator
@@ -85,19 +83,19 @@
     nlp/token-annotators)))
 
 (defn make-model [filename]
-  (def vec-model
-    (-> (Word2Vec$Builder. )
-        (.batchSize batch-size)
-        (.sampling sampling)
-        (.minWordFrequency min-word-freq)
-        (.useAdaGrad use-adagrad)
-        (.layerSize layer-size)
-        (.iterations iterations)
-        (.learningRate learn-rate)
-        (.minLearningRate min-learn-rate)
-        (.negativeSample neg-sample)
-        (.iterate (SentenceLoaderFactory filename))
-        (.tokenizerFactory (make-token-factory))
-        .build))
-  (p :train-word2vec (.fit vec-model))
-  vec-model)
+  (let [vec-model
+        (-> (Word2Vec$Builder. )
+            (.batchSize batch-size)
+            (.sampling sampling)
+            (.minWordFrequency min-word-freq)
+            (.useAdaGrad use-adagrad)
+            (.layerSize layer-size)
+            (.iterations iterations)
+            (.learningRate learn-rate)
+            (.minLearningRate min-learn-rate)
+            (.negativeSample neg-sample)
+            (.iterate (SentenceLoaderFactory filename))
+            (.tokenizerFactory (make-token-factory))
+            .build atom)]
+    (p :train-word2vec (.fit @vec-model))
+    @vec-model))

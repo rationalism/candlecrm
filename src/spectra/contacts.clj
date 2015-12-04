@@ -1,16 +1,12 @@
 (ns spectra.contacts
-  (:require [clojure.java.io :as io]
-            [environ.core :refer [env]]
-            [spectra.auth :as auth]
+  (:require [spectra.auth :as auth]
             [spectra.common :as com]
             [spectra.corenlp :as nlp]
             [spectra.datetime :as dt]
             [spectra.google :as google]
             [spectra.neo4j :as neo4j]
             [spectra.recon :as recon]
-            [spectra_cljc.schema :as s]
-            [taoensso.timbre.profiling :as profiling
-             :refer (pspy pspy* profile defnp p p*)])
+            [spectra_cljc.schema :as s])
   (:import [com.google.gdata.client Query]
            [com.google.gdata.client.contacts ContactsService]
            [com.google.gdata.data.contacts ContactFeed]
@@ -105,5 +101,5 @@
     neo4j/batch-insert!))
 
 (defn load-all-contacts! [user]
-  (doall (batch-insert! user (all-contacts user)))
+  (dorun (batch-insert! user (all-contacts user)))
   :success)

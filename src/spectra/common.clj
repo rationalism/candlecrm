@@ -1,10 +1,5 @@
 (ns spectra.common
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [environ.core :refer [env]]
-            [pandect.algo.sha1 :as sha1]
-            [taoensso.timbre.profiling :as profiling
-             :refer (pspy pspy* profile defnp p p*)]))
+  (:require [pandect.algo.sha1 :as sha1]))
 
 ;; Common library functions. Shouldn't depend on anything else.
 

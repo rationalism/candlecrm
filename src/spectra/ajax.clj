@@ -2,13 +2,8 @@
   (:require
    [spectra.auth       :as auth]
    [spectra.queries    :as queries]
-   [clojure.string     :as str]
    [ring.middleware.defaults]
-   [compojure.core     :as comp :refer (defroutes GET POST)]
-   [compojure.route    :as route]
-   [hiccup.core        :as hiccup]
    [clojure.core.async :as async  :refer (<! <!! >! >!! put! chan go go-loop)]
-   [taoensso.encore    :as encore :refer ()]
    [taoensso.timbre    :as timbre :refer (tracef debugf infof warnf errorf)]
    [taoensso.sente     :as sente]
    [org.httpkit.server :as http-kit]
