@@ -93,12 +93,5 @@
         (.-innerHTML)
         (set! i))))
 
-(defn insert-table-body! [body html]
-  (set! (.-innerHTML body) html))
-
-(defn table-body [table]
-  (when (-> table #(.-tBodies) #(.-length) (> 0))
-    (-> table #(.-tBodies) array-seq first)))
-
 (defn render-all! []
   (r/render [homepage] (dom/getElement "content")))

@@ -144,9 +144,9 @@
 
 (defn start! []
   (reset! scheduler (qs/start (qs/initialize)))
-  (qs/schedule @scheduler
-               (make-job EmailLoad "jobs.email.load.1")
-               (periodic-trigger 15000 nil "email.trigger.1"))
+;  (qs/schedule @scheduler
+;               (make-job EmailLoad "jobs.email.load.1")
+;               (periodic-trigger 15000 nil "email.trigger.1"))
   (qs/schedule @scheduler
                (make-job NewGeocodes "jobs.geocode.load.1")
                (periodic-trigger 5000 nil "geocode.trigger.1"))
