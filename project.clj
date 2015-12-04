@@ -67,7 +67,8 @@
   :plugins [[lein-environ "1.0.1"]
             [lein-figwheel "0.5.0"]
             [lein-cljsbuild "1.1.0"]
-            [cider/cider-nrepl "0.9.1"]]
+            [cider/cider-nrepl "0.9.1"]
+            [jonase/eastwood "0.2.2"]]
   :resource-paths ["config" "resources"]
   :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
   :source-paths ["src"]
