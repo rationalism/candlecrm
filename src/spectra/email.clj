@@ -71,10 +71,11 @@
   ([folder time bottom top]
    (if (or (= bottom top) (= bottom (dec top)))
      bottom
-     (let [mid (/ (+ top bottom) 2)]
-       (if (< time (sent-time (get-message folder mid)))
-         (recur folder num bottom mid)
-         (recur folder num mid top))))))
+     (let [mid (quot (+ top bottom) 2)]
+       (if (->> mid (get-message folder)
+                sent-time dt/to-ms (< time))
+         (recur folder time bottom mid)
+         (recur folder time mid top))))))
 
 (defonce imap-lookup (atom {}))
 
