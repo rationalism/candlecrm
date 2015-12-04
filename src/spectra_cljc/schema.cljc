@@ -106,33 +106,4 @@
 (def date-times [start-time stop-time over-time
                  email-sent email-received])
 
-(defn prop
-  ([arg1 arg2 arg3]
-   (.createProperty arg1 arg2 arg3))
-  ([arg1 arg2 arg3 arg4]
-   (.createProperty arg1 arg2 arg3 arg4)))
-
-(defn vertex
-  ([name]
-   (.createVertexType name))
-  ([name super]
-   (.createVertexType name super)))
-
-(defn get-vertex [name]
-  (.getVertexType name))
-
-(defn drop-vertex! [name]
-  (.dropVertexType name))
-
-(defn drop-edge! [name]
-  (.dropEdgeType name))
-
-(defn edge
-  ([name]
-   (.createEdgeType name))
-  ([name super]
-   (.createEdgeType name super)))
-
-(defn key-index [var-type var-class params]
-  (.createKeyIndex var-type var-class params))
 
