@@ -43,8 +43,12 @@
 
 (defn queue-time [queue-user]
   [(-> queue-user :queue range-bottom (email-time queue-user))
-   (-> queue-user :queue range-top (email-time queue-user))
-   (-> queue-user :queue range-top inc (email-time queue-user))])
+   (-> queue-user :queue range-top (email-time queue-user))])
+
+(defn queue-time-extra [queue-user]
+  (conj (queue-time queue-user)
+        (-> queue-user :queue range-top inc
+            (email-time queue-user))))
 
 (defn scan-check [user email-times]
   (->> email-times
@@ -91,7 +95,7 @@
                              (range-top (:queue queue-user))))
 
 (defn adjust-times! [queue-user]
-  (let [email-times (queue-time queue-user)]
+  (let [email-times (queue-time-extra queue-user)]
     (if (= [true true false] (scan-check (:user queue-user) email-times))
       (do (run-insertion! queue-user) 
           (neo4j/set-property! (:queue queue-user)
@@ -101,7 +105,7 @@
 
 (defn new-time-scanned! [queue-user]
   (let [email-times (queue-time queue-user)
-        new-node (->> email-times (take 2)
+        new-node (->> email-times
                       (zipmap [s/start-time s/stop-time])
                       (neo4j/create-vertex! s/time-scanned))]
     (neo4j/create-edge! (:user queue-user) new-node s/scanned)))

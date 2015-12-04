@@ -111,10 +111,6 @@
     (if (coll? value) (set value) value)))
 
 (defn set-property! [vertex property value]
-  (prn "set-property!")
-  (prn vertex)
-  (prn property)
-  (prn value)
   (nn/set-property @conn vertex property
                    (dt/catch-dates value)))
 
@@ -197,11 +193,12 @@
       nil (set-property! vertex property (conj old-props value)))))
 
 (defn merge-property-list! [vertex property values]
-  (->> property
-       (get-property vertex)
-       (concat values)
-       distinct
-       (set-property! vertex property)))
+  (when (com/not-nil-ext? values)
+    (if (coll? values)
+      (->> (get-property vertex property)
+           (concat values) distinct
+           (set-property! vertex property))
+      (set-property! vertex property values))))
 
 (defn delete-property! [vertex property]
   (-> (str "MATCH (a) where ID(a)= " (:id vertex)
@@ -223,8 +220,6 @@
        vertex)))
 
 (defn batch-insert! [items]
-  (prn "batch-insert!")
-  (prn items)
   (p :batch-insert
      (let [nodes (nn/create-batch
                   @conn (map #(filter-props (:props %)) items))]
