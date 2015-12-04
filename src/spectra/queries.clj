@@ -94,9 +94,9 @@
        "]->(s:" s/time-scanned
        ") WHERE ID(root)= " (:id user)
        " AND s." (neo4j/cypher-esc-token s/start-time)
-       " < " time
+       " <= " time
        " AND s." (neo4j/cypher-esc-token s/stop-time)
-       " > " time " RETURN s"]
+       " >= " time " RETURN s"]
       str/join neo4j/cypher-list))
 
 (defn escape-rels [rels]

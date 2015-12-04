@@ -57,8 +57,7 @@
 
 (defn scan-check [user email-times]
   (->> email-times
-       (mapv #(queries/scan-overlaps user %))
-       (mapv com/nil-or-empty?)))
+       (mapv #(queries/scan-overlaps user %))))
 
 (defn incdec [range]
   [(dec (first range)) (inc (second range))])
@@ -112,13 +111,14 @@
                              (range-top (:queue queue-user))))
 
 (defn adjust-times! [queue-user]
-  (let [email-times (queue-time-extra queue-user)]
-    (if (= [true true false] (scan-check (:user queue-user) email-times))
+  (let [email-times (queue-time-extra queue-user)
+        overlaps (scan-check (:user queue-user) email-times)]
+    (if (= [true true false] (map com/nil-or-empty? overlaps))
       (do (run-insertion! queue-user) 
-          (neo4j/set-property! (:queue queue-user)
+          (neo4j/set-property! (first (last overlaps))
                                s/start-time (first email-times)))
       (->> queue-user find-ranges
-           (wipe-and-insert! (:user queue-user))))))
+           (apply wipe-and-insert! (:user queue-user))))))
 
 (defn new-time-scanned! [queue-user]
   (let [email-times (queue-time queue-user)
