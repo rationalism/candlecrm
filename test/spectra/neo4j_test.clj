@@ -4,7 +4,7 @@
             [spectra_cljc.schema :as s]))
 
 (defn graph-ready [f]
-  (intern 'spectra.neo4j '*graph* (get-graph))
+  (define-graph!)
   (f)
   nil)
 

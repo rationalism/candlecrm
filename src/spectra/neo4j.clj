@@ -28,8 +28,10 @@
 (defn get-graph []
   (nr/connect (make-graph-url)))
 
+(def conn (atom nil))
+
 (defn define-graph! []
-  (def ^:dynamic *graph* (get-graph)))
+  (reset! conn (get-graph)))
 
 (defn cypher-esc [value]
   (if (nil? value) nil
@@ -65,11 +67,11 @@
        (into {})))
 
 (defn cypher-query [query]
-  (->> (cy/tquery *graph* query)
+  (->> (cy/tquery @conn query)
        (map cypher-map->node)))
 
 (defn cypher-query-labeled [query]
-  (->> (cy/tquery *graph* query)
+  (->> (cy/tquery @conn query)
        (map cypher-map-node-labeled)))
 
 (defn cypher-prop-any [prop]
@@ -106,7 +108,7 @@
 
 (defn cypher-combined-tx [queries]
   (->> (map tx/statement queries)
-       (apply tx/in-transaction *graph*)
+       (apply tx/in-transaction @conn)
        (map cy/tableize)))
 
 (defn get-property [vertex property]
@@ -114,7 +116,7 @@
     (if (coll? value) (into #{} value) value)))
 
 (defn set-property! [vertex property value]
-  (nn/set-property *graph* vertex property
+  (nn/set-property @conn vertex property
                    (dt/catch-dates value)))
 
 (defn make-links-query [nodes links]
@@ -217,23 +219,23 @@
 
 (defn create-vertex! [labels properties]
   (p :create-vertex
-     (let [vertex (nn/create *graph* (filter-props properties))]
-       (nl/add *graph* vertex labels)
+     (let [vertex (nn/create @conn (filter-props properties))]
+       (nl/add @conn vertex labels)
        vertex)))
 
 (defn batch-insert! [items]
   (p :batch-insert
      (let [nodes (nn/create-batch
-                  *graph* (map #(filter-props (:props %)) items))]
-       (dorun (map #(nl/add *graph* %1 (:labels %2)) nodes items))
+                  @conn (map #(filter-props (:props %)) items))]
+       (dorun (map #(nl/add @conn %1 (:labels %2)) nodes items))
        nodes)))
 
 (defn replace-labels! [vertex labels]
   (p :replace-labels
-     (nl/replace *graph* vertex labels)))
+     (nl/replace @conn vertex labels)))
 
 (defn delete-vertex! [vertex]
-  (nn/destroy *graph* vertex))
+  (nn/destroy @conn vertex))
 
 (defn get-vertices [class props]
   (cypher-list
@@ -264,7 +266,7 @@
 
 (defn create-edge! [out in class]
   (p :create-edge
-     (nrl/create *graph* out in class)))
+     (nrl/create @conn out in class)))
 
 (defn delete-edge! [edge]
-  (nrl/delete *graph* edge))
+  (nrl/delete @conn edge))

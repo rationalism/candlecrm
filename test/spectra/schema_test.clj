@@ -5,7 +5,7 @@
             [environ.core :refer [env]]))
 
 (defn graph-ready [f]
-  (intern 'spectra.neo4j '*graph* (neo4j/get-graph))
+  (neo4j/define-graph!)
   (f)
   nil)
 
