@@ -3,7 +3,7 @@
   :url "http://spectra.herokuapp.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.7.145"
+                 [org.clojure/clojurescript "1.7.170"
                   :exclusions [args4j com.google.code.findbugs/jsr305]]
                  [org.clojure/tools.nrepl "0.2.11"]
                  [clj-time "0.11.0"]
@@ -24,15 +24,15 @@
                                org.apache.httpcomponents/httpclient
                                org.apache.httpcomponents/httpcore
                                org.clojure/core.cache]]
-                 [com.google.api-client/google-api-client "1.20.0"
+                 [com.google.api-client/google-api-client "1.21.0"
                   :exclusions [com.fasterxml.jackson.core/jackson-core
                                com.google.code.findbugs/jsr305]]
                  [com.google.gdata/core "1.47.1"
                   :exclusions [com.google.guava/guava org.apache.httpcomponents/httpclient
                                com.google.code.findbugs/jsr305]]
                  [org.passay/passay "1.1.0"]
-                 [com.google.apis/google-api-services-oauth2 "v2-rev95-1.20.0"]
-                 [com.google.http-client/google-http-client-jackson "1.20.0"
+                 [com.google.apis/google-api-services-oauth2 "v2-rev98-1.21.0"]
+                 [com.google.http-client/google-http-client-jackson "1.21.0"
                   :exclusions [org.apache.httpcomponents/httpclient
                                com.google.code.findbugs/jsr305]]
                  [com.sun.mail/javax.mail "1.5.4"]
@@ -41,17 +41,17 @@
                  [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"]
                  [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.1.0"]
-                 [org.deeplearning4j/deeplearning4j-core "0.4-rc3.4"
+                 [com.googlecode.libphonenumber/libphonenumber "7.2.1"]
+                 [org.deeplearning4j/deeplearning4j-core "0.4-rc3.7"
                   :exclusions [org.apache.commons/commons-lang3 commons-logging
                                com.fasterxml.jackson.core/jackson-core junit
                                org.apache.commons/commons-compress com.google.guava/guava]]
-                 [org.deeplearning4j/deeplearning4j-nlp "0.4-rc3.4"
+                 [org.deeplearning4j/deeplearning4j-nlp "0.4-rc3.7"
                   :uberjar-merge-with {#"\.properties$" [slurp str spit]
                                        "reference.conf" [slurp str spit]}
                   :exclusions [com.fasterxml.jackson.core/jackson-core
                                com.google.guava/guava commons-logging]]
-                 [org.nd4j/nd4j-jcublas-7.5 "0.4-rc3.5"
+                 [org.nd4j/nd4j-jcublas-7.5 "0.4-rc3.7"
                   :exclusions [com.google.guava/guava]]
                  [com.joestelmach/natty "0.12"
                   :exclusions [commons-logging commons-codec]]

@@ -83,7 +83,7 @@
 (def formatter (format/formatters :rfc822))
 
 (defn format-date [value]
-  (->> value (now) coerce/from-date
+  (->> (Date. value) coerce/from-date
        (format/unparse formatter)))
 
 (defn hours-ago

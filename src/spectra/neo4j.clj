@@ -226,7 +226,7 @@
   (p :batch-insert
      (let [nodes (nn/create-batch
                   *graph* (map #(filter-props (:props %)) items))]
-       (doall (map #(nl/add *graph* %1 (:labels %2)) nodes items))
+       (dorun (map #(nl/add *graph* %1 (:labels %2)) nodes items))
        nodes)))
 
 (defn replace-labels! [vertex labels]

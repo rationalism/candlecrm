@@ -76,11 +76,17 @@
      (.setProperty "openie.triple.all_nominals" "true"))
    false))
 
+(def pipelines (atom {:token nil :ner nil :mention nil :openie nil}))
+
+(defn new-pipeline! [token annotators]
+  (swap! pipelines assoc token
+         (make-pipeline annotators pcfg-parse-model)))
+
 (defn load-pipeline! []
-  (def token-pipeline (make-pipeline sentence-annotators pcfg-parse-model))
-  (def ner-pipeline (make-pipeline ner-annotators pcfg-parse-model))
-  (def mention-pipeline (make-pipeline mention-annotators pcfg-parse-model))
-  (def openie-pipeline (make-pipeline openie-annotators pcfg-parse-model)))
+  (new-pipeline! :token sentence-annotators)
+  (new-pipeline! :ner ner-annotators)
+  (new-pipeline! :mention mention-annotators)
+  (new-pipeline! :openie openie-annotators))
 
 (defn run-nlp [pipeline text]
   ;; Global var needed for mutating Java method
@@ -89,17 +95,17 @@
   parsed-text)
 
 (defn tokenize [text]
-  (run-nlp token-pipeline text))
+  (run-nlp (:token @pipelines) text))
 
 (defn run-ner [text]
-  (run-nlp ner-pipeline text))
+  (run-nlp (:ner @pipelines) text))
 
 (defn get-mentions [annotation]
-  (p :get-mentions (.annotate mention-pipeline annotation))
+  (p :get-mentions (.annotate (:mention @pipelines) annotation))
   annotation)
 
 (defn run-openie [annotation]
-  (p :run-openie (.annotate openie-pipeline annotation))
+  (p :run-openie (.annotate (:openie @pipelines) annotation))
   annotation)
 
 (defn get-tokens [words]
