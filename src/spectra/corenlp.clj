@@ -74,7 +74,7 @@
      (.setProperty "openie.triple.all_nominals" "true"))
    false))
 
-(def pipelines (atom {:token nil :ner nil :mention nil :openie nil}))
+(defonce pipelines (atom {:token nil :ner nil :mention nil :openie nil}))
 
 (defn new-pipeline! [token annotators]
   (swap! pipelines assoc token

@@ -140,7 +140,7 @@
        (schedule (repeat-forever)
                  (with-interval-in-milliseconds interval))))))
 
-(def scheduler (atom nil))
+(defonce scheduler (atom nil))
 
 (defn start! []
   (reset! scheduler (qs/start (qs/initialize)))

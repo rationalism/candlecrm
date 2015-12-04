@@ -28,7 +28,7 @@
 (defn get-graph []
   (nr/connect (make-graph-url)))
 
-(def conn (atom nil))
+(defonce conn (atom nil))
 
 (defn define-graph! []
   (reset! conn (get-graph)))
@@ -111,6 +111,10 @@
     (if (coll? value) (set value) value)))
 
 (defn set-property! [vertex property value]
+  (prn "set-property!")
+  (prn vertex)
+  (prn property)
+  (prn value)
   (nn/set-property @conn vertex property
                    (dt/catch-dates value)))
 

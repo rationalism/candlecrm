@@ -10,7 +10,7 @@
 (defn make-context []
   (.setApiKey (GeoApiContext. ) (env :geocode-api-key)))
 
-(def context (atom nil))
+(defonce context (atom nil))
 
 (defn define-context! []
   (reset! context (make-context)))

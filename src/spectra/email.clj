@@ -76,7 +76,7 @@
          (recur folder num bottom mid)
          (recur folder num mid top))))))
 
-(def imap-lookup (atom {}))
+(defonce imap-lookup (atom {}))
 
 (defn update-imap-lookup! [user inbox]
   (swap! imap-lookup assoc user inbox))
@@ -98,7 +98,7 @@
       (google/get-imap-store! (auth/get-username user))
       get-inbox))
 
-(def inbox (atom nil))
+(defonce inbox (atom nil))
 
 ;; TODO: support IMAP stores other than GMail
 (defn fetch-imap-folder [user]
