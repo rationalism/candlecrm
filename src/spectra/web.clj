@@ -1,6 +1,5 @@
 (ns spectra.web
   (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]
-            [compojure.handler :refer [site]]
             [compojure.route :as route]
             [ring.util.response :as resp]
             [ring.middleware.defaults :refer :all]
@@ -16,7 +15,6 @@
             [spectra.corenlp :as nlp]
             [spectra.pages :as pages]
             [spectra.quartz :as quartz]
-            [spectra_cljc.schema :as s]
             [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
                              [credentials :as creds])
@@ -38,7 +36,7 @@
 
 (defroutes app
   (GET "/" req
-       (when (auth/user-from-req req)
+       (if (auth/user-from-req req)
          (resp/redirect "/app")
          (html-wrapper (pages/login req))))
   ;; TODO: Make this return an error message when credentials are invalid
@@ -124,8 +122,7 @@
     :workflows [(workflows/interactive-form)]}))
   
 (def secure-app
-  (-> app
-      friend-authenticate
+  (-> (friend-authenticate app)
       (wrap-defaults (middleware-config))))
 
 (defn app-init! []
@@ -146,6 +143,6 @@
 (defn -main [& args]
   (app-init!)
   (let [handler (if (env :in-dev)
-                  (reload/wrap-reload (site #'secure-app)) 
-                  (site secure-app))]
+                  (reload/wrap-reload #'secure-app)
+                  secure-app)]
     (run-server handler {:port 3000})))
