@@ -78,12 +78,11 @@
            ") WHERE ID(u)= " (:id user)
            " DETACH DELETE d")
       neo4j/cypher-query)
-  (dorun
-   (->> (map #(assoc % s/modified (dt/now)) queues)
-        (map #(hash-map :props %))
-        (map #(assoc % :labels [s/user-queue]))
-        neo4j/batch-insert!
-        (map #(create-edges! user %)))))
+  (->> (map #(assoc % s/modified (dt/now)) queues)
+       (map #(hash-map :props %))
+       (map #(assoc % :labels [s/user-queue]))
+       neo4j/batch-insert!
+       (map #(create-edges! user %)) dorun))
 
 (defn run-insertion! [queue-user]
   (email/insert-email-range! (:user queue-user)

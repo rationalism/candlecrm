@@ -1,7 +1,8 @@
 (ns spectra.html
-  (:require [environ.core :refer [env]])
-  (:use [hiccup.core] [hiccup.page]
-        [ring.util.anti-forgery]))
+  (:require [environ.core :refer [env]]
+            [hiccup.core :refer :all]
+            [hiccup.page :refer :all]
+            [ring.util.anti-forgery :refer :all]))
 
 ;; TODO: Reorganize this by page
 ;; TODO: Add CDN local fallback in case something fails
@@ -33,9 +34,9 @@
           ;[:script "google.maps.core.main();"]]))
 
 (defn signup-form [flash]
-  [flash]
   [:div {:class "row"}
    [:div {:class "columns small-12"}
+    [:span flash]
     [:h3 "Sign up "
      [:small "(Any user/pass combination will do, as you are creating a new account or profile.)"]]
     [:div.row

@@ -78,9 +78,9 @@
   (neo4j/get-vertices-class entity-class))
 
 (defn expand-entity [entity properties]
-  (merge
-   (map #(assoc {} % (neo4j/get-property entity %))
-        properties)))
+  (apply merge
+         (map #(assoc {} % (neo4j/get-property entity %))
+              properties)))
 
 (defn list-entities-full [entity-class properties]
   (->> (list-entities entity-class)
@@ -158,7 +158,8 @@
                    (-> match-edge first %)))
        (map #(neo4j/merge-property-list!
               (second match-edge) %
-              (-> match-edge first %))))
+              (-> match-edge first %)))
+       dorun)
   (let [labels (-> match-edge first :label)]
     (when (coll? labels)
       (neo4j/replace-labels! (second match-edge) labels))))
@@ -214,8 +215,8 @@
 (defn delete-headers! [g user]
   (->> (filter-memory g s/email)
        (map #(loom/out-edge-label g % s/email-from))
-       (map #(email-delete! s/email-headers (first %) (second %))))
-  g)
+       (map #(email-delete! s/email-headers (first %) (second %)))
+       dorun) g)
 
 (defn name-email-map [names emails]
   (cond

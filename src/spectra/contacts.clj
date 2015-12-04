@@ -101,5 +101,7 @@
     neo4j/batch-insert!))
 
 (defn load-all-contacts! [user]
-  (dorun (batch-insert! user (all-contacts user)))
+  (->> user all-contacts
+       (batch-insert! user)
+       dorun)
   :success)

@@ -97,19 +97,21 @@
       google/get-access-token!
       (google/get-imap-store! (auth/get-username user))
       get-inbox))
-  
+
+(def inbox (atom nil))
+
 ;; TODO: support IMAP stores other than GMail
 (defn fetch-imap-folder [user]
-  (def inbox (if (contains? @imap-lookup user)
-               (get @imap-lookup user)
-               (refresh-inbox user)))
-  (if (folder-open? inbox) nil
-      (try (open-folder-read! inbox)
-           (catch Exception e
-             (do (def inbox (refresh-inbox user))
-                 (open-folder-read! inbox)))))
-  (update-imap-lookup! user inbox)
-  inbox)
+  (reset! inbox (if (contains? @imap-lookup user)
+                  (get @imap-lookup user)
+                  (refresh-inbox user)))
+  (when (not (folder-open? @inbox))
+    (try (open-folder-read! @inbox)
+         (catch Exception e
+           (do (reset! inbox (refresh-inbox user))
+               (open-folder-read! @inbox)))))
+  (update-imap-lookup! user @inbox)
+  @inbox)
 
 (defn content [message]
   (p :get-content
@@ -301,15 +303,20 @@
 (defn dec-depth [chain]
   (->> (update (find-bottom chain) s/email-body remove-arrows)
        (loom/replace-node chain (find-bottom chain))))
-      
+
+(defn maybe-add-edges [chain new-node email-from]
+  (if email-from
+    (loom/add-edges chain [[new-node email-from s/email-from]])
+    chain))
+
 (defn split-email [marks chain]
   (if (depth-match? marks chain)
     (let [new-node (make-new-node marks chain)
           email-from (header->person marks)]
-      (cond-> chain
-        true (loom/replace-node (find-bottom chain) new-node)
-        email-from (loom/add-edges [[new-node email-from s/email-from]])
-        true (loom/add-edges [[new-node (new-bottom marks chain) s/email-reply]])))
+      (-> chain
+          (loom/replace-node (find-bottom chain) new-node)
+          (maybe-add-edges new-node email-from)
+          (loom/add-edges [[new-node (new-bottom marks chain) s/email-reply]])))
     (dec-depth chain)))
   
 (defn recursive-split [depth chain]
@@ -563,7 +570,7 @@
   (reduce #(recon/link-one-prop %1 (key %2) (val %2) user)
           g s/recon-attrs))
 
-(defn merge-and-recon [block-size attrs graphs]
+(defn merge-and-recon [batch-size attrs graphs]
   (->> (partition-all batch-size graphs)
        (map loom/merge-graphs)
        (map #(reduce recon/remove-dupes % attrs))))
@@ -572,32 +579,30 @@
 (defn insert-emails! [user emails]
   (p :insert-emails
      (try
-       (dorun
-        (-> (merge-old-people! emails user)
-            (recon/find-old-messages s/email)
-            use-nlp-graph
-            (link-people user)
-            (link-by-prop user)
-            (link-new-all user)
-            make-hyperlinks switch-message-graph
-            (recon/delete-headers! user)
-            (recon/link-new! s/email [s/email (neo4j/user-label user)])
-            recon/merge-graph! insert-links!))
+       (-> (merge-old-people! emails user)
+           (recon/find-old-messages s/email)
+           use-nlp-graph
+           (link-people user)
+           (link-by-prop user)
+           (link-new-all user)
+           make-hyperlinks switch-message-graph
+           (recon/delete-headers! user)
+           (recon/link-new! s/email [s/email (neo4j/user-label user)])
+           recon/merge-graph! insert-links! dorun)
        (catch Exception e
          (do (prn "Email insertion error")
              (prn e) nil)))))
   
 (defn insert-email-range! [user lower upper]
-  (dorun
    (->> (messages-in-range (fetch-imap-folder user) lower upper)
         (pmap message-fetch)
         (map full-parse)
-        (map #(insert-emails! user %))))
-  :success)
+        (map #(insert-emails! user %))
+        dorun) :success)
 
 (defn insert-one-email! [user email-num]
   (insert-email-range! user email-num email-num))
-4
+
 (defn insert-first-n! [user n]
   (let [limit (message-count (fetch-imap-folder user))]
     (insert-email-range! user (- limit n) limit)))
@@ -606,23 +611,21 @@
 (defn insert-headers! [user headers]
   (p :insert-headers
      (try
-       (dorun
-        (-> (merge-old-people! headers user)
-            (recon/find-old-messages s/email-headers)
-            (recon/load-new! s/email-headers [s/email-headers (neo4j/user-label user)])
-            insert-links!))
+       (-> (merge-old-people! headers user)
+           (recon/find-old-messages s/email-headers)
+           (recon/load-new! s/email-headers [s/email-headers (neo4j/user-label user)])
+           insert-links! dorun)
        (catch Exception e
          (do (prn "Email insertion error")
              (prn e) nil)))))
 
 (defn insert-headers-range! [user lower upper]
-  (dorun
-   (->> (messages-in-range (fetch-imap-folder user) lower upper)
-        (pmap headers-fetch)
-        (map headers-parse)
-        (map label-headers)
-        (map #(insert-headers! user %))))
-  :success)
+  (->> (messages-in-range (fetch-imap-folder user) lower upper)
+       (pmap headers-fetch)
+       (map headers-parse)
+       (map label-headers)
+       (map #(insert-headers! user %))
+       dorun) :success)
 
 (defn date-graphs [user start limit]
   (->> (queries/emails-with-dates user start limit)

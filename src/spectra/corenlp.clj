@@ -639,8 +639,7 @@
   (cond-> (-> text strip-parens
               (fpp-replace author)
               run-ner library-annotate-all
-              get-mentions)
-    true nlp-graph
+              get-mentions nlp-graph)
     (env :coreference) rewrite-pronouns))
 
 (defn run-nlp-openie [text]
@@ -677,7 +676,7 @@
                                  run-nlp-default nlp-names first)]
           (assoc (label-edge parsed-name) s/email-addr [inferred-email])
           {:label default s/email-addr [inferred-email]
-           s/s-name (-> inferred-email regex/parse-name vector)})
+           s/s-name (-> name (regex/parse-name inferred-email) vector)})
         (if-let [parsed-name (-> name run-nlp-default nlp-names first)]
           (label-edge parsed-name) {:label default s/s-name [name]
                                     :hash (com/sha1 name)}))
@@ -692,7 +691,7 @@
 (defn normalize-person [name email default]
   {:pre [(not (and (com/nil-or-empty? name) (com/nil-or-empty? email)))]}
   (if (= name email)
-    (if-let [inferred-email (-> name regex/find-email-addrs first)]
+    (if (-> name regex/find-email-addrs first)
       (format-person nil email default)
       (format-person name nil default))
     (format-person name email default)))
