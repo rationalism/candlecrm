@@ -105,6 +105,9 @@
        neo4j/batch-insert!
        (map #(create-edges! user %)) dorun))
 
+(defn refresh-queue! [user]
+  (apply wipe-and-insert! user (find-ranges user)))
+
 (defn run-insertion! [queue-user]
   (email/insert-email-range! (:user queue-user)
                              (range-bottom (:queue queue-user))
@@ -117,8 +120,7 @@
       (do (run-insertion! queue-user) 
           (neo4j/set-property! (first (last overlaps))
                                s/start-time (first email-times)))
-      (->> queue-user find-ranges
-           (apply wipe-and-insert! (:user queue-user))))))
+      (refresh-queue! (:user queue-user)))))
 
 (defn new-time-scanned! [queue-user]
   (let [email-times (queue-time queue-user)
@@ -145,6 +147,10 @@
 (jobs/defjob CachedGeocodes [ctx]
   (geocode/geocode-cached 20))
 
+(jobs/defjob EmailRefresh [ctx]
+  (doseq [user (auth/list-users)]
+    (refresh-queue! user)))
+
 (defn make-job [job-type job-name]
   (jobs/build
    (jobs/of-type job-type)
@@ -165,9 +171,12 @@
 
 (defn start! []
   (reset! scheduler (qs/start (qs/initialize)))
-;  (qs/schedule @scheduler
-;               (make-job EmailLoad "jobs.email.load.1")
-;               (periodic-trigger 15000 nil "email.trigger.1"))
+  (qs/schedule @scheduler
+               (make-job EmailLoad "jobs.email.load.1")
+               (periodic-trigger 15000 nil "email.trigger.1"))
+  (qs/schedule @scheduler
+               (make-job EmailRefresh "jobs.email.load.2")
+               (periodic-trigger 3600000 nil "email.trigger.2"))
   (qs/schedule @scheduler
                (make-job NewGeocodes "jobs.geocode.load.1")
                (periodic-trigger 5000 nil "geocode.trigger.1"))
