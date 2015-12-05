@@ -68,7 +68,7 @@
 (defn queue-ends [user excluded]
   (let [top-end (message-count user)]
     (-> (- top-end test-count)
-        (range (inc test-count))
+        (range (inc top-end))
         set (cset/difference excluded))))
 
 (defonce cnt (atom 0))
@@ -152,6 +152,11 @@
           (new-time-scanned! queue-user))
       (adjust-times! queue-user))))
 
+(defn user-job [ctx]
+  (-> ctx qc/from-job-data
+      (get s/user) (get "id")
+      neo4j/find-by-id))
+
 (jobs/defjob EmailLoad [ctx]
   (queue-pop!))
 
@@ -166,7 +171,7 @@
     (refresh-queue! user)))
 
 (jobs/defjob LoadContacts [ctx]
-  (let [user (-> ctx qc/from-job-data (get s/user))]
+  (let [user (user-job ctx)]
     (contacts/load-all-contacts! user)))
 
 (defn make-job
