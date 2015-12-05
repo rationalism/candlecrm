@@ -33,6 +33,9 @@
 (defn now []
   (Date. ))
 
+(defn future-ms [ms]
+  (-> (now) (.getTime) (+ ms) (Date.)))
+
 (defn dates-in-text
   ([text] (dates-in-text text (now)))
   ([text reference]

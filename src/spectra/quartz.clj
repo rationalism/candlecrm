@@ -1,5 +1,6 @@
 (ns spectra.quartz
   (:require [clojurewerkz.quartzite.jobs :as jobs]
+            [clojurewerkz.quartzite.conversion :as qc]
             [clojurewerkz.quartzite.schedule.simple :refer
              [schedule repeat-forever with-repeat-count
               with-interval-in-milliseconds]]
@@ -8,6 +9,7 @@
             [clojure.string :as str]
             [spectra.auth :as auth]
             [spectra.common :as com]
+            [spectra.contacts :as contacts]
             [spectra.datetime :as dt]
             [spectra.email :as email]
             [spectra.geocode :as geocode]
@@ -150,10 +152,18 @@
   (doseq [user (auth/list-users)]
     (refresh-queue! user)))
 
-(defn make-job [job-type job-name]
-  (jobs/build
-   (jobs/of-type job-type)
-   (jobs/with-identity (jobs/key job-name))))
+(jobs/defjob LoadContacts [ctx]
+  (let [user (-> ctx qc/from-job-data (get s/user))]
+    (contacts/load-all-contacts! user)))
+
+(defn make-job
+  ([job-type job-name]
+   (make-job job-type job-name {}))
+  ([job-type job-name job-data]
+   (jobs/build
+    (jobs/of-type job-type)
+    (jobs/using-job-data job-data)
+    (jobs/with-identity (jobs/key job-name)))))
 
 (defn periodic-trigger [interval limit name]
   (triggers/build
@@ -166,7 +176,20 @@
        (schedule (repeat-forever)
                  (with-interval-in-milliseconds interval))))))
 
+(defn once-trigger [delay name]
+  (triggers/build
+   (triggers/with-identity (triggers/key name))
+   (triggers/start-at (dt/future-ms delay))
+   (triggers/with-schedule
+     (schedule (with-repeat-count 0)
+               (with-interval-in-milliseconds 1)))))
+
 (defonce scheduler (atom nil))
+
+(defn schedule-contacts! [user]
+  (qs/schedule @scheduler
+               (make-job LoadContacts "jobs.contacts.load.1" {s/user user})
+               (once-trigger 20000 "jobs.contacts.trigger.1")))
 
 (defn start! []
   (reset! scheduler (qs/start (qs/initialize)))

@@ -7,7 +7,6 @@
             [clojure.java.io :as io]
             [spectra.ajax :as ajax]
             [spectra.auth :as auth]
-            [spectra.contacts :as contacts]
             [spectra.email :as email]
             [spectra.geocode :as geocode]
             [spectra.google :as google]
@@ -66,7 +65,7 @@
        (friend/authenticated
         (let [user (auth/user-from-req req)]
           (quartz/wipe-and-insert! user (quartz/default-queue user))
-          (contacts/load-all-contacts! user)
+          (quartz/schedule-contacts! user)
           (home-with-message "Congrats! Authentication successful"))))
   (GET google/callback-url req
        (friend/authenticated
