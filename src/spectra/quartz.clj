@@ -6,6 +6,7 @@
               with-interval-in-milliseconds]]
             [clojurewerkz.quartzite.scheduler :as qs]
             [clojurewerkz.quartzite.triggers :as triggers]
+            [clojure.set :as cset]
             [clojure.string :as str]
             [spectra.auth :as auth]
             [spectra.common :as com]
@@ -17,7 +18,7 @@
             [spectra.queries :as queries]
             [spectra_cljc.schema :as s]))
 
-(def test-count 200)
+(def test-count 50)
 
 (defn message-count [user]
   (-> user email/fetch-imap-folder email/message-count))
@@ -61,25 +62,35 @@
   (->> email-times
        (mapv #(queries/scan-overlaps user %))))
 
-(defn incdec [range]
-  [(dec (first range)) (inc (second range))])
+(defn in-range [bounds]
+  (range (first bounds) (inc (second bounds))))
 
-(defn queue-ends [user ranges]
+(defn queue-ends [user excluded]
   (let [top-end (message-count user)]
-    (concat [(- top-end test-count)] ranges [top-end])))
+    (-> (- top-end test-count)
+        (range (inc test-count))
+        set (cset/difference excluded))))
 
-(defn range-empty? [range]
-  (> (first range) (second range)))
+(defonce cnt (atom 0))
+
+(defn count-up [n]
+  (swap! cnt dec)
+  (+ @cnt n))
+
+(defn first-last [coll]
+  [(first coll) (last coll)])
 
 (defn find-ranges [user]
+  (reset! cnt 0)
   (let [folder (email/fetch-imap-folder user)]
     (->> user queries/all-scanned
          (map :data)
          (mapcat (juxt s/start-time s/stop-time))
          (map #(email/find-num folder %))
-         (partition 2) (mapcat incdec)
-         (queue-ends user) (partition 2)
-         (remove range-empty?)
+         (partition 2) (mapcat in-range) set
+         (queue-ends user) (into []) sort
+         (partition-by count-up) 
+         (map first-last)
          (map #(zipmap [s/queue-bottom s/queue-top] %)))))
 
 (defn default-queue [user]
