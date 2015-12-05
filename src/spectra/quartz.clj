@@ -17,8 +17,8 @@
 
 (def test-count 50)
 
-(defn message-count [queue-user]
-  (-> queue-user :user email/fetch-imap-folder email/message-count))
+(defn message-count [user]
+  (-> user email/fetch-imap-folder email/message-count))
   
 (defn queue-small? [queue]
   (< (- (-> queue :data s/queue-top)
@@ -62,27 +62,26 @@
 (defn incdec [range]
   [(dec (first range)) (inc (second range))])
 
-(defn queue-ends [queue-user ranges]
-  (let [top-end (message-count queue-user)]
+(defn queue-ends [user ranges]
+  (let [top-end (message-count user)]
     (concat [(- top-end test-count)] ranges [top-end])))
 
 (defn range-empty? [range]
   (> (first range) (second range)))
 
-(defn find-ranges [queue-user]
-  (let [folder (-> queue-user :user email/fetch-imap-folder)]
-    (->> queue-user :user queries/all-scanned
+(defn find-ranges [user]
+  (let [folder (email/fetch-imap-folder user)]
+    (->> user queries/all-scanned
          (map :data)
          (mapcat (juxt s/start-time s/stop-time))
          (map #(email/find-num folder %))
          (partition 2) (mapcat incdec)
-         (queue-ends queue-user) (partition 2)
+         (queue-ends user) (partition 2)
          (remove range-empty?)
          (map #(zipmap [s/queue-bottom s/queue-top] %)))))
 
 (defn default-queue [user]
-  (let [top (-> user email/fetch-imap-folder
-                email/message-count)]
+  (let [top (message-count user)]
     {s/queue-bottom (- top test-count)
      s/queue-top top}))
 
@@ -132,7 +131,7 @@
 (defn queue-pop! []
   (when-let [queue-user (queries/next-email-queue)]
     (queue-reset! (:queue queue-user))
-    (if (= (message-count queue-user)
+    (if (= (message-count (:user queue-user))
            (-> queue-user :queue :data s/queue-top))
       (do (run-insertion! queue-user)
           (new-time-scanned! queue-user))

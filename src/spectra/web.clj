@@ -128,8 +128,8 @@
   (neo4j/define-graph!)
   (nlp/load-pipeline!)
   (ajax/start!)
-  (quartz/start!)
   (geocode/define-context!)
+  (quartz/start!)
   (println "Ready to start server")
   (nrepl-server/start-server
    :port 9998
