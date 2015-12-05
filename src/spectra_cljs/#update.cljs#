@@ -114,8 +114,7 @@
   (state/set! [:map-markers :updated] false))
 
 (defn map-markers [person-id]
-  (send! (person-place-req person-id)
-         (update-loc-rows!)))
+  (send! (person-place-req person-id) update-loc-rows!))
 
 (defn cal-events [person-id]
   (send! (person-event-req person-id) update-cal-rows!))

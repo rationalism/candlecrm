@@ -31,7 +31,7 @@
   (def ch-chsk    ch-recv) ; ChannelSocket's receive channel
   (def chsk-send! send-fn) ; ChannelSocket's send API fn
   (def chsk-state state)   ; Watchable, read-only atom
-  (state/update! [:ajax-chan] (constantly chsk-send!)))
+  (state/set! [:ajax-chan] chsk-send!))
 
 ;;;; Routing handlers
 

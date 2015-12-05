@@ -39,3 +39,6 @@
 (defn update! [& args]
   (apply (partial swap! a update-in) args))
 
+(defn set! [loc val]
+  (apply (partial swap! a update-in) loc
+         [(constantly val)]))

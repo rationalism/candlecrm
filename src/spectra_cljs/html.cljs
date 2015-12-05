@@ -57,8 +57,8 @@
                        s/birthday s/gender s/website])
 
 (defn new-person-switch []
-  (state/update! [:input-new :type] (constantly s/person))
-  (state/update! [:input-new :attrs] (constantly new-person-attrs)))
+  (state/set! [:input-new :type] s/person)
+  (state/set! [:input-new :attrs] new-person-attrs))
 
 (defn person-link [person attr]
   [node-link (person attr) (person :id) s/person])
@@ -197,7 +197,7 @@
 
 (defn window-open [marker vars]
   (fn []
-    (state/update! [:map-markers :clicked] (constantly vars))
+    (state/set! [:map-markers :clicked] vars)
     (.open (state/look :map-markers :window)
            (state/look :map-obj) marker)))
   
@@ -220,13 +220,13 @@
 (defn markers-update []
   (state/update! [:map-markers :objs] wipe-markers)
   (state/update! [:map-markers :objs] new-markers)
-  (state/update! [:map-markers :updated] (constantly true)))
+  (state/set! [:map-markers :updated] true))
 
 (defn map-did-mount [this]
   (->> (map state/look [:map-center :map-zoom])
        (zipmap [:center :zoom]) clj->js
-       (js/google.maps.Map. (r/dom-node this)) constantly
-       (state/update! [:map-obj]))
+       (js/google.maps.Map. (r/dom-node this))
+       (state/set! [:map-obj]))
   (state/update! [:map-markers :window] map-window)
   (markers-update)
   (state/look :map-obj))
@@ -365,8 +365,8 @@
 
 (defn set-tab-fn [tab-num]
   (fn []
-    (state/update! [:tabid] (constantly tab-num))
-    (state/update! [:current-node] (constantly nil))))
+    (state/set! [:tabid] tab-num)
+    (state/set! [:current-node] nil)))
 
 (defn header-tab [num name]
   [:td>h2>a {:href "#" :on-click (set-tab-fn num)
