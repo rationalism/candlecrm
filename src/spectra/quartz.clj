@@ -15,7 +15,7 @@
             [spectra.queries :as queries]
             [spectra_cljc.schema :as s]))
 
-(def test-count 50)
+(def test-count 200)
 
 (defn message-count [user]
   (-> user email/fetch-imap-folder email/message-count))
