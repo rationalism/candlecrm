@@ -42,7 +42,7 @@
 
 (defn node-link [text id type]
   [:a.go-node
-   {:href "#" :on-click #(u/go-node! ajax/chsk-send! id type)}
+   {:href "#" :on-click #(u/go-node! id type)}
    text])
 
 (defn home-content [& content]
@@ -84,9 +84,9 @@
      (for [p-row (state/look :people-rows)]
        ^{:key p-row}
        [person-row p-row])]]
-   [:a {:href "#" :on-click (u/prev-fetch! :people u/update-people! ajax/chsk-send!)
+   [:a {:href "#" :on-click (u/prev-fetch! :people u/update-people!)
         :id "prev-people-page"} "<-- Previous"]
-   [:a {:href "#" :on-click (u/next-fetch! :people u/update-people! ajax/chsk-send!)
+   [:a {:href "#" :on-click (u/next-fetch! :people u/update-people!)
         :id "next-people-page"} "Next -->"]
    [:p>a {:href "#" :on-click new-person-switch
           :id "add-new-person"} "Add new person"]])
@@ -118,9 +118,9 @@
      (for [e-row (apply state/look row-keys)]
        ^{:key (:id e-row)}
        [email-row e-row])]]
-   [:a {:href "#" :on-click (u/prev-fetch! counter update-fn ajax/chsk-send!)
+   [:a {:href "#" :on-click (u/prev-fetch! counter update-fn)
         :class "prev-email-page"} "<-- Previous"]
-   [:a {:href "#" :on-click (u/next-fetch! counter update-fn ajax/chsk-send!)
+   [:a {:href "#" :on-click (u/next-fetch! counter update-fn)
         :class "next-email-page"} "Next -->"]])
 
 (defn person-option [person]
@@ -129,8 +129,7 @@
 
 (defn people-ranks [rel-type]
   [:select {:class (str "people-list-" rel-type)
-            :on-change #(u/rel-switch ajax/chsk-send! (.. % -target -value)
-                                      rel-type)}
+            :on-change #(u/rel-switch (.. % -target -value) rel-type)}
    (for [person (state/look :rank-lists rel-type)]
      ^{:key (:id person)}
      [person-option person])])
@@ -146,7 +145,7 @@
   (cal-adjust "gotoDate" date))
 
 (defn event-click [event jsevent view]
-  (u/go-node! ajax/chsk-send! (.-id event) s/event))
+  (u/go-node! (.-id event) s/event))
 
 (defn event-source [start end timezone callback]
   (-> :cal-events state/look clj->js callback))

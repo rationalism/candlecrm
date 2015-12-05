@@ -18,7 +18,8 @@
     :map-markers {:data [] :objs [] :updated true :window nil :clicked nil}
     :rank-lists {s/event [] s/location []}
     :map-obj nil
-    :input-new {:type nil :attrs nil}}))
+    :input-new {:type nil :attrs nil}
+    :ajax-chan nil}))
 
 (defn look [& args]
   (get-in @a args))

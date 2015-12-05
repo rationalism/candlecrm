@@ -3,6 +3,11 @@
             [spectra_cljs.state :as state]
             [spectra_cljc.schema :as s]))
 
+(def timeout timeout)
+
+(defn send! [req update-fn]
+  ((state/look :ajax-chan) req 5000 update-fn))
+
 (defn update-rows! [rows-type]
   (fn [new-rows]
     (state/update! [rows-type] (constantly new-rows))))
@@ -11,30 +16,30 @@
   (fn [new-rows]
     (state/update! [:current-node rows-type] (constantly new-rows))))
 
-(defn fetch-rows! [chsk-send! rows-type req-type]
-  (chsk-send! req-type 5000 (update-rows! rows-type)))
+(defn fetch-rows! [rows-type req-type]
+  (send! req-type (update-rows! rows-type)))
 
-(defn fetch-node-rows! [chsk-send! rows-type req-type]
-  (chsk-send! req-type 5000 (update-node-rows! rows-type)))
+(defn fetch-node-rows! [rows-type req-type]
+  (send! req-type (update-node-rows! rows-type)))
 
 (defn people-req []
   [:pages/fetch-people
    {:start (state/person-pos)
     :limit (state/look :page-lengths :people)}])
   
-(defn update-people! [chsk-send!]
-  (fetch-rows! chsk-send! :people-rows (people-req)))
+(defn update-people! []
+  (fetch-rows! :people-rows (people-req)))
 
-(defn prev-fetch! [counter update-fn chsk-send!]
+(defn prev-fetch! [counter update-fn]
   (fn []
     (when (pos? (state/look :counters counter))
       (state/update! [:counters counter] dec)
-      (update-fn chsk-send!))))
+      (update-fn))))
 
-(defn next-fetch! [counter update-fn chsk-send!]
+(defn next-fetch! [counter update-fn]
   (fn []
     (state/update! [:counters counter] inc)
-    (update-fn chsk-send!)))
+    (update-fn)))
 
 (defn email-req []
   [:pages/fetch-emails
@@ -48,15 +53,15 @@
     :start (state/email-person-pos link-type)
     :limit (state/look :page-lengths :email)}])
 
-(defn update-emails! [chsk-send!]
-  (fetch-rows! chsk-send! :email-rows (email-req)))
+(defn update-emails! []
+  (fetch-rows! :email-rows (email-req)))
 
-(defn update-emails-person! [link-type chsk-send!]
-  (fetch-node-rows! chsk-send! link-type (email-person-req link-type)))
+(defn update-emails-person! [link-type]
+  (fetch-node-rows! link-type (email-person-req link-type)))
 
-(defn update-user! [chsk-send!]
-  (chsk-send! [:update/user-data] 5000
-              #(state/update! [:user] (constantly %))))
+(defn update-user! []
+  (send! [:update/user-data] 
+         #(state/update! [:user] (constantly %))))
 
 (defn node-req [id type]
   [:update/fetch-node
@@ -65,16 +70,15 @@
 (defn new-node [req type]
   (constantly (assoc {:center-node req} :type type)))
 
-(defn update-node [chsk-send! type]
+(defn update-node [type]
   (fn [req]
     (state/update! [:current-node] (new-node req type))
     (when (= type s/person)
-      (update-emails-person! s/email-to chsk-send!)
-      (update-emails-person! s/email-from chsk-send!))))
+      (update-emails-person! s/email-to)
+      (update-emails-person! s/email-from))))
 
-(defn go-node! [chsk-send! id type]
-  (chsk-send! (node-req id type) 5000
-              (update-node chsk-send! type)))
+(defn go-node! [id type]
+  (send! (node-req id type) (update-node type)))
 
 (defn rel-map [rel-type]
   {:reltype rel-type
@@ -87,9 +91,9 @@
   (fn [new-ranks]
     (state/update! [:rank-lists rel-type] (constantly new-ranks))))
 
-(defn fetch-ranks! [chsk-send! rel-type]
-  (chsk-send! (people-ranked-req rel-type) 5000
-              (new-rank-lists! rel-type)))
+(defn fetch-ranks! [rel-type]
+  (send! (people-ranked-req rel-type)
+         (new-rank-lists! rel-type)))
 
 (defn person-event-req [person-id]
   [:pages/person-events
@@ -120,14 +124,16 @@
          (state/update! [:map-markers :data]))
     (state/update! [:map-markers :updated] (constantly false))))
 
-(defn map-markers [chsk-send! person-id]
-  (chsk-send! (person-place-req person-id) 5000 (update-loc-rows!)))
+(defn map-markers [person-id]
+  (send! (person-place-req person-id)
+         (update-loc-rows!)))
 
-(defn cal-events [chsk-send! person-id]
-  (chsk-send! (person-event-req person-id) 5000 (update-cal-rows!)))
+(defn cal-events [person-id]
+  (send! (person-event-req person-id)
+         (update-cal-rows!)))
 
-(defn rel-switch [chsk-send! person-id rel-type]
+(defn rel-switch [person-id rel-type]
   (condp = rel-type
-    s/event (cal-events chsk-send! person-id)
-    s/location (map-markers chsk-send! person-id)
+    s/event (cal-events person-id)
+    s/location (map-markers person-id)
     nil))

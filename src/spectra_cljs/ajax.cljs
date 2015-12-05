@@ -30,7 +30,8 @@
   (def chsk       chsk)
   (def ch-chsk    ch-recv) ; ChannelSocket's receive channel
   (def chsk-send! send-fn) ; ChannelSocket's send API fn
-  (def chsk-state state))   ; Watchable, read-only atom
+  (def chsk-state state)   ; Watchable, read-only atom
+  (state/update! [:ajax-chan] (constantly chsk-send!)))
 
 ;;;; Routing handlers
 
@@ -43,11 +44,11 @@
 
 ;; This fills in initial email values
 (defn chsk-init! []
-  (u/update-emails! chsk-send!)
-  (u/update-people! chsk-send!)
-  (u/update-user! chsk-send!)
-  (u/fetch-ranks! chsk-send! s/event)
-  (u/fetch-ranks! chsk-send! s/location))
+  (u/update-emails!)
+  (u/update-people!)
+  (u/update-user!)
+  (u/fetch-ranks! s/event)
+  (u/fetch-ranks! s/location))
 
 (defmulti event-msg-handler :id) ; Dispatch on event-id
 
