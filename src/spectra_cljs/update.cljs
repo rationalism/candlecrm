@@ -8,19 +8,13 @@
 (defn send! [req update-fn]
   ((state/look :ajax-chan) req 5000 update-fn))
 
-(defn fetch-rows! [rows-type req-type]
-  (send! req-type #(state/set! [rows-type] %)))
-
-(defn fetch-node-rows! [rows-type req-type]
-  (send! req-type #(state/set! [:current-node rows-type] %)))
-
 (defn people-req []
   [:pages/fetch-people
    {:start (state/person-pos)
     :limit (state/look :page-lengths :people)}])
   
 (defn update-people! []
-  (fetch-rows! :people-rows (people-req)))
+  (send! (people-req) #(state/set! [:people-rows] %)))
 
 (defn prev-fetch! [counter update-fn]
   (fn []
@@ -46,10 +40,11 @@
     :limit (state/look :page-lengths :email)}])
 
 (defn update-emails! []
-  (fetch-rows! :email-rows (email-req)))
+  (send! (email-req) #(state/set! [:email-rows] %)))
 
 (defn update-emails-person! [link-type]
-  (fetch-node-rows! link-type (email-person-req link-type)))
+  (send! (email-person-req link-type)
+         #(state/set! [:current-node link-type] %)))
 
 (defn update-user! []
   (send! [:update/user-data] #(state/set! [:user] %)))
