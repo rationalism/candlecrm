@@ -71,7 +71,7 @@
 
 (defn exact-num [folder time nums]
   (->> (map #(get-message folder %) nums)
-       (map sent-time) (map dt/to-ms)
+       (map received-time) (map dt/to-ms)
        (map #(- % time)) (map #(Math/abs %))
        min-loc (get nums)))
 
@@ -85,7 +85,7 @@
          :else 
          (let [mid (quot (+ top bottom) 2)]
            (if (->> mid (get-message folder) 
-                    sent-time dt/to-ms (< time))
+                    received-time dt/to-ms (< time))
              (recur folder time bottom mid)
              (recur folder time mid top))))))
 

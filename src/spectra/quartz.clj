@@ -46,7 +46,7 @@
   (-> queue-user :user
       email/fetch-imap-folder
       (email/get-message email-num)
-      email/sent-time dt/to-ms))
+      email/received-time dt/to-ms))
 
 (defn queue-time [queue-user]
   [(-> queue-user :queue range-bottom (email-time queue-user))
@@ -110,6 +110,7 @@
   (apply wipe-and-insert! user (find-ranges user)))
 
 (defn run-insertion! [queue-user]
+  (prn "emails inserted")
   (email/insert-email-range! (:user queue-user)
                              (range-bottom (:queue queue-user))
                              (range-top (:queue queue-user))))
@@ -117,6 +118,8 @@
 (defn adjust-times! [queue-user]
   (let [email-times (queue-time-extra queue-user)
         overlaps (scan-check (:user queue-user) email-times)]
+    (prn "adjust-times")
+    (prn overlaps)
     (if (= [true true false] (map com/nil-or-empty? overlaps))
       (do (run-insertion! queue-user) 
           (neo4j/set-property! (first (last overlaps))
@@ -132,6 +135,7 @@
 
 (defn queue-pop! []
   (when-let [queue-user (queries/next-email-queue)]
+    (prn "email queue pop")
     (queue-reset! (:queue queue-user))
     (if (= (message-count (:user queue-user))
            (-> queue-user :queue :data s/queue-top))
