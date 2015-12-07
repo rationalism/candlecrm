@@ -174,6 +174,11 @@
     (str "MATCH (a) where ID(a)= " id
          " RETURN a"))))
 
+;(defn create-instance! [class id]
+;  (->> ["CREATE (a:" class
+;        " {bogusid:"id"}) RETURN a"]
+;       (apply str) cypher-list first))
+
 (defn node-from-id [user id node-type]
   (-> (str "MATCH (root:" (cypher-esc (user-label user))
            ":" node-type
@@ -228,7 +233,7 @@
   (p :batch-insert
      (let [nodes (nn/create-batch
                   @conn (map #(filter-props (:props %)) items))]
-       (dorun (map #(nl/add @conn %1 (:labels %2)) nodes items))
+       (dorun (pmap #(nl/add @conn %1 (:labels %2)) nodes items))
        nodes)))
 
 (defn replace-labels! [vertex labels]
