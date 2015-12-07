@@ -176,9 +176,12 @@
                (loom/remove-edges g match-edges)
                match-edges))))
 
-(defn filter-memory [g type-name]
+(defn filter-type [g type-name]
   (->> (loom/nodes g)
-       (filter #(= (s/type-label %) type-name))
+       (filter #(= (s/type-label %) type-name))))
+
+(defn filter-memory [g type-name]
+  (->> (filter-type g type-name)
        (filter #(nil? (:data %)))
        (remove #(loom/out-edge-label g % :database-match))))
 
