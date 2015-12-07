@@ -114,6 +114,11 @@
   (nn/set-property @conn vertex property
                    (dt/catch-dates value)))
 
+(defn all-links [id]
+   (->> ["MATCH (a)-[b]-(c) WHERE ID(a)=" id
+         " RETURN ID(STARTNODE(b)), TYPE(b), ID(c)"]
+        (apply str) (cy/tquery @conn)))
+
 (defn make-links-query [nodes links]
   (let [id-list (->> nodes count range
                      (map #(str "a" %)))]
