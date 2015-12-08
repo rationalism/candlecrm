@@ -628,13 +628,6 @@
          (do (prn "Email insertion error")
              (prn e) nil)))))
 
-(defn insert-raw-header! [header]
-  (-> header headers-fetch headers-parse label-headers
-      (recon/load-new! s/person [s/person (neo4j/user-label user)])
-      (recon/load-new! s/organization [s/organization (neo4j/user-label user)])
-      (recon/load-new! s/email-headers [s/email-headers (neo4j/user-label user)])
-      insert-links!))
-
 (defn insert-headers-range! [user lower upper]
   (->> (messages-in-range (fetch-imap-folder user) lower upper)
        (pmap headers-fetch)
