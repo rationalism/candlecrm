@@ -58,8 +58,6 @@
     (.putScalar matrix (int-wrap [pos old-pos n]) 0.0)
     (.putScalar matrix (int-wrap [pos (inc-mod old-pos data-size) n]) 1.0)
     matrix))
-
-;(defn dates->array [data-size date-sets]
   
 ;; train-data should be a three-dimensional vector here
 (defrecord TimeSeriesIterator [pos data-size train-data]

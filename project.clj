@@ -51,14 +51,14 @@
                                        "reference.conf" [slurp str spit]}
                   :exclusions [com.fasterxml.jackson.core/jackson-core
                                com.google.guava/guava commons-logging]]
-                 [org.nd4j/nd4j-jcublas-7.5 "0.4-rc3.7"
+                 [org.nd4j/nd4j-x86 "0.4-rc3.7"
                   :exclusions [com.google.guava/guava]]
                  [com.joestelmach/natty "0.12"
                   :exclusions [commons-logging commons-codec]]
                  [clojurewerkz/neocons "3.1.0"]
                  [pandect "0.5.4"]
                  [aysylu/loom "0.5.4"]
-                 [com.taoensso/sente "1.7.0-RC1"]
+                 [com.taoensso/sente "1.7.0"]
                  [clojurewerkz/quartzite "2.0.0"]
                  [reagent "0.5.1"]
                  [jayq "2.5.4"]
