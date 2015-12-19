@@ -35,13 +35,13 @@
                  [com.google.http-client/google-http-client-jackson "1.21.0"
                   :exclusions [org.apache.httpcomponents/httpclient
                                com.google.code.findbugs/jsr305]]
-                 [com.sun.mail/javax.mail "1.5.4"]
+                 [com.sun.mail/javax.mail "1.5.5"]
                  ;; See http://www.thesoftwaresimpleton.com/blog/2014/12/06/om-local/
                  ;; for how to include local source code
                  [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"]
                  [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.2.1"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.2.2"]
                  [org.deeplearning4j/deeplearning4j-core "0.4-rc3.7"
                   :exclusions [org.apache.commons/commons-lang3 commons-logging
                                com.fasterxml.jackson.core/jackson-core junit
