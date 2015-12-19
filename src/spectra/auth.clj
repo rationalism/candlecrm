@@ -39,6 +39,7 @@
 (defn list-users []
   (neo4j/get-vertices-class s/user))
 
+;; TODO: Clean this up, delete by label
 (defn delete-user! [user]
   (neo4j/cypher-query (str "MATCH (a)-[r*1..6]->m WHERE ID(a) = "
                            (:id user)
