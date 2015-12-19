@@ -119,6 +119,11 @@
          " RETURN ID(STARTNODE(b)), TYPE(b), ID(c)"]
         (apply str) (cy/tquery @conn)))
 
+(defn delete-nodes! [ids]
+  (cypher-query
+   (str "MATCH (n) WHERE ID(n) IN [" (str/join "," ids)
+        "] DETACH DELETE n")))
+
 (defn make-links-query [nodes links]
   (let [id-list (->> nodes count range
                      (map #(str "a" %)))]
