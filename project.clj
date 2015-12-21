@@ -62,7 +62,10 @@
                  [clojurewerkz/quartzite "2.0.0"]
                  [reagent "0.5.1"]
                  [jayq "2.5.4"]
-                 [com.google.maps/google-maps-services "0.1.9"]]
+                 [com.google.maps/google-maps-services "0.1.9"]
+                 [com.github.sanity/quickml "0.10.9"
+                  :exclusions [commons-httpclient commons-logging
+                               org.codehaus.jackson/jackson-core-asl]]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]
             [lein-kibit "0.1.2"]
@@ -73,7 +76,8 @@
             [venantius/yagni "0.1.4"]
             [lein-ancient "0.6.8"]]
   :resource-paths ["config" "resources"]
-  :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
+  :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))
+                 "jitpack.io" "https://jitpack.io"}
   :source-paths ["src"]
   :cljsbuild {:builds
               [{:id "dev"
