@@ -32,15 +32,23 @@
     (.add (make-instance point))))
 
 (defn make-instances [points]
-  (reduce #(add-point %1 %2) 
-   (doto (Instances. "training set"
-                     (make-attributes points)
-                     (count points))
-     (.setClassIndex (-> points first count dec)))
-   points))
+  (doto (Instances. "training set"
+                    (make-attributes points)
+                    (count points))
+    (.setClassIndex (-> points first count dec))))
+  
+(defn add-points [instances points]
+  (reduce #(add-point %1 %2) instances points))
 
 (defn make-forest [numtrees points]
   (doto (RandomForest. )
     (.setNumTrees numtrees)
     (.buildClassifier
-     (make-instances points))))
+     (add-points (make-instances points)
+                 points))))
+
+(defn classify [forest point]
+  (.classifyInstance
+   forest (doto (make-instance point)
+            (.setDataset (make-instances [point])))))
+                     
