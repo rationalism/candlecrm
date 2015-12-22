@@ -33,7 +33,7 @@
    (doto (Instances. "training set"
                      (make-attributes points)
                      (count points))
-     (.setClassIndex (dec (count points))))
+     (.setClassIndex (-> points first count dec)))
    points))
 
 (defn make-forest [numtrees points]
