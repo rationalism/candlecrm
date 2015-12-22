@@ -21,12 +21,15 @@
     (.setValue (first attr-pairs)
                (second attr-pairs))))
 
+(defn make-instance [point]
+  (reduce #(set-value %1 %2)
+          (DenseInstance. (count point))
+          (->> point (interleave (range (count point)))
+               (partition 2))))
+
 (defn add-point [instances point]
   (doto instances
-    (.add (reduce #(set-value %1 %2)
-                  (DenseInstance. (count point))
-                  (->> point (interleave (range (count point)))
-                       (partition 2))))))
+    (.add (make-instance point))))
 
 (defn make-instances [points]
   (reduce #(add-point %1 %2) 
