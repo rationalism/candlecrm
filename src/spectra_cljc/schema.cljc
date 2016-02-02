@@ -2,6 +2,8 @@
 
 (def user "user")
 (def s-name :name)
+(def value :val)
+(def val-node "value")
 (def pwd-hash :pwd-hash)
 (def google-token :google-token)
 (def type-label :label)

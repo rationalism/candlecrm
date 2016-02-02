@@ -17,8 +17,8 @@
                  [compojure "1.4.0"
                   :exclusions [commons-codec]]
                  [hiccup "1.0.5"]
-                 [environ "1.0.1"]
-                 [com.taoensso/timbre "4.1.4"]
+                 [environ "1.0.2"]
+                 [com.taoensso/timbre "4.2.1"]
                  [com.cemerick/friend "0.2.1"
                   :exclusions [slingshot commons-codec commons-logging
                                org.apache.httpcomponents/httpclient
@@ -31,27 +31,25 @@
                   :exclusions [com.google.guava/guava org.apache.httpcomponents/httpclient
                                com.google.code.findbugs/jsr305]]
                  [org.passay/passay "1.1.0"]
-                 [com.google.apis/google-api-services-oauth2 "v2-rev98-1.21.0"]
+                 [com.google.apis/google-api-services-oauth2 "v2-rev102-1.21.0"]
                  [com.google.http-client/google-http-client-jackson "1.21.0"
                   :exclusions [org.apache.httpcomponents/httpclient
                                com.google.code.findbugs/jsr305]]
                  [com.sun.mail/javax.mail "1.5.5"]
-                 ;; See http://www.thesoftwaresimpleton.com/blog/2014/12/06/om-local/
-                 ;; for how to include local source code
-                 [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"]
-                 [edu.stanford.nlp/stanford-corenlp "3.5.3-SNAPSHOT"
+                 [edu.stanford.nlp/stanford-corenlp "3.6.0"]
+                 [edu.stanford.nlp/stanford-corenlp "3.6.0"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.2.2"]
-                 [org.deeplearning4j/deeplearning4j-core "0.4-rc3.7"
+                 [com.googlecode.libphonenumber/libphonenumber "7.2.4"]
+                 [org.deeplearning4j/deeplearning4j-core "0.4-rc3.8"
                   :exclusions [org.apache.commons/commons-lang3 commons-logging
                                com.fasterxml.jackson.core/jackson-core junit
                                org.apache.commons/commons-compress com.google.guava/guava]]
-                 [org.deeplearning4j/deeplearning4j-nlp "0.4-rc3.7"
+                 [org.deeplearning4j/deeplearning4j-nlp "0.4-rc3.8"
                   :uberjar-merge-with {#"\.properties$" [slurp str spit]
                                        "reference.conf" [slurp str spit]}
                   :exclusions [com.fasterxml.jackson.core/jackson-core
                                com.google.guava/guava commons-logging]]
-                 [org.nd4j/nd4j-x86 "0.4-rc3.7"
+                 [org.nd4j/nd4j-x86 "0.4-rc3.8"
                   :exclusions [com.google.guava/guava]]
                  [com.joestelmach/natty "0.12"
                   :exclusions [commons-logging commons-codec]]
@@ -62,7 +60,7 @@
                  [clojurewerkz/quartzite "2.0.0"]
                  [reagent "0.5.1"]
                  [jayq "2.5.4"]
-                 [com.google.maps/google-maps-services "0.1.9"]
+                 [com.google.maps/google-maps-services "0.1.10"]
                  [nz.ac.waikato.cms.weka/weka-dev "3.7.13"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]
@@ -74,7 +72,6 @@
             [venantius/yagni "0.1.4"]
             [lein-ancient "0.6.8"]]
   :resource-paths ["config" "resources"]
-  :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
   :source-paths ["src"]
   :cljsbuild {:builds
               [{:id "dev"

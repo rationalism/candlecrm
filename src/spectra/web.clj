@@ -120,7 +120,7 @@
     :unauthorized-handler unauthorized-handler
     :credential-fn (partial creds/bcrypt-credential-fn auth/get-user-pwd)
     :workflows [(workflows/interactive-form)]}))
-  
+
 (def secure-app
   (wrap-defaults (friend-authenticate app) (middleware-config)))
 
