@@ -10,22 +10,46 @@
 (def goog-maps (str "https://maps.googleapis.com/maps/api/js?v=3&key="
                     (env :gmaps-api-key)))
 
+(defn pure-css []
+  [:link {:rel "stylesheet"
+          :href "/css/pure-release-0.6.0/pure-min.css"}])
+
+(defn viewport []
+  [:meta {:name "viewport"
+          :content "width=device-width, initial-scale=1"}]) 
+
+(defn content-box [content]
+  [:div {:class "pure-g"}
+   [:div {:class "pure-u-1-8"}]
+   (into [:div#content {:class "pure-u-3-4"}]
+         content)])
+
+(defn header-box []
+  [:div {:class "pure-g"}
+   [:div {:class "pure-u-1-8"}]
+   [:div {:class "pure-u-3-4"}
+    [:h1 "Spectra"]]])
+
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "Spectra"]
-          (include-css "/css/screen.css")]
-         [:body 
-          (into [:div#content] content)
+          (pure-css) (viewport)
+          (include-css "/css/main.css")]
+         [:body
+          (header-box)
+          (content-box content)
           (include-js goog-jquery)
           (include-js "/js/login.js")]))
 
 (defn app-template [& content]
   (html5 {:lang "en"}
          [:head [:title "Spectra"]
+          (pure-css) (viewport)
           (include-css "/css/fullcalendar.min.css")
-          (include-css "/css/screen.css")]
-         [:body 
-          (into [:div#content] content)
+          (include-css "/css/main.css")]
+         [:body
+          (header-box)
+          (content-box content)
           (include-js goog-maps)
           (include-js goog-jquery)
           (include-js "/js/libs/moment.min.js")
@@ -37,37 +61,50 @@
   [:div {:class "row"}
    [:div {:class "columns small-12"}
     [:span flash]
-    [:h3 "Sign up "
-     [:small "(Any user/pass combination will do, as you are creating a new account or profile.)"]]
     [:div.row
-     [:form {:method "POST" :action "create-account" :class "columns small-4"
-             :id "signupForm" :novalidate ""}
-      (anti-forgery-field)
-      [:div.row "Email " [:input {:type "text" :name "username"
-                                  :id "signupUsername" :required "required"}]]
-      [:div.row "Password " [:input {:type "password" :name "password"
-                                     :id "signupPassword" :required "required"}]]
-      [:div.row "Confirm " [:input {:type "password" :name "confirm"
-                                    :id "signupConfirm" :required "required"}]]
-      [:div.row
-       [:input {:type "submit" :class "button" :value "Sign up"}]
-       [:span {:style "padding:0 0 0 10px;color:red;"
-               :id "signupError"} flash]]]]]])
+     [:form {:method "POST" :action "create-account"
+             :class "pure-form pure-form-aligned" :id "signupForm" :novalidate ""}
+      [:fieldset
+       (anti-forgery-field)
+       [:legend [:h2 "Sign up"]]
+       [:div.pure-control-group
+        [:label {:for "signupUsername"} "Email "]
+        [:input {:type "text" :name "username"
+                 :id "signupUsername" :required "required"}]]
+       [:div.pure-control-group
+        [:label {:for "signupPassword"} "Password "]
+        [:input {:type "password" :name "password"
+                 :id "signupPassword" :required "required"}]]
+       [:div.pure-control-group
+        [:label {:for "signupConfirm"} "Confirm "]
+        [:input {:type "password" :name "confirm"
+                 :id "signupConfirm" :required "required"}]]
+       [:div.pure-controls
+        [:input {:class "pure-button pure-button-primary"
+                 :value "Sign up" :type "submit"}]
+        [:span {:style "padding:0 0 0 10px;color:red;"
+                :id "signupError"} flash]]]]]]])
 
 (defn login-form []
   [:div {:class "columns small-12"}
-   [:h3 "Login"]
-   [:form {:method "POST" :action "login" :class "columns small-4"
+   [:form {:method "POST" :action "login" :class "pure-form pure-form-aligned"
            :id "loginForm" :novalidate ""}
-    (anti-forgery-field)
-    [:div.row "Email " [:input {:type "text" :name "username"
-                                :id "loginUsername"}]]
-    [:div.row "Password " [:input {:type "password" :name "password"
-                                   :id "loginPassword"}]]
-    [:div.row
-     [:input {:type "submit" :class "button" :value "Login"}]
-     [:span {:style "padding:0 0 0 10px;color:red;"
-               :id "loginError"}]]]])
+    [:fieldset
+     (anti-forgery-field)
+     [:legend [:h2 "Log in"]]
+     [:div.pure-control-group
+      [:label {:for "loginUsername"} "Email "]
+      [:input {:type "text" :name "username"
+               :id "loginUsername"}]]
+     [:div.pure-control-group
+      [:label {:for "loginPassword"} "Password "]
+      [:input {:type "password" :name "password"
+               :id "loginPassword"}]]
+     [:div.pure-controls
+      [:input {:class "pure-button pure-button-primary"
+               :value "Login" :type "submit"}]
+      [:span {:style "padding:0 0 0 10px;color:red;"
+              :id "loginError"}]]]]])
 
 (defn login-needed [uri]
   [:h2 "You do not have sufficient privileges to access " uri])

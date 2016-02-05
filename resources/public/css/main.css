@@ -1,0 +1,7 @@
+div.tab-show {
+    display: block;
+}
+
+div.tab-hide {
+    display: none;
+}

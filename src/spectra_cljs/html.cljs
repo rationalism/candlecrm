@@ -75,7 +75,7 @@
 
 (defn people-table []
   [:div {:class "columns small-12"}
-   [:table {:id "people-table"}
+   [:table {:id "people-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "people-header"}
      (for [attr s/person-attrs]
        ^{:key attr}
@@ -110,7 +110,7 @@
 
 (defn email-table [row-keys counter update-fn]
   [:div
-   [:table {:id "email-table"}
+   [:table {:id "email-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "email-header"}
      (for [attr email-attrs]
        ^{:key attr} [:td attr])]
@@ -369,12 +369,16 @@
     (state/set! [:current-node] nil)))
 
 (defn header-tab [num name]
-  [:td>h2>a {:href "#" :on-click (set-tab-fn num)
-             :id (str "set-tab-" num)} name])
+  [:li {:class "pure-menu-item"}
+   [:h2>a
+   {:href "#" :class "pure-menu-link"
+    :on-click (set-tab-fn num)
+    :id (str "set-tab-" num)} name]])
 
 (defn home-header []
-  [:div.home-header>table>tr.tab-row
-   [header-tab 1 "People"]
-   [header-tab 2 "Emails"]
-   [header-tab 3 "Calendar"]
-   [header-tab 4 "Locations"]])
+  [:div {:class "pure-menu pure-menu-horizontal"}
+   [:ul {:class="pure-menu-list"}
+    [header-tab 1 "People"]
+    [header-tab 2 "Emails"]
+    [header-tab 3 "Calendar"]
+    [header-tab 4 "Locations"]]])
