@@ -85,9 +85,9 @@
        ^{:key p-row}
        [person-row p-row])]]
    [:a {:href "#" :on-click (u/prev-fetch! :people u/update-people!)
-        :id "prev-people-page"} "<-- Previous"]
+        :id "prev-people-page" :class "pure-button"} "<-- Previous"]
    [:a {:href "#" :on-click (u/next-fetch! :people u/update-people!)
-        :id "next-people-page"} "Next -->"]
+        :id "next-people-page" :class "pure-button"} "Next -->"]
    [:p>a {:href "#" :on-click new-person-switch
           :id "add-new-person"} "Add new person"]])
 
@@ -376,7 +376,7 @@
     :id (str "set-tab-" num)} name]])
 
 (defn home-header []
-  [:div {:class "pure-menu pure-menu-horizontal"}
+  [:div#app-menu {:class "pure-menu pure-menu-horizontal"}
    [:ul {:class="pure-menu-list"}
     [header-tab 1 "People"]
     [header-tab 2 "Emails"]

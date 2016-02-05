@@ -25,10 +25,16 @@
          content)])
 
 (defn header-box []
-  [:div {:class "pure-g"}
+  [:div#page-header {:class "pure-g"}
    [:div {:class "pure-u-1-8"}]
    [:div {:class "pure-u-3-4"}
     [:h1 "Spectra"]]])
+
+(defn footer-box []
+  [:div#page-footer {:class "pure-g"}
+   [:div {:class "pure-u-1-8"}]
+   [:div {:class "pure-u-3-4"}
+    [:p "© 2016 Alyssa Vance"]]])
 
 (defn base-template [& content]
   (html5 {:lang "en"}
@@ -38,6 +44,7 @@
          [:body
           (header-box)
           (content-box content)
+          (footer-box)
           (include-js goog-jquery)
           (include-js "/js/login.js")]))
 
@@ -50,6 +57,7 @@
          [:body
           (header-box)
           (content-box content)
+          (footer-box)
           (include-js goog-maps)
           (include-js goog-jquery)
           (include-js "/js/libs/moment.min.js")

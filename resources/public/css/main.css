@@ -5,3 +5,25 @@ div.tab-show {
 div.tab-hide {
     display: none;
 }
+
+div#page-footer {
+    background: #00688B;
+    color: #FFFFFF;
+    margin-top: 4em;
+}
+
+div#page-header {
+    background: #00688B;
+    color: #FFFFFF;
+}
+
+div#app-menu a {
+    background: #00688B;
+    color: #FFFFFF;
+}
+
+div#app-menu li {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}
+
