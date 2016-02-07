@@ -17,8 +17,11 @@ div#page-header {
     color: #FFFFFF;
 }
 
-div#app-menu a {
-    background: #00688B;
+div#menu-bar {
+    background: #61B329;
+}
+
+div#menu-icons a {
     color: #FFFFFF;
 }
 

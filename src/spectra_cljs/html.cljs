@@ -46,7 +46,10 @@
    text])
 
 (defn home-content [& content]
-  (into [:div.home-content] content))
+  [:div {:class "pure-g"}
+   [:div {:class "pure-u-1-8"}]
+   (into [:div {:class "pure-u-3-4"}]
+         content)])
 
 (defn user-footer []
   [:div
@@ -377,9 +380,12 @@
     :id (str "set-tab-" num)} name]])
 
 (defn home-header []
-  [:div#app-menu {:class "pure-menu pure-menu-horizontal"}
-   [:ul {:class="pure-menu-list"}
-    [header-tab 1 "People"]
-    [header-tab 2 "Emails"]
-    [header-tab 3 "Calendar"]
-    [header-tab 4 "Locations"]]])
+  [:div#menu-bar {:class "pure-g"}
+   [:div {:class "pure-u-1-8"}]
+   [:div {:class "pure-u-3-4"}
+    [:div#menu-icons {:class "pure-menu pure-menu-horizontal"}
+     [:ul {:class "pure-menu-list"}
+      [header-tab 1 "People"]
+      [header-tab 2 "Emails"]
+      [header-tab 3 "Calendar"]
+      [header-tab 4 "Locations"]]]]])   

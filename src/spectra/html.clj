@@ -18,10 +18,15 @@
   [:meta {:name "viewport"
           :content "width=device-width, initial-scale=1"}]) 
 
-(defn content-box [content]
+(defn login-box [content]
   [:div {:class "pure-g"}
    [:div {:class "pure-u-1-8"}]
    (into [:div#content {:class "pure-u-3-4"}]
+         content)])
+
+(defn app-box [content]
+  [:div {:class "pure-g"}
+   (into [:div#content {:class "pure-u-1-1"}]
          content)])
 
 (defn header-box []
@@ -43,7 +48,7 @@
           (include-css "/css/main.css")]
          [:body
           (header-box)
-          (content-box content)
+          (login-box content)
           (footer-box)
           (include-js goog-jquery)
           (include-js "/js/login.js")]))
@@ -56,7 +61,7 @@
           (include-css "/css/main.css")]
          [:body
           (header-box)
-          (content-box content)
+          (app-box content)
           (footer-box)
           (include-js goog-maps)
           (include-js goog-jquery)
