@@ -2,7 +2,7 @@
   :description "Personal semantic graphs"
   :url "http://spectra.herokuapp.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
-  :dependencies [[org.clojure/clojure "1.7.0"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.7.170"
                   :exclusions [args4j com.google.code.findbugs/jsr305]]
                  [org.clojure/tools.nrepl "0.2.12"]
@@ -31,7 +31,7 @@
                   :exclusions [com.google.guava/guava org.apache.httpcomponents/httpclient
                                com.google.code.findbugs/jsr305]]
                  [org.passay/passay "1.1.0"]
-                 [com.google.apis/google-api-services-oauth2 "v2-rev102-1.21.0"]
+                 [com.google.apis/google-api-services-oauth2 "v2-rev103-1.21.0"]
                  [com.google.http-client/google-http-client-jackson "1.21.0"
                   :exclusions [org.apache.httpcomponents/httpclient
                                com.google.code.findbugs/jsr305]]
