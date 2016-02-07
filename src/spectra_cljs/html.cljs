@@ -24,7 +24,7 @@
    [:input {:type "text" :name attr}]])
 
 (defn new-entity [type attrs]
-  [:div {:class "columns small-12"}
+  [:div
    [:form
     (for [attr attrs]
      ^{:key attr}
@@ -35,7 +35,7 @@
      "Submit"]]])
 
 (defn user-welcome [flash username]
-  [:div {:class "columns small-12"}
+  [:div
    [:h3 "Success! You are logged in now"]
    [:h3 (str "Welcome. Your username is: " username)]
    [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]])
@@ -49,9 +49,10 @@
   (into [:div.home-content] content))
 
 (defn user-footer []
-  [:div {:class "columns small-12"}
-   [:p [:a {:href "/gmail"} "Connect to GMail here"]]
-   [:p [:a {:href "/logout"} "Logout here"]]])
+  [:div
+   [:p
+    [:a {:href "/logout" :class "pure-button"}
+     "Logout here"]]])
 
 (def new-person-attrs [s/s-name s/email-addr s/phone-num
                        s/birthday s/gender s/website])
@@ -74,7 +75,7 @@
          [person-cell person attr])])
 
 (defn people-table []
-  [:div {:class "columns small-12"}
+  [:div
    [:table {:id "people-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "people-header"}
      (for [attr s/person-attrs]
@@ -89,7 +90,7 @@
    [:a {:href "#" :on-click (u/next-fetch! :people u/update-people!)
         :id "next-people-page" :class "pure-button"} "Next -->"]
    [:p>a {:href "#" :on-click new-person-switch
-          :id "add-new-person"} "Add new person"]])
+          :id "add-new-person" :class "pure-button"} "Add new person"]])
 
 (def email-attrs {s/email-sent "Date"
                   s/email-subject "Subject"})
@@ -321,7 +322,7 @@
      [:p.infoitem [str-item attr (-> attr key s/attr-names)]])])
 
 (defn show-person [person-name attrs]
-  [:div {:class "columns small-12"}
+  [:div
    [:h3.infotitle (str person-name " (Person)")]
    [info-items attrs]
    [:h3.infotitle (str "Emails to " person-name)]
@@ -332,27 +333,27 @@
     (partial u/update-emails-person! s/email-from)]])
 
 (defn show-email [email-name attrs]
-  [:div {:class "columns small-12"}
+  [:div
    [:h3.infotitle (str email-name " (Email)")]
    [info-items attrs]])
 
 (defn show-organization [organization-name attrs]
-  [:div {:class "columns small-12"}
+  [:div
    [:h3.infotitle (str organization-name " (Organization)")]
    [info-items attrs]])
 
 (defn show-location [location-name attrs]
-  [:div {:class "columns small-12"}
+  [:div
    [:h3.infotitle (str location-name " (Location)")]
    [info-items attrs]])
 
 (defn show-event [event-name attrs]
-  [:div {:class "columns small-12"}
+  [:div
    [:h3.infotitle (str event-name " (Event)")]
    [info-items attrs]])
 
 (defn show-money [money-name attrs]
-  [:div {:class "columns small-12"}
+  [:div
    [:h3.infotitle (str money-name " (Finance)")]
    [info-items attrs]])
 
@@ -360,7 +361,7 @@
   [:h2 "Error: Access to this page is unauthorized."])
 
 (defn not-found-error []
-  [:div {:class "columns small-12"}
+  [:div
    [:h2 "Error: No such object can be found."]])
 
 (defn set-tab-fn [tab-num]

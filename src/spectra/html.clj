@@ -67,7 +67,7 @@
 
 (defn signup-form [flash]
   [:div {:class "row"}
-   [:div {:class "columns small-12"}
+   [:div
     [:span flash]
     [:div.row
      [:form {:method "POST" :action "create-account"
@@ -94,7 +94,7 @@
                 :id "signupError"} flash]]]]]]])
 
 (defn login-form []
-  [:div {:class "columns small-12"}
+  [:div
    [:form {:method "POST" :action "login" :class "pure-form pure-form-aligned"
            :id "loginForm" :novalidate ""}
     [:fieldset
@@ -121,18 +121,18 @@
   [:h2 "Error: Access to this page is unauthorized."])
 
 (defn not-found-error []
-  [:div {:class "columns small-12"}
+  [:div
    [:h2 "Error: No such object can be found."]])
 
 (defn gmail-setup [flash username auth-url]
-  [:div {:class "columns small-12"}
+  [:div
    [:h2 "Connect your account to GMail"]
    [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
    [:h3 (str "Welcome. Your username is: " username)]
    [:h3 [:a {:href auth-url} "Connect to GMail"]]])
 
 (defn gmail-finished [flash username email-total]
-  [:div {:class "columns small-12"}
+  [:div
    [:h2 "Congrats - your account is connected to GMail."]
    [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
    [:h3 (str "Welcome. Your username is: " username)]
@@ -150,7 +150,7 @@
    [:p "Currently disabled - do this via Ajax calls"]])
 
 (defn ajax-test []
-  [:div {:class "columns small-12"}
+  [:div
    [:h1 "Sente reference example"]
    [:p "An Ajax/WebSocket connection has been configured (random)."]
    [:hr]
