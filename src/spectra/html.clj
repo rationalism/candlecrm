@@ -31,14 +31,14 @@
 
 (defn header-box []
   [:div#page-header {:class "pure-g"}
-   [:div {:class "pure-u-1-8"}]
-   [:div {:class "pure-u-3-4"}
+   [:div {:class "pure-u-1-12"}]
+   [:div {:class "pure-u-5-6"}
     [:h1 "Spectra"]]])
 
 (defn footer-box []
   [:div#page-footer {:class "pure-g"}
-   [:div {:class "pure-u-1-8"}]
-   [:div {:class "pure-u-3-4"}
+   [:div {:class "pure-u-1-12"}]
+   [:div {:class "pure-u-5-6"}
     [:p "© 2016 Alyssa Vance"]]])
 
 (defn base-template [& content]

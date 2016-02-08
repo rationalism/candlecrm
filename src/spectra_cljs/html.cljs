@@ -42,8 +42,7 @@
 
 (defn user-welcome [username]
   [:div
-   [:h3 "Success! You are logged in now"]
-   [:h3 (str "Welcome. Your username is: " username)]])
+   [:h3 (str "Welcome. Your email is: " username)]])
 
 (defn node-link [text id type]
   [:a.go-node
@@ -52,8 +51,8 @@
 
 (defn home-content [& content]
   [:div {:class "pure-g"}
-   [:div {:class "pure-u-1-8"}]
-   (into [:div {:class "pure-u-3-4"}]
+   [:div {:class "pure-u-1-12"}]
+   (into [:div {:class "pure-u-5-6"}]
          content)])
 
 (defn user-footer []
@@ -336,7 +335,7 @@
          :else item)])
 
 (defn str-item [n k v]
-  [:span (str n ": ")
+  [:span [:strong (str n ": ")]
    [string-item v k]])
 
 (defn filter-display [attrs]
@@ -405,8 +404,13 @@
     (state/set! [:tabid] tab-num)
     (state/set! [:current-node] nil)))
 
+(defn tab-class [num]
+  (if (= num (state/look :tabid))
+    "pure-menu-item pure-menu-selected"
+    "pure-menu-item"))
+
 (defn header-tab [num name]
-  [:li {:class "pure-menu-item"}
+  [:li {:class (tab-class num)}
    [:h2>a
    {:href "#" :class "pure-menu-link"
     :on-click (set-tab-fn num)
@@ -414,11 +418,21 @@
 
 (defn home-header []
   [:div#menu-bar {:class "pure-g"}
-   [:div {:class "pure-u-1-8"}]
-   [:div {:class "pure-u-3-4"}
-    [:div#menu-icons {:class "pure-menu pure-menu-horizontal"}
+   [:div {:class "pure-u-1-12"}]
+   [:div {:class "pure-u-2-3"}
+    [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
      [:ul {:class "pure-menu-list"}
       [header-tab 1 "People"]
       [header-tab 2 "Emails"]
       [header-tab 3 "Calendar"]
-      [header-tab 4 "Locations"]]]]])   
+      [header-tab 4 "Locations"]]]]
+   [:div#right-menu {:class "pure-u-1-6"}
+    [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
+     [:ul {:class "pure-menu-list"}
+      [header-tab 5 "My Account"]]]]])   
+
+(defn my-account []
+  [:div
+   [:h2 "My Account"]
+   [user-welcome (state/look :user :email-addr)]
+   [user-footer]])

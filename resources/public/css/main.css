@@ -21,11 +21,11 @@ div#menu-bar {
     background: #61B329;
 }
 
-div#menu-icons a {
+div.menu-icons a {
     color: #FFFFFF;
 }
 
-div#menu-icons h2 {
+div.menu-icons h2 {
     margin-top: 0em;
     margin-bottom: 0em;
 }

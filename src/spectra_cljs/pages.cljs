@@ -33,6 +33,11 @@
     [:div#tab4.tab-show [html/locations]]
     [:div#tab4.tab-hide [html/locations]]))
 
+(defn myaccount-tab []
+  (if (= (state/look :tabid) 5)
+    [:div#tab5.tab-show [html/my-account]]
+    [:div#tab5.tab-hide [html/my-account]]))
+
 (defn show-person [person]
   [html/show-person (-> person :center-node :name first)
                     (:center-node person)])
@@ -66,7 +71,8 @@
    [people-tab]
    [email-tab]
    [calendar-tab]
-   [locations-tab]])
+   [locations-tab]
+   [myaccount-tab]])
 
 (defn node-page [node]
   [(get node-fn (:type node)) node])
@@ -75,15 +81,14 @@
   [:div
    [html/home-header]
    [html/home-content
-    [html/user-welcome (state/look :user :email-addr)]
+    [:h2 ""]
     (cond
       (state/look :current-node)
       [node-page (state/look :current-node)]
       (state/look :input-new :type)
       [html/new-entity (state/look :input-new :type)
        (state/look :input-new :attrs)]
-      :else [main-page])
-    [html/user-footer]]])
+      :else [main-page])]])
 
 (defn insert-rows! [table n]
   (dotimes [i n]
