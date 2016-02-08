@@ -25,20 +25,22 @@
   [:span (format-date item)])
 
 (defn input-cell [attr]
-  [:div {:class "new-input-field"}
-   [:span (attr s/attr-names)]
+  [:div {:class "pure-control-group"}
+   [:label (attr s/attr-names)]
    [:input {:type "text" :name attr}]])
 
 (defn new-entity [type attrs]
   [:div
-   [:form
-    (for [attr (add-nums attrs)]
-     ^{:key (first attr)}
-     [input-cell (second attr)])
+   [:form {:class "pure-form pure-form-aligned"}
+    [:fieldset
+     [:legend>h3 (str "Add new " type)]
+     (for [attr (add-nums attrs)]
+       ^{:key (first attr)}
+       [input-cell (second attr)])
     [:button {:type "button"
-              :class "submit-btn"
+              :class "pure-button pure-button-primary"
               :on-click #(js/alert "Submitted!")}
-     "Submit"]]])
+     "Submit"]]]])
 
 (defn user-welcome [username]
   [:div
