@@ -9,34 +9,18 @@
             [jayq.core :as jq])
   (:use [jayq.core :only [$]]))
 
-(defn people-tab []
-  (if (= (state/look :tabid) 1)
-    [:div#tab1.tab-show [html/people-table]]
-    [:div#tab1.tab-hide [html/people-table]]))
-
 (defn all-email-table []
   [:div
    [html/email-table [:email-rows] :email u/update-emails!]])
 
-(defn email-tab []
-  (if (= (state/look :tabid) 2)
-    [:div#tab2.tab-show [all-email-table]]
-    [:div#tab2.tab-hide [all-email-table]]))
-
-(defn calendar-tab []
-  (if (= (state/look :tabid) 3)
-    [:div#tab3.tab-show [html/calendar]]
-    [:div#tab3.tab-hide [html/calendar]]))
-
-(defn locations-tab []
-  (if (= (state/look :tabid) 4)
-    [:div#tab4.tab-show [html/locations]]
-    [:div#tab4.tab-hide [html/locations]]))
-
-(defn myaccount-tab []
-  (if (= (state/look :tabid) 5)
-    [:div#tab5.tab-show [html/my-account]]
-    [:div#tab5.tab-hide [html/my-account]]))
+(defn tab-switch []
+  (condp = (state/look :tabid)
+    1 [:div#tab1.tab-show [html/people-table]]
+    2 [:div#tab1.tab-show [all-email-table]]
+    3 [:div#tab1.tab-show [html/calendar]]
+    4 [:div#tab1.tab-show [html/locations]]
+    5 [:div#tab1.tab-show [html/my-account]]
+    [:div "Error: Page not found."]))
 
 (defn show-person [person]
   [html/show-person (-> person :center-node :name first)
@@ -68,11 +52,7 @@
 
 (defn main-page []
   [:div
-   [people-tab]
-   [email-tab]
-   [calendar-tab]
-   [locations-tab]
-   [myaccount-tab]])
+   [tab-switch]])
 
 (defn node-page [node]
   [(get node-fn (:type node)) node])
