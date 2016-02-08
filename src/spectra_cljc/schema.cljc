@@ -85,7 +85,7 @@
                   time-interval event})
 
 (def attr-names {s-name "Name" amount "Amount"
-                 email-addr "Address" email-subject "Subject"
+                 email-addr "Email address" email-subject "Subject"
                  email-to "Email to" email-from "Email from"
                  email-reply "Reply to" email-body "Email body"
                  date-time "Time" email-received "Email received"

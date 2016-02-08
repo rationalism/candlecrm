@@ -12,8 +12,14 @@
 
 ;; TODO: Reorganize this by page
 
+(defn add-nums [coll]
+  (partition
+   2 (-> coll count range
+         (interleave coll))))
+
 (defn format-date [date]
-  (.toISOString (js/moment. date)))
+  (.format (js/moment. date)
+           "MMM Do, h:mm a"))
 
 (defn date-display [item]
   [:span (format-date item)])
@@ -26,9 +32,9 @@
 (defn new-entity [type attrs]
   [:div
    [:form
-    (for [attr attrs]
-     ^{:key attr}
-     [input-cell attr])
+    (for [attr (add-nums attrs)]
+     ^{:key (first attr)}
+     [input-cell (second attr)])
     [:button {:type "button"
               :class "submit-btn"
               :on-click #(js/alert "Submitted!")}
@@ -66,27 +72,31 @@
 (defn person-link [person attr]
   [node-link (person attr) (person :id) s/person])
 
+(defn person-site [person attr]
+  [:a {:href (person attr)} (person attr)])
+
 (defn person-cell [person attr]
-  [:td (if (= s/s-name attr)
-         [person-link person attr]
+  [:td (condp = attr
+         s/s-name [person-link person attr]
+         s/website [person-site person attr]
          (person attr))])
 
 (defn person-row [person]
-  [:tr (for [attr s/person-attrs]
-         ^{:key attr}
-         [person-cell person attr])])
+  [:tr (for [attr (add-nums s/person-attrs)]
+         ^{:key (first attr)}
+         [person-cell person (second attr)])])
 
 (defn people-table []
   [:div
    [:table {:id "people-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "people-header"}
-     (for [attr s/person-attrs]
-       ^{:key attr}
-       [:td (get s/attr-names attr)])]
+     (for [attr (add-nums s/person-attrs)]
+       ^{:key (first attr)}
+       [:td (get s/attr-names (second attr))])]
     [:tbody {:id "people-rows"}
-     (for [p-row (state/look :people-rows)]
-       ^{:key p-row}
-       [person-row p-row])]]
+     (for [p-row (-> :people-rows state/look add-nums)]
+       ^{:key (first p-row)}
+       [person-row (second p-row)])]]
    [:a {:href "#" :on-click (u/prev-fetch! :people u/update-people!)
         :id "prev-people-page" :class "pure-button"} "<-- Previous"]
    [:a {:href "#" :on-click (u/next-fetch! :people u/update-people!)
@@ -107,24 +117,25 @@
          :else (email attr))])
 
 (defn email-row [email]
-  [:tr (for [attr (keys email-attrs)]
-         ^{:key attr}
-         [email-cell email attr])])
+  [:tr (for [attr (-> email-attrs keys add-nums)]
+         ^{:key (first attr)}
+         [email-cell email (second attr)])])
 
 (defn email-table [row-keys counter update-fn]
   [:div
    [:table {:id "email-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "email-header"}
-     (for [attr email-attrs]
-       ^{:key attr} [:td attr])]
+     (for [attr (add-nums email-attrs)]
+       ^{:key (first attr)}
+       [:td (second attr)])]
     [:tbody {:id "email-rows"}
-     (for [e-row (apply state/look row-keys)]
-       ^{:key (:id e-row)}
-       [email-row e-row])]]
+     (for [e-row (add-nums (apply state/look row-keys))]
+       ^{:key (first e-row)}
+       [email-row (second e-row)])]]
    [:a {:href "#" :on-click (u/prev-fetch! counter update-fn)
-        :class "prev-email-page"} "<-- Previous"]
+        :class "prev-email-page pure-button"} "<-- Previous"]
    [:a {:href "#" :on-click (u/next-fetch! counter update-fn)
-        :class "next-email-page"} "Next -->"]])
+        :class "next-email-page pure-button"} "Next -->"]])
 
 (defn person-option [person]
   [:option {:value (:id person)}
@@ -135,9 +146,9 @@
    [:form {:class "pure-form"}
     [:select {:class (str "people-list-" rel-type " pure-input-1-2")
               :on-change #(u/rel-switch (.. % -target -value) rel-type)}
-     (for [person (state/look :rank-lists rel-type)]
-       ^{:key (:id person)}
-       [person-option person])]]])
+     (for [person (add-nums (state/look :rank-lists rel-type))]
+       ^{:key (first person)}
+       [person-option (second person)])]]])
 
 (defn cal-adjust
   ([param] (.fullCalendar ($ :#calendarbox) param))
@@ -291,21 +302,26 @@
     (->> parsed keys (split-many item)
          (map #(swap-item % parsed)))))
 
-(defn item-key [item]
-  (if (string? item)
-    item (:text item)))
+(defn add-newlines [piece]
+  [:span
+   (let [n (add-nums (str/split piece #"\r\n"))]
+     (for [ln n]
+       ^{:key (first ln)}
+       [:span (second ln)
+        (when (> (dec (count n)) (first ln))
+          [:br])]))])
 
 (defn body-link [piece]
   (if (string? piece)
-    [:span piece]
+    [add-newlines piece]
     [node-link (:text piece) (-> piece :link :id)
      (-> piece :link :type)]))
 
 (defn body-links [item]
-  [:p
-   (for [piece (link-items item)]
-     ^{:key (item-key piece)}
-     [body-link piece])])
+  [:p#email-body
+   (for [piece (-> item link-items add-nums)]
+     ^{:key (first piece)}
+     [body-link (second piece)])])
 
 (defn string-item [item prop]
   [:span
@@ -314,23 +330,32 @@
          (some #{prop} s/date-times) [date-display item]
          :else item)])
 
-(defn str-item [attr attr-name]
-  [:span (str attr-name ": ")
-   [string-item (val attr) (key attr)]])
+(defn str-item [n k v]
+  [:span (str n ": ")
+   [string-item v k]])
 
 (defn filter-display [attrs]
   (filter #(-> % key s/attr-names) attrs))
 
-(defn info-items [attrs]
+(defn info-items [attrs item]
   [:div
-   (for [attr (filter-display attrs)]
-     ^{:key (key attr)}
-     [:p.infoitem [str-item attr (-> attr key s/attr-names)]])])
+   (for [attr (add-nums attrs)]
+     ^{:key (first attr)}
+     [:p.infoitem
+      [str-item (-> attr second s/attr-names)
+       (second attr) (get item (second attr))]])])
 
-(defn show-person [person-name attrs]
+(def person-disp [s/email-addr s/website])
+(def email-disp [s/email-sent s/email-body])
+(def org-disp [s/s-name])
+(def loc-disp [s/s-name])
+(def event-disp [s/start-time s/stop-time])
+(def money-disp [s/s-name])
+
+(defn show-person [person-name item]
   [:div
    [:h3.infotitle (str person-name " (Person)")]
-   [info-items attrs]
+   [info-items person-disp item]
    [:h3.infotitle (str "Emails to " person-name)]
    [email-table [:current-node s/email-to] s/email-to
     (partial u/update-emails-person! s/email-to)]
@@ -338,30 +363,30 @@
    [email-table [:current-node s/email-from] s/email-from
     (partial u/update-emails-person! s/email-from)]])
 
-(defn show-email [email-name attrs]
+(defn show-email [email-name item]
   [:div
    [:h3.infotitle (str email-name " (Email)")]
-   [info-items attrs]])
+   [info-items email-disp item]])
 
-(defn show-organization [organization-name attrs]
+(defn show-organization [organization-name item]
   [:div
    [:h3.infotitle (str organization-name " (Organization)")]
-   [info-items attrs]])
+   [info-items org-disp item]])
 
-(defn show-location [location-name attrs]
+(defn show-location [location-name item]
   [:div
    [:h3.infotitle (str location-name " (Location)")]
-   [info-items attrs]])
+   [info-items loc-disp item]])
 
-(defn show-event [event-name attrs]
+(defn show-event [event-name item]
   [:div
    [:h3.infotitle (str event-name " (Event)")]
-   [info-items attrs]])
+   [info-items event-disp item]])
 
-(defn show-money [money-name attrs]
+(defn show-money [money-name item]
   [:div
    [:h3.infotitle (str money-name " (Finance)")]
-   [info-items attrs]])
+   [info-items money-disp item]])
 
 (defn unauthorized-error []
   [:h2 "Error: Access to this page is unauthorized."])

@@ -39,3 +39,9 @@ tbody#people-rows td {
     white-space: nowrap;
     overflow: hidden;
 }
+
+#email-body a, span {
+    display: inline;
+}
+
+
