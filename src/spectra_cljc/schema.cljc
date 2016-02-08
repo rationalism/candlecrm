@@ -96,8 +96,7 @@
                  url "Page address" start-time "Begins at"
                  stop-time "Ends at"})
 
-(def person-attrs [s-name email-addr phone-num birthday gender
-                   occupation mail-address website org-member])
+(def person-attrs [s-name email-addr phone-num website])
 
 (def email-links [email-to email-cc email-bcc
                   email-reply email-replyto email-mentions])

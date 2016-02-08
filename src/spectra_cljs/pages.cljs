@@ -75,7 +75,7 @@
   [:div
    [html/home-header]
    [html/home-content
-    [html/user-welcome "" (state/look :user :email-addr)]
+    [html/user-welcome (state/look :user :email-addr)]
     (cond
       (state/look :current-node)
       [node-page (state/look :current-node)]

@@ -34,11 +34,10 @@
               :on-click #(js/alert "Submitted!")}
      "Submit"]]])
 
-(defn user-welcome [flash username]
+(defn user-welcome [username]
   [:div
    [:h3 "Success! You are logged in now"]
-   [:h3 (str "Welcome. Your username is: " username)]
-   [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]])
+   [:h3 (str "Welcome. Your username is: " username)]])
 
 (defn node-link [text id type]
   [:a.go-node
@@ -132,11 +131,13 @@
    (str (s/s-name person) " (" (s/email-addr person) ")")])
 
 (defn people-ranks [rel-type]
-  [:select {:class (str "people-list-" rel-type)
-            :on-change #(u/rel-switch (.. % -target -value) rel-type)}
-   (for [person (state/look :rank-lists rel-type)]
-     ^{:key (:id person)}
-     [person-option person])])
+  [:div>span "Select a person: "
+   [:form {:class "pure-form"}
+    [:select {:class (str "people-list-" rel-type " pure-input-1-2")
+              :on-change #(u/rel-switch (.. % -target -value) rel-type)}
+     (for [person (state/look :rank-lists rel-type)]
+       ^{:key (:id person)}
+       [person-option person])]]])
 
 (defn cal-adjust
   ([param] (.fullCalendar ($ :#calendarbox) param))
@@ -169,8 +170,8 @@
 
 (defn cal-html []
   (if (= (state/look :tabid) 3)
-    [:div#calendarbox {:style {:height "300px" :width "500px"}}]
-    [:div#calendarbox {:style {:height "299px" :width "499px"}}]))
+    [:div#calendarbox {:style {:height "600px" :width "1000px"}}]
+    [:div#calendarbox {:style {:height "599px" :width "999px"}}]))
 
 (defn calendar-box []
   (r/create-class
@@ -182,6 +183,7 @@
 (defn calendar []
   [:div#calendar
    [people-ranks s/event]
+   [:br]
    [calendar-box]])
 
 (defn event-info-window []
@@ -237,8 +239,8 @@
 
 (defn location-html []
   (if (= (state/look :tabid) 4)
-    [:div#mapbox {:style {:height "300px" :width "500px"}}]
-    [:div#mapbox {:style {:height "299px" :width "499px"}}]))
+    [:div#mapbox {:style {:height "600px" :width "1000px"}}]
+    [:div#mapbox {:style {:height "599px" :width "999px"}}]))
 
 (defn resize-map [this]
   (when-not (state/look :map-markers :updated)
@@ -254,6 +256,7 @@
 (defn locations []
   [:div#locations
    [people-ranks s/location]
+   [:br]
    [map-box]])
 
 (defn login-needed [uri]

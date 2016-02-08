@@ -25,8 +25,17 @@ div#menu-icons a {
     color: #FFFFFF;
 }
 
+div#menu-icons h2 {
+    margin-top: 0em;
+    margin-bottom: 0em;
+}
+
 div#app-menu li {
     margin-left: 0.5em;
     margin-right: 0.5em;
 }
 
+tbody#people-rows td {
+    white-space: nowrap;
+    overflow: hidden;
+}
