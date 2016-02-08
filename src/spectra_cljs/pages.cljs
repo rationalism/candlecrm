@@ -13,15 +13,6 @@
   [:div
    [html/email-table [:email-rows] :email u/update-emails!]])
 
-(defn tab-switch []
-  (condp = (state/look :tabid)
-    1 [:div#tab1.tab-show [html/people-table]]
-    2 [:div#tab1.tab-show [all-email-table]]
-    3 [:div#tab1.tab-show [html/calendar]]
-    4 [:div#tab1.tab-show [html/locations]]
-    5 [:div#tab1.tab-show [html/my-account]]
-    [:div "Error: Page not found."]))
-
 (defn show-person [person]
   [html/show-person (-> person :center-node :name first)
                     (:center-node person)])
@@ -50,25 +41,28 @@
               s/organization show-organization s/location show-location
               s/event show-event s/money show-money})
 
-(defn main-page []
-  [:div
-   [tab-switch]])
-
 (defn node-page [node]
   [(get node-fn (:type node)) node])
+
+(defn main-page []
+  [:div
+   (condp = (state/look :tabid)
+     1 [:div#tab1.tab-show [html/people-table]]
+     2 [:div#tab2.tab-show [all-email-table]]
+     3 [:div#tab3.tab-show [html/calendar]]
+     4 [:div#tab4.tab-show [html/locations]]
+     5 [:div#tab5.tab-show [html/my-account]]
+     6 [node-page (state/look :current-node)]
+     7 [html/new-entity (state/look :input-new :type)
+        (state/look :input-new :attrs)]
+     [:div "Error: Page not found."])])
 
 (defn homepage []
   [:div
    [html/home-header]
    [html/home-content
     [:h2 ""]
-    (cond
-      (state/look :current-node)
-      [node-page (state/look :current-node)]
-      (state/look :input-new :type)
-      [html/new-entity (state/look :input-new :type)
-       (state/look :input-new :attrs)]
-      :else [main-page])]])
+    [main-page]]])
 
 (defn insert-rows! [table n]
   (dotimes [i n]

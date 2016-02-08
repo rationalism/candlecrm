@@ -42,9 +42,14 @@
 (defn update-emails! []
   (send! (email-req) #(state/set! [:email-rows] %)))
 
+(defn email-callback [link-type]
+  (fn [resp]
+    (state/set! [:current-node link-type] resp)
+    (state/set! [:tabid] 6)))
+
 (defn update-emails-person! [link-type]
   (send! (email-person-req link-type)
-         #(state/set! [:current-node link-type] %)))
+         (email-callback link-type)))
 
 (defn update-user! []
   (send! [:update/user-data] #(state/set! [:user] %)))
@@ -59,6 +64,7 @@
 (defn update-node [type]
   (fn [req]
     (state/set! [:current-node] (new-node req type))
+    (state/set! [:tabid] 6)
     (when (= type s/person)
       (update-emails-person! s/email-to)
       (update-emails-person! s/email-from))))

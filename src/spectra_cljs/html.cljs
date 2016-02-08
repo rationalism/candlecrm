@@ -68,7 +68,8 @@
 
 (defn new-person-switch []
   (state/set! [:input-new :type] s/person)
-  (state/set! [:input-new :attrs] new-person-attrs))
+  (state/set! [:input-new :attrs] new-person-attrs)
+  (state/set! [:tabid] 7))
 
 (defn person-link [person attr]
   [node-link (person attr) (person :id) s/person])
