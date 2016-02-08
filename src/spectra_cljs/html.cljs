@@ -86,6 +86,15 @@
          ^{:key (first attr)}
          [person-cell person (second attr)])])
 
+(defn prev-next-box [counter update-fn num-rows row-type]
+  [:div
+   (when (> (state/look :counters counter) 0)
+     [:a {:href "#" :on-click (u/prev-fetch! counter update-fn)
+          :class "prev-email-page pure-button"} "<-- Previous"])
+   (when (= num-rows (state/look :page-lengths row-type))
+     [:a {:href "#" :on-click (u/next-fetch! counter update-fn)
+          :class "next-email-page pure-button"} "Next -->"])])
+
 (defn people-table []
   [:div
    [:table {:id "people-table" :class "pure-table pure-table-horizontal"}
@@ -97,10 +106,8 @@
      (for [p-row (-> :people-rows state/look add-nums)]
        ^{:key (first p-row)}
        [person-row (second p-row)])]]
-   [:a {:href "#" :on-click (u/prev-fetch! :people u/update-people!)
-        :id "prev-people-page" :class "pure-button"} "<-- Previous"]
-   [:a {:href "#" :on-click (u/next-fetch! :people u/update-people!)
-        :id "next-people-page" :class "pure-button"} "Next -->"]
+   [prev-next-box :people u/update-people!
+    (count (state/look :people-rows)) :people]
    [:p>a {:href "#" :on-click new-person-switch
           :id "add-new-person" :class "pure-button"} "Add new person"]])
 
@@ -132,10 +139,8 @@
      (for [e-row (add-nums (apply state/look row-keys))]
        ^{:key (first e-row)}
        [email-row (second e-row)])]]
-   [:a {:href "#" :on-click (u/prev-fetch! counter update-fn)
-        :class "prev-email-page pure-button"} "<-- Previous"]
-   [:a {:href "#" :on-click (u/next-fetch! counter update-fn)
-        :class "next-email-page pure-button"} "Next -->"]])
+   [prev-next-box counter update-fn
+    (count (apply state/look row-keys)) :email]])
 
 (defn person-option [person]
   [:option {:value (:id person)}
