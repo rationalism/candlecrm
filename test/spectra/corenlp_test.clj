@@ -27,3 +27,17 @@
   (testing "empty set"
     (def empty-graph (loom/build-graph [] []))
     (is (= empty-graph (run-nlp-default "")))))
+
+(def me-blurb "Hello, my name is Alyssa Vance. I was born on June 21st, 1991; my email address is alyssamvance@gmail.com; and my phone number is 203-850-2427.")
+
+(deftest nlp-full
+  (testing "all types of entities"
+    (let [entities (as-> me-blurb $
+                     (run-nlp-full "Alyssa Vance" $))]
+      (is entities))))
+
+(deftest normalize-test
+  (testing "Normalize people with info in different formats"
+    (is (normalize-person "Alyssa Vance"
+                          "alyssamvance@gmail.com"
+                          s/person))))
