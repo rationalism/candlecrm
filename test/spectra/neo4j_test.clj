@@ -10,11 +10,11 @@
 
 (use-fixtures :once graph-ready)
 
-(def test-names #{"Alice" "Bob" "Carol"})
+(def test-names #{"Alice Fakename" "Bob Fakename" "Carol Fakename"})
 (def test-emails #{"alice@foo.com" "bob@foo.com" "carol@foo.com"})
 (def test-phones #{"555-5555" "666-6666" "777-7777"})
 
-(def other-name "Doug")
+(def other-name "Doug Fakename")
 (def other-email "doug@foo.com")
 (def other-phone "888-8888")
 

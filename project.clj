@@ -70,7 +70,8 @@
             [cider/cider-nrepl "0.9.1"]
             [jonase/eastwood "0.2.2"]
             [venantius/yagni "0.1.4"]
-            [lein-ancient "0.6.8"]]
+            [lein-ancient "0.6.8"]
+            [lein-cloverage "1.0.6"]]
   :resource-paths ["config" "resources"]
   :source-paths ["src"]
   :cljsbuild {:builds
