@@ -9,14 +9,16 @@
   (:import java.net.URI
            [org.passay PasswordData PasswordValidator LengthRule]))
 
+(defn friend-user [u]
+  {:identity (get-in u (:data s/email-addr))})
+
 (defn create-user!
   [{:keys [username password] :as user-data}]
   (let [new-user
         (-> user-data (dissoc :admin)
             (assoc :identity username
                    :password (creds/hash-bcrypt password)))]
-   (recon/add-user-graph! new-user)
-   new-user))
+   (recon/add-user-graph! new-user)))
 
 (defn lookup-user [username]
   (when-let [user (neo4j/get-vertex s/user {s/email-addr username})] user))

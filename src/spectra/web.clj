@@ -56,8 +56,9 @@
   (POST "/create-account" {{:keys [username password confirm] :as params} :params :as req}
         (if-let [err-msg (auth/new-user-check username password confirm)]
           (home-with-message err-msg)
-          (let [user (auth/create-user! (select-keys params [:username :password]))]
-            (friend/merge-authentication (resp/redirect "/gmail") user))))
+          (->> [:username :password] (select-keys params)
+               auth/create-user! auth/friend-user
+               (friend/merge-authentication (resp/redirect "/gmail")))))
   (GET "/logout" req (friend/logout* (logout req)))
   (GET "/gmail" req
        (friend/authenticated
@@ -89,6 +90,7 @@
   (route/files "/resources/public/js" {:root "./resources/public/js"})
   (route/resources "/")
   (route/not-found (slurp (io/resource "public/404.html"))))
+
 
 (defn form-params [req]
   (merge (:form-params req)
