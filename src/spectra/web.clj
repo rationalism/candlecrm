@@ -91,7 +91,6 @@
   (route/resources "/")
   (route/not-found (slurp (io/resource "public/404.html"))))
 
-
 (defn form-params [req]
   (merge (:form-params req)
          (:multipart-params req)))
