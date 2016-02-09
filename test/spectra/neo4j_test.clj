@@ -72,13 +72,14 @@
            (get-property new-vertex s/s-name)))
     (delete-vertex! new-vertex)))
 
-(def link-query
+(def make-link-query
   (str "MATCH (a0), (a1), (a2) "
        "WHERE ID(a0)= 1 AND ID(a1)= 2 AND ID(a2)= 3 "
        "CREATE root = (a0)-[:`dog`]->(a1)-[:`cat`]->(a2) "
        "RETURN root"))
 
-(defn make-links-test
+(deftest make-links-test
   (testing "Query to create a set of links"
-    (is (= link-query (make-links-query [1 2 3] [[1 2 "dog"] [2 3 "cat"]])))))
-
+    (is (= make-link-query
+           (make-links-query
+            [1 2 3] [[1 2 "dog"] [2 3 "cat"]])))))
