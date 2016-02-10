@@ -4,6 +4,7 @@
             [spectra.common :as com]
             [spectra.datetime :as dt]
             [spectra.google :as google]
+            [spectra.insert :as insert]
             [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra.corenlp :as nlp]
