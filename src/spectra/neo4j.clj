@@ -17,8 +17,9 @@
 (defn user-label [user]
   (str "user_" (:id user)))
 
-(defn person-labels [user]
-  [s/person (user-label user)])
+(defn prop-label [user prop]
+  (str "`" (name prop) "_"
+       (user-label user) "`"))
 
 (defn make-graph-url []
   (str "http://" (env :database-username)
@@ -180,9 +181,8 @@
          " RETURN a"))))
 
 (defn node-from-id [user id node-type]
-  (-> (str "MATCH (root:" (cypher-esc (user-label user))
-           ":" node-type
-           " ) WHERE ID(root)= " id
+  (-> (str "MATCH (root:" (prop-label user node-type)
+           ") WHERE ID(root)= " id
            " RETURN root")
       cypher-list first))
 

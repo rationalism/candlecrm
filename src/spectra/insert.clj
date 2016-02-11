@@ -10,9 +10,8 @@
              :refer (pspy pspy* profile defnp p p*)]))
 
 (defn create-cypher [user label]
-  (let [user-label (neo4j/cypher-esc (neo4j/user-label user))]
-    (str "CREATE (root:" user-label
-         ":" label ") RETURN ID(root)")))
+    (str "CREATE (root:" (neo4j/prop-label user label)
+         ") RETURN ID(root)"))
 
 (defn insert-nodes! [g user]
   (let [n (loom/nodes g)]

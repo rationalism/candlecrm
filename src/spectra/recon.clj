@@ -15,7 +15,7 @@
     s/pwd-hash (:password user)}))
   
 (defn create-person! [user person]
-  (neo4j/create-vertex! [s/person (neo4j/user-label user)] person))
+  (neo4j/create-vertex! [(neo4j/prop-label user s/person)] person))
        
 (defn add-user-graph! [user]
   (let [new-user (create-user! user)]
@@ -26,9 +26,8 @@
      s/user-person)))
 
 (defn type-query [user type-name filters]
-  (str "MATCH (root:" (neo4j/cypher-esc (neo4j/user-label user))
-       ":" type-name
-       " ) WHERE " filters
+  (str "MATCH (root:" (neo4j/prop-label user type-name)
+       ") WHERE " filters
        " RETURN root"))
 
 (defn list-from-props [user type-name props]

@@ -95,7 +95,7 @@
   (->> contacts 
     (map contact->person)
     (map #(hash-map :props %))
-    (map #(assoc % :labels (neo4j/person-labels user)))
+    (map #(assoc % :labels [(neo4j/prop-label user s/person)]))
     neo4j/batch-insert!))
 
 (defn load-all-contacts! [user]

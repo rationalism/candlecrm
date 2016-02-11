@@ -562,8 +562,8 @@
 (defn merge-old-people! [g user]
   (p :merge-old-people
      (-> (link-people g user) recon/merge-graph!
-         (recon/load-new! s/person [s/person (neo4j/user-label user)])
-         (recon/load-new! s/organization [s/organization (neo4j/user-label user)]))))
+         (recon/load-new! s/person [(neo4j/prop-label user s/person)])
+         (recon/load-new! s/organization [(neo4j/prop-label user s/organization)]))))
 
 (defn use-nlp-graph [g]
   (reduce use-nlp g (recon/filter-memory g s/email)))
@@ -572,7 +572,7 @@
   (reduce switch-message g (recon/filter-memory g s/email)))
 
 (defn link-new-all [g user]
-  (reduce #(recon/link-new! %1 %2 [%2 (neo4j/user-label user)])
+  (reduce #(recon/link-new! %1 %2 [(neo4j/prop-label user %2)])
           g [s/person s/organization s/location
              s/event s/money s/webpage]))
 
@@ -597,7 +597,7 @@
            (link-new-all user)
            make-hyperlinks switch-message-graph
            (recon/delete-headers! user)
-           (recon/link-new! s/email [s/email (neo4j/user-label user)])
+           (recon/link-new! s/email [(neo4j/prop-label user s/email)])
            recon/merge-graph! insert-links! dorun)
        (catch Exception e
          (do (prn "Email insertion error")
@@ -623,7 +623,8 @@
      (try
        (-> (merge-old-people! headers user)
            (recon/find-old-messages s/email-headers)
-           (recon/load-new! s/email-headers [s/email-headers (neo4j/user-label user)])
+           (recon/load-new! s/email-headers
+                            [(neo4j/prop-label user s/email-headers)])
            insert-links! dorun)
        (catch Exception e
          (do (prn "Email insertion error")
