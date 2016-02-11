@@ -9,22 +9,6 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
-(defn create-user! [user]
-  (neo4j/create-vertex! s/user 
-   {s/email-addr (:identity user)
-    s/pwd-hash (:password user)}))
-  
-(defn create-person! [user person]
-  (neo4j/create-vertex! [(neo4j/prop-label user s/person)] person))
-       
-(defn add-user-graph! [user]
-  (let [new-user (create-user! user)]
-    (neo4j/create-edge!
-     new-user
-     (->> s/person (nlp/normalize-person nil (:identity user))
-          (create-person! new-user))
-     s/user-person)))
-
 (defn type-query [user type-name filters]
   (str "MATCH (root:" (neo4j/prop-label user type-name)
        ") WHERE " filters

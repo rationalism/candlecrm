@@ -23,17 +23,20 @@
           (map first) (map second)
           (map first)))))
 
-(defn prop-cypher [id prop val]
-  (let [p (neo4j/cypher-esc-token prop)]
-    (str "MATCH (a) WHERE ID(a) = " id
-         " MERGE (b:" p " {"
-         (neo4j/cypher-esc-token s/value) ": '"
-         (neo4j/cypher-esc val) "'}) CREATE (a)-[r:"
-         p "]->(b) RETURN ID(b)")))
+(defn prop-cypher [id user prop val]
+  (if (coll? val)
+    (map #(prop-cypher id user prop %) val)
+    [(str "MATCH (a) WHERE ID(a) = " id
+          " MERGE (b:" (neo4j/prop-label user prop)
+          " {" (neo4j/cypher-esc-token s/value) ": '"
+          (neo4j/cypher-esc val) "'}) CREATE (a)-[r:"
+          (neo4j/cypher-esc-token prop)
+          "]->(b) RETURN ID(b)")]))
 
-(defn id-pair-cypher [id-pair]
+(defn id-pair-cypher [user id-pair]
   (->> (apply dissoc (key id-pair) s/exclude-upload)
-       (map #(prop-cypher (val id-pair) (key %) (val %)))))
+       (mapcat #(prop-cypher user (val id-pair)
+                             (key %) (val %)))))
 
 (defn link-cypher [id1 id2 prop]
   (str "MATCH (a),(b) WHERE ID(a) = " id1
@@ -45,9 +48,9 @@
   (link-cypher (id-map (first e)) (id-map (second e))
                (nth e 2)))
 
-(defn insert-graph! [g user]
+(defn push-graph! [g user]
   (let [id-map (insert-nodes! g user)]
-    (->> (mapcat id-pair-cypher id-map)
+    (->> (mapcat #(id-pair-cypher user) id-map)
          neo4j/cypher-combined-tx)
     (->> g loom/multi-edges
          (map #(edge-cypher % id-map))

@@ -1,8 +1,9 @@
 (ns spectra.auth
   (:require [clojure.string :as str]
             [spectra.index :as index]
+            [spectra.insert :as insert]
+            [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
-            [spectra.recon :as recon]
             [spectra.regex :as regex]
             [spectra_cljc.schema :as s]
             [cemerick.friend :as friend]
@@ -10,16 +11,29 @@
   (:import java.net.URI
            [org.passay PasswordData PasswordValidator LengthRule]))
 
+(defn user-vertex! [email-addr pwd-hash]
+  (neo4j/create-vertex! s/user 
+   {s/email-addr email-addr
+    s/pwd-hash pwd-hash}))
+
 (defn friend-user [u]
   {:identity (get-in u (:data s/email-addr))})
 
+(defn user-person [email]
+  (loom/build-graph
+   [{s/type-label s/person s/email-addr email}]
+   []))
+
+(defn user-person-edge! [person user]
+  (neo4j/create-edge! user person s/user-person))
+
 (defn create-user!
   [{:keys [username password] :as user-data}]
-  (let [new-user
-        (-> user-data (dissoc :admin)
-            (assoc :identity username
-                   :password (creds/hash-bcrypt password)))
-        user (recon/add-user-graph! new-user)]
+  (let [user (user-vertex! username (creds/hash-bcrypt password))]
+    (-> username user-person
+        (insert/push-graph! user)
+        first neo4j/find-by-id
+        (user-person-edge! user))
     (index/make-constraints! user)
     (friend-user user)))
 
