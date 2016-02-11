@@ -20,7 +20,7 @@
             (assoc :identity username
                    :password (creds/hash-bcrypt password)))
         user (recon/add-user-graph! new-user)]
-    (index/make-constraints user)
+    (index/make-constraints! user)
     (friend-user user)))
 
 (defn lookup-user [username]
@@ -44,11 +44,9 @@
 (defn list-users []
   (neo4j/get-vertices-class s/user))
 
-;; TODO: Clean this up, delete by label
 (defn delete-user! [user]
-  (neo4j/cypher-query (str "MATCH (a)-[r*1..6]->m WHERE ID(a) = "
-                           (:id user)
-                           " FOREACH(rel in r | DELETE rel) DELETE a, m")))
+  (index/delete-all! user)
+  (index/drop-constraints! user))
 
 (defn auth-user [credentials]
   (let [user (neo4j/get-vertex s/email-addr (:username credentials))
