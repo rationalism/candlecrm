@@ -8,21 +8,21 @@
    s/email-received s/email-sent s/lat s/lng
    s/start-time s/stop-time])
 
-(defn val-unique [prop]
+(defn val-unique [user prop]
   (str "CREATE CONSTRAINT ON (root:"
-       (neo4j/cypher-esc-token prop) ") ASSERT root."
+       (neo4j/prop-label user prop) ") ASSERT root."
        (neo4j/cypher-esc-token s/value) " IS UNIQUE"))
 
-(defn val-exists [prop]
+(defn val-exists [user prop]
   (str "CREATE CONSTRAINT ON (root:"
-       (neo4j/cypher-esc-token prop)
+       (neo4j/prop-label user prop)
        ") ASSERT exists(root."
        (neo4j/cypher-esc-token s/value) ")"))
 
-(defn make-constraints []
+(defn make-constraints [user]
   (->> unique-exists-vals
-       (map val-unique)
+       (map #(val-unique user %))
        neo4j/cypher-combined-tx)
   (->> unique-exists-vals
-       (map val-exists)
+       (map #(val-exists user %))
        neo4j/cypher-combined-tx))

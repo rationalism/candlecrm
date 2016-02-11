@@ -1,7 +1,8 @@
 (ns spectra.auth
   (:require [clojure.string :as str]
-            [spectra.recon :as recon]
+            [spectra.index :as index]
             [spectra.neo4j :as neo4j]
+            [spectra.recon :as recon]
             [spectra.regex :as regex]
             [spectra_cljc.schema :as s]
             [cemerick.friend :as friend]
@@ -17,8 +18,10 @@
   (let [new-user
         (-> user-data (dissoc :admin)
             (assoc :identity username
-                   :password (creds/hash-bcrypt password)))]
-   (recon/add-user-graph! new-user)))
+                   :password (creds/hash-bcrypt password)))
+        user (recon/add-user-graph! new-user)]
+    (index/make-constraints user)
+    (friend-user user)))
 
 (defn lookup-user [username]
   (when-let [user (neo4j/get-vertex s/user {s/email-addr username})] user))
