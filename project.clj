@@ -31,7 +31,7 @@
                   :exclusions [com.google.guava/guava org.apache.httpcomponents/httpclient
                                com.google.code.findbugs/jsr305]]
                  [org.passay/passay "1.1.0"]
-                 [com.google.apis/google-api-services-oauth2 "v2-rev104-1.21.0"]
+                 [com.google.apis/google-api-services-oauth2 "v2-rev105-1.21.0"]
                  [com.google.http-client/google-http-client-jackson "1.21.0"
                   :exclusions [org.apache.httpcomponents/httpclient
                                com.google.code.findbugs/jsr305]]
@@ -39,7 +39,7 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.0"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.0"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.2.4"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.2.5"]
                  [org.deeplearning4j/deeplearning4j-core "0.4-rc3.8"
                   :exclusions [org.apache.commons/commons-lang3 commons-logging
                                com.fasterxml.jackson.core/jackson-core junit
