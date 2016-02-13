@@ -35,10 +35,11 @@
         first neo4j/find-by-id
         (user-person-edge! user))
     (index/make-constraints! user)
-    (friend-user user)))
+    user))
 
 (defn lookup-user [username]
-  (when-let [user (neo4j/get-vertex s/user {s/email-addr username})] user))
+  (when-let [user (neo4j/get-vertex s/user {s/email-addr username})]
+    user))
 
 (defn get-username [user]
   (neo4j/get-property user s/email-addr))
@@ -46,7 +47,8 @@
 (defn get-user-pwd [username]
   (let [user (lookup-user username)]
     (when user
-      {:username username :password (neo4j/get-property user s/pwd-hash)})))
+      {:username username
+       :password (neo4j/get-property user s/pwd-hash)})))
 
 (defn get-user-obj [friend-map]
   (when friend-map
@@ -60,16 +62,8 @@
 
 (defn delete-user! [user]
   (index/delete-all! user)
-  (index/drop-constraints! user))
-
-(defn auth-user [credentials]
-  (let [user (neo4j/get-vertex s/email-addr (:username credentials))
-        unauthed [false {:flash "Invalid username or password"}]]
-    (if user
-      (if (= (:password credentials) (:password user))            
-        [true {:user (dissoc user :password)}]                           
-        unauthed)
-      unauthed)))
+  (index/drop-constraints! user)
+  (neo4j/delete-nodes! [(:id user)]))
 
 (defn new-user-check [username password confirm]
   (cond

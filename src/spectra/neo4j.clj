@@ -79,20 +79,18 @@
 (defn cypher-props-any [props]
   (->> props (map cypher-prop-any) (str/join "OR")))
 
-(defn cypher-prop-coll [prop]
-  (str " ANY (x in root." (cypher-esc-token (key prop))
-       " where x = '" (cypher-esc (val prop)) "') "))
-
-(defn cypher-props-coll [props]
-  (->> props (map cypher-prop-coll) (str/join "AND")))
-
 (defn cypher-property [prop]
   (str (cypher-esc-token (key prop))
-       ": '" (cypher-esc (val prop)) "'"))
+       ": " (if (-> prop val string?) "'" "")
+       (cypher-esc (val prop))
+       (if (-> prop val string?) "'" "")))
 
 (defn cypher-properties [props]
   (str "{ "
-       (->> props (map cypher-property) (str/join ", "))
+       (->> props
+            (filter com/val-not-nil?)
+            (map cypher-property)
+            (str/join ", "))
        " }"))
 
 (defn cypher-list [query]
@@ -197,11 +195,6 @@
 (defn refresh-vertex [vertex]
   (find-by-id (:id vertex)))
 
-(defn recon-property-list! [vertex property value]
-  (let [old-props (get-property vertex property)]
-    (if (some #{value} old-props)
-      nil (set-property! vertex property (conj old-props value)))))
-
 (defn merge-property-list! [vertex property values]
   (when (com/not-nil-ext? values)
     (if (coll? values)
@@ -244,27 +237,28 @@
   (nn/destroy @conn vertex))
 
 (defn get-vertices [class props]
-  (cypher-list
-   (str "MATCH (root:" (cypher-esc class)
-        " " (cypher-properties props)
-        " ) RETURN root")))
-
-(defn get-vertices-coll [class props]
-  (cypher-list (str "MATCH (root:" (cypher-esc class)
-                    ") WHERE " (cypher-props-coll props)
-                    " RETURN root")))
+  (let [v (->> props first val
+               (hash-map s/value))]
+    (cypher-list
+     (str "MATCH (root:" class
+          ")-[:" (-> props first key cypher-esc-token)
+          "]-(v " (cypher-properties v)
+          ") RETURN root"))))
 
 (defn get-vertex [class props]
-  (first (get-vertices class props)))
+  (->> ["MATCH (root:" (cypher-esc-token class)
+        " " (cypher-properties props)
+        ") RETURN root"]
+       (apply str) cypher-list first))
 
 (defn get-vertices-class [class]
-  (cypher-list (str "MATCH (root:" (cypher-esc class)
+  (cypher-list (str "MATCH (root:" class
                     ") RETURN root")))
 
 (defn delete-class! [class]
-  (cypher-query (str "MATCH (root:" (cypher-esc class)
+  (cypher-query (str "MATCH (root:" class
                      ")-[v]-() DELETE root, v"))
-  (cypher-query (str "MATCH (root:" (cypher-esc class)
+  (cypher-query (str "MATCH (root:" class
                      ") DELETE root")))
 
 (defn delete-id! [id]

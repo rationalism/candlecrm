@@ -6,7 +6,11 @@
   [s/email-addr s/phone-num s/birthday s/gender s/occupation
    s/mail-address s/website s/email-subject s/email-body
    s/email-received s/email-sent s/lat s/lng
-   s/start-time s/stop-time])
+   s/start-time s/stop-time s/s-name])
+
+(def obj-types
+  [s/person s/email s/location s/organization
+   s/money s/amount s/event])
 
 (defn val-unique [mode user prop]
   (str mode " CONSTRAINT ON (root:"
@@ -42,5 +46,8 @@
 
 (defn delete-all! [user]
   (->> unique-exists-vals
+       (map #(delete-with-prop user %))
+       neo4j/cypher-combined-tx)
+  (->> obj-types
        (map #(delete-with-prop user %))
        neo4j/cypher-combined-tx))
