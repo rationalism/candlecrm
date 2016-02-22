@@ -31,7 +31,7 @@
                   :exclusions [com.google.guava/guava org.apache.httpcomponents/httpclient
                                com.google.code.findbugs/jsr305]]
                  [org.passay/passay "1.1.0"]
-                 [com.google.apis/google-api-services-oauth2 "v2-rev105-1.21.0"]
+                 [com.google.apis/google-api-services-oauth2 "v2-rev106-1.21.0"]
                  [com.google.http-client/google-http-client-jackson "1.21.0"
                   :exclusions [org.apache.httpcomponents/httpclient
                                com.google.code.findbugs/jsr305]]
@@ -60,7 +60,7 @@
                  [clojurewerkz/quartzite "2.0.0"]
                  [reagent "0.5.1"]
                  [jayq "2.5.4"]
-                 [com.google.maps/google-maps-services "0.1.10"]
+                 [com.google.maps/google-maps-services "0.1.11"]
                  [nz.ac.waikato.cms.weka/weka-dev "3.7.13"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]

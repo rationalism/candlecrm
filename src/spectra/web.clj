@@ -67,7 +67,7 @@
        (friend/authenticated
         (let [user (auth/user-from-req req)]
           (quartz/wipe-and-insert! user (quartz/default-queue user))
-          (quartz/schedule-contacts! user)
+;          (quartz/schedule-contacts! user)
           (home-with-message "Congrats! Authentication successful"))))
   (GET google/callback-url req
        (friend/authenticated
