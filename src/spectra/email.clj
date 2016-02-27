@@ -66,30 +66,6 @@
 (defn sent-time [message]
   (.getSentDate message))
 
-(defn min-loc [nums]
-  (apply min-key #(get (into [] nums) %)
-         (range (count nums))))
-
-(defn exact-num [folder time nums]
-  (->> (map #(get-message folder %) nums)
-       (map received-time) (map dt/to-ms)
-       (map #(- % time)) (map #(Math/abs %))
-       min-loc (get nums)))
-
-(defn find-num
-  ([folder time]
-   (find-num folder time 0 (message-count folder)))
-  ([folder time bottom top]
-   (cond (= bottom top) bottom
-         (= bottom (dec top))
-         (exact-num folder time [bottom (inc bottom)])
-         :else 
-         (let [mid (quot (+ top bottom) 2)]
-           (if (->> mid (get-message folder) 
-                    received-time dt/to-ms (< time))
-             (recur folder time bottom mid)
-             (recur folder time mid top))))))
-
 (defonce imap-lookup (atom {}))
 
 (defn update-imap-lookup! [user inbox]

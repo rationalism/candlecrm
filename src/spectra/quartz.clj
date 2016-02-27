@@ -82,16 +82,18 @@
 
 (defn find-ranges [user]
   (reset! cnt 0)
-  (let [folder (email/fetch-imap-folder user)]
-    (->> user queries/all-scanned
-         (map :data)
-         (mapcat (juxt s/start-time s/stop-time))
-         (map #(email/find-num folder %))
-         (partition 2) (mapcat in-range) set
-         (queue-ends user) (into []) sort
-         (partition-by count-up) 
-         (map first-last)
-         (map #(zipmap [s/queue-bottom s/queue-top] %)))))
+  [])
+  
+;  (let [folder (email/fetch-imap-folder user)]
+;    (->> user queries/all-scanned
+;         (map :data)
+;         (mapcat (juxt s/start-time s/stop-time))
+;         (map #(email/find-num folder %))
+;         (partition 2) (mapcat in-range) set
+;         (queue-ends user) (into []) sort
+;         (partition-by count-up) 
+;         (map first-last)
+;         (map #(zipmap [s/queue-bottom s/queue-top] %)))))
 
 (defn default-queue [user]
   (let [top (message-count user)]
