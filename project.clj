@@ -3,7 +3,7 @@
   :url "http://spectra.herokuapp.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.7.170"
+                 [org.clojure/clojurescript "1.7.228"
                   :exclusions [args4j com.google.code.findbugs/jsr305]]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [clj-time "0.11.0"]
@@ -18,7 +18,7 @@
                   :exclusions [commons-codec]]
                  [hiccup "1.0.5"]
                  [environ "1.0.2"]
-                 [com.taoensso/timbre "4.2.1"]
+                 [com.taoensso/timbre "4.3.0"]
                  [com.cemerick/friend "0.2.1"
                   :exclusions [slingshot commons-codec commons-logging
                                org.apache.httpcomponents/httpclient
@@ -56,7 +56,7 @@
                  [clojurewerkz/neocons "3.1.0"]
                  [pandect "0.5.4"]
                  [aysylu/loom "0.5.4"]
-                 [com.taoensso/sente "1.7.0"]
+                 [com.taoensso/sente "1.8.0"]
                  [clojurewerkz/quartzite "2.0.0"]
                  [reagent "0.5.1"]
                  [jayq "2.5.4"]
