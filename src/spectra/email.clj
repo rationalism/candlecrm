@@ -6,6 +6,7 @@
             [spectra.google :as google]
             [spectra.insert :as insert]
             [spectra.loom :as loom]
+            [spectra.mlrecon :as mlrecon]
             [spectra.neo4j :as neo4j]
             [spectra.corenlp :as nlp]
             [spectra.queries :as queries]

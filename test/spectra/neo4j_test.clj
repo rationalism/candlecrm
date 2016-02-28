@@ -70,7 +70,7 @@
     
     (is (= 0 (count (get-people test-name))))
     (is (= 0 (count (get-people test-email))))
-    (is (= 0 (count (get-people test-phone))))))
+    (is (= 0 (count (get-people test-phone)))))
 
 (def make-link-query
   (str "MATCH (a0), (a1), (a2) "

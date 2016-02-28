@@ -126,7 +126,7 @@
 
 (defn all-links [id]
    (->> ["MATCH (a)-[b]-(c) WHERE ID(a)=" id
-         " RETURN ID(STARTNODE(b)), TYPE(b), ID(c)"]
+         " RETURN ID(STARTNODE(b)), TYPE(b), ID(a), ID(c)"]
         (apply str) (cy/tquery @conn)))
 
 (defn delete-nodes! [ids]
