@@ -129,11 +129,6 @@
          " RETURN ID(STARTNODE(b)), TYPE(b), ID(a), ID(c)"]
         (apply str) (cy/tquery @conn)))
 
-(defn delete-nodes! [ids]
-  (cypher-query
-   (str "MATCH (n) WHERE ID(n) IN [" (str/join "," ids)
-        "] DETACH DELETE n")))
-
 (defn make-links-query [nodes links]
   (let [id-list (->> nodes count range
                      (map #(str "a" %)))]
@@ -194,14 +189,6 @@
            ") WHERE ID(root)= " id
            " RETURN root")
       cypher-list first))
-
-(defn one-hop [id out property]
-  (cypher-list
-   (str "MATCH (a)" (if out "" "<")
-        "(-[:" (esc-token property)
-        "]-" (if out ">" "")
-        "(b) WHERE ID(a)= " id
-        " RETURN b")))
 
 (defn refresh-vertex [vertex]
   (find-by-id (:id vertex)))

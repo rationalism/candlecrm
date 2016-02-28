@@ -63,7 +63,7 @@
 (defn delete-user! [user]
   (index/delete-all! user)
   (index/drop-constraints! user)
-  (neo4j/delete-nodes! [(:id user)]))
+  (neo4j/delete-id! (:id user)))
 
 (defn new-user-check [username password confirm]
   (cond
