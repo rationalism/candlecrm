@@ -40,8 +40,8 @@
                              (key %) (val %)))))
 
 (defn link-cypher [id1 id2 prop]
-  (str "MATCH (a),(b) WHERE ID(a) = " id1
-       " AND ID(b) = " id2
+  (str "MATCH (a) WHERE ID(a) = " id1
+       " WITH a MATCH (b) WHERE ID(b) = " id2
        " CREATE (a)-[r:" (neo4j/esc-token prop)
        "]->(b) RETURN ID(a)"))
 

@@ -124,28 +124,19 @@
   (nn/set-property @conn vertex property
                    (dt/catch-dates value)))
 
+(defn format-link [l]
+  (vector (get l "ID(STARTNODE(b))")
+          (if (= (get l "ID(STARTNODE(b))")
+                 (get l "ID(a)"))
+            (get l "ID(c)")
+            (get l "ID(a)"))
+          (keyword (get l "TYPE(b)"))))
+
 (defn all-links [id]
    (->> ["MATCH (a)-[b]-(c) WHERE ID(a)=" id
          " RETURN ID(STARTNODE(b)), TYPE(b), ID(a), ID(c)"]
-        (apply str) (cy/tquery @conn)))
-
-(defn make-links-query [nodes links]
-  (let [id-list (->> nodes count range
-                     (map #(str "a" %)))]
-    (str "MATCH (" (str/join "), (" id-list)
-         ") WHERE "
-         (->> (map #(str "ID(" % ")= ") id-list)
-              (zipmap nodes)
-              (map #(str (val %) (key %)))
-              (str/join " AND "))
-         " CREATE root = (a0"
-         (->> (map #(nth % 2) links)
-              (map esc-token)
-              (zipmap (drop 1 id-list))
-              (map #(str ")-[:" (val %)
-                         "]->(" (key %)))
-              str/join)
-         ") RETURN root")))
+        (apply str) (cy/tquery @conn)
+        (map format-link)))
 
 (defn link-query [link]
   (str "ID(a)= " (first link)
@@ -181,7 +172,7 @@
 (defn find-by-id [id]
   (first
    (cypher-list
-    (str "MATCH (a) where ID(a)= " id
+    (str "MATCH (a) WHERE ID(a)= " id
          " RETURN a"))))
 
 (defn node-from-id [user id node-type]
@@ -202,7 +193,7 @@
       (set-property! vertex property values))))
 
 (defn delete-property! [vertex property]
-  (-> (str "MATCH (a) where ID(a)= " (:id vertex)
+  (-> (str "MATCH (a) WHERE ID(a)= " (:id vertex)
            " REMOVE a." (esc-token property)
            " RETURN a")
       cypher-query))
@@ -276,6 +267,3 @@
 (defn create-edge! [out in class]
   (p :create-edge
      (nrl/create @conn out in class)))
-
-(defn delete-edge! [edge]
-  (nrl/delete @conn edge))

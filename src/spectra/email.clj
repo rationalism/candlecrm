@@ -535,15 +535,6 @@
 (defn nodes-of-edges [edges]
   (conj (map second edges) (ffirst edges)))
 
-(defn insert-links! [g]
-  (p :insert-links
-     (as-> g $
-       (reduce #(loom/replace-node %1 %2 (:id %2)) $ (loom/nodes $))
-       (loom/remove-edges $ (neo4j/find-links (loom/multi-edges $)))
-       (loom/spider-edges $ '())
-       (map #(neo4j/make-links-query (nodes-of-edges %) %) $)
-       (neo4j/cypher-combined-tx $))))
-
 (defn link-people [g user]
   (->> [s/person s/organization]
        (recon/merged-props g)
@@ -589,7 +580,7 @@
            make-hyperlinks switch-message-graph
            (recon/delete-headers! user)
            (recon/link-new! s/email [(neo4j/prop-label user s/email)])
-           recon/merge-graph! insert-links! dorun)
+           recon/merge-graph! dorun)
        (catch Exception e
          (do (println "Email insertion error")
              (print e) nil)))))
@@ -616,7 +607,7 @@
            (recon/find-old-messages s/email-headers)
            (recon/load-new! s/email-headers
                             [(neo4j/prop-label user s/email-headers)])
-           insert-links! dorun)
+           dorun)
        (catch Exception e
          (do (println "Email insertion error")
              (print e) nil)))))

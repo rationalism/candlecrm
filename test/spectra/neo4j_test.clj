@@ -71,15 +71,3 @@
     (is (= 0 (count (get-people test-name))))
     (is (= 0 (count (get-people test-email))))
     (is (= 0 (count (get-people test-phone)))))
-
-(def make-link-query
-  (str "MATCH (a0), (a1), (a2) "
-       "WHERE ID(a0)= 1 AND ID(a1)= 2 AND ID(a2)= 3 "
-       "CREATE root = (a0)-[:`dog`]->(a1)-[:`cat`]->(a2) "
-       "RETURN root"))
-
-(deftest make-links-test
-  (testing "Query to create a set of links"
-    (is (= make-link-query
-           (make-links-query
-            [1 2 3] [[1 2 "dog"] [2 3 "cat"]])))))
