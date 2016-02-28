@@ -18,7 +18,7 @@
                   :exclusions [commons-codec]]
                  [hiccup "1.0.5"]
                  [environ "1.0.2"]
-                 [com.taoensso/timbre "4.3.0"]
+                 [com.taoensso/timbre "4.2.1"]
                  [com.cemerick/friend "0.2.1"
                   :exclusions [slingshot commons-codec commons-logging
                                org.apache.httpcomponents/httpclient

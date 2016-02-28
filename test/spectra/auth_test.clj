@@ -21,8 +21,7 @@
     (is (create-user! {:username test-username :password test-password}))
     (is (= test-username (get-username (lookup-user test-username))))
     (def get-people (partial neo4j/get-vertices
-                             (neo4j/prop-label (lookup-user test-username)
-                                               s/person)))
+                             (lookup-user test-username) s/person))
     (is (= 1 (count (get-people test-email))))
     
     (delete-user! (lookup-user test-username))

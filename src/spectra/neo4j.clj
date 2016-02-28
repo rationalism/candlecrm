@@ -83,11 +83,14 @@
 (defn cypher-props-any [props]
   (->> props (map cypher-prop-any) (str/join "OR")))
 
+(defn esc-val [v]
+  (str (if (string? v) "'" "")
+       (cypher-esc v)
+       (if (string? v) "'" "")))
+
 (defn cypher-property [prop]
-  (str (esc-token (key prop))
-       ": " (if (-> prop val string?) "'" "")
-       (cypher-esc (val prop))
-       (if (-> prop val string?) "'" "")))
+  (str (esc-token (key prop)) ": "
+       (esc-val (val prop))))
 
 (defn cypher-properties [props]
   (str "{ "
@@ -241,17 +244,31 @@
   (p :replace-labels
      (nl/replace @conn vertex labels)))
 
-(defn delete-vertex! [vertex]
-  (nn/destroy @conn vertex))
+(defn delete-id! [id]
+  (cypher-query
+   (str "MATCH (root)-->(v) WHERE ID(root) = " id
+        " AND v." (esc-token s/value)
+        " IS NOT NULL WITH v MATCH (v)<--(x)"
+        " WITH v, count(x) as n WHERE n = 1 DETACH DELETE v"))
+  (cypher-query
+   (str "MATCH (root) WHERE ID(root) = " id
+        " DETACH DELETE root")))
 
-(defn get-vertices [class props]
-  (let [v (->> props first val
-               (hash-map s/value))]
-    (cypher-list
-     (str "MATCH (root:" class
-          ")-[:" (-> props first key esc-token)
-          "]-(v " (cypher-properties v)
-          ") RETURN root"))))
+(defn delete-vertex! [vertex]
+  (-> vertex :id delete-id!))
+
+(defn val-query [prop]
+  (str "MATCH (root)-[:" (-> prop key esc-token)
+       "]-(v) WHERE v.val = " (-> prop val esc-val) ""))
+
+(defn add-return [s]
+  (str s " RETURN root"))
+
+(defn get-vertices [user class props]
+  (->> props (filter com/val-not-nil?) (map val-query)
+       (concat [(str "MATCH (root:" (prop-label user class) ")")])
+       (str/join " WITH root ")
+       add-return cypher-list))
 
 (defn get-vertex [class props]
   (->> ["MATCH (root:" (esc-token class)
@@ -268,9 +285,6 @@
                      ")-[v]-() DELETE root, v"))
   (cypher-query (str "MATCH (root:" class
                      ") DELETE root")))
-
-(defn delete-id! [id]
-  (-> id find-by-id delete-vertex!))
 
 (defn create-edge! [out in class]
   (p :create-edge

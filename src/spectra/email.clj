@@ -14,11 +14,13 @@
             [spectra_cljc.schema :as s]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
-  (:import [javax.mail Folder Message Message$RecipientType]))
+  (:import [javax.mail FetchProfile Folder
+            Message Message$RecipientType]
+           [com.sun.mail.imap IMAPFolder$FetchProfileItem]))
 
 (def inbox-folder-name "[Gmail]/All Mail")
-(def plain-type "TEXT/PLAIN")
-(def html-type "TEXT/HTML")
+(def plain-type "text/plain")
+(def html-type "text/html")
 (def multi-type "multipart")
 (def batch-size 10)
 
@@ -46,15 +48,27 @@
 (defn message-count [folder]
   (.getMessageCount folder))
 
+(defn last-uid [folder]
+  (dec (.getUIDNext folder)))
+
 (defn inbox-count [store]
   (message-count (get-inbox store)))
 
 (defn get-message [folder num]
-  (.getMessage folder num))
+  (.getMessageByUID folder num))
+
+(defn fetch-profile-all []
+  (doto (FetchProfile. )
+    (.add IMAPFolder$FetchProfileItem/MESSAGE)))
 
 (defn messages-in-range [folder begin end]
-  (.getMessages folder begin end))
+  (.getMessagesByUID folder begin end))
 
+(defn fetch-messages [folder begin end]
+  (def q (messages-in-range folder begin end))
+  (.fetch folder q (fetch-profile-all))
+  (into [] q))
+  
 (defn subject [message]
   (let [subject (.getSubject message)]
     (if (com/nil-or-empty? subject)

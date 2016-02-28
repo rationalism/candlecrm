@@ -35,7 +35,7 @@
 
     (def fake-label (prop-label user :fake-property))
     
-    (def get-people (partial get-vertices (prop-label user s/person)))
+    (def get-people (partial get-vertices user s/person)))
     (def test-name {s/s-name (first test-names)})
     (def test-email {s/email-addr (first test-emails)})
     (def test-phone {s/phone-num (first test-phones)})
