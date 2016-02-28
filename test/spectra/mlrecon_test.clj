@@ -26,20 +26,24 @@
   (def fish (neo4j/get-vertices-class (neo4j/prop-label user :fish)))
   (def phyla (neo4j/get-vertices user :phylum {:phy-name "Vertebrates"})))
 
+(defn build-graphs! []
+  (def g1 (loom/build-graph [node1 node2]
+                            [[node1 node2 :has-phylum]]))
+  (def g2 (loom/build-graph [node3 node2]
+                            [[node3 node2 :has-phylum]]))
+  
+  (def user (auth/create-user! {:username test-username
+                                :password test-password}))
+  
+  (insert/push-graph! g1 user)
+  (insert/push-graph! g2 user)
+  
+  (get-fish! user))
+
 (deftest merge-test
   (testing "Can we merge two nodes?"
-    (def g1 (loom/build-graph [node1 node2]
-                              [[node1 node2 :has-phylum]]))
-    (def g2 (loom/build-graph [node3 node2]
-                              [[node3 node2 :has-phylum]]))
+    (build-graphs!)
     
-    (def user (auth/create-user! {:username test-username
-                                  :password test-password}))
-    
-    (insert/push-graph! g1 user)
-    (insert/push-graph! g2 user)
-
-    (get-fish! user)
     (is (= 1 (count tuna)))
     (is (= 1 (count salmon)))
     (is (= 2 (count fish)))
@@ -61,4 +65,24 @@
     (is (= 0 (count fish)))
     (is (= 0 (count phyla)))
 
+    (auth/delete-user! user)))
+
+(deftest path-fetching
+  (testing "Try fetching some paths for recon"
+    (def g1 (loom/build-graph [node1 node2]
+                              [[node1 node2 :has-phylum]]))
+    (def user (auth/create-user! {:username test-username
+                                  :password test-password}))
+    
+    (insert/push-graph! g1 user)
+    (get-fish! user)
+
+    (is (= ["tuna" "Vertebrates" nil]
+           (fetch-paths (:id (first fish))
+                        [[:species]
+                         [:has-phylum :phy-name]
+                         [:notarealvalue]])))
+    
+    (neo4j/delete-vertex! (first fish))
+    (neo4j/delete-vertex! (first phyla))
     (auth/delete-user! user)))

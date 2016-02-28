@@ -32,3 +32,37 @@
        (map merge-link)
        (append-delete old-id)
        (neo4j/cypher-combined-tx)))
+
+(defn one-link [n1 n2 pred]
+  (str "[:" (neo4j/esc-token pred)
+       "]-(b" n2 "a" n1 ")-"))
+
+(defn link-chain [n1 preds]
+  (->> preds count range
+       (map #(one-link n1 % (nth preds %)))
+       str/join))
+
+(defn match-chain [n1 preds]
+  (str "OPTIONAL MATCH (root)" 
+       "-" (->> preds drop-last (link-chain n1))
+       "[:" (-> preds last neo4j/esc-token)
+       "]->(a" n1 ")"))
+
+(defn all-paths [paths]
+  (->> paths count range
+       (map #(match-chain % (nth paths %)))
+       (str/join " ")))
+
+(defn ret-vals [n]
+  (str "RETURN "
+       (->> n range
+            (map #(str "a" % "." (neo4j/esc-token s/value)))
+            (str/join ", "))))
+
+(defn fetch-paths [id paths]
+  (->> ["MATCH (root) WHERE ID(root) = " id
+        " " (all-paths paths)
+        " " (ret-vals (count paths))]
+       (apply str) vector
+       neo4j/cypher-combined-tx
+       ffirst vals first second))
