@@ -45,11 +45,11 @@
     (str/join
      ["MATCH (root:" node-type
       " " (message-props message)
-      ")-[:" (neo4j/cypher-esc-token s/email-from)
+      ")-[:" (neo4j/esc-token s/email-from)
       "]->(f) WHERE ID (f)=" (:id person-from)
-      " AND (root." (neo4j/cypher-esc-token s/email-sent)
+      " AND (root." (neo4j/esc-token s/email-sent)
       " < (" (dt/to-ms (s/email-sent message)) " + " sent-tolerance
-      ")) AND (root." (neo4j/cypher-esc-token s/email-sent)
+      ")) AND (root." (neo4j/esc-token s/email-sent)
       " > (" (dt/to-ms (s/email-sent message)) " - " sent-tolerance 
       "))"])))
 

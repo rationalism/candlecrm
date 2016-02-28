@@ -15,13 +15,13 @@
 (defn val-unique [mode user prop]
   (str mode " CONSTRAINT ON (root:"
        (neo4j/prop-label user prop) ") ASSERT root."
-       (neo4j/cypher-esc-token s/value) " IS UNIQUE"))
+       (neo4j/esc-token s/value) " IS UNIQUE"))
 
 (defn val-exists [mode user prop]
   (str mode " CONSTRAINT ON (root:"
        (neo4j/prop-label user prop)
        ") ASSERT exists(root."
-       (neo4j/cypher-esc-token s/value) ")"))
+       (neo4j/esc-token s/value) ")"))
 
 (defn make-constraints! [user]
   (->> unique-exists-vals

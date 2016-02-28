@@ -106,9 +106,9 @@
   
 (defn wipe-and-insert! [user & queues]
   (-> ["MATCH (root:" s/email-queue
-       ")-[:" (neo4j/cypher-esc-token s/has-queue)
+       ")-[:" (neo4j/esc-token s/has-queue)
        "]->(d:" s/user-queue
-       ")<-[:" (neo4j/cypher-esc-token s/has-queue)
+       ")<-[:" (neo4j/esc-token s/has-queue)
        "]-(u:" s/user 
        ") WHERE ID(u)= " (:id user)
        " DETACH DELETE d"]

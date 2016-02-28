@@ -45,7 +45,7 @@
        (map str)
        (str/join "', '")))
 
-(defn cypher-esc-token [token]
+(defn esc-token [token]
   (str "`" (name token) "`"))
 
 (defn cypher-pair->node [pair]
@@ -73,14 +73,14 @@
   (map cypher-map-node-labeled (cy/tquery @conn query)))
 
 (defn cypher-prop-any [prop]
-  (str " ANY (x in root." (cypher-esc-token (key prop))
+  (str " ANY (x in root." (esc-token (key prop))
        " where x in ['" (cypher-esc-coll (val prop)) "']) "))
 
 (defn cypher-props-any [props]
   (->> props (map cypher-prop-any) (str/join "OR")))
 
 (defn cypher-property [prop]
-  (str (cypher-esc-token (key prop))
+  (str (esc-token (key prop))
        ": " (if (-> prop val string?) "'" "")
        (cypher-esc (val prop))
        (if (-> prop val string?) "'" "")))
@@ -134,7 +134,7 @@
               (str/join " AND "))
          " CREATE root = (a0"
          (->> (map #(nth % 2) links)
-              (map cypher-esc-token)
+              (map esc-token)
               (zipmap (drop 1 id-list))
               (map #(str ")-[:" (val %)
                          "]->(" (key %)))
@@ -187,7 +187,7 @@
 (defn one-hop [id out property]
   (cypher-list
    (str "MATCH (a)" (if out "" "<")
-        "(-[:" (cypher-esc-token property)
+        "(-[:" (esc-token property)
         "]-" (if out ">" "")
         "(b) WHERE ID(a)= " id
         " RETURN b")))
@@ -205,7 +205,7 @@
 
 (defn delete-property! [vertex property]
   (-> (str "MATCH (a) where ID(a)= " (:id vertex)
-           " REMOVE a." (cypher-esc-token property)
+           " REMOVE a." (esc-token property)
            " RETURN a")
       cypher-query))
 
@@ -241,12 +241,12 @@
                (hash-map s/value))]
     (cypher-list
      (str "MATCH (root:" class
-          ")-[:" (-> props first key cypher-esc-token)
+          ")-[:" (-> props first key esc-token)
           "]-(v " (cypher-properties v)
           ") RETURN root"))))
 
 (defn get-vertex [class props]
-  (->> ["MATCH (root:" (cypher-esc-token class)
+  (->> ["MATCH (root:" (esc-token class)
         " " (cypher-properties props)
         ") RETURN root"]
        (apply str) cypher-list first))

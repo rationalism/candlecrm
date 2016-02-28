@@ -29,9 +29,9 @@
     (when val
       [(str "MATCH (a) WHERE ID(a) = " id
             " MERGE (b:" (neo4j/prop-label user prop)
-            " {" (neo4j/cypher-esc-token s/value) ": '"
+            " {" (neo4j/esc-token s/value) ": '"
             (neo4j/cypher-esc val) "'}) CREATE (a)-[r:"
-            (neo4j/cypher-esc-token prop)
+            (neo4j/esc-token prop)
             "]->(b) RETURN ID(b)")])))
 
 (defn id-pair-cypher [user id-pair]
@@ -42,7 +42,7 @@
 (defn link-cypher [id1 id2 prop]
   (str "MATCH (a),(b) WHERE ID(a) = " id1
        " AND ID(b) = " id2
-       " CREATE (a)-[r:" (neo4j/cypher-esc-token prop)
+       " CREATE (a)-[r:" (neo4j/esc-token prop)
        "]->(b) RETURN ID(a)"))
 
 (defn edge-cypher [e id-map]

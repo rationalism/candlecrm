@@ -30,23 +30,23 @@
         (.location) map-latlng)))
 
 (defn geocode-cached [limit]
-  (-> ["MATCH (aloc:" s/location
-       "),(bloc:" s/location
-       ")-[:" (neo4j/cypher-esc-token s/has-coord)
-       "]->(g:" s/geocode
-       ") WHERE aloc." (neo4j/cypher-esc-token s/s-name)
-       " = bloc." (neo4j/cypher-esc-token s/s-name)
-       " AND NOT (aloc)-[:" (neo4j/cypher-esc-token s/has-coord)
-       "]->() CREATE (aloc)-[:" (neo4j/cypher-esc-token s/has-coord)
+  (-> ["MATCH (aloc:" (neo4j/esc-token s/location)
+       "),(bloc:" (neo4j/esc-token s/location)
+       ")-[:" (neo4j/esc-token s/has-coord)
+       "]->(g:" (neo4j/esc-token s/geocode)
+       ") WHERE aloc." (neo4j/esc-token s/s-name)
+       " = bloc." (neo4j/esc-token s/s-name)
+       " AND NOT (aloc)-[:" (neo4j/esc-token s/has-coord)
+       "]->() CREATE (aloc)-[:" (neo4j/esc-token s/has-coord)
        "]->(g) RETURN aloc LIMIT " limit]
       str/join neo4j/cypher-list))
 
 (defn insert-query [geocode]
   (str/join
-   ["MATCH (root:" s/location
+   ["MATCH (root:" (neo4j/esc-token s/location)
     ") WHERE ID(root) = " (:id geocode)
-    " CREATE (root)-[:" (neo4j/cypher-esc-token s/has-coord)
-    "]->(g:" s/geocode
+    " CREATE (root)-[:" (neo4j/esc-token s/has-coord)
+    "]->(g:" (neo4j/esc-token s/geocode)
     " " (-> geocode (get s/geocode) neo4j/cypher-properties)
     ") RETURN g"]))
 
