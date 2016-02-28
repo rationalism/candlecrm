@@ -67,7 +67,11 @@
        (into {})))
 
 (defn cypher-query [query]
-  (map cypher-map->node (cy/tquery @conn query)))
+  (try
+    (map cypher-map->node (cy/tquery @conn query))
+    (catch Exception e
+      (do (prn "Cypher query error")
+          (prn e) {}))))
 
 (defn cypher-query-labeled [query]
   (map cypher-map-node-labeled (cy/tquery @conn query)))
@@ -101,10 +105,14 @@
   (apply merge (cypher-query-labeled query)))
 
 (defn cypher-combined-tx [queries]
-  (->> (map tx/statement queries)
-       (apply tx/in-transaction @conn)
-       (map cy/tableize)))
-
+  (try
+    (->> (map tx/statement queries)
+         (apply tx/in-transaction @conn)
+         (map cy/tableize))
+    (catch Exception e
+      (do (prn "Cypher query error")
+          (prn e) {}))))
+  
 (defn get-property [vertex property]
   (let [value (property (:data vertex))]
     (if (coll? value) (set value) value)))
