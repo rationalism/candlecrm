@@ -418,8 +418,8 @@
               (merge-bottom-headers (headers-parse (second message)))
               message-inference)
           (catch Exception e
-            (do (prn "Email parse error")
-                (prn e) {})))))
+            (do (println "Email parse error")
+                (print e) {})))))
 
 (defn hash-brackets [text]
   (str "<node " (com/sha1 text) ">" text "</node>"))
@@ -576,8 +576,8 @@
            (recon/link-new! s/email [(neo4j/prop-label user s/email)])
            recon/merge-graph! insert-links! dorun)
        (catch Exception e
-         (do (prn "Email insertion error")
-             (prn e) nil)))))
+         (do (println "Email insertion error")
+             (print e) nil)))))
   
 (defn insert-email-range! [user lower upper]
    (->> (messages-in-range (fetch-imap-folder user) lower upper)
@@ -603,8 +603,8 @@
                             [(neo4j/prop-label user s/email-headers)])
            insert-links! dorun)
        (catch Exception e
-         (do (prn "Email insertion error")
-             (prn e) nil)))))
+         (do (println "Email insertion error")
+             (print e) nil)))))
 
 (defn insert-headers-range! [user lower upper]
   (->> (messages-in-range (fetch-imap-folder user) lower upper)

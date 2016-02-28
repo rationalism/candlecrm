@@ -70,8 +70,8 @@
   (try
     (map cypher-map->node (cy/tquery @conn query))
     (catch Exception e
-      (do (prn "Cypher query error")
-          (prn e) {}))))
+      (do (println "Cypher query error")
+          (print e) {}))))
 
 (defn cypher-query-labeled [query]
   (map cypher-map-node-labeled (cy/tquery @conn query)))
@@ -110,8 +110,8 @@
          (apply tx/in-transaction @conn)
          (map cy/tableize))
     (catch Exception e
-      (do (prn "Cypher query error")
-          (prn e) {}))))
+      (do (println "Cypher query error")
+          (print e) {}))))
   
 (defn get-property [vertex property]
   (let [value (property (:data vertex))]

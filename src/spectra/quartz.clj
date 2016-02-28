@@ -120,11 +120,11 @@
        (map #(create-edges! user %)) dorun))
 
 (defn refresh-queue! [user]
-  (prn "refreshing queue")
+  (println "refreshing queue")
   (apply wipe-and-insert! user (find-ranges user)))
 
 (defn run-insertion! [queue-user]
-  (prn "inserting emails")
+  (println "inserting emails")
   (email/insert-email-range! (:user queue-user)
                              (range-bottom (:queue queue-user))
                              (range-top (:queue queue-user))))

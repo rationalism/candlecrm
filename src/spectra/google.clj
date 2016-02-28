@@ -60,9 +60,9 @@
                (full-callback-url)))]
          (.getRefreshToken token-response))
        (catch TokenResponseException e
-         (do (prn "Exception caught when requesting a token")
-             (prn "Type of exception is: ")
-             (prn (.getMessage e))
+         (do (println "Exception caught when requesting a token")
+             (println "Type of exception is: ")
+             (print (.getMessage e))
              nil))))
 
 (defn lookup-token [user]

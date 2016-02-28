@@ -52,7 +52,7 @@
 
 (defn get-user-obj [friend-map]
   (when friend-map
-    (lookup-user (:current friend-map))))
+    (:current friend-map)))
 
 (defn user-from-req [req]
   (get-user-obj (friend/identity req)))

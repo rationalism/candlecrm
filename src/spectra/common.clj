@@ -60,7 +60,8 @@
           (->> (keys a) (map a) (map b))))
 
 (defn debug [x]
-  (prn "Debug message: ") (prn x) x)
+  (print "Debug message: ")
+  (print x) x)
 
 (defn map-values [m keys f & args]
   (reduce #(apply update-in %1 [%2] f args) m keys))
