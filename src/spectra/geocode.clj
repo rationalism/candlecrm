@@ -31,7 +31,7 @@
 
 (defn geocode-cached [limit]
   (-> ["MATCH (aloc:" (neo4j/esc-token s/location)
-       "),(bloc:" (neo4j/esc-token s/location)
+       ") WITH aloc MATCH (bloc:" (neo4j/esc-token s/location)
        ")-[:" (neo4j/esc-token s/has-coord)
        "]->(g:" (neo4j/esc-token s/geocode)
        ") WHERE aloc." (neo4j/esc-token s/s-name)
