@@ -61,6 +61,8 @@
 
 (defn fetch-profile-all []
   (doto (FetchProfile. )
+    (.add IMAPFolder$FetchProfileItem/INTERNALDATE)
+    (.add IMAPFolder$FetchProfileItem/HEADERS)
     (.add IMAPFolder$FetchProfileItem/MESSAGE)))
 
 (defnp messages-in-range [folder begin end]
@@ -353,7 +355,7 @@
 (defn make-headers [pair root]
   (map #(vector root % (key pair)) (val pair)))
 
-(defn headers-fetch [message]
+(defnp headers-fetch [message]
   (vector {s/email-received (received-time message)
            s/email-sent (sent-time message)
            s/email-subject (subject message)}
@@ -418,7 +420,7 @@
     (loom/replace-node $ (-> headers loom/top-nodes first)
                        (find-bottom $))))
 
-(defn message-fetch [message]
+(defnp message-fetch [message]
   (vector (get-text-recursive message)
           (headers-fetch message)))
 
@@ -512,7 +514,7 @@
   (->> (fetch-messages (fetch-imap-folder user) lower upper)
        (pmap message-fetch)
        (pmap full-parse)
-       (pmap use-nlp-graph)
+;       (pmap use-nlp-graph)
        (map #(insert/push-graph! % user))))
 
 (defn insert-one-email! [user email-num]
