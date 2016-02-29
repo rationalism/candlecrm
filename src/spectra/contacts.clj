@@ -77,10 +77,18 @@
        (filter #(-> % val com/not-nil-ext?))
        (into {})))
 
+(defn maybe-add [m k v]
+  (if v (assoc m k v) m))
+
+(defn pair-person [pair]
+  (-> (assoc {} s/type-label s/person)
+      (maybe-add s/s-name (key pair))
+      (maybe-add s/email-addr (val pair))))
+
 (defn contact->person [contact]
   (->> (emails contact)
        (recon/name-email-map (names contact))
-       (map #(nlp/normalize-person (key %) (val %) s/person))
+       (map pair-person)
        recon/merge-nodes
        (conj [{s/phone-num (phones contact)
                s/birthday (birthday contact)

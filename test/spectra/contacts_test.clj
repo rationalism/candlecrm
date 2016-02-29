@@ -14,8 +14,7 @@
 ;; THIS IS BROKEN
 
 (def expected-person
-  {:hash "dfbb3be9276784fd972f9f4175633823485cfb64"
-   :label :person
+  {:label :person
    :email-addr '("foobar2@gmail.com")})
 
 (deftest contact-extraction

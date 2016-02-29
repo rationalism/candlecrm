@@ -39,12 +39,6 @@
     (-> value dt/catch-dates
         (str/replace #"[\\'\"]" #(str "\\" %1)))))
 
-(defn cypher-esc-coll [coll]
-  (->> coll
-       (map cypher-esc)
-       (map str)
-       (str/join "', '")))
-
 (defn esc-token [token]
   (str "`" (name token) "`"))
 
@@ -52,18 +46,9 @@
   [(key pair)
    (rec/instantiate-node-from (val pair))])
 
-(defn cypher-pair-labeled [pair]
-  [(rec/instantiate-node-from (val pair))
-   (-> pair val :metadata :labels)])
-
 (defn cypher-map->node [cymap]
   (->> cymap
        (map cypher-pair->node)
-       (into {})))
-
-(defn cypher-map-node-labeled [cymap]
-  (->> cymap
-       (map cypher-pair-labeled)
        (into {})))
 
 (defn cypher-query [query]
@@ -72,16 +57,6 @@
     (catch Exception e
       (do (println "Cypher query error")
           (print e) {}))))
-
-(defn cypher-query-labeled [query]
-  (map cypher-map-node-labeled (cy/tquery @conn query)))
-
-(defn cypher-prop-any [prop]
-  (str " ANY (x in root." (esc-token (key prop))
-       " where x in ['" (cypher-esc-coll (val prop)) "']) "))
-
-(defn cypher-props-any [props]
-  (->> props (map cypher-prop-any) (str/join "OR")))
 
 (defn esc-val [v]
   (str (if (string? v) "'" "")
@@ -103,9 +78,6 @@
 (defn cypher-list [query]
   (->> (cypher-query query)
        (map first) (map val)))
-
-(defn cypher-labeled-list [query]
-  (apply merge (cypher-query-labeled query)))
 
 (defn cypher-combined-tx [queries]
   (try
@@ -137,36 +109,6 @@
          " RETURN ID(STARTNODE(b)), TYPE(b), ID(a), ID(c)"]
         (apply str) (cy/tquery @conn)
         (map format-link)))
-
-(defn link-query [link]
-  (str "ID(a)= " (first link)
-       " AND ID(b)= " (second link)
-       " AND type(r)= '" (name (nth link 2))
-       "'"))
-
-(defn keyword-link [link]
-  (assoc link 2 (keyword (nth link 2))))
-
-(defn link-result [result]
-  (-> result (get "ID(a)") second keyword-link))
-
-(defn is-link-valid? [link]
-  (and (-> link first type (= java.lang.Long))
-       (-> link second type (= java.lang.Long))
-       (-> link (nth 2) type (= clojure.lang.Keyword))))
-
-(defn find-link-query [link]
-  {:pre [(is-link-valid? link)]}
-  (str "MATCH (a)-[r]->(b) WHERE ("
-       (link-query link)
-       ") RETURN ID(a), ID(b), type(r)"))
-
-(defnp find-links [links]
-  (->> (map find-link-query links)
-       cypher-combined-tx
-       (map first)
-       (remove nil?)
-       (map link-result)))
   
 (defn find-by-id [id]
   (first
@@ -179,17 +121,6 @@
            ") WHERE ID(root)= " id
            " RETURN root")
       cypher-list first))
-
-(defn refresh-vertex [vertex]
-  (find-by-id (:id vertex)))
-
-(defn merge-property-list! [vertex property values]
-  (when (com/not-nil-ext? values)
-    (if (coll? values)
-      (->> (get-property vertex property)
-           (concat values) distinct
-           (set-property! vertex property))
-      (set-property! vertex property values))))
 
 (defn delete-property! [vertex property]
   (-> (str "MATCH (a) WHERE ID(a)= " (:id vertex)
@@ -214,9 +145,6 @@
                @conn (map #(filter-props (:props %)) items))]
     (dorun (pmap #(nl/add @conn %1 (:labels %2)) nodes items))
     nodes))
-
-(defnp replace-labels! [vertex labels]
-  (nl/replace @conn vertex labels))
 
 (defn delete-id! [id]
   (cypher-query

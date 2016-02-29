@@ -449,8 +449,7 @@
 
 (defn label-edge [edge]
   {(label-correction (second edge)) (format-value edge)
-   :label (s/attr-entity (second edge))
-   :hash (com/sha1 (first edge))})
+   :label (s/attr-entity (second edge))})
 
 (defn label-annotate [label class]
   (.setNER label class) label)
@@ -661,42 +660,3 @@
             (str/replace #"[0-9]" "")) $
     (when (-> $ (str/split #" ") count (> 1))
       (-> $ capitalize-words run-nlp-default nlp-names first))))
-
-(defn format-person [name email default]
-  (if-not (com/nil-or-empty? name)
-    (if (com/nil-or-empty? email)
-      (if-let [inferred-email (-> name regex/find-email-addrs first)]
-        (if-let [parsed-name (-> name (regex/parse-name inferred-email)
-                                 run-nlp-default nlp-names first)]
-          (assoc (label-edge parsed-name) s/email-addr [inferred-email])
-          {:label default s/email-addr [inferred-email]
-           s/s-name (-> name (regex/parse-name inferred-email) vector)})
-        (if-let [parsed-name (-> name run-nlp-default nlp-names first)]
-          (label-edge parsed-name) {:label default s/s-name [name]
-                                    :hash (com/sha1 name)}))
-      (if-let [parsed-name (-> name (regex/parse-name email)
-                               run-nlp-default nlp-names first)]
-        (assoc (label-edge parsed-name) s/email-addr [email])
-        {:label default s/s-name [(regex/parse-name name email)] s/email-addr [email]}))
-    (if-let [inferred-name (name-from-email email)]
-      (assoc (label-edge inferred-name) s/email-addr [email])
-      {:label default s/email-addr [email] :hash (com/sha1 email)})))
-
-(defn normalize-person [name email default]
-  {:pre [(not (and (com/nil-or-empty? name) (com/nil-or-empty? email)))]}
-  (if (= name email)
-    (if (-> name regex/find-email-addrs first)
-      (format-person nil email default)
-      (format-person name nil default))
-    (format-person name email default)))
-
-(defn triple-string [triple]
-  (str/join "\t"
-            [(.confidence triple)
-             (.subjectLemmaGloss triple)
-             (.relationLemmaGloss triple)
-             (.objectLemmaGloss triple)]))
-
-(defn print-triples [triples]
-  (->> triples (map triple-string)
-       (map #(print (str % "\n")))))

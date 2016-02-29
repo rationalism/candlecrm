@@ -8,7 +8,6 @@
 (def google-token :google-token)
 (def type-label :label)
 (def date-time :date-time)
-(def sha1 :hash)
 
 (def person :person)
 (def email-addr :email-addr)
@@ -59,6 +58,10 @@
 (def has-type :has-type)
 (def pos-map :pos-map)
 (def scanned :scanned)
+
+(def link-to :link-to)
+(def link-id :link-id)
+(def has-link :has-link)
 
 (def webpage :webpage)
 (def url :url)

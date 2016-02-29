@@ -83,7 +83,7 @@
   (POST "/load-emails" {{:keys [lower upper] :as params} :params :as req}
         (friend/authenticated
          (if-let [user (auth/user-from-req req)]
-           (do (email/insert-email-range!
+           (do (email/insert-raw-range!
                 user (Integer/parseInt lower) (Integer/parseInt upper))
                (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
            (home-with-message "Error: Could not log in"))))

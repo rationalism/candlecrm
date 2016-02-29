@@ -1,5 +1,6 @@
 (ns spectra.email
   (:require [clojure.string :as str]
+            [crypto.random :as rnd]
             [spectra.auth :as auth]
             [spectra.common :as com]
             [spectra.datetime :as dt]
@@ -431,15 +432,19 @@
          (do (println "Email parse error")
              (print e) {}))))
 
-(defn hash-brackets [text]
-  (str "<node " (com/sha1 text) ">" text "</node>"))
+(defn hash-brackets [m text]
+  (str "<node " (get m text) ">" text "</node>"))
 
 (defn hyperlink-text [text mentions]
   (if (com/nil-or-empty? mentions) text
-      (str/replace text (regex/regex-or mentions) hash-brackets)))
+      (str/replace text (-> mentions keys regex/regex-or)
+                   (partial hash-brackets mentions))))
 
 (defn mention-nodes [chain]
   (filter #(loom/out-edge-label chain % s/has-type) (loom/nodes chain)))
+
+(defn hyperlink-nodes [chain]
+  (filter #(loom/out-edge-label chain % s/link-to) (loom/nodes chain)))
 
 (defn map-interval [interval]
   {s/start-time (first interval)
@@ -463,29 +468,34 @@
            first s/email-sent (normalize-event event)
            (loom/replace-node chain event))))
 
-(defn parse-person [chain node]
-  (if (or (s/email-addr node) (s/s-name node))
-    (->> (s/email-addr node)
-         (recon/name-email-map (s/s-name node))
-         (map #(nlp/normalize-person (key %) (val %) (:label node)))
-         recon/merge-nodes
-         (loom/replace-node chain node))
-    chain))
-
 (defn author-name [chain message]
   (-> (loom/out-edge-label chain message s/email-from)
       second (get-in [:data s/s-name])))
 
+(defn append-hyperlinks [chain]
+  (->> chain mention-nodes
+       (map #(vector {s/link-id (rnd/base64 6)}
+                     % s/link-to))
+       (loom/add-edges chain)))
+
+(defn link-pair [edge]
+  (hash-map (-> edge second)
+            (-> edge first s/link-id)))
+
+(defn link-map [chain]
+  (->> (loom/select-edges chain s/link-to)
+       (map link-pair) (apply merge)))
+  
 (defn use-nlp [chain message]
   (if (com/nil-or-empty? (s/email-body message)) chain
       (as-> (->> (s/email-body message)
                  (nlp/run-nlp-full (author-name chain message))
-                 (conj [chain])
+                 append-hyperlinks (conj [chain])
                  loom/merge-graphs) $
-        (loom/add-edges $ (->> $ mention-nodes
-                               (map #(vector message % s/email-mentions))))
+        (loom/add-edges $ (->> $ hyperlink-nodes
+                               (map #(vector message % s/has-link))))
         (loom/replace-node $ message
-                           (->> (mention-nodes $)
+                           (->> (link-map $)
                                 (hyperlink-text (s/email-body message))
                                 (assoc message s/email-body)))
         (reduce import-label $ (loom/select-edges $ s/has-type))
@@ -493,94 +503,9 @@
                                       (filter #(= s/event (:label %)))))
         (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/s-name])
         (loom/remove-nodes $ (->> s/has-type (loom/select-edges $) (map second))))))
-  
-(def url-map {s/person "person" s/email "email"
-              s/organization "organization" s/location "location"
-              s/money "finance" s/event "event"
-              s/webpage "webpage"})
-
-(defn add-hyperlink [g edge]
-  (loom/replace-node
-   g (first edge)
-   (assoc (first edge) :hyperlink
-          (str "{:type \""(-> edge first :label url-map)
-               "\" :id " (-> edge second :id)
-               "}"))))
-
-(defn make-hyperlinks [g]
-  (reduce add-hyperlink g (loom/select-edges g :database-match)))
-
-(defn switch-hyperlinks [text link-map]
-  (if (com/nil-or-empty? link-map) text
-      (str/replace text (-> link-map keys regex/regex-or) link-map)))
-
-(defn switch-message [g message]
-  (if (com/nil-or-empty? (s/email-body message)) g
-      (->> (loom/labeled-edges g message s/email-mentions)
-           (map second)
-           (map #(hash-map (:hash %) (:hyperlink %)))
-           (apply merge)
-           (switch-hyperlinks (:body message))
-           (assoc message :body)
-           (loom/replace-node g message))))
-
-(defn nodes-of-edges [edges]
-  (conj (map second edges) (ffirst edges)))
-
-(defn link-people [g user]
-  (->> [s/person s/organization]
-       (recon/merged-props g)
-       (recon/labeled-people-orgs user)
-       (recon/link-people g)))
-
-(defnp merge-old-people! [g user]
-  (-> (link-people g user) recon/merge-graph!
-      (recon/load-new! s/person [(neo4j/prop-label user s/person)])
-      (recon/load-new! s/organization [(neo4j/prop-label user s/organization)])))
 
 (defn use-nlp-graph [g]
   (reduce use-nlp g (recon/filter-memory g s/email)))
-
-(defn switch-message-graph [g]
-  (reduce switch-message g (recon/filter-memory g s/email)))
-
-(defn link-new-all [g user]
-  (reduce #(recon/link-new! %1 %2 [(neo4j/prop-label user %2)])
-          g [s/person s/organization s/location
-             s/event s/money s/webpage]))
-
-(defn link-by-prop [g user]
-  (reduce #(recon/link-one-prop %1 (key %2) (val %2) user)
-          g s/recon-attrs))
-
-(defn merge-and-recon [batch-size attrs graphs]
-  (->> (partition-all batch-size graphs)
-       (map loom/merge-graphs)
-       (map #(reduce recon/remove-dupes % attrs))))
-
-;; Assumes emails are already parsed
-(defnp insert-emails! [user emails]
-  (try
-    (-> (merge-old-people! emails user)
-        (recon/find-old-messages s/email)
-        use-nlp-graph
-        (link-people user)
-        (link-by-prop user)
-        (link-new-all user)
-        make-hyperlinks switch-message-graph
-        (recon/delete-headers! user)
-        (recon/link-new! s/email [(neo4j/prop-label user s/email)])
-        recon/merge-graph! dorun)
-    (catch Exception e
-      (do (println "Email insertion error")
-          (print e) nil))))
-  
-(defn insert-email-range! [user lower upper]
-   (->> (messages-in-range (fetch-imap-folder user) lower upper)
-        (pmap message-fetch)
-        (map full-parse)
-        (map #(insert-emails! user %))
-        dorun) :success)
 
 (defn insert-raw-range! [user lower upper]
   (->> (fetch-messages (fetch-imap-folder user) lower upper)
@@ -590,31 +515,11 @@
        (map #(insert/push-graph! % user))))
 
 (defn insert-one-email! [user email-num]
-  (insert-email-range! user email-num email-num))
+  (insert-raw-range! user email-num email-num))
 
 (defn insert-first-n! [user n]
-  (let [limit (message-count (fetch-imap-folder user))]
-    (insert-email-range! user (- limit n) limit)))
-
-;; Assumes emails are already parsed
-(defnp insert-headers! [user headers]
-  (try
-    (-> (merge-old-people! headers user)
-        (recon/find-old-messages s/email-headers)
-        (recon/load-new! s/email-headers
-                         [(neo4j/prop-label user s/email-headers)])
-        dorun)
-    (catch Exception e
-      (do (println "Email insertion error")
-          (print e) nil))))
-
-(defn insert-headers-range! [user lower upper]
-  (->> (messages-in-range (fetch-imap-folder user) lower upper)
-       (pmap headers-fetch)
-       (map headers-parse)
-       (map label-headers)
-       (map #(insert-headers! user %))
-       dorun) :success)
+  (let [limit (last-uid (fetch-imap-folder user))]
+    (insert-raw-range! user (- limit n) limit)))
 
 (defn date-graphs [user start limit]
   (->> (queries/emails-with-dates user start limit)

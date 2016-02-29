@@ -36,8 +36,16 @@
                      (run-nlp-full "Alyssa Vance" $))]
       (is entities))))
 
-(deftest normalize-test
-  (testing "Normalize people with info in different formats"
-    (is (normalize-person "Alyssa Vance"
-                          "alyssamvance@gmail.com"
-                          s/person))))
+(deftest email-name
+  (testing "Get a name from an email"
+    (is (= ["Michael Vassar" s/person-name s/has-type]
+           (name-from-email "michael.vassar@gmail.com")))))
+
+;(deftest fix-case
+;  (testing "Fix the case of text"
+;    (is (= "Welcome to the Black Mesa Research Facility."
+;           (correct-case "Welcome to the Black Mesa Research Facility.")))
+;    (is (= "Welcome to the Black Mesa Research Facility."
+;           (correct-case "WELCOME TO THE BLACK MESA RESEARCH FACILITY.")))
+;    (is (= "Welcome to the Black Mesa Research Facility."
+;           (correct-case "welcome to the black mesa research facility.")))))

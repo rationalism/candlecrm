@@ -125,9 +125,9 @@
 
 (defn run-insertion! [queue-user]
   (println "inserting emails")
-  (email/insert-email-range! (:user queue-user)
-                             (range-bottom (:queue queue-user))
-                             (range-top (:queue queue-user))))
+  (email/insert-raw-range! (:user queue-user)
+                           (range-bottom (:queue queue-user))
+                           (range-top (:queue queue-user))))
 
 (defn adjust-times! [queue-user]
   (let [email-times (queue-time-extra queue-user)
