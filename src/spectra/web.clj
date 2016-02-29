@@ -59,7 +59,7 @@
           (->> [:username :password] (select-keys params)
                auth/create-user! auth/friend-user
                (friend/merge-authentication (resp/redirect "/gmail")))))
-  (GET "/logout" req (friend/logout* (logout req)))
+  (GET "/logout" req (friend/logout*  (logout req)))
   (GET "/gmail" req
        (friend/authenticated
         (html-wrapper (pages/gmail req))))
