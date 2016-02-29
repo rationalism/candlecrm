@@ -13,7 +13,7 @@
     (str "CREATE (root:" (neo4j/prop-label user label)
          ") RETURN ID(root)"))
 
-(defn insert-nodes! [g user]
+(defnp insert-nodes! [g user]
   (let [n (loom/nodes g)]
     (zipmap n
      (->> (map s/type-label n)
@@ -49,7 +49,7 @@
   (link-cypher (id-map (first e)) (id-map (second e))
                (nth e 2)))
 
-(defn push-graph! [g user]
+(defnp push-graph! [g user]
   (let [id-map (insert-nodes! g user)]
     (->> (mapcat #(id-pair-cypher user %) id-map)
          neo4j/cypher-combined-tx)

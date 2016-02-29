@@ -86,10 +86,10 @@
   (new-pipeline! :mention mention-annotators)
   (new-pipeline! :openie openie-annotators))
 
-(defn run-nlp [pipeline text]
+(defnp run-nlp [pipeline text]
   ;; Global var needed for mutating Java method
   (def parsed-text (Annotation. text))
-  (p :run-nlp (.annotate pipeline parsed-text))
+  (.annotate pipeline parsed-text)
   parsed-text)
 
 (defn tokenize [text]
@@ -98,12 +98,12 @@
 (defn run-ner [text]
   (run-nlp (:ner @pipelines) text))
 
-(defn get-mentions [annotation]
-  (p :get-mentions (.annotate (:mention @pipelines) annotation))
+(defnp get-mentions [annotation]
+  (.annotate (:mention @pipelines) annotation)
   annotation)
 
-(defn run-openie [annotation]
-  (p :run-openie (.annotate (:openie @pipelines) annotation))
+(defnp run-openie [annotation]
+  (.annotate (:openie @pipelines) annotation)
   annotation)
 
 (defn get-tokens [words]
@@ -545,17 +545,16 @@
        (.set annotation CoreAnnotations$SentencesAnnotation))
   annotation)
 
-(defn sentence-graph [sent-pair]
-  (p :sentence-graph
-     (-> (loom/merge-graphs
-          [(-> sent-pair val get-triples triples-graph)
-           (->> (entity-mentions (val sent-pair))
-                (map ner-graph) (remove nil?)
-                loom/merge-graphs)])
+(defnp sentence-graph [sent-pair]
+  (-> (loom/merge-graphs
+       [(-> sent-pair val get-triples triples-graph)
+        (->> (entity-mentions (val sent-pair))
+             (map ner-graph) (remove nil?)
+             loom/merge-graphs)])
          ;(breakup-node (key sent-pair))
          ;trampoline recursion-cleanup
-         (dedup-graph (key sent-pair))
-         stringify-graph)))
+      (dedup-graph (key sent-pair))
+      stringify-graph))
 
 (defn shorten-node [node]
   (hash-map (subs (key node) 0 5)

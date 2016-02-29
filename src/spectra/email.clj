@@ -118,18 +118,15 @@
   (update-imap-lookup! user @inbox)
   @inbox)
 
-(defn content [message]
-  (p :get-content
-     (.getContent message)))
+(defnp content [message]
+  (.getContent message))
 
-(defn content-type [message]
-  (p :content-type
-     (.getContentType message)))
+(defnp content-type [message]
+  (.getContentType message))
 
-(defn get-parts [multipart]
-  (p :get-parts
-     (map #(.getBodyPart multipart %)
-          (range (.getCount multipart)))))
+(defnp get-parts [multipart]
+  (map #(.getBodyPart multipart %)
+       (range (.getCount multipart))))
 
 (defn import-label [chain edge]
   (loom/replace-node chain (first edge) (nlp/label-edge edge)))
@@ -332,23 +329,21 @@
 (defn start-email-graph [body]
   (loom/build-graph [{s/email-body body}] []))
 
-(defn raw-msg-chain [body]
-  (p :raw-msg-chain
-     (-> body str/split-lines count-depth
-         (recursive-split (start-email-graph
-                           (str/split-lines body))))))
+(defnp raw-msg-chain [body]
+  (-> body str/split-lines count-depth
+      (recursive-split (start-email-graph
+                        (str/split-lines body)))))
 
-(defn get-text-recursive [message]
-  (p :get-text-recursive
-     (cond
-       (.contains (content-type message) plain-type)
-       (content message)
-       (.contains (content-type message) multi-type)
-       (->> (-> message content get-parts)
-            (map get-text-recursive)
-            (remove #(= "" %))
-            (cons "") last)
-       :else "")))
+(defnp get-text-recursive [message]
+  (cond
+    (.contains (content-type message) plain-type)
+    (content message)
+    (.contains (content-type message) multi-type)
+    (->> (-> message content get-parts)
+         (map get-text-recursive)
+         (remove #(= "" %))
+         (cons "") last)
+    :else ""))
 
 (defn make-headers [pair root]
   (map #(vector root % (key pair)) (val pair)))
@@ -406,11 +401,10 @@
           chain (->> chain loom/nodes
                      (filter #(loom/out-edge-label chain % s/email-from)))))
 
-(defn message-inference [chain]
-  (p :message-inference
-     (-> chain
-         infer-email-chain
-         infer-subject)))
+(defnp message-inference [chain]
+  (-> chain
+      infer-email-chain
+      infer-subject))
 
 (defn merge-bottom-headers [chain headers]
   (as-> chain $
@@ -425,16 +419,15 @@
   (vector (get-text-recursive message)
           (headers-fetch message)))
 
-(defn full-parse [message]
-  (p :full-parse
-     (try (-> message first
-              regex/strip-javascript
-              raw-msg-chain
-              (merge-bottom-headers (headers-parse (second message)))
-              message-inference)
-          (catch Exception e
-            (do (println "Email parse error")
-                (print e) {})))))
+(defnp full-parse [message]
+  (try (-> message first
+           regex/strip-javascript
+           raw-msg-chain
+           (merge-bottom-headers (headers-parse (second message)))
+           message-inference)
+       (catch Exception e
+         (do (println "Email parse error")
+             (print e) {}))))
 
 (defn hash-brackets [text]
   (str "<node " (com/sha1 text) ">" text "</node>"))
@@ -541,11 +534,10 @@
        (recon/labeled-people-orgs user)
        (recon/link-people g)))
 
-(defn merge-old-people! [g user]
-  (p :merge-old-people
-     (-> (link-people g user) recon/merge-graph!
-         (recon/load-new! s/person [(neo4j/prop-label user s/person)])
-         (recon/load-new! s/organization [(neo4j/prop-label user s/organization)]))))
+(defnp merge-old-people! [g user]
+  (-> (link-people g user) recon/merge-graph!
+      (recon/load-new! s/person [(neo4j/prop-label user s/person)])
+      (recon/load-new! s/organization [(neo4j/prop-label user s/organization)])))
 
 (defn use-nlp-graph [g]
   (reduce use-nlp g (recon/filter-memory g s/email)))
@@ -568,22 +560,21 @@
        (map #(reduce recon/remove-dupes % attrs))))
 
 ;; Assumes emails are already parsed
-(defn insert-emails! [user emails]
-  (p :insert-emails
-     (try
-       (-> (merge-old-people! emails user)
-           (recon/find-old-messages s/email)
-           use-nlp-graph
-           (link-people user)
-           (link-by-prop user)
-           (link-new-all user)
-           make-hyperlinks switch-message-graph
-           (recon/delete-headers! user)
-           (recon/link-new! s/email [(neo4j/prop-label user s/email)])
-           recon/merge-graph! dorun)
-       (catch Exception e
-         (do (println "Email insertion error")
-             (print e) nil)))))
+(defnp insert-emails! [user emails]
+  (try
+    (-> (merge-old-people! emails user)
+        (recon/find-old-messages s/email)
+        use-nlp-graph
+        (link-people user)
+        (link-by-prop user)
+        (link-new-all user)
+        make-hyperlinks switch-message-graph
+        (recon/delete-headers! user)
+        (recon/link-new! s/email [(neo4j/prop-label user s/email)])
+        recon/merge-graph! dorun)
+    (catch Exception e
+      (do (println "Email insertion error")
+          (print e) nil))))
   
 (defn insert-email-range! [user lower upper]
    (->> (messages-in-range (fetch-imap-folder user) lower upper)
@@ -600,17 +591,16 @@
     (insert-email-range! user (- limit n) limit)))
 
 ;; Assumes emails are already parsed
-(defn insert-headers! [user headers]
-  (p :insert-headers
-     (try
-       (-> (merge-old-people! headers user)
-           (recon/find-old-messages s/email-headers)
-           (recon/load-new! s/email-headers
-                            [(neo4j/prop-label user s/email-headers)])
-           dorun)
-       (catch Exception e
-         (do (println "Email insertion error")
-             (print e) nil)))))
+(defnp insert-headers! [user headers]
+  (try
+    (-> (merge-old-people! headers user)
+        (recon/find-old-messages s/email-headers)
+        (recon/load-new! s/email-headers
+                         [(neo4j/prop-label user s/email-headers)])
+        dorun)
+    (catch Exception e
+      (do (println "Email insertion error")
+          (print e) nil))))
 
 (defn insert-headers-range! [user lower upper]
   (->> (messages-in-range (fetch-imap-folder user) lower upper)

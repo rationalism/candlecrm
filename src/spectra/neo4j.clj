@@ -161,13 +161,12 @@
        (link-query link)
        ") RETURN ID(a), ID(b), type(r)"))
 
-(defn find-links [links]
-  (p :find-links
-     (->> (map find-link-query links)
-          cypher-combined-tx
-          (map first)
-          (remove nil?)
-          (map link-result))))
+(defnp find-links [links]
+  (->> (map find-link-query links)
+       cypher-combined-tx
+       (map first)
+       (remove nil?)
+       (map link-result)))
   
 (defn find-by-id [id]
   (first
@@ -205,22 +204,19 @@
        (map dt/catch-dates-map)
        (into {})))
 
-(defn create-vertex! [labels properties]
-  (p :create-vertex
-     (let [vertex (nn/create @conn (filter-props properties))]
-       (nl/add @conn vertex labels)
-       vertex)))
+(defnp create-vertex! [labels properties]
+  (let [vertex (nn/create @conn (filter-props properties))]
+    (nl/add @conn vertex labels)
+    vertex))
 
-(defn batch-insert! [items]
-  (p :batch-insert
-     (let [nodes (nn/create-batch
-                  @conn (map #(filter-props (:props %)) items))]
-       (dorun (pmap #(nl/add @conn %1 (:labels %2)) nodes items))
-       nodes)))
+(defnp batch-insert! [items]
+  (let [nodes (nn/create-batch
+               @conn (map #(filter-props (:props %)) items))]
+    (dorun (pmap #(nl/add @conn %1 (:labels %2)) nodes items))
+    nodes))
 
-(defn replace-labels! [vertex labels]
-  (p :replace-labels
-     (nl/replace @conn vertex labels)))
+(defnp replace-labels! [vertex labels]
+  (nl/replace @conn vertex labels))
 
 (defn delete-id! [id]
   (cypher-query
@@ -264,6 +260,5 @@
   (cypher-query (str "MATCH (root:" class
                      ") DELETE root")))
 
-(defn create-edge! [out in class]
-  (p :create-edge
-     (nrl/create @conn out in class)))
+(defnp create-edge! [out in class]
+  (nrl/create @conn out in class))

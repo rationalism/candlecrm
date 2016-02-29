@@ -150,14 +150,13 @@
     (when (coll? labels)
       (neo4j/replace-labels! (second match-edge) labels))))
 
-(defn merge-graph! [g]
-  (p :merge-graph
-     (let [match-edges (->> (loom/multi-edges g)
-                            (filter #(= (nth % 2) :database-match)))]
-       (dorun (map merge-edge! match-edges))
-       (reduce #(loom/replace-node %1 (first %2) (second %2))
-               (loom/remove-edges g match-edges)
-               match-edges))))
+(defnp merge-graph! [g]
+  (let [match-edges (->> (loom/multi-edges g)
+                         (filter #(= (nth % 2) :database-match)))]
+    (dorun (map merge-edge! match-edges))
+    (reduce #(loom/replace-node %1 (first %2) (second %2))
+            (loom/remove-edges g match-edges)
+            match-edges)))
 
 (defn filter-type [g type-name]
   (->> (loom/nodes g)
@@ -168,16 +167,15 @@
        (filter #(nil? (:data %)))
        (remove #(loom/out-edge-label g % :database-match))))
 
-(defn push-new! [labels old-nodes]
+(defnp push-new! [labels old-nodes]
   (if (or (nil? old-nodes) (empty? old-nodes))
     (list)
-    (p :push-new
-       (->> old-nodes
-            (map #(dissoc % :label :hyperlink :hash))
-            (map #(hash-map :props %))
-            (map #(assoc % :labels labels))
-            neo4j/batch-insert!
-            (zipmap old-nodes)))))
+    (->> old-nodes
+         (map #(dissoc % :label :hyperlink :hash))
+         (map #(hash-map :props %))
+         (map #(assoc % :labels labels))
+         neo4j/batch-insert!
+         (zipmap old-nodes))))
 
 (defn load-new! [g type-name labels]
   (reduce #(loom/replace-node %1 (key %2) (val %2))
@@ -192,14 +190,13 @@
    (->> (loom/out-edge-label g message s/email-from)
         second (email-find node-type message)))
 
-(defn find-old-messages [g node-type]
-  (p :find-old-messages
-     (let [messages (filter-memory g node-type)]
-       (reduce #(if (-> %2 val nil?) %1
-                    (loom/replace-node %1 (key %2) (val %2)))
-               g (->> messages
-                      (map #(find-old-message node-type g %))
-                      (zipmap messages))))))
+(defnp find-old-messages [g node-type]
+  (let [messages (filter-memory g node-type)]
+    (reduce #(if (-> %2 val nil?) %1
+                 (loom/replace-node %1 (key %2) (val %2)))
+            g (->> messages
+                   (map #(find-old-message node-type g %))
+                   (zipmap messages)))))
 
 (defn delete-headers! [g user]
   (->> (filter-memory g s/email)
