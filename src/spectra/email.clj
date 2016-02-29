@@ -514,7 +514,7 @@
   (->> (fetch-messages (fetch-imap-folder user) lower upper)
        (pmap message-fetch)
        (pmap full-parse)
-;       (pmap use-nlp-graph)
+       (pmap use-nlp-graph)
        (map #(insert/push-graph! % user))))
 
 (defn insert-one-email! [user email-num]

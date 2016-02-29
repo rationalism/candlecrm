@@ -86,7 +86,10 @@
   (new-pipeline! :mention mention-annotators)
   (new-pipeline! :openie openie-annotators))
 
+(defonce letter-count (atom 0))
+
 (defnp run-nlp [pipeline text]
+  (swap! letter-count #(+ % (count text)))
   ;; Global var needed for mutating Java method
   (def parsed-text (Annotation. text))
   (.annotate pipeline parsed-text)
