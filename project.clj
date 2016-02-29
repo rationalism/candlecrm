@@ -61,7 +61,8 @@
                  [reagent "0.5.1"]
                  [jayq "2.5.4"]
                  [com.google.maps/google-maps-services "0.1.11"]
-                 [nz.ac.waikato.cms.weka/weka-dev "3.7.13"]]
+                 [nz.ac.waikato.cms.weka/weka-dev "3.7.13"]
+                 [crypto-random "1.2.0"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.1"]
             [lein-kibit "0.1.2"]

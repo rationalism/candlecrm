@@ -62,10 +62,10 @@
   (doto (FetchProfile. )
     (.add IMAPFolder$FetchProfileItem/MESSAGE)))
 
-(defn messages-in-range [folder begin end]
+(defnp messages-in-range [folder begin end]
   (.getMessagesByUID folder begin end))
 
-(defn fetch-messages [folder begin end]
+(defnp fetch-messages [folder begin end]
   (def q (messages-in-range folder begin end))
   (.fetch folder q (fetch-profile-all))
   (into [] q))
@@ -131,11 +131,16 @@
 (defn import-label [chain edge]
   (loom/replace-node chain (first edge) (nlp/label-edge edge)))
 
+(defn maybe-add [m k v]
+  (if v (assoc m k v) m))
+
+(defn addr-person [addr]
+  (-> (assoc {} s/type-label s/person)
+      (maybe-add s/s-name (.getPersonal addr))
+      (maybe-add s/email-addr (.getAddress addr))))
+
 (defn decode-addresses [addresses]
-  (map #(nlp/normalize-person (.getPersonal %)
-                              (.getAddress %)
-                              s/person)
-       addresses))
+  (map addr-person addresses))
 
 (defn decode-addr-map [addr-map]
   (reduce #(update %1 %2 decode-addresses)
@@ -197,10 +202,9 @@
 (defn header->person [header]
   (when (or (:email-from-name header)
             (:email-from-addr header))
-    (nlp/normalize-person
-     (:email-from-name header)
-     (:email-from-addr header)
-     s/person)))
+    (-> (assoc {} s/type-label s/person)
+        (maybe-add s/s-name (:email-from-name header))
+        (maybe-add s/email-addr (:email-from-addr header)))))
 
 (defn assoc-if-found [marks map-key coll]
   (if (or (nil? coll) (empty? coll)) marks
@@ -365,8 +369,7 @@
 
 (defn label-headers [graph]
   (let [message (->> graph loom/top-nodes first)]
-    (->> (s/email-subject message) com/end-hash
-         (assoc message :label s/email-headers s/email-sub-hash)
+    (->> (assoc message :label s/email-headers)
          (loom/replace-node graph message))))
 
 (defn headers-for-last [raw-msgs headers]
@@ -392,8 +395,7 @@
 (defn replace-subject [subject chain node]
   (loom/replace-node
    chain node
-   (assoc node s/email-subject subject
-               s/email-sub-hash (com/end-hash subject))))
+   (assoc node s/email-subject subject)))
 
 (defn infer-subject [chain]
   (reduce (partial replace-subject
@@ -489,9 +491,6 @@
         (reduce import-label $ (loom/select-edges $ s/has-type))
         (reduce parse-datetime $ (->> $ loom/nodes
                                       (filter #(= s/event (:label %)))))
-        (reduce parse-person $
-                (->> $ loom/nodes
-                     (filter #(some #{(:label %)} [s/person s/organization]))))
         (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/s-name])
         (loom/remove-nodes $ (->> s/has-type (loom/select-edges $) (map second))))))
   
@@ -582,6 +581,13 @@
         (map full-parse)
         (map #(insert-emails! user %))
         dorun) :success)
+
+(defn insert-raw-range! [user lower upper]
+  (->> (fetch-messages (fetch-imap-folder user) lower upper)
+       (pmap message-fetch)
+       (pmap full-parse)
+       (pmap use-nlp-graph)
+       (map #(insert/push-graph! % user))))
 
 (defn insert-one-email! [user email-num]
   (insert-email-range! user email-num email-num))

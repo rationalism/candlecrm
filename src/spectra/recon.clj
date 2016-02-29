@@ -34,7 +34,7 @@
 
 (defn message-props [message]
   (->> message s/email-subject com/end-hash
-       vector (zipmap [s/email-sub-hash])
+       vector; (zipmap [s/email-sub-hash])
        neo4j/cypher-properties))
 
 (defn email-query [node-type message person-from]
