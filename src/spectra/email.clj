@@ -24,7 +24,7 @@
 (def plain-type "text/plain")
 (def html-type "text/html")
 (def multi-type "multipart")
-(def batch-size 10)
+(def batch-size 100)
 
 (defn get-folder [store folder-name]
   (.getFolder store folder-name))
@@ -474,7 +474,8 @@
 
 (defn append-hyperlinks [chain]
   (->> chain mention-nodes
-       (map #(vector {s/link-id (rnd/base64 6)}
+       (map #(vector {s/link-id (rnd/base64 6)
+                      s/type-label s/hyperlink}
                      % s/link-to))
        (loom/add-edges chain)))
 

@@ -59,6 +59,7 @@
 (def pos-map :pos-map)
 (def scanned :scanned)
 
+(def hyperlink :hyperlink)
 (def link-to :link-to)
 (def link-id :link-id)
 (def has-link :has-link)
@@ -73,6 +74,9 @@
 (def modified :last-modified)
 (def queue-top :queue-top)
 (def queue-bottom :queue-bottom)
+(def loaded-top :loaded-top)
+(def loaded-bottom :loaded-bottom)
+(def top-uid :top-uid)
 
 (def repeated-attr [s-name person-name org-name email-addr phone-num
                     mail-address website org-member])

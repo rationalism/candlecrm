@@ -10,8 +10,9 @@
              :refer (pspy pspy* profile defnp p p*)]))
 
 (defn create-cypher [user label]
-    (str "CREATE (root:" (neo4j/prop-label user label)
-         ") RETURN ID(root)"))
+  {:pre [user label]}
+  (str "CREATE (root:" (neo4j/prop-label user label)
+       ") RETURN ID(root)"))
 
 (defnp insert-nodes! [g user]
   (let [n (loom/nodes g)]
@@ -29,8 +30,8 @@
     (when val
       [(str "MATCH (a) WHERE ID(a) = " id
             " MERGE (b:" (neo4j/prop-label user prop)
-            " {" (neo4j/esc-token s/value) ": '"
-            (neo4j/cypher-esc val) "'}) CREATE (a)-[r:"
+            " {" (neo4j/esc-token s/value) ": "
+            (neo4j/esc-val val) "}) CREATE (a)-[r:"
             (neo4j/esc-token prop)
             "]->(b) RETURN ID(b)")])))
 

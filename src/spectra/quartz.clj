@@ -14,6 +14,9 @@
             [spectra.datetime :as dt]
             [spectra.email :as email]
             [spectra.geocode :as geocode]
+            [spectra.insert :as insert]
+            [spectra.loom :as loom]
+            [spectra.mlrecon :as mlrecon]
             [spectra.neo4j :as neo4j]
             [spectra.queries :as queries]
             [spectra_cljc.schema :as s]))
@@ -24,39 +27,27 @@
   (-> user email/fetch-imap-folder email/message-count))
   
 (defn queue-small? [queue]
-  (< (- (-> queue :data s/queue-top)
-        (-> queue :data s/queue-bottom))
+  (< (- (-> queue s/loaded-bottom)
+        260000)
      email/batch-size))
 
 (defn range-top [queue]
-  (-> queue :data s/queue-top))
+  (-> queue s/loaded-bottom))
 
 (defn range-bottom [queue]
   (if (queue-small? queue)
-    (-> queue :data s/queue-bottom)
-    (-> queue :data s/queue-top (- email/batch-size) inc)))
+    260000
+    (-> queue s/loaded-bottom (- email/batch-size) inc)))
 
 (defn queue-reset! [queue]
-  (neo4j/set-property! queue s/modified (dt/now))
-  (if (queue-small? queue)
-    (neo4j/delete-vertex! queue)
-    (neo4j/set-property! queue s/queue-top
-                         (- (-> queue :data s/queue-top) 10))))
-
-(defn email-time [email-num queue-user]
-  (-> queue-user :user
-      email/fetch-imap-folder
-      (email/get-message email-num)
-      email/received-time dt/to-ms))
-
-(defn queue-time [queue-user]
-  [(-> queue-user :queue range-bottom (email-time queue-user))
-   (-> queue-user :queue range-top (email-time queue-user))])
-
-(defn queue-time-extra [queue-user]
-  (conj (queue-time queue-user)
-        (-> queue-user :queue range-top inc
-            (email-time queue-user))))
+  (neo4j/update-vals! (:id queue) s/modified
+                      (s/modified queue) (dt/now))
+  (neo4j/update-vals! (:id queue) s/loaded-bottom
+                      (s/loaded-bottom queue)
+                      (if (queue-small? queue)
+                        260000
+                        (- (-> queue s/loaded-bottom)
+                           email/batch-size))))
 
 (defn scan-check [user email-times]
   (->> email-times
@@ -129,30 +120,26 @@
                            (range-bottom (:queue queue-user))
                            (range-top (:queue queue-user))))
 
-(defn adjust-times! [queue-user]
-  (let [email-times (queue-time-extra queue-user)
-        overlaps (scan-check (:user queue-user) email-times)]
-    (if (= [true true false] (map com/nil-or-empty? overlaps))
-      (do (run-insertion! queue-user) 
-          (neo4j/set-property! (first (last overlaps))
-                               s/start-time (first email-times)))
-      (refresh-queue! (:user queue-user)))))
-
-(defn new-time-scanned! [queue-user]
-  (let [email-times (queue-time queue-user)
-        new-node (->> email-times
-                      (zipmap [s/start-time s/stop-time])
-                      (neo4j/create-vertex! s/time-scanned))]
-    (neo4j/create-edge! (:user queue-user) new-node s/scanned)))
-
 (defn queue-pop! []
   (when-let [queue-user (queries/next-email-queue)]
     (queue-reset! (:queue queue-user))
-    (if (= (message-count (:user queue-user))
-           (-> queue-user :queue :data s/queue-top))
-      (do (run-insertion! queue-user)
-          (new-time-scanned! queue-user))
-      (adjust-times! queue-user))))
+    (run-insertion! queue-user)))
+
+(defn new-queue-map [top-uid]
+  {s/top-uid top-uid
+   s/loaded-top top-uid
+   s/loaded-bottom top-uid
+   s/type-label s/email-queue
+   s/modified (dt/now)})
+
+(defn add-new-queue! [user]
+  (-> user email/fetch-imap-folder
+      email/last-uid
+      new-queue-map vector
+      (loom/build-graph [])
+      (insert/push-graph! user)
+      first neo4j/find-by-id
+      (neo4j/create-edge! user s/user-queue)))
 
 (defn user-job [ctx]
   (-> ctx qc/from-job-data

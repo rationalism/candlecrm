@@ -131,10 +131,12 @@
 
 (defn gmail-setup [flash username auth-url]
   [:div
-   [:h2 "Connect your account to GMail"]
+   [:h2 "Set up your account by connecting your email"]
    [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
-   [:h3 (str "Welcome. Your username is: " username)]
-   [:h3 [:a {:href auth-url} "Connect to GMail"]]])
+   [:h3 (str "Your email address is: " username)]
+   [:h3 "Select an email provider"]
+   [:a {:class "pure-button pure-button-primary" :href auth-url}
+    [:h3 "GMail"]]])
 
 (defn gmail-finished [flash username email-total]
   [:div

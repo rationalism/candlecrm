@@ -2,6 +2,7 @@
   (:require [clojure.set :as set]
             [clojure.string :as str]
             [spectra.auth :as auth]
+            [spectra.mlrecon :as mlrecon]
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]))
 
@@ -66,16 +67,26 @@
            ") RETURN root LIMIT 1")
       neo4j/cypher-list first))
 
+(defn queue-data [n]
+  (->> [[s/loaded-bottom] [s/loaded-top] [s/modified]]
+       (mlrecon/fetch-paths (:id n))
+       (zipmap [s/loaded-bottom s/loaded-top s/modified])
+       (merge {:id (:id n)})))
+
 (defn next-email-queue []
-  (-> (str "MATCH (root:" s/email-queue
-           ")-[:" (neo4j/esc-token s/has-queue)
-           "]->(q:" (neo4j/esc-token s/user-queue)
-           ")<-[:" (neo4j/esc-token s/has-queue)
-           "]-(u:" s/user 
-           ") RETURN q, u ORDER BY q." (neo4j/esc-token s/modified)
+  (-> (str "MATCH (root)-[:" (neo4j/esc-token s/user-queue)
+           "]->(u:" (neo4j/esc-token s/user)
+           ") WITH root, u"
+           " MATCH (root)-[:" (neo4j/esc-token s/loaded-bottom)
+           "]-(b) WITH root, u, b WHERE b." (neo4j/esc-token s/value)
+           " > " 260000
+           " MATCH (root)-[:" (neo4j/esc-token s/modified)
+           "]-(m) WITH root, u, b, m "
+           " RETURN root, u ORDER BY m." (neo4j/esc-token s/value)
            " LIMIT 1")
       neo4j/cypher-query first
-      (set/rename-keys {"q" :queue "u" :user})))
+      (set/rename-keys {"root" :queue "u" :user})
+      (update :queue queue-data)))
 
 (defn all-scanned [user]
   (-> ["MATCH (root:" (neo4j/esc-token s/user)

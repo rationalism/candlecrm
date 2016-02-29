@@ -55,7 +55,8 @@
     (:current friend-map)))
 
 (defn user-from-req [req]
-  (get-user-obj (friend/identity req)))
+  (let [u (get-user-obj (friend/identity req))]
+    (if (string? u) (lookup-user u) u)))
 
 (defn list-users []
   (neo4j/get-vertices-class s/user))

@@ -190,3 +190,10 @@
 
 (defnp create-edge! [out in class]
   (nrl/create @conn out in class))
+
+(defn update-vals! [id pred old-val new-val]
+  (cypher-query
+   (str "MATCH (root)-[:" (esc-token pred)
+        "]->(n) WHERE ID(root) = " id
+        " AND n.val = " (esc-val old-val)
+        " SET n.val = " (esc-val new-val))))
