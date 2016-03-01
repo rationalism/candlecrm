@@ -91,4 +91,6 @@
        (map #(str "'" % "'"))
        (str/join ", ")
        (candidate-query (neo4j/prop-label user class))
-       neo4j/cypher-list))
+       neo4j/cypher-query-raw
+       (map (juxt #(get % "ID(root)") #(get % "ID(m)")))
+       (map sort) distinct))

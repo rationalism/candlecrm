@@ -51,12 +51,16 @@
        (map cypher-pair->node)
        (into {})))
 
-(defn cypher-query [query]
+(defn cypher-query-raw [query]
   (try
-    (map cypher-map->node (cy/tquery @conn query))
+    (cy/tquery @conn query)
     (catch Exception e
       (do (println "Cypher query error")
           (print e) {}))))
+
+(defn cypher-query [query]
+  (map cypher-map->node
+       (cypher-query-raw query)))
 
 (defn esc-val [v]
   (str (if (string? v) "'" "")
