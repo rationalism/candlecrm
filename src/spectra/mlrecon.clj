@@ -7,41 +7,27 @@
             [spectra_cljc.schema :as s]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
-             :refer (pspy pspy* profile defnp p p*)]))
+             :refer (pspy pspy* profile defnp p p*)])
+  (:import [com.googlecode.concurrenttrees.solver LCSubstringSolver]
+           [com.googlecode.concurrenttrees.radix.node.concrete
+            SmartArrayBasedNodeFactory]))
 
 (defn abs [a b]
   (Math/abs (- a b)))
 
-;; From http://stackoverflow.com/questions/14949705/
-;; clojure-performance-for-expensive-algorithms
-(defn lcs-impl [^chars a1 ^chars a2]
-  (first
-   (let [n (inc (alength a1))]
-     (areduce
-      a1 i 
-      [max-len ^ints prev ^ints curr]
-      [0 (int-array n) (int-array n)]
-      [(areduce a2 j max-len (unchecked-long max-len)
-                (let [match-len 
-                      (if (.equals (aget a1 i) (aget a2 j))
-                        (unchecked-inc (aget prev j)) 0)]
-                  (aset curr (unchecked-inc j) match-len)
-                  (if (> match-len max-len)
-                    match-len max-len)))
-       curr prev]))))
-
-(defn divmax [a b n]
-  (/ n (max (count a) (count b))))
-
-(defn lcs [a b]
-  (->> (if (>= (count a) (count b))
-         [a b] [b a])
-       (map char-array)
-       (apply lcs-impl)
-       float (divmax a b)))
-
 (defn is-eq [a b]
   (if (= a b) 1.0 0.0))
+
+(defn lcs-solver []
+  (LCSubstringSolver.
+   (SmartArrayBasedNodeFactory. )))
+
+(defn lcs [coll]
+  (.toString
+   (.getLongestCommonSubstring
+    (doto (lcs-solver)
+      (#(dotimes [i (count coll)]
+          (.add % (-> coll (nth i)))))))))
 
 (defn merge-link [link]
   (str "MATCH (a) WHERE ID(a) = " (first link)
