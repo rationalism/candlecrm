@@ -78,6 +78,9 @@
 (def loaded-bottom :loaded-bottom)
 (def top-uid :top-uid)
 
+(def recon :recon)
+(def norecon :norecon)
+
 (def repeated-attr [s-name person-name org-name email-addr phone-num
                     mail-address website org-member])
 

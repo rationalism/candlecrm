@@ -12,6 +12,7 @@
 (defn create-cypher [user label]
   {:pre [user label]}
   (str "CREATE (root:" (neo4j/prop-label user label)
+       ":" (neo4j/esc-token s/norecon)
        ") RETURN ID(root)"))
 
 (defnp insert-nodes! [g user]

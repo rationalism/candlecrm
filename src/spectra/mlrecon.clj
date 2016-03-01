@@ -1,6 +1,7 @@
 (ns spectra.mlrecon
   (:require [clojure.string :as str]
             [spectra.common :as com]
+            [spectra.auth :as auth]
             [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]
@@ -66,3 +67,13 @@
        (apply str) vector
        neo4j/cypher-combined-tx
        ffirst vals first second))
+
+(defn recon-finished! [user class]
+  (neo4j/cypher-query
+   (str "MATCH (root:" (neo4j/prop-label user class)
+        ":" (neo4j/esc-token s/norecon)
+        ") SET root:" (neo4j/esc-token s/recon)))
+  (neo4j/cypher-query
+   (str "MATCH (root:" (neo4j/prop-label user class)
+        ":" (neo4j/esc-token s/norecon)
+        ") REMOVE root:" (neo4j/esc-token s/norecon))))
