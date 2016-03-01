@@ -77,3 +77,18 @@
    (str "MATCH (root:" (neo4j/prop-label user class)
         ":" (neo4j/esc-token s/norecon)
         ") REMOVE root:" (neo4j/esc-token s/norecon))))
+
+(defn candidate-query [label preds]
+  (str "MATCH (root:" label
+       ":" (neo4j/esc-token s/norecon)
+       ")-[r1]->(v)<-[r2]-(m:" label
+       ") WHERE type(r1) IN [" preds
+       "] AND type(r2) = type(r1)"
+       " RETURN ID(root), ID(m)"))
+
+(defn find-candidates [user class preds]
+  (->> (map name preds)
+       (map #(str "'" % "'"))
+       (str/join ", ")
+       (candidate-query (neo4j/prop-label user class))
+       neo4j/cypher-list))
