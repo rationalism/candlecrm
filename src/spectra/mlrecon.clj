@@ -60,13 +60,18 @@
             (map #(str "a" % "." (neo4j/esc-token s/value)))
             (str/join ", "))))
 
+(defn vectorize [m]
+  (reduce #(update %1 %2 vector) m (keys m)))
+
 (defn fetch-paths [id paths]
   (->> ["MATCH (root) WHERE ID(root) = " id
         " " (all-paths paths)
         " " (ret-vals (count paths))]
-       (apply str) vector
-       neo4j/cypher-combined-tx
-       ffirst vals first second))
+       (apply str) neo4j/cypher-query-raw
+       (map vectorize)
+       (apply merge-with concat)
+       (into (sorted-map)) (seq)
+       (map second)))
 
 (defn recon-finished! [user class]
   (neo4j/cypher-query
