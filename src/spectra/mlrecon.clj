@@ -4,6 +4,7 @@
             [spectra.auth :as auth]
             [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
+            [spectra.weka :as weka]
             [spectra_cljc.schema :as s]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
@@ -18,16 +19,33 @@
 (defn is-eq [a b]
   (if (= a b) 1.0 0.0))
 
+(defn contains-s [s]
+  (fn [l]
+    (.contains l s)))
+
+(defn filter-s [coll1 coll2 s]
+  [(filter (contains-s s) coll1)
+   (filter (contains-s s) coll2)])
+
+(defn max-lcs [coll1 coll2 s]
+  (->> (filter-s coll1 coll2 s)
+       (map #(map count %))
+       (map #(apply min %))
+       (apply max) float
+       (/ (count s))))
+
 (defn lcs-solver []
   (LCSubstringSolver.
    (SmartArrayBasedNodeFactory. )))
 
-(defn lcs [coll]
-  (->> (doto (lcs-solver)
+(defn lcs [coll1 coll2]
+  (let [coll (concat coll1 coll2)]
+    (->> (doto (lcs-solver)
          (#(dotimes [i (count coll)]
              (.add % (-> coll (nth i))))))
-       (.getLongestCommonSubstring)
-       (.toString)))
+         (.getLongestCommonSubstring)
+         (.toString)
+         (max-lcs coll1 coll2))))
 
 (def email-recon {[s/email-body] [is-eq]
                   [s/email-subject] [is-eq lcs]
