@@ -47,12 +47,12 @@
          (.toString)
          (max-lcs coll1 coll2))))
 
-(def email-recon {[s/email-body] [is-eq]
+(def email-recon [[s/email-body] [is-eq]
                   [s/email-subject] [is-eq lcs]
                   [s/email-received] [abs]
                   [s/email-sent] [abs]
                   [s/email-from s/email-addr] [is-eq]
-                  [s/email-to s/email-addr] [is-eq]})
+                  [s/email-to s/email-addr] [is-eq]])
 
 (defn merge-link [link]
   (str "MATCH (a) WHERE ID(a) = " (first link)
@@ -144,3 +144,5 @@
        neo4j/cypher-query-raw
        (map (juxt #(get % "ID(root)") #(get % "ID(m)")))
        (map sort) distinct))
+
+       
