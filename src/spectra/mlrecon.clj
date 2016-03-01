@@ -30,10 +30,15 @@
                     match-len max-len)))
        curr prev]))))
 
+(defn divmax [a b n]
+  (/ n (max (count a) (count b))))
+
 (defn lcs [a b]
-  (if (>= (count a) (count b))
-    (lcs-impl (char-array a) (char-array b))
-    (lcs-impl (char-array b) (char-array a))))
+  (->> (if (>= (count a) (count b))
+         [a b] [b a])
+       (map char-array)
+       (apply lcs-impl)
+       float (divmax a b)))
 
 (defn is-eq [a b]
   (if (= a b) 1.0 0.0))

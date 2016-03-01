@@ -84,6 +84,9 @@
 (defn sent-time [message]
   (.getSentDate message))
 
+(defn get-uid [message]
+  (.getUID message))
+
 (defonce imap-lookup (atom {}))
 
 (defn update-imap-lookup! [user inbox]
@@ -358,7 +361,8 @@
 (defnp headers-fetch [message]
   (vector {s/email-received (received-time message)
            s/email-sent (sent-time message)
-           s/email-subject (subject message)}
+           s/email-subject (subject message)
+           s/email-uid (get-uid message)}
           [(decode-recipients message)
            (decode-sender message)
            (decode-replyto message)]))

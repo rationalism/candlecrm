@@ -33,6 +33,7 @@
 (def email-received :received-date)
 (def email-sent :sent-date)
 (def email-reply :reply)
+(def email-uid :email-uid)
 
 (def location :location)
 (def loc-name :loc-name)
