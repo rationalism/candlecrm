@@ -13,8 +13,12 @@
            [com.googlecode.concurrenttrees.radix.node.concrete
             SmartArrayBasedNodeFactory]))
 
+(def default-score 0.5)
+
 (defn abs [a b]
-  (Math/abs (- a b)))
+  (if (or (not a) (not b))
+    default-score
+    (Math/abs (- a b))))
 
 (defn is-eq [a b]
   (if (= a b) 1.0 0.0))
@@ -39,20 +43,28 @@
    (SmartArrayBasedNodeFactory. )))
 
 (defn lcs [coll1 coll2]
-  (let [coll (concat coll1 coll2)]
-    (->> (doto (lcs-solver)
-         (#(dotimes [i (count coll)]
-             (.add % (-> coll (nth i))))))
-         (.getLongestCommonSubstring)
-         (.toString)
-         (max-lcs coll1 coll2))))
+  (if (or (empty? coll1) (empty? coll2))
+    default-score
+    (let [coll (concat coll1 coll2)]
+      (->> (doto (lcs-solver)
+             (#(dotimes [i (count coll)]
+                 (.add % (-> coll (nth i))))))
+           (.getLongestCommonSubstring)
+           (.toString)
+           (max-lcs coll1 coll2)))))
 
-(def email-recon [[s/email-body] [is-eq]
-                  [s/email-subject] [is-eq lcs]
-                  [s/email-received] [abs]
-                  [s/email-sent] [abs]
-                  [s/email-from s/email-addr] [is-eq]
-                  [s/email-to s/email-addr] [is-eq]])
+(def scoring
+  {s/email
+   [[[s/email-body] [is-eq]]
+    [[s/email-subject] [is-eq lcs]]
+    [[s/email-received] [abs]]
+    [[s/email-sent] [abs]]
+    [[s/email-from s/email-addr] [is-eq]]
+    [[s/email-to s/email-addr] [is-eq]]]})
+
+(def candidates
+  {s/email
+   [s/email-subject s/email-received s/email-sent]})
 
 (defn merge-link [link]
   (str "MATCH (a) WHERE ID(a) = " (first link)
@@ -118,6 +130,10 @@
        (into (sorted-map)) (seq)
        (map second)))
 
+(defn fetch-all-paths [paths ids]
+  (->> (pmap #(fetch-paths % paths) ids)
+       (zipmap ids)))
+
 (defn recon-finished! [user class]
   (neo4j/cypher-query
    (str "MATCH (root:" (neo4j/prop-label user class)
@@ -136,8 +152,8 @@
        "] AND type(r2) = type(r1)"
        " RETURN ID(root), ID(m)"))
 
-(defn find-candidates [user class preds]
-  (->> (map name preds)
+(defn find-candidates [user class]
+  (->> class (get candidates) (map name)
        (map #(str "'" % "'"))
        (str/join ", ")
        (candidate-query (neo4j/prop-label user class))
@@ -145,4 +161,12 @@
        (map (juxt #(get % "ID(root)") #(get % "ID(m)")))
        (map sort) distinct))
 
-       
+(defn pair-map [p m]
+  (map #(get m %) p))
+
+(defn values-fetch [user class]
+  (let [cs (find-candidates user class)
+        vs (->> cs flatten distinct
+                (fetch-all-paths
+                 (map first (get scoring class))))]
+    (map #(pair-map % vs) cs)))
