@@ -16,12 +16,15 @@
 (def default-score 0.5)
 
 (defn abs [a b]
-  (if (or (not a) (not b))
+  (if (or (not (first a))
+          (not (first b)))
     default-score
-    (Math/abs (- a b))))
+    (->> [a b] (map first)
+         (apply -) Math/abs)))
 
 (defn is-eq [a b]
-  (if (= a b) 1.0 0.0))
+  (if (= (first a) (first b))
+    1.0 0.0))
 
 (defn contains-s [s]
   (fn [l]
@@ -164,9 +167,21 @@
 (defn pair-map [p m]
   (map #(get m %) p))
 
-(defn values-fetch [user class]
-  (let [cs (find-candidates user class)
+(defn diff-pair [fp]
+  (map #(apply % (second fp))
+       (first fp)))
+
+(defn score-diff [rules diff]
+  (->> (apply interleave diff)
+       (partition 2)
+       (interleave (map second rules))
+       (partition 2)
+       (map diff-pair) flatten))
+
+(defn get-diffs [user class]
+  (let [rules (get scoring class)
+        cs (find-candidates user class)
         vs (->> cs flatten distinct
-                (fetch-all-paths
-                 (map first (get scoring class))))]
-    (map #(pair-map % vs) cs)))
+                (fetch-all-paths (map first rules)))]
+    (->> (map #(pair-map % vs) cs)
+         (map #(score-diff rules %)))))
