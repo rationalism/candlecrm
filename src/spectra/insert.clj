@@ -34,7 +34,7 @@
             " {" (neo4j/esc-token s/value) ": "
             (neo4j/esc-val val) "}) CREATE (a)-[r:"
             (neo4j/esc-token prop)
-            "]->(b) RETURN ID(b)")])))
+            "]->(b)")])))
 
 (defn id-pair-cypher [user id-pair]
   (->> (apply dissoc (key id-pair) s/exclude-upload)
@@ -45,7 +45,7 @@
   (str "MATCH (a) WHERE ID(a) = " id1
        " WITH a MATCH (b) WHERE ID(b) = " id2
        " CREATE (a)-[r:" (neo4j/esc-token prop)
-       "]->(b) RETURN ID(a)"))
+       "]->(b)"))
 
 (defn edge-cypher [e id-map]
   (link-cypher (id-map (first e)) (id-map (second e))

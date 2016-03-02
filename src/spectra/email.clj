@@ -361,8 +361,8 @@
 (defnp headers-fetch [message]
   (vector {s/email-received (received-time message)
            s/email-sent (sent-time message)
-           s/email-subject (subject message)
-           s/email-uid (get-uid message)}
+           s/email-subject (subject message)}
+;           s/email-uid (get-uid message)}
           [(decode-recipients message)
            (decode-sender message)
            (decode-replyto message)]))
