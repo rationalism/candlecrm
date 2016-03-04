@@ -77,7 +77,7 @@
     (insert/push-graph! g1 user)
     (get-fish! user)
 
-    (is (= ["tuna" "Vertebrates" nil]
+    (is (= [["tuna"] ["Vertebrates"] [nil]]
            (fetch-paths (:id (first fish))
                         [[:species]
                          [:has-phylum :phy-name]

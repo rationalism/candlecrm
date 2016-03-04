@@ -84,8 +84,8 @@
 (defn sent-time [message]
   (.getSentDate message))
 
-(defn get-uid [message]
-  (.getUID message))
+(defn get-uid [folder message]
+  (.getUID folder message))
 
 (defonce imap-lookup (atom {}))
 
@@ -358,11 +358,11 @@
 (defn make-headers [pair root]
   (map #(vector root % (key pair)) (val pair)))
 
-(defnp headers-fetch [message]
+(defnp headers-fetch [message folder]
   (vector {s/email-received (received-time message)
            s/email-sent (sent-time message)
-           s/email-subject (subject message)}
-;           s/email-uid (get-uid message)}
+           s/email-subject (subject message)
+           s/email-uid (get-uid folder message)}
           [(decode-recipients message)
            (decode-sender message)
            (decode-replyto message)]))
@@ -424,9 +424,9 @@
     (loom/replace-node $ (-> headers loom/top-nodes first)
                        (find-bottom $))))
 
-(defnp message-fetch [message]
+(defnp message-fetch [message folder]
   (vector (get-text-recursive message)
-          (headers-fetch message)))
+          (headers-fetch message folder)))
 
 (defnp full-parse [message]
   (try (-> message first
@@ -515,11 +515,12 @@
   (reduce use-nlp g (recon/filter-memory g s/email)))
 
 (defn insert-raw-range! [user lower upper]
-  (->> (fetch-messages (fetch-imap-folder user) lower upper)
-       (pmap message-fetch)
-       (pmap full-parse)
-;       (pmap use-nlp-graph)
-       (map #(insert/push-graph! % user))))
+  (let [folder (fetch-imap-folder user)]
+    (->> (fetch-messages folder lower upper)
+         (pmap #(message-fetch % folder))
+         (pmap full-parse)
+;        (pmap use-nlp-graph)
+         (map #(insert/push-graph! % user)))))
 
 (defn insert-one-email! [user email-num]
   (insert-raw-range! user email-num email-num))
