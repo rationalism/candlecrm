@@ -2,7 +2,9 @@
   (:require [clojure.string :as str])
   (:import [weka.classifiers.trees RandomForest]
            [weka.core Attribute FastVector
-            DenseInstance Instances]))
+            DenseInstance Instances]
+           [java.io FileInputStream FileOutputStream
+            ObjectInputStream ObjectOutputStream]))
 
 (defn all-attributes [point]
   (->> point count range
@@ -52,3 +54,15 @@
    forest (doto (make-instance point)
             (.setDataset (make-instances [point])))))
                      
+(defn serialize [forest filename]
+  (-> filename
+      (FileOutputStream. )
+      (ObjectOutputStream. )
+      (.writeObject forest)))
+
+(defn deserialize [filename]
+  (-> filename
+      (FileInputStream. )
+      (ObjectInputStream. )
+      (.readObject )))
+
