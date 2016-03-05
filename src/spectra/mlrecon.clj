@@ -26,6 +26,11 @@
   (if (= (first a) (first b))
     1.0 0.0))
 
+(defn min-len [a b]
+  (->> [a b] (apply concat)
+       (map count)
+       (apply min)))
+
 (defn contains-s [s]
   (fn [l]
     (.contains l s)))
@@ -38,7 +43,7 @@
   (->> (filter-s coll1 coll2 s)
        (map #(map count %))
        (map #(apply min %))
-       (apply max) float
+       (apply max)
        (/ (count s))))
 
 (defn lcs-solver []
@@ -58,16 +63,18 @@
 
 (def scoring
   {s/email
-   [[[s/email-body] [is-eq]]
+   [[[s/email-body] [is-eq min-len]]
     [[s/email-subject] [is-eq lcs]]
     [[s/email-received] [abs]]
     [[s/email-sent] [abs]]
     [[s/email-from s/email-addr] [is-eq]]
-    [[s/email-to s/email-addr] [is-eq]]]})
+    [[s/email-to s/email-addr] [is-eq]]
+    [[s/email-uid] [is-eq]]]})
 
 (def candidates
   {s/email
-   [s/email-subject s/email-received s/email-sent]})
+   [s/email-subject s/email-body
+    s/email-received s/email-sent]})
 
 (defn merge-link [link]
   (str "MATCH (a) WHERE ID(a) = " (first link)
@@ -178,10 +185,22 @@
        (partition 2)
        (map diff-pair) flatten))
 
-(defn get-diffs [user class]
+(defn get-diffs [user class cs]
   (let [rules (get scoring class)
-        cs (find-candidates user class)
         vs (->> cs flatten distinct
                 (fetch-all-paths (map first rules)))]
     (->> (map #(pair-map % vs) cs)
-         (map #(score-diff rules %)))))
+         (map #(score-diff rules %))
+         (zipmap cs))))
+
+(defn append-scores [pos-and-neg]
+  [(->> pos-and-neg first (map #(conj % 1.0)))
+   (->> pos-and-neg first (map #(conj % 0.0)))])
+
+(defn train-forest [user class pos-cs neg-cs]
+  (->> [pos-cs neg-cs]
+       (map #(get-diffs user class %))
+       (map vals)
+       append-scores
+       (apply concat)
+       weka/make-forest))

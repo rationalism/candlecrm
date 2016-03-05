@@ -6,6 +6,8 @@
            [java.io FileInputStream FileOutputStream
             ObjectInputStream ObjectOutputStream]))
 
+(def num-trees 200)
+
 (defn all-attributes [point]
   (->> point count range
        (map #(str "attr" %))
@@ -21,7 +23,7 @@
 (defn set-value [instance attr-pairs]
   (doto instance
     (.setValue (first attr-pairs)
-               (second attr-pairs))))
+               (-> attr-pairs second double))))
 
 (defn make-instance [point]
   (reduce #(set-value %1 %2)
@@ -42,9 +44,9 @@
 (defn add-points [instances points]
   (reduce #(add-point %1 %2) instances points))
 
-(defn make-forest [numtrees points]
+(defn make-forest [points]
   (doto (RandomForest. )
-    (.setNumTrees numtrees)
+    (.setNumTrees num-trees)
     (.buildClassifier
      (add-points (make-instances points)
                  points))))
