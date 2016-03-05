@@ -349,10 +349,9 @@
     (.contains (content-type message) plain-type)
     (content message)
     (.contains (content-type message) multi-type)
-    (->> (-> message content get-parts)
+    (->> message content get-parts
          (map get-text-recursive)
-         (remove #(= "" %))
-         (cons "") last)
+         (str/join ""))
     :else ""))
 
 (defn make-headers [pair root]
