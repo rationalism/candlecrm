@@ -14,6 +14,7 @@
             SmartArrayBasedNodeFactory]))
 
 (def default-score 0.5)
+(def min-match-score 0.75)
 
 (defn abs [a b]
   (if (or (not (first a))
@@ -195,7 +196,7 @@
 
 (defn append-scores [pos-and-neg]
   [(->> pos-and-neg first (map #(conj % 1.0)))
-   (->> pos-and-neg first (map #(conj % 0.0)))])
+   (->> pos-and-neg second (map #(conj % 0.0)))])
 
 (defn train-forest [user class pos-cs neg-cs]
   (->> [pos-cs neg-cs]
@@ -204,3 +205,21 @@
        append-scores
        (apply concat)
        weka/make-forest))
+
+(defn score-map [forest mo]
+  (reduce
+   #(update %1 %2 (partial weka/classify forest))
+   mo (keys mo)))
+
+(defn score-all [user class forest]
+  (->> (find-candidates user class)
+       (get-diffs user class)
+       (score-map forest) (into [])))
+
+(defn groups-to-recon [score-map]
+  (->> score-map
+       (remove #(> min-match-score (second %)))
+       (mapv first) (map vec) (map #(conj % :is))
+       (loom/build-graph [])
+       loom/subgraphs
+       (map loom/nodes)))
