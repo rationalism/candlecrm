@@ -4,6 +4,8 @@
             [spectra.corenlp :as nlp]
             [spectra.datetime :as dt]
             [spectra.google :as google]
+            [spectra.insert :as insert]
+            [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra.recon :as recon]
             [spectra_cljc.schema :as s])
@@ -100,11 +102,9 @@
        (apply merge) filter-map))
 
 (defn batch-insert! [user contacts]
-  (->> contacts 
-    (map contact->person)
-    (map #(hash-map :props %))
-    (map #(assoc % :labels [(neo4j/prop-label user s/person)]))
-    neo4j/batch-insert!))
+  (-> (map contact->person contacts)
+      (loom/build-graph [])
+      (insert/push-graph! user)))
 
 (defn load-all-contacts! [user]
   (->> user all-contacts
