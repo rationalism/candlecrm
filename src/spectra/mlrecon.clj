@@ -118,7 +118,7 @@
   (str "OPTIONAL MATCH (root)" 
        "-" (->> preds drop-last (link-chain n1))
        "[:" (-> preds last neo4j/esc-token)
-       "]->(a" n1 ")"))
+       "]-(a" n1 ")"))
 
 (defn all-paths [paths]
   (->> paths count range
@@ -246,3 +246,29 @@
     (->> bodies (map count) (interleave bodies)
          (partition 2) (sort-by second) ffirst)
     :else (first bodies)))
+
+(defn body-id [email-id]
+  (str "MATCH (a)-[:" (neo4j/esc-token s/email-body)
+       "]->(b) WHERE ID(a) = " email-id
+       " RETURN ID(b), b.val"))
+
+(defn body-ids [id-group]
+  (->> id-group (map body-id)
+       neo4j/cypher-combined-tx
+       (map first) (map vals)
+       (map first) (map second)))
+
+(defn delete-body [id]
+  (str "MATCH (a) WHERE ID(a) = " id
+       " DETACH DELETE a"))
+
+(defn delete-bodies! [id-group]
+  (let [body-map (body-ids id-group)]
+    (->> (remove #(= (second %)
+                     (-> body-map (map second)
+                         choose-body))
+                 body-map)
+         (map first) (map delete-body)
+         cypher-combined-tx)))
+         
+       
