@@ -491,7 +491,7 @@
 (defn link-map [chain]
   (->> (loom/select-edges chain s/link-to)
        (map link-pair) (apply merge)))
-  
+
 (defn use-nlp [chain message]
   (if (com/nil-or-empty? (s/email-body message)) chain
       (as-> (->> (s/email-body message)
