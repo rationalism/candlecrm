@@ -266,20 +266,23 @@
        rest butlast (partition 2)))
 
 (defn all-eq [coll]
-  (let [s (sort coll)]
-    (= (first s) (last s))))
+  (if (empty? coll) true
+      (let [s (sort coll)]
+        (= (first s) (last s)))))
 
 (defn choose-body [bodies]
-  (cond
-    (->> bodies (map #(re-seq #">" %))
-         (map count) all-eq not)
-    (->> bodies (map #(re-seq #">" %))
-         (map count) (interleave bodies)
-         (partition 2) (sort-by second) ffirst)
-    (->> bodies (map count) all-eq not)
-    (->> bodies (map count) (interleave bodies)
-         (partition 2) (sort-by second) ffirst)
-    :else (first bodies)))
+  (let [b (->> bodies (remove nil?) (remove empty?))]
+    (if (empty? b) ""
+        (cond
+          (->> b (map #(re-seq #">" %))
+               (map count) all-eq not)
+          (->> b (map #(re-seq #">" %))
+               (map count) (interleave b)
+               (partition 2) (sort-by second) ffirst)
+          (->> b (map count) all-eq not)
+          (->> b (map count) (interleave b)
+               (partition 2) (sort-by second) ffirst)
+          :else (first b)))))
 
 (defn body-id [email-id]
   (str "MATCH (a)-[:" (neo4j/esc-token s/email-body)
@@ -291,7 +294,6 @@
        neo4j/cypher-combined-tx
        (map (comp second first vals first))))
 
-;; FIX THIS
 (defn delete-body [id]
   (str "MATCH (a) WHERE ID(a) = " id
        " DETACH DELETE a"))
@@ -301,7 +303,15 @@
                    (->> body-map (map second)
                         choose-body))
                body-map)
-       (map first) (map delete-body)
+       (map first) (remove nil?) (remove empty?)
+       (map delete-body)
        neo4j/cypher-combined-tx))
 
-       
+(defn run-recon! [user class]
+  (let [recon-groups (->> class (score-all user)
+                          groups-to-recon)]
+    (->> recon-groups (map body-ids)
+         (map delete-bodies!) dorun)
+    (->> recon-groups
+         (map merge-all!) dorun)
+    (recon-finished! user class)))
