@@ -47,6 +47,15 @@
        (map count)
        (apply min)))
 
+(defn overlap [a b]
+  (if (or (empty? a) (empty? b))
+    default-score
+    (/ (->> (concat a b) distinct count
+            (- (+ (count a) (count b)))
+            double)
+       (->> [a b] (map count)
+            (apply min) double))))
+
 (defn contains-s [s]
   (fn [l]
     (.contains l s)))
@@ -87,7 +96,11 @@
     [[s/email-to s/email-addr] [is-eq]]
     [[s/email-uid] [is-eq]]]
    s/person
-   [[[s/email-addr] [is-eq]]]})
+   [[[s/s-name] [overlap lcs]]
+    [[s/email-addr] [overlap is-eq]]
+    [[s/phone-num] [overlap is-eq]]
+    [[s/email-from s/email-sent] [overlap]]
+    [[s/email-to s/email-sent] [overlap]]]})
 
 (def candidates
   {s/email
