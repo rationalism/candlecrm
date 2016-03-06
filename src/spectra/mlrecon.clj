@@ -85,12 +85,16 @@
     [[s/email-sent] [abs]]
     [[s/email-from s/email-addr] [is-eq]]
     [[s/email-to s/email-addr] [is-eq]]
-    [[s/email-uid] [is-eq]]]})
+    [[s/email-uid] [is-eq]]]
+   s/person
+   [[[s/email-addr] [is-eq]]]})
 
 (def candidates
   {s/email
    [s/email-subject s/email-body
-    s/email-received s/email-sent]})
+    s/email-received s/email-sent]
+   s/person
+   [s/s-name s/email-addr s/phone-num]})
 
 (defn merge-link [link]
   (str "MATCH (a) WHERE ID(a) = " (first link)
@@ -274,6 +278,7 @@
        neo4j/cypher-combined-tx
        (map (comp second first vals first))))
 
+;; FIX THIS
 (defn delete-body [id]
   (str "MATCH (a) WHERE ID(a) = " id
        " DETACH DELETE a"))
