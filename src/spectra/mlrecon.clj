@@ -14,7 +14,7 @@
             SmartArrayBasedNodeFactory]))
 
 (def default-score 0.5)
-(def min-match-score 0.75)
+(def min-match-score 0.4)
 
 (defn abs [a b]
   (if (or (not (first a))
@@ -24,8 +24,11 @@
          (apply -) Math/abs)))
 
 (defn is-eq [a b]
-  (if (= (first a) (first b))
-    1.0 0.0))
+  (if (or (not (first a))
+          (not (first b)))
+    default-score
+    (if (= (first a) (first b))
+      1.0 0.0)))
 
 (defn min-len [a b]
   (->> [a b] (apply concat)
@@ -223,3 +226,8 @@
        (loom/build-graph [])
        loom/subgraphs
        (map loom/nodes)))
+
+(defn make-pairs [coll]
+  (->> coll (mapcat #(repeat 2 %))
+       rest butlast (partition 2)))
+
