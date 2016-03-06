@@ -105,6 +105,10 @@
        (append-delete old-id)
        (neo4j/cypher-combined-tx)))
 
+(defn merge-all! [id-set]
+  (map #(merge-into! % (first id-set))
+       (rest id-set)))
+
 (defn one-link [n1 n2 pred]
   (str "[:" (neo4j/esc-token pred)
        "]-(b" n2 "a" n1 ")-"))
@@ -255,8 +259,7 @@
 (defn body-ids [id-group]
   (->> id-group (map body-id)
        neo4j/cypher-combined-tx
-       (map first) (map vals)
-       (map first) (map second)))
+       (map (comp second first vals first))))
 
 (defn delete-body [id]
   (str "MATCH (a) WHERE ID(a) = " id
@@ -265,10 +268,8 @@
 (defn delete-bodies! [id-group]
   (let [body-map (body-ids id-group)]
     (->> (remove #(= (second %)
-                     (-> body-map (map second)
-                         choose-body))
+                     (->> body-map (map second)
+                          choose-body))
                  body-map)
          (map first) (map delete-body)
-         cypher-combined-tx)))
-         
-       
+         neo4j/cypher-combined-tx)))
