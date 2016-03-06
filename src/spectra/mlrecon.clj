@@ -231,3 +231,18 @@
   (->> coll (mapcat #(repeat 2 %))
        rest butlast (partition 2)))
 
+(defn all-eq [coll]
+  (let [s (sort coll)]
+    (= (first s) (last s))))
+
+(defn choose-body [bodies]
+  (cond
+    (->> bodies (map #(re-seq #">" %))
+         (map count) all-eq not)
+    (->> bodies (map #(re-seq #">" %))
+         (map count) (interleave bodies)
+         (partition 2) (sort-by second) ffirst)
+    (->> bodies (map count) all-eq not)
+    (->> bodies (map count) (interleave bodies)
+         (partition 2) (sort-by second) ffirst)
+    :else (first bodies)))
