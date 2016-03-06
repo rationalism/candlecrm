@@ -62,9 +62,12 @@
       (ObjectOutputStream. )
       (.writeObject forest)))
 
-(defn deserialize [filename]
-  (-> filename
-      (FileInputStream. )
+(defn deserialize-stream [stream]
+  (-> stream
       (ObjectInputStream. )
       (.readObject )))
 
+(defn deserialize [filename]
+  (-> filename
+      (FileInputStream. )
+      deserialize-stream))

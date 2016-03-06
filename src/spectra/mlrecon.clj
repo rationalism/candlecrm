@@ -1,5 +1,6 @@
 (ns spectra.mlrecon
   (:require [clojure.string :as str]
+            [clojure.java.io :as io]
             [spectra.common :as com]
             [spectra.auth :as auth]
             [spectra.loom :as loom]
@@ -15,6 +16,17 @@
 
 (def default-score 0.5)
 (def min-match-score 0.4)
+(def models-dir "/home/alyssavance/clojure/spectra/resources/models")
+
+(defonce recon-models (atom {s/email nil}))
+
+(defn new-model! [class dir]
+  (->> (str dir "/" (name class) ".dat")
+       weka/deserialize
+       (swap! recon-models assoc class)))
+
+(defn load-models! []
+  (new-model! s/email models-dir))
 
 (defn abs [a b]
   (if (or (not (first a))
@@ -218,10 +230,11 @@
    #(update %1 %2 (partial weka/classify forest))
    mo (keys mo)))
 
-(defn score-all [user class forest]
+(defn score-all [user class]
   (->> (find-candidates user class)
        (get-diffs user class)
-       (score-map forest) (into [])))
+       (score-map (get @recon-models class))
+       (into [])))
 
 (defn groups-to-recon [score-map]
   (->> score-map
@@ -265,11 +278,10 @@
   (str "MATCH (a) WHERE ID(a) = " id
        " DETACH DELETE a"))
 
-(defn delete-bodies! [id-group]
-  (let [body-map (body-ids id-group)]
-    (->> (remove #(= (second %)
-                     (->> body-map (map second)
-                          choose-body))
-                 body-map)
-         (map first) (map delete-body)
-         neo4j/cypher-combined-tx)))
+(defn delete-bodies! [body-map]
+  (->> (remove #(= (second %)
+                   (->> body-map (map second)
+                        choose-body))
+               body-map)
+       (map first) (map delete-body)
+       neo4j/cypher-combined-tx))

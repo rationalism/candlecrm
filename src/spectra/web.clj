@@ -10,6 +10,7 @@
             [spectra.email :as email]
             [spectra.geocode :as geocode]
             [spectra.google :as google]
+            [spectra.mlrecon :as mlrecon]
             [spectra.neo4j :as neo4j]
             [spectra.corenlp :as nlp]
             [spectra.pages :as pages]
@@ -128,6 +129,7 @@
   (neo4j/define-graph!)
   (nlp/load-pipeline!)
   (ajax/start!)
+  (mlrecon/load-models!)
   (geocode/define-context!)
   (quartz/start!)
   (println "Ready to start server")
