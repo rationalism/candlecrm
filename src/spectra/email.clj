@@ -18,6 +18,7 @@
              :refer (pspy pspy* profile defnp p p*)])
   (:import [javax.mail FetchProfile Folder
             Message Message$RecipientType]
+           [javax.mail.internet InternetAddress]
            [com.sun.mail.imap IMAPFolder$FetchProfileItem]))
 
 (def inbox-folder-name "[Gmail]/All Mail")
@@ -86,6 +87,9 @@
 
 (defn get-uid [folder message]
   (.getUID folder message))
+
+(defn get-header [message header]
+  (.getHeader message header))
 
 (defonce imap-lookup (atom {}))
 
@@ -163,8 +167,14 @@
    s/email-cc (get-recipients message Message$RecipientType/CC)
    s/email-bcc (get-recipients message Message$RecipientType/BCC)})
 
+(defn parse-name-email [s]
+  (-> s InternetAddress/parse))
+  
 (defn decode-sender [message]
-  {s/email-from (.getFrom message)})
+  {s/email-from
+   (if-let [orig-from (get-header message "X-Original-From")]
+     (-> orig-from vec first parse-name-email)
+     (.getFrom message))})
 
 (defn decode-replyto [message]
   {s/email-replyto (.getReplyTo message)})
