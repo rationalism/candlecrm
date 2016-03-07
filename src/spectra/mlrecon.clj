@@ -15,7 +15,7 @@
             SmartArrayBasedNodeFactory]))
 
 (def default-score 0.5)
-(def min-match-score 0.4)
+(def min-match-score {s/email 0.4 s/person 0.4})
 (def models-dir "/home/alyssavance/clojure/spectra/resources/models")
 
 (defonce recon-models (atom {s/email nil}))
@@ -77,7 +77,8 @@
    (SmartArrayBasedNodeFactory. )))
 
 (defn lcs [coll1 coll2]
-  (if (or (empty? coll1) (empty? coll2))
+  (if (or (empty? coll1) (empty? coll2)
+          (every? empty? coll1) (every? empty? coll2))
     default-score
     (let [coll (concat coll1 coll2)]
       (->> (doto (lcs-solver)
@@ -269,9 +270,10 @@
        (score-map (get @recon-models class))
        (into [])))
 
-(defn groups-to-recon [score-map]
+(defn groups-to-recon [class score-map]
   (->> score-map
-       (remove #(> min-match-score (second %)))
+       (remove #(> (get min-match-score class)
+                   (second %)))
        (mapv first) (map vec) (map #(conj % :is))
        (loom/build-graph [])
        loom/subgraphs
@@ -325,7 +327,7 @@
 
 (defn run-recon! [user class]
   (let [recon-groups (->> class (score-all user)
-                          groups-to-recon)]
+                          (groups-to-recon class))]
     (->> recon-groups (map body-ids)
          (map delete-bodies!) dorun)
     (->> recon-groups

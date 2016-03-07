@@ -52,9 +52,10 @@
                  points))))
 
 (defn classify [forest point]
-  (.classifyInstance
-   forest (doto (make-instance point)
-            (.setDataset (make-instances [point])))))
+  (if (empty? point) 0.0
+      (.classifyInstance
+       forest (doto (make-instance point)
+                (.setDataset (make-instances [point]))))))
                      
 (defn serialize [forest filename]
   (-> filename
