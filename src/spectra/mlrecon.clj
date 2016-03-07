@@ -26,7 +26,8 @@
        (swap! recon-models assoc class)))
 
 (defn load-models! []
-  (new-model! s/email models-dir))
+  (new-model! s/email models-dir)
+  (new-model! s/person models-dir))
 
 (defn abs [a b]
   (if (or (not (first a))
