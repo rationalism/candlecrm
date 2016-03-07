@@ -147,11 +147,20 @@
        (map #(one-link n1 % (nth preds %)))
        str/join))
 
+(defn with-clause [n1]
+  (->> [["WITH root"]
+        (->> n1 range
+             (map #(str "b" %)))
+        [(str "collect(a" n1 "." (neo4j/esc-token s/value)
+              ") AS b" n1)]]
+       flatten (str/join ", ")))
+
 (defn match-chain [n1 preds]
   (str "OPTIONAL MATCH (root)" 
        "-" (->> preds drop-last (link-chain n1))
        "[:" (-> preds last neo4j/esc-token)
-       "]-(a" n1 ")"))
+       "]-(a" n1 ") "
+       (with-clause n1)))
 
 (defn all-paths [paths]
   (->> paths count range
@@ -161,24 +170,30 @@
 (defn ret-vals [n]
   (str "RETURN "
        (->> n range
-            (map #(str "a" % "." (neo4j/esc-token s/value)))
+            (map #(str "b" %))
             (str/join ", "))))
 
 (defn vectorize [m]
   (reduce #(update %1 %2 vector) m (keys m)))
 
-(defn fetch-paths [id paths]
+(defn fetch-paths-query [id paths]
   (->> ["MATCH (root) WHERE ID(root) = " id
-        " " (all-paths paths)
+        " WITH root " (all-paths paths)
         " " (ret-vals (count paths))]
-       (apply str) neo4j/cypher-query-raw
-       (map vectorize)
-       (apply merge-with concat)
-       (into (sorted-map)) (seq)
-       (map second)))
+       (apply str)))
+
+(defn parse-paths [rs]
+  (map (comp second first vals first) rs))
+
+(defn fetch-paths [id paths]
+  (-> (fetch-paths-query id paths)
+      vector neo4j/cypher-combined-tx
+      parse-paths first))
 
 (defn fetch-all-paths [paths ids]
-  (->> (pmap #(fetch-paths % paths) ids)
+  (->> (map #(fetch-paths-query % paths) ids)
+       neo4j/cypher-combined-tx
+       parse-paths
        (zipmap ids)))
 
 (defn recon-finished! [user class]

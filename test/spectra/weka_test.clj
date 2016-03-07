@@ -15,5 +15,5 @@
   (testing "Train and use a random forest classifier"
     (def forest (make-forest train-points))
     (is forest)
-    (is (= 0.0 (classify forest [0.0 0.0 0.0])))
-    (is (= 1.0 (classify forest [1.0 1.0 1.0])))))
+    (is (> 0.01 (classify forest [0.0 0.0 0.0])))
+    (is (< 0.99 (classify forest [1.0 1.0 1.0])))))
