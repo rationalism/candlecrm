@@ -89,11 +89,17 @@
 (defonce letter-count (atom 0))
 
 (defnp run-nlp [pipeline text]
-  (swap! letter-count #(+ % (count text)))
-  ;; Global var needed for mutating Java method
-  (def parsed-text (Annotation. text))
-  (.annotate pipeline parsed-text)
-  parsed-text)
+  (try
+    (swap! letter-count #(+ % (count text)))
+    ;; Global var needed for mutating Java method
+    (def parsed-text (Annotation. text))
+    (.annotate pipeline parsed-text)
+    parsed-text
+    (catch Exception e
+      (do (println "NLP parsing error on text:")
+          (println text)
+          (println "Error message:")
+          (print e)))))
 
 (defn tokenize [text]
   (run-nlp (:token @pipelines) text))
