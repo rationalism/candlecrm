@@ -87,11 +87,16 @@
       (maybe-add s/s-name (key pair))
       (maybe-add s/email-addr (val pair))))
 
+(defn label-if-none [m]
+  (if (empty? m)
+    {s/type-label s/person}
+    m))
+
 (defn contact->person [contact]
   (->> (emails contact)
        (recon/name-email-map (names contact))
        (map pair-person)
-       recon/merge-nodes
+       recon/merge-nodes label-if-none
        (conj [{s/phone-num (phones contact)
                s/birthday (birthday contact)
                s/gender (gender contact)
