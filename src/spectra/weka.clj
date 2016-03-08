@@ -3,7 +3,8 @@
   (:import [weka.classifiers.trees RandomForest]
            [weka.core Attribute FastVector
             DenseInstance Instances]
-           [java.io FileInputStream FileOutputStream
+           [weka.core.converters TextDirectoryLoader]
+           [java.io File FileInputStream FileOutputStream
             ObjectInputStream ObjectOutputStream]))
 
 (def num-trees 200)
@@ -72,3 +73,8 @@
   (-> filename
       (FileInputStream. )
       deserialize-stream))
+
+(defn load-text-dir [dir-name]
+  (.getDataSet
+   (doto (TextDirectoryLoader. )
+     (.setDirectory (File. dir-name)))))
