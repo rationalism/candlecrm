@@ -14,7 +14,7 @@
                   :exclusions [commons-codec]]
                  [ring/ring-defaults "0.1.5"
                   :exclusions [commons-codec]]
-                 [compojure "1.4.0"
+                 [compojure "1.5.0"
                   :exclusions [commons-codec]]
                  [hiccup "1.0.5"]
                  [environ "1.0.2"]
