@@ -4,6 +4,8 @@
            [weka.core Attribute FastVector
             DenseInstance Instances]
            [weka.core.converters TextDirectoryLoader]
+           [weka.filters Filter]
+           [weka.filters.unsupervised.attribute StringToWordVector]
            [java.io File FileInputStream FileOutputStream
             ObjectInputStream ObjectOutputStream]))
 
@@ -78,3 +80,9 @@
   (.getDataSet
    (doto (TextDirectoryLoader. )
      (.setDirectory (File. dir-name)))))
+
+;; Texts must be in "Instances" format
+(defn word-vec [texts]
+  (Filter/useFilter
+   texts (doto (StringToWordVector. )
+           (.setInputFormat texts))))
