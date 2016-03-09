@@ -1,6 +1,7 @@
 (ns spectra.weka
   (:require [clojure.string :as str])
   (:import [weka.classifiers.bayes NaiveBayes]
+           [weka.classifiers.meta FilteredClassifier]
            [weka.classifiers.trees RandomForest]
            [weka.core Attribute FastVector
             DenseInstance Instances]
@@ -102,6 +103,7 @@
 (defn word-vec [texts]
   (Filter/useFilter
    texts (doto (StringToWordVector. )
+           (.setAttributeIndices "first")
            (.setInputFormat texts))))
 
 (defn naive-bayes [points]

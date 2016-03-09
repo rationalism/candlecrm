@@ -12,7 +12,7 @@
                   :exclusions [joda-time commons-codec]]
                  [ring/ring-devel "1.4.0"
                   :exclusions [commons-codec]]
-                 [ring/ring-defaults "0.1.5"
+                 [ring/ring-defaults "0.2.0"
                   :exclusions [commons-codec]]
                  [compojure "1.5.0"
                   :exclusions [commons-codec]]
@@ -39,7 +39,7 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.0"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.0"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.2.6"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.2.7"]
                  [org.deeplearning4j/deeplearning4j-core "0.4-rc3.8"
                   :exclusions [org.apache.commons/commons-lang3 commons-logging
                                com.fasterxml.jackson.core/jackson-core junit
@@ -68,9 +68,9 @@
   :plugins [[lein-environ "1.0.2"]
             [lein-kibit "0.1.2"]
             [lein-figwheel "0.5.0-6"]
-            [lein-cljsbuild "1.1.2"]
-            [cider/cider-nrepl "0.10.2"]
-            [jonase/eastwood "0.2.2"]
+            [lein-cljsbuild "1.1.3"]
+            [cider/cider-nrepl "0.11.0"]
+            [jonase/eastwood "0.2.3"]
             [venantius/yagni "0.1.4"]
             [lein-ancient "0.6.8"]
             [lein-cloverage "1.0.6"]]
