@@ -12,10 +12,18 @@
 
 (def num-trees 200)
 
+(defn attr-gen [n val]
+  (cond
+    (number? val)
+    (Attribute. (str "attr" n))
+    (string? val)
+    (Attribute. (str "attr" n) (cast FastVector nil))
+    :else
+    (Attribute. (str "attr" n))))
+
 (defn all-attributes [point]
   (->> point count range
-       (map #(str "attr" %))
-       (map #(Attribute. %))))
+       (map #(attr-gen % (nth point %)))))
 
 (defn add-element [attrs new-attr]
   (doto attrs (.addElement new-attr)))
