@@ -12,25 +12,27 @@
 
 (def num-trees 200)
 
-(defn attr-gen [n val]
-  (cond
-    (number? val)
-    (Attribute. (str "attr" n))
-    (string? val)
-    (Attribute. (str "attr" n) (cast FastVector nil))
-    :else
-    (Attribute. (str "attr" n))))
+(defn attr-gen [n]
+  (Attribute. (str "attr" n)))
 
 (defn all-attributes [point]
   (->> point count range
-       (map #(attr-gen % (nth point %)))))
+       (map attr-gen)))
 
 (defn add-element [attrs new-attr]
   (doto attrs (.addElement new-attr)))
 
+(defn class-vals [points]
+  (->> points (map second) 
+       distinct (into '())))
+
 (defn make-attributes [points]
-  (reduce #(add-element %1 %2) (FastVector. )
-          (all-attributes (first points))))
+  (if (-> points ffirst string?)
+    (doto (FastVector. )
+      (add-element (Attribute. "text" (cast FastVector nil)))
+      (add-element (Attribute. "@@class@@" (class-vals points))))
+    (reduce #(add-element %1 %2) (FastVector. )
+            (all-attributes (first points)))))
 
 (defn double-if-num [n]
   (if (number? n) (double n) n))
