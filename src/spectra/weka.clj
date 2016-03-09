@@ -32,20 +32,24 @@
   (reduce #(add-element %1 %2) (FastVector. )
           (all-attributes (first points))))
 
+(defn double-if-num [n]
+  (if (number? n) (double n) n))
+
 (defn set-value [instance attr-pairs]
   (doto instance
     (.setValue (first attr-pairs)
-               (-> attr-pairs second double))))
+               (-> attr-pairs second double-if-num))))
 
-(defn make-instance [point]
+(defn make-instance [dataset point]
   (reduce #(set-value %1 %2)
-          (DenseInstance. (count point))
+          (doto (DenseInstance. (count point))
+            (.setDataset dataset))
           (->> point (interleave (range (count point)))
                (partition 2))))
 
 (defn add-point [instances point]
   (doto instances
-    (.add (make-instance point))))
+    (.add (make-instance instances point))))
 
 (defn make-instances [points]
   (doto (Instances. "training set"
@@ -56,18 +60,20 @@
 (defn add-points [instances points]
   (reduce #(add-point %1 %2) instances points))
 
+(defn instances [points]
+  (add-points (make-instances points)
+              points))
+
 (defn make-forest [points]
   (doto (RandomForest. )
     (.setNumTrees num-trees)
-    (.buildClassifier
-     (add-points (make-instances points)
-                 points))))
+    (.buildClassifier (instances points))))
 
-(defn classify [forest point]
-  (if (empty? point) 0.0
+(defn classify [model point]
+  (if (empty? point) 00.
       (.classifyInstance
-       forest (doto (make-instance point)
-                (.setDataset (make-instances [point]))))))
+       model (-> point vector make-instances
+                 (make-instance point)))))
                      
 (defn serialize [forest filename]
   (-> filename
