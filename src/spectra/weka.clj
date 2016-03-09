@@ -70,7 +70,7 @@
     (.buildClassifier (instances points))))
 
 (defn classify [model point]
-  (if (empty? point) 00.
+  (if (empty? point) 0.0
       (.classifyInstance
        model (-> point vector make-instances
                  (make-instance point)))))
