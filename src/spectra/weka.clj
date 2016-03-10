@@ -25,7 +25,8 @@
 
 (defn class-vals [points]
   (->> points (map second) 
-       distinct (into '())))
+       distinct (into '())
+       sort))
 
 (defn make-attributes [points]
   (if (-> points ffirst string?)
@@ -94,11 +95,6 @@
       (FileInputStream. )
       deserialize-stream))
 
-(defn load-text-dir [dir-name]
-  (.getDataSet
-   (doto (TextDirectoryLoader. )
-     (.setDirectory (File. dir-name)))))
-
 ;; Texts must be in "Instances" format
 (defn word-vec [texts]
   (Filter/useFilter
@@ -106,6 +102,38 @@
            (.setAttributeIndices "first")
            (.setInputFormat texts))))
 
+(defn load-text-dir [dir-name]
+  (word-vec 
+   (.getDataSet
+    (doto (TextDirectoryLoader. )
+      (.setDirectory (File. dir-name))))))
+
 (defn naive-bayes [points]
-  (doto (NaiveBayes. )
-    (.buildClassifier points)))
+  (doto (FilteredClassifier. )
+    (.setFilter (StringToWordVector. ))
+    (.setClassifier (NaiveBayes. ))
+    (.buildClassifier (instances points))))
+
+(defn add-text [instances text]
+  (.add instances 
+        (doto (DenseInstance. 2)
+          (.setDataset instances)
+          (.setValue 0 text)
+          (.setClassMissing))))
+
+(defn test-attributes [bayes]
+  (doto (FastVector. )
+    (add-element (Attribute. "text" (cast FastVector nil)))
+    (add-element (-> bayes (.getClassifier)
+                     (.getHeader) (.classAttribute)))))
+
+(defn test-instances [bayes text]
+  (doto (Instances. "test set"
+                    (test-attributes bayes) 1)
+    (.setClassIndex 1)
+    (add-text text)))
+
+(defn classify-bayes [bayes text]
+  (->> text (test-instances bayes) first
+       (.distributionForInstance bayes)
+       (into [])))
