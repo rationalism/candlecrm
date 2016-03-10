@@ -355,14 +355,15 @@
                         (str/split-lines body)))))
 
 (defnp get-text-recursive [message]
-  (cond
-    (.contains (content-type message) plain-type)
-    (content message)
-    (.contains (content-type message) multi-type)
-    (->> message content get-parts
-         (map get-text-recursive)
-         (str/join ""))
-    :else ""))
+  (let [c-type (-> message content-type str/lower-case)]
+    (cond
+      (.contains c-type plain-type)
+      (content message)
+      (.contains c-type multi-type)
+      (->> message content get-parts
+           (map get-text-recursive)
+           (str/join ""))
+      :else "")))
 
 (defn make-headers [pair root]
   (map #(vector root % (key pair)) (val pair)))
