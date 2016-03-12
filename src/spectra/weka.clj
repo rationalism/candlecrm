@@ -3,6 +3,7 @@
             [clojure.edn :as edn])
   (:import [weka.classifiers Evaluation]
            [weka.classifiers.bayes NaiveBayes]
+           [weka.classifiers.evaluation.output.prediction HTML]
            [weka.classifiers.meta FilteredClassifier]
            [weka.classifiers.trees RandomForest]
            [weka.core Attribute FastVector
@@ -162,12 +163,16 @@
       (str/split #"\\n")
       vec))
 
-(defn crossval-bayes [points]
+(defn html-out [outfile]
+  (doto (HTML. )
+    (.setOutputFile (File. outfile))
+;    (.setOptions (into-array String ["-p" "1"]))
+    (.setBuffer (StringBuffer. ))))
+
+(defn crossval-bayes [outfile points]
   (doto (Evaluation. points)
     (.crossValidateModel
      (empty-bayes) points
      (int crossval-folds)
      (java.util.Random. )
-     (into-array Object []))))
-     
-     
+     (into-array Object [(html-out outfile)]))))
