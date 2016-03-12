@@ -166,7 +166,7 @@
 (defn html-out [outfile]
   (doto (HTML. )
     (.setOutputFile (File. outfile))
-;    (.setOptions (into-array String ["-p" "1"]))
+    (.setAttributes "1-2")
     (.setBuffer (StringBuffer. ))))
 
 (defn crossval-bayes [outfile points]
