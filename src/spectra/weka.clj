@@ -14,7 +14,7 @@
             ObjectInputStream ObjectOutputStream]))
 
 (def num-trees 200)
-(def token-delims " \r\n\t.,@;:'\"()?!")
+(def token-delims " \r\n\t.,@;&_/:\"()?!\\>=")
 
 (defn attr-gen [n]
   (Attribute. (str "attr" n)))
@@ -114,6 +114,7 @@
 (defn string-to-vector []
   (doto (StringToWordVector. )
     (.setLowerCaseTokens true)
+    (.setWordsToKeep 10000)
     (.setTokenizer (doto (WordTokenizer. )
                      (.setDelimiters token-delims)))))
 
@@ -150,3 +151,8 @@
 (defn read-trainset [filename]
   (->> (str/split (slurp filename) #"\n")
        (map edn/read-string)))
+
+(defn pretty-classifier [classifier]
+  (-> classifier prn-str
+      (str/split #"\\n")
+      vec))
