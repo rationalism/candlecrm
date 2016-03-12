@@ -1,17 +1,20 @@
 (ns spectra.weka
-  (:require [clojure.string :as str])
+  (:require [clojure.string :as str]
+            [clojure.edn :as edn])
   (:import [weka.classifiers.bayes NaiveBayes]
            [weka.classifiers.meta FilteredClassifier]
            [weka.classifiers.trees RandomForest]
            [weka.core Attribute FastVector
             DenseInstance Instances]
            [weka.core.converters TextDirectoryLoader]
+           [weka.core.tokenizers WordTokenizer]
            [weka.filters Filter]
            [weka.filters.unsupervised.attribute StringToWordVector]
            [java.io File FileInputStream FileOutputStream
             ObjectInputStream ObjectOutputStream]))
 
 (def num-trees 200)
+(def token-delims " \r\n\t.,@;:'\"()?!")
 
 (defn attr-gen [n]
   (Attribute. (str "attr" n)))
@@ -108,9 +111,15 @@
     (doto (TextDirectoryLoader. )
       (.setDirectory (File. dir-name))))))
 
+(defn string-to-vector []
+  (doto (StringToWordVector. )
+    (.setLowerCaseTokens true)
+    (.setTokenizer (doto (WordTokenizer. )
+                     (.setDelimiters token-delims)))))
+
 (defn naive-bayes [points]
   (doto (FilteredClassifier. )
-    (.setFilter (StringToWordVector. ))
+    (.setFilter (string-to-vector))
     (.setClassifier (NaiveBayes. ))
     (.buildClassifier (instances points))))
 
@@ -137,3 +146,7 @@
   (->> text (test-instances bayes) first
        (.distributionForInstance bayes)
        (into [])))
+
+(defn read-trainset [filename]
+  (->> (str/split (slurp filename) #"\n")
+       (map edn/read-string)))

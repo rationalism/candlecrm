@@ -9,6 +9,7 @@
 (def bracket-regex #"\>(.+)\<")
 (def esc-char-regex #"\^|\[|\]|\.|\$|\{|\}|\(|\)|\\|\*|\+|\||\?|\<|\>")
 
+;; FIX THIS - NOT TRUSTED!
 (defn node-map [hypertext]
   {:text (-> bracket-regex (re-seq hypertext)
              first second)
