@@ -15,6 +15,7 @@
             [spectra.corenlp :as nlp]
             [spectra.pages :as pages]
             [spectra.quartz :as quartz]
+            [spectra.weka :as weka]
             [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
                              [credentials :as creds])
@@ -130,6 +131,7 @@
   (nlp/load-pipeline!)
   (ajax/start!)
   (mlrecon/load-models!)
+  (weka/load-models!)
   (geocode/define-context!)
   (quartz/start!)
   (println "Ready to start server")

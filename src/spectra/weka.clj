@@ -18,6 +18,33 @@
 (def num-trees 200)
 (def crossval-folds 5)
 (def token-delims " \r\n\t.,@;&_/:\"()?!\\>=")
+(def models-dir "/home/alyssavance/clojure/spectra/resources/models")
+
+(defonce email-sep-model (atom {}))
+
+(defn serialize [forest filename]
+  (-> filename
+      (FileOutputStream. )
+      (ObjectOutputStream. )
+      (.writeObject forest)))
+
+(defn deserialize-stream [stream]
+  (-> stream
+      (ObjectInputStream. )
+      (.readObject )))
+
+(defn deserialize [filename]
+  (-> filename
+      (FileInputStream. )
+      deserialize-stream))
+
+(defn new-model! [class dir]
+  (->> (str dir "/" class ".dat")
+       deserialize
+       (swap! email-sep-model assoc class)))
+
+(defn load-models! []
+  (new-model! "emailbreak" models-dir))
 
 (defn attr-gen [n]
   (Attribute. (str "attr" n)))
@@ -84,22 +111,6 @@
       (.classifyInstance
        model (-> point vector make-instances
                  (make-instance point)))))
-                     
-(defn serialize [forest filename]
-  (-> filename
-      (FileOutputStream. )
-      (ObjectOutputStream. )
-      (.writeObject forest)))
-
-(defn deserialize-stream [stream]
-  (-> stream
-      (ObjectInputStream. )
-      (.readObject )))
-
-(defn deserialize [filename]
-  (-> filename
-      (FileInputStream. )
-      deserialize-stream))
 
 ;; Texts must be in "Instances" format
 (defn word-vec [texts]

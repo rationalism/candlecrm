@@ -13,6 +13,7 @@
             [spectra.queries :as queries]
             [spectra.recon :as recon]
             [spectra.regex :as regex]
+            [spectra.weka :as weka]
             [spectra_cljc.schema :as s]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
