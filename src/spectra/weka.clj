@@ -1,7 +1,8 @@
 (ns spectra.weka
   (:require [clojure.string :as str]
             [clojure.edn :as edn])
-  (:import [weka.classifiers.bayes NaiveBayes]
+  (:import [weka.classifiers Evaluation]
+           [weka.classifiers.bayes NaiveBayes]
            [weka.classifiers.meta FilteredClassifier]
            [weka.classifiers.trees RandomForest]
            [weka.core Attribute FastVector
@@ -14,6 +15,7 @@
             ObjectInputStream ObjectOutputStream]))
 
 (def num-trees 200)
+(def crossval-folds 5)
 (def token-delims " \r\n\t.,@;&_/:\"()?!\\>=")
 
 (defn attr-gen [n]
@@ -118,10 +120,13 @@
     (.setTokenizer (doto (WordTokenizer. )
                      (.setDelimiters token-delims)))))
 
-(defn naive-bayes [points]
+(defn empty-bayes []
   (doto (FilteredClassifier. )
     (.setFilter (string-to-vector))
-    (.setClassifier (NaiveBayes. ))
+    (.setClassifier (NaiveBayes. ))))
+
+(defn naive-bayes [points]
+  (doto (empty-bayes)
     (.buildClassifier (instances points))))
 
 (defn add-text [instances text]
@@ -156,3 +161,13 @@
   (-> classifier prn-str
       (str/split #"\\n")
       vec))
+
+(defn crossval-bayes [points]
+  (doto (Evaluation. points)
+    (.crossValidateModel
+     (empty-bayes) points
+     (int crossval-folds)
+     (java.util.Random. )
+     (into-array Object []))))
+     
+     
