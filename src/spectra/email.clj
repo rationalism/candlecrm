@@ -252,6 +252,14 @@
              (drop-while (drop (:start-body marks) (range)))
              first)))
 
+(defn first-header [lines]
+  (loop [cnt 0]
+    (cond (= cnt (count lines)) -1
+          :else "dog")))
+
+(defn first-body [lines]
+  (count lines))
+
 ;; Arbitrary date: 1960-01-02 05:11:48.874
 (def ref-date (java.util.Date. -315514073744))
 

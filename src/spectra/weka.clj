@@ -19,8 +19,9 @@
 (def crossval-folds 5)
 (def token-delims " \r\n\t.,@;&_/:\"()?!\\>=")
 (def models-dir "/home/alyssavance/clojure/spectra/resources/models")
+(def email-sep-key "emailbreak")
 
-(defonce email-sep-model (atom {}))
+(defonce models (atom {}))
 
 (defn serialize [forest filename]
   (-> filename
@@ -41,10 +42,10 @@
 (defn new-model! [class dir]
   (->> (str dir "/" class ".dat")
        deserialize
-       (swap! email-sep-model assoc class)))
+       (swap! models assoc class)))
 
 (defn load-models! []
-  (new-model! "emailbreak" models-dir))
+  (new-model! email-sep-key models-dir))
 
 (defn attr-gen [n]
   (Attribute. (str "attr" n)))
@@ -150,7 +151,8 @@
 
 (defn test-attributes [bayes]
   (doto (FastVector. )
-    (add-element (Attribute. "text" (cast FastVector nil)))
+    (add-element (let [^java.util.ArrayList e nil]
+                   (Attribute. "text" e)))
     (add-element (-> bayes (.getClassifier)
                      (.getHeader) (.classAttribute)))))
 
@@ -164,6 +166,10 @@
   (->> text (test-instances bayes) first
        (.distributionForInstance bayes)
        (into [])))
+
+(defn classify-email-line [l]
+  (-> @models (get email-sep-key)
+      (classify-bayes l)))
 
 (defn read-trainset [filename]
   (->> (str/split (slurp filename) #"\n")
