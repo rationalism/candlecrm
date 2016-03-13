@@ -23,36 +23,56 @@
        (remove empty?)
        (map first-table-vals)))
 
+(defn mapify-params [params]
+  (if (or (nil? params) (empty? params))
+    nil (->> (map #(drop 1 %) params)
+             (map #(hash-map (keyword (first %)) (second %)))
+             (apply merge) (merge {:id (ffirst params)}))))
+
+(defn mapify-hits [hits]
+  (->> hits first vals first
+       (group-by first) vals
+       (map mapify-params)))
+
+(defn vals-collect []
+  (str " MATCH (root)-[r]->(v)"
+       " WITH collect([ID(root), type(r), v." (neo4j/esc-token s/value)
+       "]) as vs RETURN vs"))
+
 (defn person-from-user [user query-map]
   (-> (str "MATCH (root:" (neo4j/prop-label user s/person)
            ")<-[:" (neo4j/esc-token s/email-to)
            "]-(em:" (neo4j/prop-label user s/email)
-           ") WITH root, count(em) as cem RETURN root ORDER BY cem"
-           " SKIP " (:start query-map) " LIMIT " (:limit query-map))
-      neo4j/cypher-list tablify-hits))
+           ") WITH root, count(em) as cem ORDER BY cem"
+           " SKIP " (:start query-map) " LIMIT " (:limit query-map)
+           (vals-collect))
+      neo4j/cypher-query-raw mapify-hits))
 
 (defn emails-from-user [user query-map]
   (-> (str "MATCH (root:" (neo4j/prop-label user s/email)
-           ") RETURN root ORDER BY root." (neo4j/esc-token s/email-sent)
-           " DESC SKIP " (:start query-map) " LIMIT " (:limit query-map))
-      neo4j/cypher-list tablify-hits))
+           ") WITH root ORDER BY root." (neo4j/esc-token s/email-sent)
+           " DESC SKIP " (:start query-map) " LIMIT " (:limit query-map)
+           (vals-collect))
+      neo4j/cypher-query-raw mapify-hits))
 
 (defn emails-linked [user query-map]
   (-> (str "MATCH (root:" (neo4j/prop-label user s/email)
            ")-[:" (neo4j/esc-token (:link query-map))
            "]->(p:" (neo4j/prop-label user s/person)
            ") WHERE ID(p)=" (:person-id query-map)
-           " RETURN root ORDER BY root." (neo4j/esc-token s/email-sent)
-           " DESC SKIP " (:start query-map) " LIMIT " (:limit query-map))
-      neo4j/cypher-list tablify-hits))
+           " WITH root ORDER BY root." (neo4j/esc-token s/email-sent)
+           " DESC SKIP " (:start query-map) " LIMIT " (:limit query-map)
+           (vals-collect))
+      neo4j/cypher-query-raw mapify-hits))
 
 (defn emails-with-dates [user start limit]
   (-> (str "MATCH (root:" (neo4j/prop-label user s/email)
            ")-[:" (neo4j/esc-token s/email-mentions)
            "]->(d:" (neo4j/prop-label user s/event)
-           ") RETURN root ORDER BY root." (neo4j/esc-token s/email-sent)
-           " DESC SKIP " start " LIMIT " limit)
-      neo4j/cypher-list tablify-hits))
+           ") WITH root ORDER BY root." (neo4j/esc-token s/email-sent)
+           " DESC SKIP " start " LIMIT " limit
+           (vals-collect))
+      neo4j/cypher-query-raw mapify-hits))
 
 (defn user-data-public [user query-map]
   (-> user (get :data)
@@ -122,17 +142,19 @@
 (defn people-by-reltype [user query-map]
   (-> (str (rel-query user)
            (neo4j/prop-label user (:reltype query-map))
-           ") WITH root, count(ev) as cev RETURN root ORDER BY cev "
-           " DESC SKIP " (:start query-map) " LIMIT " (:limit query-map))
-      neo4j/cypher-list tablify-hits))
+           ") WITH root, count(ev) as cev ORDER BY cev "
+           " DESC SKIP " (:start query-map) " LIMIT " (:limit query-map)
+           (vals-collect))
+      neo4j/cypher-query-raw mapify-hits))
 
 (defn event-related [user query-map]
   (-> (str (rel-query user)
            (neo4j/prop-label user s/event)
            ") WHERE ID(root)=" (:person-id query-map)
-           " RETURN ev SKIP " (:start query-map)
-           " LIMIT " (:limit query-map))
-      neo4j/cypher-list tablify-hits))
+           " WITH ev as root SKIP " (:start query-map)
+           " LIMIT " (:limit query-map)
+           (vals-collect))
+      neo4j/cypher-query-raw mapify-hits))
 
 (defn loc-related [user query-map]
   (->> (str (rel-query user)
