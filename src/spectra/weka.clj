@@ -171,6 +171,10 @@
   (-> @models (get email-sep-key)
       (classify-bayes l)))
 
+(defn is-header? [l]
+  (->> l classify-email-line
+       second (< 0.5)))
+
 (defn read-trainset [filename]
   (->> (str/split (slurp filename) #"\n")
        (map edn/read-string)))

@@ -254,11 +254,15 @@
 
 (defn first-header [lines]
   (loop [cnt 0]
-    (cond (= cnt (count lines)) -1
-          :else "dog")))
+    (cond (= cnt (count lines)) nil
+          (weka/is-header? (nth lines cnt)) cnt
+          :else (recur (inc cnt)))))
 
 (defn first-body [lines]
-  (count lines))
+  (loop [cnt 0]
+    (cond (= cnt (count lines)) nil
+          (not (weka/is-header? (nth lines cnt))) cnt
+          :else (recur (inc cnt)))))
 
 ;; Arbitrary date: 1960-01-02 05:11:48.874
 (def ref-date (java.util.Date. -315514073744))
