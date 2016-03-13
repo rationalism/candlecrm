@@ -26,7 +26,7 @@
 (defn person-from-user [user query-map]
   (-> (str "MATCH (root:" (neo4j/prop-label user s/person)
            ")<-[:" (neo4j/esc-token s/email-to)
-           "]-(em:" (neo4j/esc-token s/email)
+           "]-(em:" (neo4j/prop-label user s/email)
            ") WITH root, count(em) as cem RETURN root ORDER BY cem"
            " SKIP " (:start query-map) " LIMIT " (:limit query-map))
       neo4j/cypher-list tablify-hits))
@@ -40,7 +40,7 @@
 (defn emails-linked [user query-map]
   (-> (str "MATCH (root:" (neo4j/prop-label user s/email)
            ")-[:" (neo4j/esc-token (:link query-map))
-           "]->(p:" (neo4j/esc-token s/person)
+           "]->(p:" (neo4j/prop-label user s/person)
            ") WHERE ID(p)=" (:person-id query-map)
            " RETURN root ORDER BY root." (neo4j/esc-token s/email-sent)
            " DESC SKIP " (:start query-map) " LIMIT " (:limit query-map))
@@ -49,7 +49,7 @@
 (defn emails-with-dates [user start limit]
   (-> (str "MATCH (root:" (neo4j/prop-label user s/email)
            ")-[:" (neo4j/esc-token s/email-mentions)
-           "]->(d:" (neo4j/esc-token s/event)
+           "]->(d:" (neo4j/prop-label user s/event)
            ") RETURN root ORDER BY root." (neo4j/esc-token s/email-sent)
            " DESC SKIP " start " LIMIT " limit)
       neo4j/cypher-list tablify-hits))
