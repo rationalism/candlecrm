@@ -102,14 +102,25 @@
     [[s/email-addr] [overlap is-eq]]
     [[s/phone-num] [overlap is-eq]]
     [[s/email-from s/email-sent] [overlap]]
-    [[s/email-to s/email-sent] [overlap]]]})
+    [[s/email-to s/email-sent] [overlap]]]
+   s/tool
+   [[[s/tool-category] [is-eq]]
+    [[s/vendor-name] [is-eq]]
+    [[s/part-name] [is-eq lcs]]
+    [[s/catalog-name] [is-eq lcs]]
+    [[s/desc1] [is-eq lcs]]
+    [[s/desc2] [is-eq lcs]]
+    [[s/item-cost] [is-eq abs]]]})
 
 (def candidates
   {s/email
    [s/email-subject s/email-body
     s/email-received s/email-sent]
    s/person
-   [s/s-name s/email-addr s/phone-num]})
+   [s/s-name s/email-addr s/phone-num]
+   s/tool
+   [s/part-name s/catalog-name
+    s/desc1 s/desc2 s/item-cost]})
 
 (defn merge-link [link]
   (str "MATCH (a) WHERE ID(a) = " (first link)

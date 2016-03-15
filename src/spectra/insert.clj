@@ -1,5 +1,6 @@
 (ns spectra.insert
   (:require [clojure.string :as str]
+            [clojure-csv.core :as csv]
             [spectra.common :as com]
             [spectra.datetime :as dt]
             [spectra.loom :as loom]
@@ -8,6 +9,8 @@
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
+
+(def insert-csv-block 100)
 
 (defn create-cypher [user label]
   {:pre [user label]}
@@ -59,3 +62,24 @@
          (map #(edge-cypher % id-map))
          neo4j/cypher-combined-tx)
     (vals id-map)))
+
+(defn load-csv [filename]
+  (let [csv-lines (-> filename slurp csv/parse-csv)]
+    (->> csv-lines (drop 1)
+         (map #(zipmap (->> csv-lines first (map keyword)) %)))))
+
+(defonce blk-count (atom 0))
+
+(defn blk-print [blk]
+  (swap! blk-count #(+ % (count blk)))
+  (println "Finished loading item:" @blk-count))
+
+(defn import-csv! [user type filename]
+  (reset! blk-count 0)
+  (->> filename load-csv
+       (map #(assoc % s/type-label type))
+       (partition insert-csv-block)
+       (map #(loom/build-graph % []))
+       (map #(push-graph! % user))
+       (map blk-print)
+       dorun))

@@ -118,3 +118,14 @@
                  email-sent email-received])
 
 (def exclude-upload [type-label])
+
+;; Special for Barry's project
+(def tool :tool)
+(def tool-category :tool-cat)
+(def vendor-name :vend-name)
+(def part-name :part-name)
+(def catalog-name :catalog-name)
+(def desc1 :desc1)
+(def desc2 :desc2)
+(def row-id :row-id)
+(def item-cost :item-cost)

@@ -63,7 +63,9 @@
                  [com.google.maps/google-maps-services "0.1.11"]
                  [nz.ac.waikato.cms.weka/weka-dev "3.7.13"]
                  [crypto-random "1.2.0"]
-                 [com.googlecode.concurrent-trees/concurrent-trees "2.5.0"]]
+                 [com.googlecode.concurrent-trees/concurrent-trees "2.5.0"]
+                 [clojure-csv/clojure-csv "2.0.2"]
+                 [org.apache.commons/commons-lang3 "3.4"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.2"]
             [lein-kibit "0.1.2"]
