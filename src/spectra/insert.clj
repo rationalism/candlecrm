@@ -78,7 +78,7 @@
   (reset! blk-count 0)
   (->> filename load-csv
        (map #(assoc % s/type-label type))
-       (partition insert-csv-block)
+       (partition-all insert-csv-block)
        (map #(loom/build-graph % []))
        (map #(push-graph! % user))
        (map blk-print)
