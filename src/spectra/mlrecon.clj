@@ -272,8 +272,10 @@
          (zipmap cs))))
 
 (defn append-scores [pos-and-neg]
-  [(->> pos-and-neg first (map #(conj % 1.0)))
-   (->> pos-and-neg second (map #(conj % 0.0)))])
+  [(->> pos-and-neg first
+        (map vec) (map #(conj % 1.0)))
+   (->> pos-and-neg second
+        (map vec) (map #(conj % 0.0)))])
 
 (defn train-forest [user class pos-cs neg-cs]
   (->> [pos-cs neg-cs]
