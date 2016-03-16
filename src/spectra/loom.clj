@@ -153,8 +153,7 @@
                       (map #(assoc % 2 label))))))
 
 (defn subgraphs [g]
-  (->> (galg/connected-components g)
-       (map #(graph/subgraph g %))))
+  (galg/connected-components g))
 
 (defn merge-graphs [graphs]
   (build-graph (mapcat nodes graphs)

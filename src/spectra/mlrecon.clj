@@ -16,7 +16,7 @@
            [org.apache.commons.lang3 StringUtils]))
 
 (def default-score 0.5)
-(def min-match-score {s/email 0.4 s/person 0.4})
+(def min-match-score {s/email 0.4 s/person 0.4 s/tool 0.8})
 (def models-dir "/home/alyssavance/clojure/spectra/resources/models")
 
 (defonce recon-models (atom {s/email nil}))
@@ -28,7 +28,8 @@
 
 (defn load-models! []
   (new-model! s/email models-dir)
-  (new-model! s/person models-dir))
+  (new-model! s/person models-dir)
+  (new-model! s/tool "/home/alyssavance"))
 
 (defn lev-distance [a b]
   (/ (StringUtils/getLevenshteinDistance a b)
@@ -161,8 +162,9 @@
        (neo4j/cypher-combined-tx)))
 
 (defn merge-all! [id-set]
-  (map #(merge-into! % (first id-set))
-       (rest id-set)))
+  (->> id-set rest
+       (map #(merge-into! % (first id-set)))
+       dorun))
 
 (defn one-link [n1 n2 pred]
   (str "[:" (neo4j/esc-token pred)
@@ -302,8 +304,7 @@
                    (second %)))
        (mapv first) (map vec) (map #(conj % :is))
        (loom/build-graph [])
-       loom/subgraphs
-       (map loom/nodes)))
+       loom/subgraphs))
 
 (defn make-pairs [coll]
   (->> coll (mapcat #(repeat 2 %))
@@ -359,3 +360,14 @@
     (->> recon-groups
          (map merge-all!) dorun)
     (recon-finished! user class)))
+
+(defn prop-and-id [user class prop]
+  (str "MATCH (root:" (neo4j/prop-label user class)
+       ")-[r]->(v:" (neo4j/prop-label user prop)
+       ") RETURN ID(root), v.val"))
+
+(defn idrow-to-str [r]
+  (str (get r "v.val") ","
+       (get r "ID(root)")))
+
+
