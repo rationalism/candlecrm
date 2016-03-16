@@ -12,7 +12,8 @@
              :refer (pspy pspy* profile defnp p p*)])
   (:import [com.googlecode.concurrenttrees.solver LCSubstringSolver]
            [com.googlecode.concurrenttrees.radix.node.concrete
-            SmartArrayBasedNodeFactory]))
+            SmartArrayBasedNodeFactory]
+           [org.apache.commons.lang3 StringUtils]))
 
 (def default-score 0.5)
 (def min-match-score {s/email 0.4 s/person 0.4})
@@ -28,6 +29,18 @@
 (defn load-models! []
   (new-model! s/email models-dir)
   (new-model! s/person models-dir))
+
+(defn lev-distance [a b]
+  (/ (StringUtils/getLevenshteinDistance a b)
+     (float (max (count a) (count b)))))
+
+(defn lev [coll1 coll2]
+  (if (or (empty? coll1) (empty? coll2)
+          (every? empty? coll1) (every? empty? coll2))
+    default-score
+    (->> (for [x coll1 y coll2] (vector x y))
+         (map #(lev-distance (first %) (second %)))
+         (apply min))))
 
 (defn abs [a b]
   (if (or (not (first a))
@@ -106,10 +119,10 @@
    s/tool
    [[[s/tool-category] [is-eq]]
     [[s/vendor-name] [is-eq]]
-    [[s/part-name] [is-eq lcs]]
-    [[s/catalog-name] [is-eq lcs]]
-    [[s/desc1] [is-eq lcs]]
-    [[s/desc2] [is-eq lcs]]
+    [[s/part-name] [is-eq lcs lev]]
+    [[s/catalog-name] [is-eq lcs lev]]
+    [[s/desc1] [is-eq lcs lev]]
+    [[s/desc2] [is-eq lcs lev]]
     [[s/item-cost] [is-eq abs]]]})
 
 (def candidates
@@ -119,8 +132,9 @@
    s/person
    [s/s-name s/email-addr s/phone-num]
    s/tool
-   [s/part-name s/catalog-name
-    s/desc1 s/desc2 s/item-cost]})
+   [s/part-name]})
+
+;; s/part-name s/catalog-name s/desc1 s/desc2 s/item-cost
 
 (defn merge-link [link]
   (str "MATCH (a) WHERE ID(a) = " (first link)
