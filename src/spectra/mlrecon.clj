@@ -16,7 +16,6 @@
            [org.apache.commons.lang3 StringUtils]))
 
 (def default-score 0.5)
-(def recon-max-block 10000)
 (def min-match-score {s/email 0.4 s/person 0.4})
 (def models-dir "/home/alyssavance/clojure/spectra/resources/models")
 
@@ -133,9 +132,8 @@
    s/person
    [s/s-name s/email-addr s/phone-num]
    s/tool
-   [s/part-name]})
-
-;; s/part-name s/catalog-name s/desc1 s/desc2 s/item-cost
+   [s/part-name s/catalog-name s/desc1
+    s/desc2 s/item-cost]})
 
 (defn merge-link [link]
   (str "MATCH (a) WHERE ID(a) = " (first link)
@@ -240,7 +238,7 @@
        ")-[r1]->(v)<-[r2]-(m:" label
        ") WHERE type(r1) IN [" preds
        "] AND type(r2) = type(r1)"
-       " RETURN ID(root), ID(m) LIMIT " recon-max-block))
+       " RETURN ID(root), ID(m)"))
 
 (defn find-candidates [user class]
   (->> class (get candidates) (map name)
