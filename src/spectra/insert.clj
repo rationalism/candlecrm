@@ -31,7 +31,7 @@
 (defn prop-cypher [user id prop val]
   (if (coll? val)
     (mapcat #(prop-cypher user id prop %) val)
-    (when val
+    (when (and val (not= val ""))
       [(str "MATCH (a) WHERE ID(a) = " id
             " MERGE (b:" (neo4j/prop-label user prop)
             " {" (neo4j/esc-token s/value) ": "

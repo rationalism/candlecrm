@@ -16,6 +16,7 @@
            [org.apache.commons.lang3 StringUtils]))
 
 (def default-score 0.5)
+(def recon-max-block 10000)
 (def min-match-score {s/email 0.4 s/person 0.4})
 (def models-dir "/home/alyssavance/clojure/spectra/resources/models")
 
@@ -239,7 +240,7 @@
        ")-[r1]->(v)<-[r2]-(m:" label
        ") WHERE type(r1) IN [" preds
        "] AND type(r2) = type(r1)"
-       " RETURN ID(root), ID(m)"))
+       " RETURN ID(root), ID(m) LIMIT " recon-max-block))
 
 (defn find-candidates [user class]
   (->> class (get candidates) (map name)
