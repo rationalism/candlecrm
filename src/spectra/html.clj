@@ -66,7 +66,7 @@
           (include-js goog-maps)
           (include-js goog-jquery)
           (include-js "/js/libs/moment.min.js")
-          (include-js "/js/libs/fullcalendar-2.4.0/fullcalendar.js")
+          (include-js "/js/libs/fullcalendar-2.6.1/fullcalendar.js")
           (include-js "/js/main.js")]))
           ;[:script "google.maps.core.main();"]]))
 
