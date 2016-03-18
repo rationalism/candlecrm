@@ -17,3 +17,5 @@ pom.xml
 /repl
 /out
 /resources/public/js
+/src/spectra/.*
+/src/spectra/#*

@@ -71,7 +71,7 @@
             [lein-kibit "0.1.2"]
             [lein-figwheel "0.5.0-6"]
             [lein-cljsbuild "1.1.3"]
-            [cider/cider-nrepl "0.11.0"]
+            [cider/cider-nrepl "0.12.0-SNAPSHOT"]
             [jonase/eastwood "0.2.3"]
             [venantius/yagni "0.1.4"]
             [lein-ancient "0.6.8"]
