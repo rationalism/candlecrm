@@ -233,24 +233,19 @@
   (if (or (nil? coll) (empty? coll)) marks
       (assoc marks map-key (first coll))))
 
-(defn sub-email [marks lines]
-  {s/email-sent (-> marks s/email-sent)
-   s/type-label s/email
-   s/email-body (->> lines
-                     (map #(strip-arrows % (:depth marks)))
-                     merge-lines)})
-
 (defn first-header [lines]
-  (loop [cnt 0]
-    (cond (= cnt (count lines)) nil
-          (weka/is-header? (nth lines cnt)) cnt
-          :else (recur (inc cnt)))))
+  (if (or (nil? lines) (empty? lines))
+    0 (loop [cnt 0]
+        (cond (= cnt (count lines)) nil
+              (weka/is-header? (nth lines cnt)) cnt
+              :else (recur (inc cnt))))))
 
 (defn first-body [lines]
-  (loop [cnt 0]
-    (cond (= cnt (count lines)) nil
-          (not (weka/is-header? (nth lines cnt))) cnt
-          :else (recur (inc cnt)))))
+  (if (or (nil? lines) (empty? lines))
+    0 (loop [cnt 0]
+        (cond (= cnt (count lines)) nil
+              (not (weka/is-header? (nth lines cnt))) cnt
+              :else (recur (inc cnt))))))
 
 ;; Arbitrary date: 1960-01-02 05:11:48.874
 (def ref-date (java.util.Date. -315514073744))
@@ -261,23 +256,23 @@
        (remove #(= "1960" (dt/format-year %)))))
 
 (defn find-header-vals [marks lines]
-  (let [header-lines (->> lines vector
-                          (concat ((juxt :start-header :end-header) marks))
+  (let [header-lines (->> [0 (:end-header marks) lines]
                           (apply com/slice)
                           (str/join " "))]
-    (-> (assoc-if-found marks s/email-sent (sent-date header-lines))
-        (assoc-if-found :email-from-addr (regex/find-email-addrs header-lines))
-        (assoc-if-found :email-from-name (->> header-lines nlp/run-nlp-default
-                                              nlp/nlp-names (map first))))))
-
-(defn find-start-header [marks lines]
-  (->> lines first-header
-       (assoc marks :start-header)))
+    (when (not= " " header-lines)
+      (-> (assoc-if-found marks s/email-sent (sent-date header-lines))
+          (assoc-if-found :email-from-addr (regex/find-email-addrs header-lines))
+          (assoc-if-found :email-from-name (->> header-lines nlp/run-nlp-default
+                                                nlp/nlp-names (map first)))))))
 
 (defn find-end-header [marks lines]
-  (->> lines (drop (:start-header marks))
-       first-body (+ (:start-header marks))
+  (->> lines first-body
        (assoc marks :end-header)))
+
+(defn find-end-body [marks lines]
+  (->> lines (drop (:end-header marks))
+       first-header (+ (:end-header marks))
+       (assoc marks :end-body)))
 
 (defn remove-arrow [line depth]
   (str/replace-first line (str/join (repeat depth ">"))
@@ -294,7 +289,7 @@
             (remove-arrow % depth) %)
          lines)))
 
-(defn find-start-tail [marks lines]
+(defn start-tail [marks lines]
   (assoc marks :start-tail
          (-> (fn [x] (in-block? (rseq (vec lines)) x zero?))
              (drop-while (range))
@@ -307,31 +302,34 @@
   (let [lines (chain-lines chain)]
     (-> {:depth depth s/email-sent nil :email-from-name nil
          :email-from-addr nil}
-        (find-start-header lines)
         (find-end-header lines)
-        (find-header-vals lines)
-        (find-start-tail lines))))
+        (find-end-body lines)
+        (start-tail lines)
+        (find-header-vals lines))))
+
+(defn remove-arrows-if [lines]
+  (if (<= 1 (count-min-depth lines))
+    (remove-arrows lines) lines))
 
 (defn new-top [marks chain]
-  (let [new-slice (com/slice (:end-header marks) (:start-tail marks)
+  (let [new-slice (com/slice (:end-body marks) (:start-tail marks)
                              (chain-lines chain))]
-    {s/email-body (if (<= 1 (count-min-depth new-slice))
-                    (remove-arrows new-slice) new-slice)}))
+    {s/email-body (remove-arrows-if new-slice)}))
 
 (defn end-bottom [chain]
   {s/email-body (-> chain chain-lines merge-lines)
    s/type-label s/email})
 
-(defn make-new-node [marks chain]
-  (sub-email marks (->> chain chain-lines
-                        (com/slice-not (:start-header marks)
-                                       (:start-tail marks)))))
+(defn sub-email [marks lines]
+  {s/email-sent (-> marks s/email-sent)
+   s/type-label s/email
+   s/email-body (merge-lines (remove-arrows-if lines))})
 
-(defn depth-match? [marks chain]
-  (if (zero? (:start-header marks)) false
-      (= (dec (:depth marks))
-         (-> chain chain-lines (nth (dec (:start-header marks)))
-             vector count-max-depth))))
+(defn make-new-node [marks chain]
+  (let [lines (chain-lines chain)]
+    (->> (com/slice (:start-tail marks) (count lines) lines)
+         (concat (com/slice (:end-header marks) (:end-body marks) lines))
+         (sub-email marks))))
 
 (defn dec-depth [chain]
   (->> remove-arrows (update (find-top chain) s/email-body)
