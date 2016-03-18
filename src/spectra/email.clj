@@ -363,9 +363,9 @@
   (loom/build-graph [{s/email-body body}] []))
 
 (defnp raw-msg-chain [body]
-  (-> body str/split-lines count-depth
-      (recursive-split (start-email-graph
-                        (str/split-lines body)))))
+  (let [lines (str/split-lines body)]
+    (recursive-split (count-depth lines)
+                     (start-email-graph lines))))
 
 (defnp get-text-recursive [message]
   (let [c-type (-> message content-type str/lower-case)]
