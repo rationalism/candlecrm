@@ -268,7 +268,7 @@
     (-> (assoc-if-found marks s/email-sent (sent-date header-lines))
         (assoc-if-found :email-from-addr (regex/find-email-addrs header-lines))
         (assoc-if-found :email-from-name (->> header-lines nlp/run-nlp-default
-                                              nlp/nlp-names)))))
+                                              nlp/nlp-names (map first))))))
 
 (defn find-start-header [marks lines]
   (->> lines first-header
@@ -276,7 +276,7 @@
 
 (defn find-end-header [marks lines]
   (->> lines (drop (:start-header marks))
-       first-body
+       first-body (+ (:start-header marks))
        (assoc marks :end-header)))
 
 (defn remove-arrow [line depth]
@@ -296,7 +296,7 @@
 
 (defn find-start-tail [marks lines]
   (assoc marks :start-tail
-         (-> (fn [x] (in-block? (rseq lines) x zero?))
+         (-> (fn [x] (in-block? (rseq (vec lines)) x zero?))
              (drop-while (range))
              first (- (count lines)))))
 
@@ -315,7 +315,7 @@
 (defn new-top [marks chain]
   (let [new-slice (com/slice (:end-header marks) (:start-tail marks)
                              (chain-lines chain))]
-    {s/email-body (if (= 1 (count-min-depth new-slice))
+    {s/email-body (if (<= 1 (count-min-depth new-slice))
                     (remove-arrows new-slice) new-slice)}))
 
 (defn end-bottom [chain]
