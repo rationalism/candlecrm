@@ -5,6 +5,7 @@
             [ring.middleware.defaults :refer :all]
             [ring.middleware.reload :as reload]
             [clojure.java.io :as io]
+            [spectra_cljc.schema :as s]
             [spectra.ajax :as ajax]
             [spectra.auth :as auth]
             [spectra.email :as email]
@@ -66,8 +67,8 @@
         (html-wrapper (pages/gmail req))))
   (GET "/init-account" req
        (friend/authenticated
-        (let [user (auth/user-from-req req)]
-          (Thread/sleep 500)
+        (let [user (-> req auth/user-from-req :data s/email-addr
+                       auth/lookup-user)]
           (quartz/add-new-queue! user)
 ;          (quartz/schedule-contacts! user)
           (home-with-message "Congrats! Authentication successful"))))
