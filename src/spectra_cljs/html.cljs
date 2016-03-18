@@ -33,7 +33,7 @@
   [:div
    [:form {:class "pure-form pure-form-aligned"}
     [:fieldset
-     [:legend>h3 (str "Add new " type)]
+     [:legend>h3 (str "Add new " (name type))]
      (for [attr (add-nums attrs)]
        ^{:key (first attr)}
        [input-cell (second attr)])
