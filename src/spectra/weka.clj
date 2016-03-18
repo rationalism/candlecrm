@@ -18,7 +18,7 @@
 (def num-trees 200)
 (def crossval-folds 5)
 (def token-delims " \r\n\t.,@;&_/:\"()?!\\>=")
-(def models-dir "/home/alyssavance/clojure/spectra/resources/models")
+(def models-dir "/home/alyssa/clojure/spectra/resources/models")
 (def email-sep-key "emailbreak")
 
 (defonce models (atom {}))

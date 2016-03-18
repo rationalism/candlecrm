@@ -17,7 +17,7 @@
 
 (def default-score 0.5)
 (def min-match-score {s/email 0.4 s/person 0.4 s/tool 0.8})
-(def models-dir "/home/alyssavance/clojure/spectra/resources/models")
+(def models-dir "/home/alyssa/clojure/spectra/resources/models")
 
 (defonce recon-models (atom {s/email nil}))
 
@@ -29,7 +29,7 @@
 (defn load-models! []
   (new-model! s/email models-dir)
   (new-model! s/person models-dir)
-  (new-model! s/tool "/home/alyssavance"))
+  (new-model! s/tool "/home/alyssa"))
 
 (defn lev-distance [a b]
   (/ (StringUtils/getLevenshteinDistance a b)
