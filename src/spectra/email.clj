@@ -343,14 +343,12 @@
     chain))
 
 (defn split-email [marks chain]
-  (if (depth-match? marks chain)
-    (let [new-node (make-new-node marks chain)
-          email-from (header->person marks)]
-      (-> chain
-          (loom/replace-node (find-top chain) new-node)
-          (maybe-add-edges new-node email-from)
-          (loom/add-edges [[(new-top marks chain) new-node s/email-reply]])))
-    (dec-depth chain)))
+  (let [new-node (make-new-node marks chain)
+        email-from (header->person marks)]
+    (-> chain
+        (loom/replace-node (find-top chain) new-node)
+        (maybe-add-edges new-node email-from)
+        (loom/add-edges [[(new-top marks chain) new-node s/email-reply]]))))
 
 (defn recursive-split [depth chain]
   (if (<= depth 0)
