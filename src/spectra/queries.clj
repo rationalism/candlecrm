@@ -88,9 +88,9 @@
       neo4j/cypher-list first))
 
 (defn queue-data [n]
-  (->> [[s/loaded-bottom] [s/loaded-top] [s/modified]]
+  (->> [[s/loaded-bottom] [s/loaded-top] [s/top-uid] [s/modified]]
        (mlrecon/fetch-paths (:id n)) (map first)
-       (zipmap [s/loaded-bottom s/loaded-top s/modified])
+       (zipmap [s/loaded-bottom s/loaded-top s/top-uid s/modified])
        (merge {:id (:id n)})))
 
 (defn next-email-queue []

@@ -23,29 +23,34 @@
 
 (defn message-count [user]
   (-> user email/fetch-imap-folder email/message-count))
-  
-(defn queue-small? [queue]
-  (< (- (-> queue s/loaded-bottom)
-        270000)
-     email/batch-size))
+
+(defn queue-new? [queue]
+  (< (s/loaded-top queue)
+     (s/top-uid queue)))
 
 (defn range-top [queue]
-  (-> queue s/loaded-bottom))
+  (if (queue-new? queue)
+    (min (s/top-uid queue)
+         (-> queue s/loaded-top (+ email/batch-size) inc))
+    (-> queue s/loaded-bottom)))
 
 (defn range-bottom [queue]
-  (if (queue-small? queue)
-    270000
-    (-> queue s/loaded-bottom (- email/batch-size) inc)))
+  (max (if (queue-new? queue) (s/loaded-top queue) 270000)
+       (-> queue range-top (- email/batch-size) inc)))
+
+(defn queue-small? [queue]
+  (< (- (range-top queue)
+        (range-bottom queue))
+     (dec email/batch-size)))
 
 (defn queue-reset! [queue]
   (neo4j/update-vals! (:id queue) s/modified
                       (s/modified queue) (dt/now))
-  (neo4j/update-vals! (:id queue) s/loaded-bottom
-                      (s/loaded-bottom queue)
-                      (if (queue-small? queue)
-                        270000
-                        (- (-> queue s/loaded-bottom)
-                           email/batch-size))))
+  (if (queue-new? queue)
+    (neo4j/update-vals! (:id queue) s/loaded-top
+                        (s/loaded-top queue) (range-top queue))
+    (neo4j/update-vals! (:id queue) s/loaded-bottom
+                        (s/loaded-bottom queue) (range-bottom queue))))
 
 (defn scan-check [user email-times]
   (->> email-times
@@ -53,12 +58,6 @@
 
 (defn in-range [bounds]
   (range (first bounds) (inc (second bounds))))
-
-(defn queue-ends [user excluded]
-  (let [top-end (message-count user)]
-    (-> (- top-end email/batch-size)
-        (range (inc top-end))
-        set (cset/difference excluded))))
 
 (defonce cnt (atom 0))
 
@@ -69,16 +68,12 @@
 (defn first-last [coll]
   [(first coll) (last coll)])
 
-(defn default-queue [user]
-  (let [top (message-count user)]
-    {s/queue-bottom (- top email/batch-size)
-     s/queue-top top}))
-
 (defn create-edges! [user queue]
   (neo4j/create-edge! (queries/email-queue) queue s/has-queue)
   (neo4j/create-edge! user queue s/has-queue))
-  
-(defn wipe-and-insert! [user]
+
+(defn refresh-queue! [user]
+  (println "refreshing queue")
   (-> ["MATCH (root:" (neo4j/prop-label user s/top-uid)
        ")<-[:" (neo4j/esc-token s/top-uid)
        "]-(d:" (neo4j/prop-label user s/email-queue)
@@ -88,10 +83,6 @@
        " SET root.val = "
        (-> user email/fetch-imap-folder email/last-uid str)]
       str/join neo4j/cypher-query dorun))
-
-(defn refresh-queue! [user]
-  (println "refreshing queue")
-  (wipe-and-insert! user))
 
 (defn run-insertion! [queue-user]
   (println "inserting emails")
@@ -179,12 +170,12 @@
 
 (defn start! []
   (reset! scheduler (qs/start (qs/initialize)))
-;  (qs/schedule @scheduler
-;               (make-job EmailLoad "jobs.email.load.1")
-;               (periodic-trigger 15000 nil "email.trigger.1"))
-;  (qs/schedule @scheduler
-;               (make-job EmailRefresh "jobs.email.load.2")
-;               (periodic-trigger 3600000 nil "email.trigger.2"))
+                                        ;  (qs/schedule @scheduler
+                                        ;               (make-job EmailLoad "jobs.email.load.1")
+                                        ;               (periodic-trigger 15000 nil "email.trigger.1"))
+                                        ;  (qs/schedule @scheduler
+                                        ;               (make-job EmailRefresh "jobs.email.load.2")
+                                        ;               (periodic-trigger 3600000 nil "email.trigger.2"))
   (qs/schedule @scheduler
                (make-job NewGeocodes "jobs.geocode.load.1")
                (periodic-trigger 5000 nil "geocode.trigger.1"))
