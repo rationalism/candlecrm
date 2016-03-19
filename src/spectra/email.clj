@@ -74,7 +74,7 @@
   (def q (messages-in-range folder begin end))
   (.fetch folder q (fetch-profile-all))
   (into [] q))
-  
+
 (defn subject [message]
   (let [subject (.getSubject message)]
     (if (com/nil-or-empty? subject)
@@ -170,7 +170,7 @@
 
 (defn parse-name-email [s]
   (-> s InternetAddress/parse))
-  
+
 (defn decode-sender [message]
   {s/email-from
    (if-let [orig-from (get-header message "X-Original-From")]
@@ -216,9 +216,17 @@
         (>= index (count lines)) false
         :else (f (count-nested (nth lines index)))))
 
-(defn find-top [chain]
+(defn email-body-nodes [chain]
   (->> chain loom/nodes
-       (filter #(contains? % s/email-body))
+       (filter #(contains? % s/email-body))))
+
+(defn find-bottom [chain]
+  (->> chain email-body-nodes
+       (remove #(loom/out-edge-label chain % s/email-reply))
+       first))
+
+(defn find-top [chain]
+  (->> chain email-body-nodes
        (remove #(loom/in-edge-label chain % s/email-reply))
        first))
 
@@ -236,14 +244,14 @@
 (defn first-header [lines]
   (if (or (nil? lines) (empty? lines))
     0 (loop [cnt 0]
-        (cond (= cnt (count lines)) nil
+        (cond (= cnt (count lines)) (count lines)
               (weka/is-header? (nth lines cnt)) cnt
               :else (recur (inc cnt))))))
 
 (defn first-body [lines]
   (if (or (nil? lines) (empty? lines))
     0 (loop [cnt 0]
-        (cond (= cnt (count lines)) nil
+        (cond (= cnt (count lines)) (count lines)
               (not (weka/is-header? (nth lines cnt))) cnt
               :else (recur (inc cnt))))))
 
@@ -291,9 +299,12 @@
 
 (defn start-tail [marks lines]
   (assoc marks :start-tail
-         (-> (fn [x] (in-block? (rseq (vec lines)) x zero?))
-             (drop-while (range))
-             first (- (count lines)))))
+         (if (= 0 (count-max-depth lines))
+           (count lines)
+           (-> (fn [x] (in-block? (rseq (vec lines)) x zero?))
+               (drop-while (range))
+               first (- )
+               (+ (count lines))))))
 
 (defn chain-lines [chain]
   (-> chain find-top s/email-body))
@@ -340,18 +351,24 @@
     (loom/add-edges chain [[new-node email-from s/email-from]])
     chain))
 
+(defn maybe-add-top [new-chain old-chain marks new-node]
+  (if (> (:depth marks) 0)
+    (loom/add-edges new-chain [[(new-top marks old-chain)
+                                new-node s/email-reply]])
+    new-chain))
+
 (defn split-email [marks chain]
   (let [new-node (make-new-node marks chain)
         email-from (header->person marks)]
     (-> chain
         (loom/replace-node (find-top chain) new-node)
         (maybe-add-edges new-node email-from)
-        (loom/add-edges [[(new-top marks chain) new-node s/email-reply]]))))
+        (maybe-add-top chain marks new-node))))
 
 (defn recursive-split [depth chain]
-  (if (<= depth 0)
-    (loom/replace-node chain (find-top chain) (end-bottom chain))
-    (recur (dec depth) (-> depth (find-marks chain) (split-email chain)))))
+  (if (>= depth 0)
+    (recur (dec depth) (-> depth (find-marks chain) (split-email chain)))
+    chain))
 
 (defn start-email-graph [body]
   (loom/build-graph [{s/email-body body}] []))
@@ -435,11 +452,11 @@
 (defn merge-bottom-headers [chain headers]
   (as-> chain $
     (loom/merge-graphs [$ headers])
-    (loom/replace-node $ (find-top chain)
-                       (merge (find-top chain)
+    (loom/replace-node $ (find-bottom chain)
+                       (merge (find-bottom chain)
                               (-> headers loom/top-nodes first)))
     (loom/replace-node $ (-> headers loom/top-nodes first)
-                       (find-top $))))
+                       (find-bottom $))))
 
 (defnp message-fetch [message folder]
   (vector (get-text-recursive message)
