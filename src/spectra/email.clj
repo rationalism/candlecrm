@@ -309,7 +309,7 @@
 (defn chain-lines [chain]
   (-> chain find-top s/email-body))
 
-(defn find-marks [depth chain]
+(defnp find-marks [depth chain]
   (let [lines (chain-lines chain)]
     (-> {:depth depth s/email-sent nil :email-from-name nil
          :email-from-addr nil}

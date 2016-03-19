@@ -1,6 +1,8 @@
 (ns spectra.weka
   (:require [clojure.string :as str]
-            [clojure.edn :as edn])
+            [clojure.edn :as edn]
+            [taoensso.timbre.profiling :as profiling
+             :refer (pspy pspy* profile defnp p p*)])
   (:import [weka.classifiers Evaluation]
            [weka.classifiers.bayes NaiveBayes]
            [weka.classifiers.evaluation.output.prediction HTML]
@@ -162,7 +164,7 @@
     (.setClassIndex 1)
     (add-text text)))
 
-(defn classify-bayes [bayes text]
+(defnp classify-bayes [bayes text]
   (->> text (test-instances bayes) first
        (.distributionForInstance bayes)
        (into [])))

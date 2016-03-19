@@ -19,7 +19,9 @@
             [spectra.mlrecon :as mlrecon]
             [spectra.neo4j :as neo4j]
             [spectra.queries :as queries]
-            [spectra_cljc.schema :as s]))
+            [spectra_cljc.schema :as s]
+            [taoensso.timbre.profiling :as profiling
+             :refer (pspy pspy* profile defnp p p*)]))
 
 (defn message-count [user]
   (-> user email/fetch-imap-folder email/message-count))
