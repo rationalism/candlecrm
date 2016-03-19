@@ -45,7 +45,7 @@
   (neo4j/update-vals! (:id queue) s/loaded-bottom
                       (s/loaded-bottom queue)
                       (if (queue-small? queue)
-                        260000
+                        270000
                         (- (-> queue s/loaded-bottom)
                            email/batch-size))))
 
@@ -70,22 +70,6 @@
 
 (defn first-last [coll]
   [(first coll) (last coll)])
-
-(defn find-ranges [user]
-  (reset! cnt 0)
-  [])
-
-
-;  (let [folder (email/fetch-imap-folder user)]
-;    (->> user queries/all-scanned
-;         (map :data)
-;         (mapcat (juxt s/start-time s/stop-time))
-;         (map #(email/find-num folder %))
-;         (partition 2) (mapcat in-range) set
-;         (queue-ends user) (into []) sort
-;         (partition-by count-up) 
-;         (map first-last)
-;         (map #(zipmap [s/queue-bottom s/queue-top] %)))))
 
 (defn default-queue [user]
   (let [top (message-count user)]
@@ -113,7 +97,7 @@
 
 (defn refresh-queue! [user]
   (println "refreshing queue")
-  (apply wipe-and-insert! user (find-ranges user)))
+  (wipe-and-insert! user))
 
 (defn run-insertion! [queue-user]
   (println "inserting emails")
