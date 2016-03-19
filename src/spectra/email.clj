@@ -552,7 +552,7 @@
   (let [folder (fetch-imap-folder user)]
     (->> (fetch-messages folder lower upper)
          (pmap #(message-fetch % folder))
-         (pmap full-parse)
+         (map full-parse)
          (map #(insert/push-graph! % user)))))
 
 (defn insert-one-email! [user email-num]
