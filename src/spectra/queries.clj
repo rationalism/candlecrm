@@ -89,7 +89,7 @@
 
 (defn queue-data [n]
   (->> [[s/loaded-bottom] [s/loaded-top] [s/modified]]
-       (mlrecon/fetch-paths (:id n))
+       (mlrecon/fetch-paths (:id n)) (map first)
        (zipmap [s/loaded-bottom s/loaded-top s/modified])
        (merge {:id (:id n)})))
 
@@ -99,7 +99,7 @@
            ") WITH root, u"
            " MATCH (root)-[:" (neo4j/esc-token s/loaded-bottom)
            "]-(b) WITH root, u, b WHERE b." (neo4j/esc-token s/value)
-           " > " 260000
+           " > " 270000
            " MATCH (root)-[:" (neo4j/esc-token s/modified)
            "]-(m) WITH root, u, b, m "
            " RETURN root, u ORDER BY m." (neo4j/esc-token s/value)

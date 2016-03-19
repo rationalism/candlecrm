@@ -21,14 +21,12 @@
             [spectra.queries :as queries]
             [spectra_cljc.schema :as s]))
 
-(def test-count 50)
-
 (defn message-count [user]
   (-> user email/fetch-imap-folder email/message-count))
   
 (defn queue-small? [queue]
   (< (- (-> queue s/loaded-bottom)
-        260000)
+        270000)
      email/batch-size))
 
 (defn range-top [queue]
@@ -36,7 +34,7 @@
 
 (defn range-bottom [queue]
   (if (queue-small? queue)
-    260000
+    270000
     (-> queue s/loaded-bottom (- email/batch-size) inc)))
 
 (defn queue-reset! [queue]
@@ -58,7 +56,7 @@
 
 (defn queue-ends [user excluded]
   (let [top-end (message-count user)]
-    (-> (- top-end test-count)
+    (-> (- top-end email/batch-size)
         (range (inc top-end))
         set (cset/difference excluded))))
 
@@ -73,27 +71,23 @@
 
 (defn default-queue [user]
   (let [top (message-count user)]
-    {s/queue-bottom (- top test-count)
+    {s/queue-bottom (- top email/batch-size)
      s/queue-top top}))
 
 (defn create-edges! [user queue]
   (neo4j/create-edge! (queries/email-queue) queue s/has-queue)
   (neo4j/create-edge! user queue s/has-queue))
   
-(defn wipe-and-insert! [user & queues]
-  (-> ["MATCH (root:" s/email-queue
-       ")-[:" (neo4j/esc-token s/has-queue)
-       "]->(d:" s/user-queue
-       ")<-[:" (neo4j/esc-token s/has-queue)
-       "]-(u:" s/user 
-       ") WHERE ID(u)= " (:id user)
-       " DETACH DELETE d"]
-      str/join neo4j/cypher-query)
-  (->> (map #(assoc % s/modified (dt/now)) queues)
-       (map #(hash-map :props %))
-       (map #(assoc % :labels [s/user-queue]))
-       neo4j/batch-insert!
-       (map #(create-edges! user %)) dorun))
+(defn wipe-and-insert! [user]
+  (-> ["MATCH (root:" (neo4j/prop-label user s/top-uid)
+       ")<-[:" (neo4j/esc-token s/top-uid)
+       "]-(d:" (neo4j/prop-label user s/email-queue)
+       ")-[:" (neo4j/esc-token s/user-queue)
+       "]->(u:" (neo4j/esc-token s/user)
+       ") WHERE ID(u) = " (:id user)
+       " SET root.val = "
+       (-> user email/fetch-imap-folder email/last-uid str)]
+      str/join neo4j/cypher-query dorun))
 
 (defn refresh-queue! [user]
   (println "refreshing queue")

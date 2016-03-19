@@ -183,7 +183,7 @@
        (apply str) cypher-list first))
 
 (defn get-vertices-class [class]
-  (cypher-list (str "MATCH (root:" class
+  (cypher-list (str "MATCH (root" class
                     ") RETURN root")))
 
 (defn delete-class! [class]
