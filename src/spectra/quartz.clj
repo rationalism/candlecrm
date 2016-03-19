@@ -74,7 +74,8 @@
 (defn find-ranges [user]
   (reset! cnt 0)
   [])
-  
+
+
 ;  (let [folder (email/fetch-imap-folder user)]
 ;    (->> user queries/all-scanned
 ;         (map :data)
