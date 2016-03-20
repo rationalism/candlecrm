@@ -3,12 +3,15 @@
             [spectra.corenlp :as nlp]
             [spectra.loom :as loom]
             [spectra.regex :as regex]
+            [spectra.weka :as weka]
             [clojure.string :as str]
             [spectra_cljc.schema :as s]
             [spectra.email :refer :all]))
 
 (defn pipeline-ready [f]
-  (nlp/load-pipeline!) (f))
+  (nlp/load-pipeline!)
+  (weka/load-models!)
+  (f))
 
 (use-fixtures :once pipeline-ready)
 
