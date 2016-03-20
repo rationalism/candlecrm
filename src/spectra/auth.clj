@@ -59,7 +59,7 @@
     (if (string? u) (lookup-user u) u)))
 
 (defn list-users []
-  (neo4j/get-vertices-class s/user))
+  (neo4j/get-vertices-class (name s/user)))
 
 (defn delete-user! [user]
   (index/delete-all! user)
