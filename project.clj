@@ -3,7 +3,7 @@
   :url "http://spectra.herokuapp.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.7.228"
+                 [org.clojure/clojurescript "1.8.34"
                   :exclusions [args4j com.google.code.findbugs/jsr305]]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [clj-time "0.11.0"]
@@ -39,7 +39,7 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.0"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.0"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.2.7"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.2.8"]
                  [org.deeplearning4j/deeplearning4j-core "0.4-rc3.8"
                   :exclusions [org.apache.commons/commons-lang3 commons-logging
                                com.fasterxml.jackson.core/jackson-core junit
