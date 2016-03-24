@@ -2,7 +2,8 @@
   (:require [clojure.set :as set]
             [clojure.string :as str]
             [spectra.auth :as auth]
-            [spectra.mlrecon :as mlrecon]
+            [spectra.common :as com]
+            [spectra.mlrecon :as mlrecon] 
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]))
 
@@ -82,7 +83,7 @@
   (-> (str "MATCH (root:" (neo4j/prop-label user node-type)
            ") WHERE ID(root)= " id
            " WITH root" (vals-collect))
-      neo4j/cypher-query-raw mapify-hits))
+      neo4j/cypher-query-raw com/debug mapify-hits))
 
 (defn node-by-id [user query-map]
   (-> user (node-from-id (:id query-map) (:type query-map))
