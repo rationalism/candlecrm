@@ -79,36 +79,19 @@
                 " successful. ")
      (node-link "Go to page" (:id resp) (s/type-label resp))]))
 
-(defn new-entity [type attrs]
+(defn entity-form [legend attrs onclick msg]
   [:div
    [:form {:class "pure-form pure-form-aligned"}
     [:fieldset
-     [:legend>h3 (str "Add new " (name type))]
-     (for [attr (add-ids attrs)]
-       ^{:key (first attr)}
-       [input-block (second attr)])
-     [:button {:type "button"
-               :class "pure-button pure-button-primary"
-               :on-click (submit-new-entity type)}
-      "Submit"]]]
-   (when (state/look :new-entity-msg)
-     (add-message))])
-
-(defn edit-entity [type attrs]
-  [:div
-   [:form {:class "pure-form pure-form-aligned"}
-    [:fieldset
-     [:legend>h3 (str "Edit " (name type) " named "
-                      (-> attrs s/s-name first second))]
+     [:legend>h3 legend]
      (for [attr attrs]
        ^{:key (first attr)}
        [input-block (second attr)])
      [:button {:type "button"
                :class "pure-button pure-button-primary"
-               :on-click #(u/edit-entity!)}
+               :on-click onclick}
       "Submit"]]]
-   (when (state/look :edit-entity-msg)
-     (edit-message))])
+   msg])
 
 (defn user-welcome [username]
   [:div
