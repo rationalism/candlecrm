@@ -120,12 +120,6 @@
     (str "MATCH (a) WHERE ID(a)= " id
          " RETURN a"))))
 
-(defn node-from-id [user id node-type]
-  (-> (str "MATCH (root:" (prop-label user node-type)
-           ") WHERE ID(root)= " id
-           " RETURN root")
-      cypher-list first))
-
 (defn delete-property! [vertex property]
   (-> (str "MATCH (a) WHERE ID(a)= " (:id vertex)
            " REMOVE a." (esc-token property)

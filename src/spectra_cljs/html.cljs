@@ -48,8 +48,8 @@
 (defn gen-message []
   (let [resp (state/look :new-entity-msg)]
     [:span (str "New " (-> resp s/type-label name)
-                " created. See it ")]
-    (node-link "here" (:id resp) (s/type-label resp))))
+                " created. ")
+     (node-link "Go to page" (:id resp) (s/type-label resp))]))
 
 (defn new-entity [type attrs]
   [:div

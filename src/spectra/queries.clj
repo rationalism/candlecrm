@@ -41,7 +41,7 @@
 
 (defn person-from-user [user query-map]
   (-> (str "MATCH (root:" (neo4j/prop-label user s/person)
-           ")<-[:" (neo4j/esc-token s/email-to)
+           ") OPTIONAL MATCH (root)<-[:" (neo4j/esc-token s/email-to)
            "]-(em:" (neo4j/prop-label user s/email)
            ") WITH root, count(em) as cem ORDER BY cem"
            " SKIP " (:start query-map) " LIMIT " (:limit query-map)
@@ -78,9 +78,15 @@
   (-> user (get :data)
       (dissoc s/pwd-hash) (dissoc s/google-token)))
 
+(defn node-from-id [user id node-type]
+  (-> (str "MATCH (root:" (neo4j/prop-label user node-type)
+           ") WHERE ID(root)= " id
+           " WITH root" (vals-collect))
+      neo4j/cypher-query-raw mapify-hits))
+
 (defn node-by-id [user query-map]
-  (-> user (neo4j/node-from-id (:id query-map) (:type query-map))
-      node-attrs))
+  (-> user (node-from-id (:id query-map) (:type query-map))
+      first (merge {:type (:type query-map)})))
 
 (defn email-queue []
   (-> (str "MATCH (root:" s/email-queue
