@@ -33,31 +33,37 @@
 (defn date-display [item]
   [:span (format-date item)])
 
-(defn add-cell [attr]
-  (state/set! [:new-entity attr (count-cells attr)] ""))
+(defn count-cells [attr cache]
+  (->> attr vector (concat cache) (apply state/look)
+       keys count))
 
-(defn input-cell [id-attr]
+(defn input-cell [id-attr cache]
   [:div {:class "pure-control-group"}
    [:label
     (if (= 0 (first id-attr))
       ((second id-attr) s/attr-names) "")]
-   [:input {:type "text" :name (str (second id-attr) (first id-attr))
-            :on-change (set-field! :new-entity (second id-attr)
-                                   (first id-attr))
-            :value (state/look :new-entity (second id-attr)
-                               (first id-attr))}]
-   (when (= 0 (first id-attr))
-     [:a.new-link {:href "#" :on-click #(add-cell (second id-attr))}
-      "Add new"])])
+   (let [attr (second id-attr)
+         params (->> id-attr first vector (concat [attr])
+                     (concat cache))]
+     [:input {:type "text" :name (str attr (first id-attr))
+              :on-change (apply set-field! params)
+              :value (apply state/look params)}])
+   (let [attr (second id-attr)]
+     (when (= 0 (first id-attr))
+       [:a.new-link {:href "#"
+                     :on-click #(-> cache (concat [attr])
+                                    (concat [(count-cells attr cache)])
+                                    (state/set! ""))}
+        "Add new"]))])
 
 (defn count-attr-cells [attr cache]
-  (-> cache attr keys count (repeat attr) add-ids))
+  (-> (count-cells attr cache) (repeat attr) add-ids))
 
 (defn input-block [attr cache]
   [:div
    (for [id-attr (count-attr-cells attr cache)]
      ^{:key (first id-attr)}
-     [input-cell id-attr])])
+     [input-cell id-attr cache])])
 
 (defn submit-new-entity [type]
   (fn []
@@ -473,9 +479,9 @@
 (defn header-tab [num name]
   [:li {:class (tab-class num)}
    [:h2>a
-   {:href "#" :class "pure-menu-link"
-    :on-click (set-tab-fn num)
-    :id (str "set-tab-" num)} name]])
+    {:href "#" :class "pure-menu-link"
+     :on-click (set-tab-fn num)
+     :id (str "set-tab-" num)} name]])
 
 (defn home-header []
   [:div#menu-bar {:class "pure-g"}
