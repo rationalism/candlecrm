@@ -126,9 +126,17 @@
     s/location (map-markers person-id)
     nil))
 
+(defn strip-ids [m]
+  (reduce #(update %1 %2 vals)
+          m (remove #(= % s/type-label) (keys m))))
+
 (defn add-req []
   [:edit/add-entity
-   {:fields (state/look :new-entity)}])
+   {:fields (-> :new-entity state/look strip-ids)}])
+
+(defn edit-req []
+  [:edit/edit-entity
+   {:fields (state/look :current-node :center-node)}])
 
 (defn new-entity-confirm! [resp]
   (state/set! [:new-entity] {})
@@ -136,3 +144,11 @@
 
 (defn add-entity! []
   (send! (add-req) new-entity-confirm!))
+
+(defn edit-entity-confirm! [resp]
+  (state/set! [:edit-entity-msg] resp))
+
+(defn edit-entity! []
+  (send! (edit-req) edit-entity-confirm!))
+
+

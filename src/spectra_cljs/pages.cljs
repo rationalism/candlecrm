@@ -53,8 +53,10 @@
      4 [:div#tab4.tab-show [html/locations]]
      5 [:div#tab5.tab-show [html/my-account]]
      6 [node-page (state/look :current-node)]
-     7 [html/new-entity (state/look :input-new :type)
-        (state/look :input-new :attrs)]
+     7 [html/new-entity (state/look :input-meta :type)
+        (state/look :input-meta :attr-list)]
+     8 [html/edit-entity (state/look :current-node :type)
+        (state/look :current-node :center-node)]
      [:div "Error: Page not found."])])
 
 (defn homepage []

@@ -21,7 +21,7 @@
   (fn [this]
     (state/set! args (-> this .-target .-value))))
 
-(defn add-nums [coll]
+(defn add-ids [coll]
   (partition
    2 (-> coll count range
          (interleave coll))))
@@ -33,22 +33,50 @@
 (defn date-display [item]
   [:span (format-date item)])
 
-(defn input-cell [attr]
+(defn count-cells [attr]
+  (-> :new-entity (state/look attr) keys count))
+
+(defn add-cell [attr]
+  (state/set! [:new-entity attr (count-cells attr)] ""))
+
+(defn input-cell [id-attr]
   [:div {:class "pure-control-group"}
-   [:label (attr s/attr-names)]
-   [:input {:type "text" :name attr
-            :on-change (set-field! :new-entity attr)
-            :value (state/look :new-entity attr)}]])
+   [:label
+    (if (= 0 (first id-attr))
+      ((second id-attr) s/attr-names) "")]
+   [:input {:type "text" :name (str (second id-attr) (first id-attr))
+            :on-change (set-field! :new-entity (second id-attr)
+                                   (first id-attr))
+            :value (state/look :new-entity (second id-attr)
+                               (first id-attr))}]
+   (when (= 0 (first id-attr))
+     [:a.new-link {:href "#" :on-click #(add-cell (second id-attr))}
+      "Add new"])])
+
+(defn count-attr-cells [attr]
+  (-> attr count-cells (repeat attr) add-ids))
+
+(defn input-block [attr]
+  [:div
+   (for [id-attr (count-attr-cells attr)]
+     ^{:key (first id-attr)}
+     [input-cell id-attr])])
 
 (defn submit-new-entity [type]
   (fn []
     (state/set! [:new-entity s/type-label] type)
     (u/add-entity!)))
 
-(defn gen-message []
+(defn add-message []
   (let [resp (state/look :new-entity-msg)]
     [:span (str "New " (-> resp s/type-label name)
                 " created. ")
+     (node-link "Go to page" (:id resp) (s/type-label resp))]))
+
+(defn edit-message []
+  (let [resp (state/look :new-entity-msg)]
+    [:span (str "Edit of " (-> resp s/type-label name)
+                " successful. ")
      (node-link "Go to page" (:id resp) (s/type-label resp))]))
 
 (defn new-entity [type attrs]
@@ -56,15 +84,31 @@
    [:form {:class "pure-form pure-form-aligned"}
     [:fieldset
      [:legend>h3 (str "Add new " (name type))]
-     (for [attr (add-nums attrs)]
+     (for [attr (add-ids attrs)]
        ^{:key (first attr)}
-       [input-cell (second attr)])
+       [input-block (second attr)])
      [:button {:type "button"
                :class "pure-button pure-button-primary"
                :on-click (submit-new-entity type)}
       "Submit"]]]
    (when (state/look :new-entity-msg)
-     (gen-message))])
+     (add-message))])
+
+(defn edit-entity [type attrs]
+  [:div
+   [:form {:class "pure-form pure-form-aligned"}
+    [:fieldset
+     [:legend>h3 (str "Edit " (name type) " named "
+                      (-> attrs s/s-name first))]
+     (for [attr (add-ids attrs)]
+       ^{:key (first attr)}
+       [input-block (first (second attr))])
+     [:button {:type "button"
+               :class "pure-button pure-button-primary"
+               :on-click #(u/edit-entity!)}
+      "Submit"]]]
+   (when (state/look :edit-entity-msg)
+     (edit-message))])
 
 (defn user-welcome [username]
   [:div
@@ -86,24 +130,28 @@
                        s/birthday s/gender s/website])
 
 (defn new-person-switch []
-  (state/set! [:input-new :type] s/person)
-  (state/set! [:input-new :attrs] new-person-attrs)
+  (state/set! [:input-meta :type] s/person)
+  (state/set! [:input-meta :attr-list] new-person-attrs)
+  (doseq [attr new-person-attrs]
+    (state/set! [:new-entity attr] {0 ""}))
   (state/set! [:tabid] 7))
 
 (defn person-link [person attr]
-  [node-link (person attr) (person :id) s/person])
+  [node-link (first (person attr))
+   (person :id) s/person])
 
 (defn person-site [person attr]
-  [:a {:href (person attr)} (person attr)])
+  [:a {:href (first (person attr))}
+   (first (person attr))])
 
 (defn person-cell [person attr]
   [:td (condp = attr
          s/s-name [person-link person attr]
          s/website [person-site person attr]
-         (person attr))])
+         (first (person attr)))])
 
 (defn person-row [person]
-  [:tr (for [attr (add-nums s/person-attrs)]
+  [:tr (for [attr (add-ids s/person-attrs)]
          ^{:key (first attr)}
          [person-cell person (second attr)])])
 
@@ -120,11 +168,11 @@
   [:div
    [:table {:id "people-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "people-header"}
-     (for [attr (add-nums s/person-attrs)]
+     (for [attr (add-ids s/person-attrs)]
        ^{:key (first attr)}
        [:td (get s/attr-names (second attr))])]
     [:tbody {:id "people-rows"}
-     (for [p-row (-> :people-rows state/look add-nums)]
+     (for [p-row (-> :people-rows state/look add-ids)]
        ^{:key (first p-row)}
        [person-row (second p-row)])]]
    [prev-next-box :people u/update-people!
@@ -145,7 +193,7 @@
          :else (email attr))])
 
 (defn email-row [email]
-  [:tr (for [attr (-> email-attrs keys add-nums)]
+  [:tr (for [attr (-> email-attrs keys add-ids)]
          ^{:key (first attr)}
          [email-cell email (second attr)])])
 
@@ -153,11 +201,11 @@
   [:div
    [:table {:id "email-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "email-header"}
-     (for [attr (add-nums email-attrs)]
+     (for [attr (add-ids email-attrs)]
        ^{:key (first attr)}
        [:td (second attr)])]
     [:tbody {:id "email-rows"}
-     (for [e-row (add-nums (apply state/look row-keys))]
+     (for [e-row (add-ids (apply state/look row-keys))]
        ^{:key (first e-row)}
        [email-row (second e-row)])]]
    [prev-next-box counter update-fn
@@ -172,7 +220,7 @@
    [:form {:class "pure-form"}
     [:select {:class (str "people-list-" rel-type " pure-input-1-2")
               :on-change #(u/rel-switch (.. % -target -value) rel-type)}
-     (for [person (add-nums (state/look :rank-lists rel-type))]
+     (for [person (add-ids (state/look :rank-lists rel-type))]
        ^{:key (first person)}
        [person-option (second person)])]]])
 
@@ -330,7 +378,7 @@
 
 (defn add-newlines [piece]
   [:span
-   (let [n (add-nums (str/split piece #"\r\n"))]
+   (let [n (add-ids (str/split piece #"\r\n"))]
      (for [ln n]
        ^{:key (first ln)}
        [:span (second ln)
@@ -345,7 +393,7 @@
 
 (defn body-links [item]
   [:p#email-body
-   (for [piece (-> item link-items add-nums)]
+   (for [piece (-> item link-items add-ids)]
      ^{:key (first piece)}
      [body-link (second piece)])])
 
@@ -365,13 +413,13 @@
 
 (defn info-items [attrs item]
   [:div
-   (for [attr (add-nums attrs)]
+   (for [attr (add-ids attrs)]
      ^{:key (first attr)}
      [:p.infoitem
       [str-item (-> attr second s/attr-names)
        (second attr) (get item (second attr))]])])
 
-(def person-disp [s/email-addr s/website])
+(def person-disp [s/email-addr s/phone-num s/website])
 (def email-disp [s/email-sent s/email-body])
 (def org-disp [s/s-name])
 (def loc-disp [s/s-name])
@@ -380,7 +428,9 @@
 
 (defn show-person [person-name item]
   [:div
-   [:h3.infotitle (str person-name " (Person)")]
+   [:h3.infotitle (str person-name " (Person) ")
+    [:a {:href "#" :on-click #(state/set! [:tabid] 8)}
+     "(Edit)"]]
    [info-items person-disp item]
    [:h3.infotitle (str "Emails to " person-name)]
    [email-table [:current-node s/email-to] s/email-to

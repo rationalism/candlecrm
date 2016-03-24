@@ -18,7 +18,7 @@
     :map-markers {:data [] :objs [] :updated true :window nil :clicked nil}
     :rank-lists {s/event [] s/location []}
     :map-obj nil
-    :input-new {:type nil :attrs nil}
+    :input-meta {:type nil :attr-list nil}
     :ajax-chan nil
     :new-entity {}
     :new-entity-msg nil}))

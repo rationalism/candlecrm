@@ -44,4 +44,6 @@ tbody#people-rows td {
     display: inline;
 }
 
-
+a.new-link {
+    margin-left: 0.5em;
+}
