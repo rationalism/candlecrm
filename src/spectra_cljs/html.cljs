@@ -12,6 +12,11 @@
 
 ;; TODO: Reorganize this by page
 
+(defn node-link [text id type]
+  [:a.go-node
+   {:href "#" :on-click #(u/go-node! id type)}
+   text])
+
 (defn set-field! [& args]
   (fn [this]
     (state/set! args (-> this .-target .-value))))
@@ -40,6 +45,12 @@
     (state/set! [:new-entity s/type-label] type)
     (u/add-entity!)))
 
+(defn gen-message []
+  (let [resp (state/look :new-entity-msg)]
+    [:span (str "New " (-> resp s/type-label name)
+                " created. See it ")]
+    (node-link "here" (:id resp) (s/type-label resp))))
+
 (defn new-entity [type attrs]
   [:div
    [:form {:class "pure-form pure-form-aligned"}
@@ -51,7 +62,9 @@
      [:button {:type "button"
                :class "pure-button pure-button-primary"
                :on-click (submit-new-entity type)}
-      "Submit"]]]])
+      "Submit"]]]
+   (when (state/look :new-entity-msg)
+     (gen-message))])
 
 (defn user-welcome [username]
   [:div
@@ -78,7 +91,7 @@
   (state/set! [:tabid] 7))
 
 (defn person-link [person attr]
-  [u/node-link (person attr) (person :id) s/person])
+  [node-link (person attr) (person :id) s/person])
 
 (defn person-site [person attr]
   [:a {:href (person attr)} (person attr)])
@@ -123,7 +136,7 @@
                   s/email-subject "Subject"})
 
 (defn email-link [email attr]
-  [u/node-link (email attr) (email :id) s/email])
+  [node-link (email attr) (email :id) s/email])
 
 (defn email-cell [email attr]
   [:td (cond
@@ -213,7 +226,7 @@
 (defn event-info-window []
   (let [marker (state/look :map-markers :clicked)]
     [:div#markerinfo>h3
-     [u/node-link (:title marker) (:id marker) s/location]]))
+     [node-link (:title marker) (:id marker) s/location]]))
 
 (defn render-window []
   (r/render [event-info-window]
@@ -327,7 +340,7 @@
 (defn body-link [piece]
   (if (string? piece)
     [add-newlines piece]
-    [u/node-link (:text piece) (-> piece :link :id)
+    [node-link (:text piece) (-> piece :link :id)
      (-> piece :link :type)]))
 
 (defn body-links [item]

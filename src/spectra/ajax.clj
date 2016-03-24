@@ -1,6 +1,7 @@
 (ns spectra.ajax
   (:require
    [spectra.auth       :as auth]
+   [spectra.insert    :as insert]
    [spectra.queries    :as queries]
    [clojure.core.async :as async  :refer (<! <!! >! >!! put! chan go go-loop)]
    [taoensso.timbre    :as timbre :refer (tracef debugf infof warnf errorf)]
