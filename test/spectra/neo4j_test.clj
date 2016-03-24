@@ -3,7 +3,6 @@
             [spectra.neo4j :refer :all]
             [spectra.auth :as auth]
             [spectra.insert :as insert]
-            [spectra.loom :as loom]
             [spectra_cljc.schema :as s]))
 
 (defn graph-ready [f]
@@ -35,7 +34,7 @@
 
     (def fake-label (prop-label user :fake-property))
     
-    (def get-people (partial get-vertices user s/person)))
+    (def get-people (partial get-vertices user s/person))
     (def test-name {s/s-name (first test-names)})
     (def test-email {s/email-addr (first test-emails)})
     (def test-phone {s/phone-num (first test-phones)})
@@ -52,8 +51,7 @@
            s/phone-num test-phones
            fake-prop test-fake-prop}
           vector
-          (loom/build-graph [])
-          (insert/push-graph! user)))
+          (insert/push-entities! user)))
     
     (is (= 1 (count (get-people test-name))))
     (is (= 1 (count (get-people test-email))))
@@ -70,4 +68,5 @@
     
     (is (= 0 (count (get-people test-name))))
     (is (= 0 (count (get-people test-email))))
-    (is (= 0 (count (get-people test-phone)))))
+    (is (= 0 (count (get-people test-phone))))))
+

@@ -12,6 +12,10 @@
 
 ;; TODO: Reorganize this by page
 
+(defn set-field! [& args]
+  (fn [this]
+    (state/set! args (-> this .-target .-value))))
+
 (defn add-nums [coll]
   (partition
    2 (-> coll count range
@@ -27,7 +31,14 @@
 (defn input-cell [attr]
   [:div {:class "pure-control-group"}
    [:label (attr s/attr-names)]
-   [:input {:type "text" :name attr}]])
+   [:input {:type "text" :name attr
+            :on-change (set-field! :new-entity attr)
+            :value (state/look :new-entity attr)}]])
+
+(defn submit-new-entity [type]
+  (fn []
+    (state/set! [:new-entity s/type-label] type)
+    (u/add-entity!)))
 
 (defn new-entity [type attrs]
   [:div
@@ -37,19 +48,14 @@
      (for [attr (add-nums attrs)]
        ^{:key (first attr)}
        [input-cell (second attr)])
-    [:button {:type "button"
-              :class "pure-button pure-button-primary"
-              :on-click #(js/alert "Submitted!")}
-     "Submit"]]]])
+     [:button {:type "button"
+               :class "pure-button pure-button-primary"
+               :on-click (submit-new-entity type)}
+      "Submit"]]]])
 
 (defn user-welcome [username]
   [:div
    [:h3 (str "Welcome. Your email is: " username)]])
-
-(defn node-link [text id type]
-  [:a.go-node
-   {:href "#" :on-click #(u/go-node! id type)}
-   text])
 
 (defn home-content [& content]
   [:div {:class "pure-g"}
@@ -72,7 +78,7 @@
   (state/set! [:tabid] 7))
 
 (defn person-link [person attr]
-  [node-link (person attr) (person :id) s/person])
+  [u/node-link (person attr) (person :id) s/person])
 
 (defn person-site [person attr]
   [:a {:href (person attr)} (person attr)])
@@ -117,7 +123,7 @@
                   s/email-subject "Subject"})
 
 (defn email-link [email attr]
-  [node-link (email attr) (email :id) s/email])
+  [u/node-link (email attr) (email :id) s/email])
 
 (defn email-cell [email attr]
   [:td (cond
@@ -207,7 +213,7 @@
 (defn event-info-window []
   (let [marker (state/look :map-markers :clicked)]
     [:div#markerinfo>h3
-     [node-link (:title marker) (:id marker) s/location]]))
+     [u/node-link (:title marker) (:id marker) s/location]]))
 
 (defn render-window []
   (r/render [event-info-window]
@@ -321,7 +327,7 @@
 (defn body-link [piece]
   (if (string? piece)
     [add-newlines piece]
-    [node-link (:text piece) (-> piece :link :id)
+    [u/node-link (:text piece) (-> piece :link :id)
      (-> piece :link :type)]))
 
 (defn body-links [item]

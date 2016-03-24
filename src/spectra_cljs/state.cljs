@@ -19,7 +19,9 @@
     :rank-lists {s/event [] s/location []}
     :map-obj nil
     :input-new {:type nil :attrs nil}
-    :ajax-chan nil}))
+    :ajax-chan nil
+    :new-entity {}
+    :new-entity-msg nil}))
 
 (defn look [& args]
   (get-in @a args))
@@ -42,3 +44,4 @@
 (defn set! [loc val]
   (apply (partial swap! a update-in) loc
          [(constantly val)]))
+

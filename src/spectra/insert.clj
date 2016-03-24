@@ -63,6 +63,18 @@
          neo4j/cypher-combined-tx)
     (vals id-map)))
 
+(defn push-entities! [coll user]
+  (push-graph! (loom/build-graph coll [])
+               user))
+
+(defn new-resp [id type]
+  {:id id s/type-label type})
+
+(defn new-entity! [user query-map]
+  (-> query-map :fields vector
+      (push-entities! user)
+      first (new-resp (-> query-map :fields s/type-label))))
+
 (defn load-csv [filename]
   (let [csv-lines (-> filename slurp csv/parse-csv)]
     (->> csv-lines (drop 1)

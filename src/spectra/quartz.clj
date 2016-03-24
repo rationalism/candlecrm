@@ -15,7 +15,6 @@
             [spectra.email :as email]
             [spectra.geocode :as geocode]
             [spectra.insert :as insert]
-            [spectra.loom :as loom]
             [spectra.mlrecon :as mlrecon]
             [spectra.neo4j :as neo4j]
             [spectra.queries :as queries]
@@ -108,8 +107,7 @@
   (-> user email/fetch-imap-folder
       email/last-uid
       new-queue-map vector
-      (loom/build-graph [])
-      (insert/push-graph! user)
+      (insert/push-entities! user)
       first neo4j/find-by-id
       (neo4j/create-edge! user s/user-queue)))
 

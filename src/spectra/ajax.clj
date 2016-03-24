@@ -54,18 +54,20 @@
   (debugf "Unhandled event: %s" event)
   {:umatched-event-as-echoed-from-from-server event})
 
-(def reply-map {:pages/fetch-people {:fn queries/person-from-user
+(def reply-map {:edit/add-entity {:fn insert/new-entity!
+                                  :keys [:fields]}
+                :pages/fetch-people {:fn queries/person-from-user
                                      :keys [:start :limit]}
                 :pages/fetch-emails {:fn queries/emails-from-user
                                      :keys [:start :limit]}
                 :pages/person-emails {:fn queries/emails-linked
-                                     :keys [:person-id :link :start :limit]}
+                                      :keys [:person-id :link :start :limit]}
                 :pages/people-ranked {:fn queries/people-by-reltype
                                       :keys [:reltype :start :limit]}
                 :pages/person-events {:fn queries/event-related
                                       :keys [:person-id :start :limit]}
                 :pages/person-places {:fn queries/loc-related
-                                       :keys [:person-id :start :limit]}
+                                      :keys [:person-id :start :limit]}
                 :update/user-data {:fn queries/user-data-public
                                    :keys []}
                 :update/fetch-node {:fn queries/node-by-id

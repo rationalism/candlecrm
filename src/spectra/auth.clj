@@ -2,7 +2,6 @@
   (:require [clojure.string :as str]
             [spectra.index :as index]
             [spectra.insert :as insert]
-            [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra.regex :as regex]
             [spectra_cljc.schema :as s]
@@ -20,9 +19,7 @@
   {:identity (get-in u (:data s/email-addr))})
 
 (defn user-person [email]
-  (loom/build-graph
-   [{s/type-label s/person s/email-addr email}]
-   []))
+  [{s/type-label s/person s/email-addr email}])
 
 (defn user-person-edge! [person user]
   (neo4j/create-edge! user person s/user-person))
@@ -31,7 +28,7 @@
   [{:keys [username password] :as user-data}]
   (let [user (user-vertex! username (creds/hash-bcrypt password))]
     (-> username user-person
-        (insert/push-graph! user)
+        (insert/push-entities! user)
         first neo4j/find-by-id
         (user-person-edge! user))
     (index/make-constraints! user)

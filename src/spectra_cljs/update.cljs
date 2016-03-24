@@ -125,3 +125,24 @@
     s/event (cal-events person-id)
     s/location (map-markers person-id)
     nil))
+
+(defn add-req []
+  [:edit/add-entity
+   {:fields (state/look :new-entity)}])
+
+(defn node-link [text id type]
+  [:a.go-node
+   {:href "#" :on-click #(go-node! id type)}
+   text])
+
+(defn gen-message [resp]
+  [:span (str "New " (-> resp s/type-label name)
+              " created. See it ")]
+  (node-link "here" (:id resp) (s/type-label resp)))
+
+(defn new-entity-confirm! [resp]
+  (state/set! [:new-entity] {})
+  (state/set! [:new-entity-msg] (gen-message resp)))
+
+(defn add-entity! []
+  (send! (add-req) new-entity-confirm!))

@@ -5,7 +5,6 @@
             [spectra.datetime :as dt]
             [spectra.google :as google]
             [spectra.insert :as insert]
-            [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra.recon :as recon]
             [spectra_cljc.schema :as s])
@@ -108,8 +107,7 @@
 
 (defn batch-insert! [user contacts]
   (-> (map contact->person contacts)
-      (loom/build-graph [])
-      (insert/push-graph! user)))
+      (insert/push-entities! user)))
 
 (defn load-all-contacts! [user]
   (->> user all-contacts
