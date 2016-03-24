@@ -60,7 +60,7 @@
                  [clojurewerkz/quartzite "2.0.0"]
                  [reagent "0.5.1"]
                  [jayq "2.5.4"]
-                 [com.google.maps/google-maps-services "0.1.11"]
+                 [com.google.maps/google-maps-services "0.1.12"]
                  [nz.ac.waikato.cms.weka/weka-dev "3.7.13"]
                  [crypto-random "1.2.0"]
                  [com.googlecode.concurrent-trees/concurrent-trees "2.5.0"]
