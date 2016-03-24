@@ -19,7 +19,9 @@
   (testing "Test the person-from-user database query"
     (def test-user (auth/create-user! {:username test-username :password test-password}))
     (is test-user)
-    (is (= '() (person-from-user test-user {:start 0 :limit 10})))
+    (is (= [test-username]
+           (-> test-user (person-from-user {:start 0 :limit 10})
+               first s/email-addr)))
     
     (auth/delete-user! test-user)))
 
