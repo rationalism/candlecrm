@@ -33,9 +33,6 @@
 (defn date-display [item]
   [:span (format-date item)])
 
-(defn count-cells [attr]
-  (-> :new-entity (state/look attr) keys count))
-
 (defn add-cell [attr]
   (state/set! [:new-entity attr (count-cells attr)] ""))
 
@@ -53,12 +50,12 @@
      [:a.new-link {:href "#" :on-click #(add-cell (second id-attr))}
       "Add new"])])
 
-(defn count-attr-cells [attr]
-  (-> attr count-cells (repeat attr) add-ids))
+(defn count-attr-cells [attr cache]
+  (-> cache attr keys count (repeat attr) add-ids))
 
-(defn input-block [attr]
+(defn input-block [attr cache]
   [:div
-   (for [id-attr (count-attr-cells attr)]
+   (for [id-attr (count-attr-cells attr cache)]
      ^{:key (first id-attr)}
      [input-cell id-attr])])
 
@@ -79,14 +76,14 @@
                 " successful. ")
      (node-link "Go to page" (:id resp) (s/type-label resp))]))
 
-(defn entity-form [legend attrs onclick msg]
+(defn entity-form [legend attrs cache onclick msg]
   [:div
    [:form {:class "pure-form pure-form-aligned"}
     [:fieldset
      [:legend>h3 legend]
      (for [attr attrs]
        ^{:key (first attr)}
-       [input-block (second attr)])
+       [input-block (second attr) cache])
      [:button {:type "button"
                :class "pure-button pure-button-primary"
                :on-click onclick}
