@@ -99,10 +99,10 @@
    [:form {:class "pure-form pure-form-aligned"}
     [:fieldset
      [:legend>h3 (str "Edit " (name type) " named "
-                      (-> attrs s/s-name first))]
-     (for [attr (add-ids attrs)]
+                      (-> attrs s/s-name first second))]
+     (for [attr attrs]
        ^{:key (first attr)}
-       [input-block (first (second attr))])
+       [input-block (second attr)])
      [:button {:type "button"
                :class "pure-button pure-button-primary"
                :on-click #(u/edit-entity!)}
@@ -126,13 +126,13 @@
     [:a {:href "/logout" :class "pure-button"}
      "Logout here"]]])
 
-(def new-person-attrs [s/s-name s/email-addr s/phone-num
-                       s/birthday s/gender s/website])
+(def person-attrs [s/s-name s/email-addr s/phone-num
+                   s/birthday s/gender s/website])
 
 (defn new-person-switch []
   (state/set! [:input-meta :type] s/person)
-  (state/set! [:input-meta :attr-list] new-person-attrs)
-  (doseq [attr new-person-attrs]
+  (state/set! [:input-meta :attr-list] person-attrs)
+  (doseq [attr person-attrs]
     (state/set! [:new-entity attr] {0 ""}))
   (state/set! [:tabid] 7))
 
@@ -426,10 +426,19 @@
 (def event-disp [s/start-time s/stop-time])
 (def money-disp [s/s-name])
 
+(defn ids-if-coll [m]
+  (let [id-fn #(->> % add-ids (map vec) vec (into {}))]
+    (reduce #(update %1 %2 id-fn)
+            m (vec (keep (set person-attrs) (set (keys m)))))))
+
+(defn edit-person-switch []
+  (state/update! [:current-node :center-node] ids-if-coll)
+  (state/set! [:tabid] 8))
+
 (defn show-person [person-name item]
   [:div
    [:h3.infotitle (str person-name " (Person) ")
-    [:a {:href "#" :on-click #(state/set! [:tabid] 8)}
+    [:a {:href "#" :on-click edit-person-switch}
      "(Edit)"]]
    [info-items person-disp item]
    [:h3.infotitle (str "Emails to " person-name)]
