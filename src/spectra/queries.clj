@@ -27,8 +27,9 @@
 (defn mapify-params [params]
   (if (or (nil? params) (empty? params))
     nil (->> (map #(drop 1 %) params)
-             (map #(hash-map (keyword (first %)) (second %)))
-             (apply merge) (merge {:id (ffirst params)}))))
+             (map #(hash-map (keyword (first %)) (vector (second %))))
+             (apply merge-with concat)
+             (merge {:id (ffirst params)}))))
 
 (defn mapify-hits [hits]
   (->> hits first vals first
@@ -83,7 +84,7 @@
   (-> (str "MATCH (root:" (neo4j/prop-label user node-type)
            ") WHERE ID(root)= " id
            " WITH root" (vals-collect))
-      neo4j/cypher-query-raw com/debug mapify-hits))
+      neo4j/cypher-query-raw mapify-hits))
 
 (defn node-by-id [user query-map]
   (-> user (node-from-id (:id query-map) (:type query-map))
