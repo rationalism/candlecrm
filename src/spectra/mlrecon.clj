@@ -368,5 +368,3 @@
 (defn idrow-to-str [r]
   (str (get r "v.val") ","
        (get r "ID(root)")))
-
-

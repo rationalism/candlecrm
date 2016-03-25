@@ -111,8 +111,15 @@
       first neo4j/find-by-id
       (neo4j/create-edge! user s/user-queue)))
 
+(defn maybe-run-recon! [params]
+  (when params (apply mlrecon/run-recon! params)))
+
 (defn run-recon! []
-  (println "Running recon algorithm"))
+  (->> (queries/norecon-count) (map second)
+       (filter #(some #{(second %)}
+                      (keys @mlrecon/recon-models)))
+       (map #(vector (neo4j/find-by-id (first %)) (second %)))
+       first maybe-run-recon!))
 
 (jobs/defjob EmailLoad [ctx]
   (queue-pop!))
@@ -190,4 +197,5 @@
                (periodic-trigger 5000 nil "geocode.trigger.2"))
   (qs/schedule @scheduler
                (make-job ProcessRecon "jobs.recon.do.1")
-               (periodic-trigger 2000 nil "recon.trigger.1")))
+               (periodic-trigger 5000 nil "recon.trigger.1")))
+
