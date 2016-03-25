@@ -478,7 +478,7 @@
 
 (defn header-tab [num name]
   [:li {:class (tab-class num)}
-   [:h2>a
+   [:h3>a
     {:href "#" :class "pure-menu-link"
      :on-click (set-tab-fn num)
      :id (str "set-tab-" num)} name]])

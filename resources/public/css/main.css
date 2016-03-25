@@ -18,14 +18,19 @@ div#page-header {
 }
 
 div#menu-bar {
-    background: #61B329;
+    background: #d3d3d3;
 }
 
 div.menu-icons a {
-    color: #FFFFFF;
+    color: #000000;
 }
 
-div.menu-icons h2 {
+/* does not work right */
+li.pure-menu-selected a {
+    color: #00688B;
+}
+
+div.menu-icons h3 {
     margin-top: 0em;
     margin-bottom: 0em;
 }
