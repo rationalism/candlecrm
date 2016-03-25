@@ -207,8 +207,8 @@
        " RETURN ID(r)"))
 
 (defn id-row [row]
-  [(-> row first)
-   (-> row second first vals first second)])
+  [(first row)
+   (flatten (map (comp second first vals) (second row)))])
 
 (defn full-search [user query-map]
   (let [query (:query query-map)]
@@ -216,7 +216,7 @@
          (map #(partial-val-query user query %))
          neo4j/cypher-combined-tx
          (interleave s/search-preds)
-         (partition 2) (map vec) vec
+         (partition 2) (map vec) vec com/debug
          (remove #(-> % second empty?))
          (map id-row) (into {}))))
 
