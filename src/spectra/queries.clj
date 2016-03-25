@@ -185,3 +185,17 @@
        ") WHERE NOT (root)-[:" (neo4j/esc-token s/has-coord)
        "]->() RETURN root LIMIT " limit]
       str/join neo4j/cypher-list))
+
+(defn recon-count-expand [labels]
+  (->> labels first
+       (map #(hash-map % (second labels)))))
+
+(defn norecon-count []
+  (->> (str "MATCH (root:" (neo4j/esc-token s/norecon)
+            ") RETURN labels(root), count(*)")
+       neo4j/cypher-query-raw (map vals)
+       (map recon-count-expand)
+       flatten (apply merge-with +)
+       (map vec) (map reverse)
+       (sort-by first >)
+       (remove #(= (second %) (name s/norecon)))))
