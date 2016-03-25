@@ -75,6 +75,10 @@
       (push-entities! user)
       first (new-resp (-> query-map :fields s/type-label))))
 
+(defn edit-entity! [user query-map]
+  (let [fields (:field query-map)]
+    []))
+
 (defn load-csv [filename]
   (let [csv-lines (-> filename slurp csv/parse-csv)]
     (->> csv-lines (drop 1)
