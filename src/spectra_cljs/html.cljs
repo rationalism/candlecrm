@@ -483,11 +483,15 @@
      :on-click (set-tab-fn num)
      :id (str "set-tab-" num)} name]])
 
+(defn search-key [e]
+  (when (= 13 (.-charCode e))
+    (u/run-search!)))
+
 (defn search-box []
-  [:form {:class "pure-form"}
-   [:fieldset
-    [:input {:id "search-box" :type "text" :name "search-box"
-             :placeholder "Search"}]]])
+  [:fieldset {:class "pure-form"}
+   [:input {:id "search-box" :type "text" :name "search-box" :placeholder "Search"
+            :on-change (set-field! :search) :value (state/look :search)
+            :on-key-press search-key}]])
 
 (defn home-header []
   [:div#menu-bar {:class "pure-g"}

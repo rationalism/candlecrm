@@ -21,7 +21,8 @@
     :input-meta {:type nil :attr-list nil}
     :ajax-chan nil
     :new-entity {}
-    :new-entity-msg nil}))
+    :new-entity-msg nil
+    :search ""}))
 
 (defn look [& args]
   (get-in @a args))

@@ -33,6 +33,7 @@ li.pure-menu-selected a {
 div#menu-bar fieldset {
     padding-top: 0em;
     padding-bottom: 0.4em;
+    border: none;
 }
 
 #search-box {
