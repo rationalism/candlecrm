@@ -76,8 +76,8 @@
       first (new-resp (-> query-map :fields s/type-label))))
 
 (defn vals-query [id attrs]
-  (str "MATCH (root)-[r:`" attrs
-       "`]->(v) WHERE ID(root) = " id
+  (str "MATCH (root)-[r:" attrs
+       "]->(v) WHERE ID(root) = " id
        " AND v." (neo4j/esc-token s/value)
        " IS NOT NULL"))
 
@@ -85,20 +85,20 @@
   (reduce #(update %1 %2 vals) m (keys m)))
 
 (defn edit-entity! [user query-map]
-  (let [fields (:field query-map)
+  (let [fields (:fields query-map)
         attrs (->> (dissoc fields :id :type) keys
-                   (map name) (str/join "|"))]
+                   (map neo4j/esc-token) (str/join "|"))]
     (neo4j/cypher-query-raw
      (str (vals-query (:id fields) attrs) " WITH v MATCH (v)<--(x)"
           " WITH v, count(x) as n WHERE n = 1 DETACH DELETE v"))
     (neo4j/cypher-query-raw
      (str (vals-query (:id fields) attrs) " DELETE r"))
-    (-> fields (dissoc :id type)
+    (-> fields (dissoc :id :type)
         vals-map (hash-map (:id fields)) first
         (id-pair-cypher user) neo4j/cypher-combined-tx)
     (neo4j/cypher-query-raw
      (str "MATCH (root) WHERE ID(root) = " (:id fields)
-          ") SET root:" (neo4j/esc-token s/norecon)))
+          " SET root:" (neo4j/esc-token s/norecon)))
     (neo4j/cypher-query-raw
      (str "MATCH (root) WHERE ID(root) = " (:id fields)
           " REMOVE root:" (neo4j/esc-token s/recon)))))
