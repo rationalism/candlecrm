@@ -69,7 +69,7 @@
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.2"]
             [lein-kibit "0.1.2"]
-            [lein-figwheel "0.5.0-6"]
+            [lein-figwheel "0.5.1"]
             [lein-cljsbuild "1.1.3"]
             [cider/cider-nrepl "0.11.0"]
             [jonase/eastwood "0.2.3"]
