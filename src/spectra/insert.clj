@@ -95,7 +95,13 @@
      (str (vals-query (:id fields) attrs) " DELETE r"))
     (-> fields (dissoc :id type)
         vals-map (hash-map (:id fields)) first
-        (id-pair-cypher user) neo4j/cypher-combined-tx)))
+        (id-pair-cypher user) neo4j/cypher-combined-tx)
+    (neo4j/cypher-query-raw
+     (str "MATCH (root) WHERE ID(root) = " (:id fields)
+          ") SET root:" (neo4j/esc-token s/norecon)))
+    (neo4j/cypher-query-raw
+     (str "MATCH (root) WHERE ID(root) = " (:id fields)
+          " REMOVE root:" (neo4j/esc-token s/recon)))))
 
 (defn load-csv [filename]
   (let [csv-lines (-> filename slurp csv/parse-csv)]
