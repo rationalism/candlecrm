@@ -219,4 +219,3 @@
          (partition 2) (map vec) vec com/debug
          (remove #(-> % second empty?))
          (map id-row) (into {}))))
-
