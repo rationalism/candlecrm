@@ -74,7 +74,9 @@
                 :update/user-data {:fn queries/user-data-public
                                    :keys []}
                 :update/fetch-node {:fn queries/node-by-id
-                                    :keys [:id :type]}})
+                                    :keys [:id :type]}
+                :update/search {:fn queries/full-search
+                                :keys [:query]}})
 
 ;; Wrap for logging, catching, etc.:
 (defn event-msg-handler*

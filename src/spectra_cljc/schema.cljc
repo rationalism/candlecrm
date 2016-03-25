@@ -119,6 +119,9 @@
 
 (def exclude-upload [type-label])
 
+(def search-preds [s-name email-addr email-subject
+                   phone-num])
+
 ;; Special for Barry's project
 (def tool :tool)
 (def tool-category :category)

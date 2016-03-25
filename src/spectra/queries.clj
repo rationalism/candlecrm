@@ -200,3 +200,14 @@
        (sort-by first >)
        (remove #(= (second %) (name s/norecon)))
        (map #(vector (first %) (neo4j/decode-label (second %))))))
+
+(defn partial-val-query [user query prop]
+  (str "MATCH (v:" (neo4j/prop-label user prop)
+       ") WHERE v.val STARTS WITH " (neo4j/esc-val query)
+       " RETURN v.val"))
+
+(defn full-search [user query-map]
+  (let [query (:query query-map)]
+    (->> s/search-preds
+         (map #(partial-val-query user query %))
+         neo4j/cypher-combined-tx)))

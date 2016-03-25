@@ -151,5 +151,12 @@
 (defn edit-entity! []
   (send! (edit-req) edit-entity-confirm!))
 
+(defn search-req []
+  [:update/search
+   {:query (state/look :search)}])
+
+(defn list-search-results! [resp]
+  (js/alert resp))
+
 (defn run-search! []
-  (js/alert (state/look :search)))
+  (send! (search-req) list-search-results!))
