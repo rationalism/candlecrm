@@ -198,4 +198,5 @@
        flatten (apply merge-with +)
        (map vec) (map reverse)
        (sort-by first >)
-       (remove #(= (second %) (name s/norecon)))))
+       (remove #(= (second %) (name s/norecon)))
+       (map #(vector (first %) (neo4j/decode-label (second %))))))

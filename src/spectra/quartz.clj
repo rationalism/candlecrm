@@ -111,10 +111,8 @@
       first neo4j/find-by-id
       (neo4j/create-edge! user s/user-queue)))
 
-(defn user-job [ctx]
-  (-> ctx qc/from-job-data
-      (get s/user) (get "id")
-      neo4j/find-by-id))
+(defn run-recon! []
+  (println "Running recon algorithm"))
 
 (jobs/defjob EmailLoad [ctx]
   (queue-pop!))
@@ -125,9 +123,17 @@
 (jobs/defjob CachedGeocodes [ctx]
   (geocode/geocode-cached 20))
 
+(jobs/defjob ProcessRecon [ctx]
+  (run-recon!))
+
 (jobs/defjob EmailRefresh [ctx]
   (doseq [user (auth/list-users)]
     (refresh-queue! user)))
+
+(defn user-job [ctx]
+  (-> ctx qc/from-job-data
+      (get s/user) (get "id")
+      neo4j/find-by-id))
 
 (jobs/defjob LoadContacts [ctx]
   (let [user (user-job ctx)]
@@ -181,4 +187,7 @@
                (periodic-trigger 5000 nil "geocode.trigger.1"))
   (qs/schedule @scheduler
                (make-job CachedGeocodes "jobs.geocode.insert.1")
-               (periodic-trigger 5000 nil "geocode.trigger.2")))
+               (periodic-trigger 5000 nil "geocode.trigger.2"))
+  (qs/schedule @scheduler
+               (make-job ProcessRecon "jobs.recon.do.1")
+               (periodic-trigger 2000 nil "recon.trigger.1")))

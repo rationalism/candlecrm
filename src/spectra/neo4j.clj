@@ -91,7 +91,22 @@
     (catch Exception e
       (do (println "Cypher query error")
           (print e) {}))))
-  
+
+(defn find-by-id [id]
+  (first
+   (cypher-list
+    (str "MATCH (a) WHERE ID(a)= " id
+         " RETURN a"))))
+
+(defn decode-label-parts [parts]
+  [(-> parts first keyword)
+   (-> parts second (Integer/parseInt))])
+
+(defn decode-label [label]
+  (-> label (str/replace #"user" "")
+      (str/split #"__")
+      decode-label-parts reverse))
+
 (defn get-property [vertex property]
   (let [value (property (:data vertex))]
     (if (coll? value) (set value) value)))
@@ -109,16 +124,10 @@
           (keyword (get l "TYPE(b)"))))
 
 (defn all-links [id]
-   (->> ["MATCH (a)-[b]-(c) WHERE ID(a)=" id
-         " RETURN ID(STARTNODE(b)), TYPE(b), ID(a), ID(c)"]
-        (apply str) (cy/tquery @conn)
-        (map format-link)))
-  
-(defn find-by-id [id]
-  (first
-   (cypher-list
-    (str "MATCH (a) WHERE ID(a)= " id
-         " RETURN a"))))
+  (->> ["MATCH (a)-[b]-(c) WHERE ID(a)=" id
+        " RETURN ID(STARTNODE(b)), TYPE(b), ID(a), ID(c)"]
+       (apply str) (cy/tquery @conn)
+       (map format-link)))
 
 (defn delete-property! [vertex property]
   (-> (str "MATCH (a) WHERE ID(a)= " (:id vertex)
