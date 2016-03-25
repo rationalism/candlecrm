@@ -492,11 +492,12 @@
       [header-tab 1 "People"]
       [header-tab 2 "Emails"]
       [header-tab 3 "Calendar"]
-      [header-tab 4 "Locations"]]]]
+      [header-tab 4 "Locations"]
+      [header-tab 5 "My Account"]]]]
    [:div#right-menu {:class "pure-u-1-6"}
     [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
      [:ul {:class "pure-menu-list"}
-      [header-tab 5 "My Account"]]]]])   
+      [:li>h3>a.pure-menu-link "Fishpaste"]]]]])   
 
 (defn my-account []
   [:div
