@@ -483,10 +483,16 @@
      :on-click (set-tab-fn num)
      :id (str "set-tab-" num)} name]])
 
+(defn search-box []
+  [:form {:class "pure-form"}
+   [:fieldset
+    [:input {:id "search-box" :type "text" :name "search-box"
+             :placeholder "Search"}]]])
+
 (defn home-header []
   [:div#menu-bar {:class "pure-g"}
    [:div {:class "pure-u-1-12"}]
-   [:div {:class "pure-u-2-3"}
+   [:div {:class "pure-u-7-12"}
     [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
      [:ul {:class "pure-menu-list"}
       [header-tab 1 "People"]
@@ -494,10 +500,9 @@
       [header-tab 3 "Calendar"]
       [header-tab 4 "Locations"]
       [header-tab 5 "My Account"]]]]
-   [:div#right-menu {:class "pure-u-1-6"}
+   [:div#right-menu {:class "pure-u-1-4"}
     [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
-     [:ul {:class "pure-menu-list"}
-      [:li>h3>a.pure-menu-link "Fishpaste"]]]]])   
+     [search-box]]]])   
 
 (defn my-account []
   [:div

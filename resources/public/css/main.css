@@ -30,6 +30,19 @@ li.pure-menu-selected a {
     color: #00688B;
 }
 
+div#menu-bar fieldset {
+    padding-top: 0em;
+    padding-bottom: 0.4em;
+}
+
+#search-box {
+    width:18em;
+}
+
+div#menu-bar .pure-menu-horizontal {
+    padding-top: 0.4em;
+}
+
 div.menu-icons h3 {
     margin-top: 0em;
     margin-bottom: 0em;
