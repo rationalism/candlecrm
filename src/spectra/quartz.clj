@@ -121,8 +121,9 @@
        (map #(vector (neo4j/find-by-id (first %)) (second %)))
        first maybe-run-recon!))
 
+;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (queue-pop!))
+  (when nil (queue-pop!)))
 
 (jobs/defjob NewGeocodes [ctx]
   (geocode/geocode-batch 10))
@@ -131,11 +132,12 @@
   (geocode/geocode-cached 20))
 
 (jobs/defjob ProcessRecon [ctx]
-  (run-recon!))
+  (when nil (run-recon!)))
 
 (jobs/defjob EmailRefresh [ctx]
-  (doseq [user (auth/list-users)]
-    (refresh-queue! user)))
+  (when nil
+    (doseq [user (auth/list-users)]
+      (refresh-queue! user))))
 
 (defn user-job [ctx]
   (-> ctx qc/from-job-data
@@ -183,12 +185,12 @@
 
 (defn start! []
   (reset! scheduler (qs/start (qs/initialize)))
-                                        ;  (qs/schedule @scheduler
-                                        ;               (make-job EmailLoad "jobs.email.load.1")
-                                        ;               (periodic-trigger 15000 nil "email.trigger.1"))
-                                        ;  (qs/schedule @scheduler
-                                        ;               (make-job EmailRefresh "jobs.email.load.2")
-                                        ;               (periodic-trigger 3600000 nil "email.trigger.2"))
+  (qs/schedule @scheduler
+               (make-job EmailLoad "jobs.email.load.1")
+               (periodic-trigger 15000 nil "email.trigger.1"))
+  (qs/schedule @scheduler
+               (make-job EmailRefresh "jobs.email.load.2")
+               (periodic-trigger 3600000 nil "email.trigger.2"))
   (qs/schedule @scheduler
                (make-job NewGeocodes "jobs.geocode.load.1")
                (periodic-trigger 5000 nil "geocode.trigger.1"))
