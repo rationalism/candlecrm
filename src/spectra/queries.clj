@@ -203,11 +203,20 @@
 
 (defn partial-val-query [user query prop]
   (str "MATCH (v:" (neo4j/prop-label user prop)
-       ") WHERE v.val STARTS WITH " (neo4j/esc-val query)
-       " RETURN v.val"))
+       ")<--(r) WHERE v.val STARTS WITH " (neo4j/esc-val query)
+       " RETURN ID(r)"))
+
+(defn id-row [row]
+  [(-> row first)
+   (-> row second first vals first second)])
 
 (defn full-search [user query-map]
   (let [query (:query query-map)]
     (->> s/search-preds
          (map #(partial-val-query user query %))
-         neo4j/cypher-combined-tx)))
+         neo4j/cypher-combined-tx
+         (interleave s/search-preds)
+         (partition 2) (map vec) vec
+         (remove #(-> % second empty?))
+         (map id-row) (into {}))))
+
