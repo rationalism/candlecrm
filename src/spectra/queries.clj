@@ -216,6 +216,6 @@
          (map #(partial-val-query user query %))
          neo4j/cypher-combined-tx
          (interleave s/search-preds)
-         (partition 2) (map vec) vec com/debug
+         (partition 2) (map vec) vec
          (remove #(-> % second empty?))
          (map id-row) (into {}))))

@@ -119,15 +119,12 @@
   (reset! router_ (sente/start-chsk-router!
                    ch-chsk event-msg-handler*)))
 
-(defonce is-started (atom false))
-
 (defn start! []
   (start-router!)
-  (start-broadcaster!)
-  (reset! is-started true))
+  (start-broadcaster!))
 
 ;; Restart Ajax when reloading the namespace
-(when @is-started
+(defn restart-ajax! []
   (println "Restarting Ajax")
   (stop-router!)
   (start-router!)

@@ -1,9 +1,9 @@
 (ns spectra.web
   (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]
             [compojure.route :as route]
+            [ns-tracker.core :as ns-tracker]
             [ring.util.response :as resp]
             [ring.middleware.defaults :refer :all]
-            [ring.middleware.reload :as reload]
             [clojure.java.io :as io]
             [spectra_cljc.schema :as s]
             [spectra.ajax :as ajax]
@@ -144,9 +144,23 @@
 (defn app-shutdown! []
   (email/close-imap-lookup!))
 
+;; Modified version of https://github.com/ring-clojure/ring/
+;; blob/master/ring-devel/src/ring/middleware/reload.clj
+(defn wrap-reload
+  {:arglists '([handler] [handler options])}
+  [handler & [options]]
+  (let [source-dirs (:dirs options ["src"])
+        modified-namespaces (ns-tracker/ns-tracker source-dirs)]
+    (fn [request]
+      (doseq [ns-sym (modified-namespaces)]
+        (require ns-sym :reload)
+        (when (= (name ns-sym) "spectra.ajax")
+          (ajax/restart-ajax!)))
+      (handler request))))
+
 (defn -main [& args]
   (app-init!)
   (let [handler (if (env :in-dev)
-                  (reload/wrap-reload #'secure-app)
+                  (wrap-reload #'secure-app)
                   secure-app)]
     (run-server handler {:port 3000})))
