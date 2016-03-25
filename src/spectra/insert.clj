@@ -39,7 +39,7 @@
             (neo4j/esc-token prop)
             "]->(b)")])))
 
-(defn id-pair-cypher [user id-pair]
+(defn id-pair-cypher [id-pair user]
   (->> (apply dissoc (key id-pair) s/exclude-upload)
        (mapcat #(prop-cypher user (val id-pair)
                              (key %) (val %)))))
@@ -56,7 +56,7 @@
 
 (defnp push-graph! [g user]
   (let [id-map (insert-nodes! g user)]
-    (->> (mapcat #(id-pair-cypher user %) id-map)
+    (->> (mapcat #(id-pair-cypher % user) id-map)
          neo4j/cypher-combined-tx)
     (->> g loom/multi-edges
          (map #(edge-cypher % id-map))
@@ -81,6 +81,9 @@
        " AND v." (neo4j/esc-token s/value)
        " IS NOT NULL"))
 
+(defn vals-map [m]
+  (reduce #(update %1 %2 vals) m (keys m)))
+
 (defn edit-entity! [user query-map]
   (let [fields (:field query-map)
         attrs (->> (dissoc fields :id :type) keys
@@ -90,7 +93,9 @@
           " WITH v, count(x) as n WHERE n = 1 DETACH DELETE v"))
     (neo4j/cypher-query-raw
      (str (vals-query (:id fields) attrs) " DELETE r"))
-    ))
+    (-> fields (dissoc :id type)
+        vals-map (hash-map (:id fields)) first
+        (id-pair-cypher user) neo4j/cypher-combined-tx)))
 
 (defn load-csv [filename]
   (let [csv-lines (-> filename slurp csv/parse-csv)]
