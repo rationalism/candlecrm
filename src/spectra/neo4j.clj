@@ -55,8 +55,8 @@
   (try
     (cy/tquery @conn query)
     (catch Exception e
-      (do (println "Cypher query error")
-          (print e) {}))))
+      (do (println "ERROR: Cypher query invalid")
+          (println "Query:" query) {}))))
 
 (defn cypher-query [query]
   (map cypher-map->node
