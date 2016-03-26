@@ -493,6 +493,11 @@
             :on-change (set-field! :search) :value (state/look :search)
             :on-key-press search-key}]])
 
+(defn search-results []
+  [:div
+   [:h2 "Search Results"]
+   [:p "(Search results go here)"]])
+
 (defn home-header []
   [:div#menu-bar {:class "pure-g"}
    [:div {:class "pure-u-1-12"}]

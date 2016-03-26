@@ -67,6 +67,7 @@
         [:current-node :center-node] #(u/edit-entity!)
         (when (state/look :edit-entity-msg)
           [html/edit-message])]
+     9 [html/search-results]
      [:div "Error: Page not found."])])
 
 (defn homepage []
