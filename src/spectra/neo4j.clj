@@ -21,6 +21,10 @@
   (str "`" (name prop) "_"
        (user-label user) "`"))
 
+(defn deadlock-throw? [e]
+  (.contains (.getMessage e)
+             ":stackTrace \"org.neo4j.kernel.DeadlockDetectedException"))
+
 (defn make-graph-url []
   (str "http://" (env :database-username)
        ":" (env :database-password)
@@ -83,14 +87,24 @@
   (->> (cypher-query query)
        (map first) (map val)))
 
-(defn cypher-combined-tx [queries]
+(declare cypher-combined-tx)
+
+(defn cypher-tx-exception [queries e]
+  (if (not (deadlock-throw? e))
+    (do (println "Cypher query exception")
+        (println (.getMessage e)) {})
+    (cypher-combined-tx queries)))
+
+(defn cypher-combined-tx-recur [queries]
   (try
     (->> (map tx/statement queries)
          (apply tx/in-transaction @conn)
          (map cy/tableize))
     (catch Exception e
-      (do (println "Cypher query error")
-          (print e) {}))))
+      (cypher-tx-exception queries e))))
+
+(defn cypher-combined-tx [queries]
+  (trampoline cypher-combined-tx-recur queries))
 
 (defn find-by-id [id]
   (first
