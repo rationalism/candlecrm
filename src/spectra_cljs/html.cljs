@@ -496,7 +496,10 @@
 (defn search-results []
   [:div
    [:h2 "Search Results"]
-   [:p "(Search results go here)"]])
+   [:ul]
+   (for [id-res (-> :search-results state/look add-ids)]
+     ^{:key (first id-res)}
+     [:li (-> id-res second str)])])
 
 (defn home-header []
   [:div#menu-bar {:class "pure-g"}
