@@ -22,7 +22,8 @@
     :ajax-chan nil
     :new-entity {}
     :new-entity-msg nil
-    :search ""}))
+    :search ""
+    :search-results nil}))
 
 (defn look [& args]
   (get-in @a args))

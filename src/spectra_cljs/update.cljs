@@ -157,6 +157,7 @@
 
 (defn list-search-results! [resp]
   (state/set! [:tabid] 9)
+  (state/set! [:search-results] resp)
   (js/alert resp))
 
 (defn run-search! []
