@@ -222,6 +222,10 @@
                    search-query))
         vec)])
 
+(defn include-pred [row]
+  (map #(merge % {:pred (first row)})
+       (second row)))
+
 (defn full-search [user query-map]
   (let [query (:query query-map)]
     (->> s/search-preds
@@ -230,5 +234,5 @@
          (interleave s/search-preds)
          (partition 2) (map vec) vec
          (remove #(-> % second empty?))
-         (map id-row) (map search-row)
-         (into {}))))
+         (map (comp include-pred search-row id-row))
+         flatten)))
