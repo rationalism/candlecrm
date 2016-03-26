@@ -210,6 +210,18 @@
   [(first row)
    (flatten (map (comp second first vals) (second row)))])
 
+(defn search-query [id]
+  (str "MATCH (root) WHERE ID(root)=" id
+       " WITH root" (vals-collect)))
+
+(defn search-row [row]
+  [(first row)
+   (->> row second
+        (map (comp first mapify-hits
+                   neo4j/cypher-query-raw
+                   search-query))
+        vec)])
+
 (defn full-search [user query-map]
   (let [query (:query query-map)]
     (->> s/search-preds
@@ -218,4 +230,5 @@
          (interleave s/search-preds)
          (partition 2) (map vec) vec
          (remove #(-> % second empty?))
-         (map id-row) (into {}))))
+         (map id-row) (map search-row)
+         (into {}))))
