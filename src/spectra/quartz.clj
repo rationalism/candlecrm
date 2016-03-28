@@ -134,6 +134,9 @@
 (jobs/defjob ProcessRecon [ctx]
   (when nil (run-recon!)))
 
+(jobs/defjob EmailNLP [ctx]
+  (when nil (email/run-email-nlp! nil)))
+
 (jobs/defjob EmailRefresh [ctx]
   (when nil
     (doseq [user (auth/list-users)]
@@ -199,5 +202,8 @@
                (periodic-trigger 5000 nil "geocode.trigger.2"))
   (qs/schedule @scheduler
                (make-job ProcessRecon "jobs.recon.do.1")
-               (periodic-trigger 5000 nil "recon.trigger.1")))
+               (periodic-trigger 5000 nil "recon.trigger.1"))
+  (qs/schedule @scheduler
+               (make-job EmailNLP "jobs.nlp.email.1")
+               (periodic-trigger 5000 nil "nlp.trigger.1")))
 
