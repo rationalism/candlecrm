@@ -530,7 +530,7 @@
   (->> (loom/select-edges chain s/link-to)
        (map link-pair) (apply merge)))
 
-(defn use-nlp [chain message]
+(defn use-nlp [message chain]
   (if (com/nil-or-empty? (s/email-body message)) chain
       (as-> (->> (s/email-body message)
                  (nlp/run-nlp-full (author-name chain message))
@@ -549,16 +549,16 @@
         (loom/remove-nodes $ (->> s/has-type (loom/select-edges $) (map second))))))
 
 (defn use-nlp-graph [g]
-  (reduce use-nlp g (recon/filter-memory g s/email)))
+  (reduce use-nlp (recon/filter-memory g s/email) g))
 
 (defn graph-from-id [id]
   (let [vals (->> [[s/email-body] [s/email-from s/s-name]]
                   (mlrecon/fetch-paths id) (map first))]
-    (->> [{s/type-label s/email s/email-body (first vals)}
+    (->> [{s/type-label s/email :id id}
           {s/s-name (second vals)} s/email-from]
          vector (loom/build-graph [])
-         use-nlp-graph)))
-  
+         (use-nlp {s/email-body (first vals)}))))
+
 (defn parse-and-insert! [sep-model message-and-user]
   (-> message-and-user :message
       (full-parse sep-model)
