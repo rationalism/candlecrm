@@ -117,7 +117,7 @@
 (def date-times [start-time stop-time over-time
                  email-sent email-received])
 
-(def exclude-upload [type-label])
+(def exclude-upload [type-label :id])
 
 (def search-preds [s-name email-addr email-subject
                    phone-num])

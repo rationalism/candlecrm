@@ -19,14 +19,14 @@
        ") RETURN ID(root)"))
 
 (defnp insert-nodes! [g user]
-  (let [n (loom/nodes g)]
-    (zipmap n
-            (->> (map s/type-label n)
-                 (map #(create-cypher user %))
-                 neo4j/cypher-combined-tx
-                 (map first) (map vals)
-                 (map first) (map second)
-                 (map first)))))
+  (let [fulls (remove #(contains? % :id) (loom/nodes g))
+        emptys (filter #(contains? % :id) (loom/nodes g))]
+    (->> (map s/type-label fulls)
+         (map #(create-cypher user %))
+         neo4j/cypher-combined-tx
+         (map (comp first second first vals first))
+         (zipmap fulls)
+         (merge (zipmap emptys (map :id emptys))))))
 
 (defn prop-cypher [user id prop val]
   (if (coll? val)
