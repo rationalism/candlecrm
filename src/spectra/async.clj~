@@ -1,5 +1,0 @@
-(ns spectra.async
-  (:require [clojure.core.async :as async]
-            [taoensso.timbre.profiling :as profiling
-             :refer (pspy pspy* profile defnp p p*)]))
-
