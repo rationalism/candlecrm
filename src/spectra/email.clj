@@ -559,6 +559,10 @@
          vector (loom/build-graph [])
          (use-nlp {s/email-body (first vals)}))))
 
+(defn run-email-nlp! [user]
+  (-> user queries/email-for-nlp
+      graph-from-id (insert/push-graph! user)))
+
 (defn parse-and-insert! [sep-model message-and-user]
   (-> message-and-user :message
       (full-parse sep-model)
