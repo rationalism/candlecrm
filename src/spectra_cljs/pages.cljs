@@ -14,28 +14,35 @@
    [html/email-table [:email-rows] :email u/update-emails!]])
 
 (defn show-person [person]
-  [html/show-person (-> person :center-node :name first)
-                    (:center-node person)])
+  [html/show-person
+   (when-let [name (-> person :center-node s/s-name first)]
+     name)
+   (-> person :center-node s/email-addr first)
+   (:center-node person)])
 
 (defn show-email [email]
   [html/show-email (-> email :center-node :subject)
-                   (:center-node email)])
+   (:center-node email)])
 
 (defn show-organization [organization]
-  [html/show-organization (-> organization :center-node :name first)
-                          (:center-node organization)])
+  [html/show-organization
+   (-> organization :center-node :name first)
+   (:center-node organization)])
 
 (defn show-location [location]
-  [html/show-location (-> location :center-node :name first)
-                      (:center-node location)])
+  [html/show-location
+   (-> location :center-node s/s-name first)
+   (:center-node location)])
 
 (defn show-event [event]
-  [html/show-event (-> event :center-node :name first)
-                   (:center-node event)])
+  [html/show-event
+   (-> event :center-node s/s-name first)
+   (:center-node event)])
 
 (defn show-money [money]
-  [html/show-money (-> money :center-node :name first)
-                   (:center-node money)])
+  [html/show-money
+   (-> money :center-node s/s-name first)
+   (:center-node money)])
 
 (def node-fn {s/person show-person s/email show-email
               s/organization show-organization s/location show-location

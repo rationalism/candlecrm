@@ -123,7 +123,9 @@
   (state/set! [:tabid] 7))
 
 (defn person-link [person attr]
-  [node-link (first (person attr))
+  [node-link
+   (if-let [name (first (person attr))]
+     name "(No name listed)")
    (person :id) s/person])
 
 (defn person-site [person attr]
@@ -421,18 +423,21 @@
   (state/update! [:current-node :center-node] ids-if-coll)
   (state/set! [:tabid] 8))
 
-(defn show-person [person-name item]
-  [:div
-   [:h3.infotitle (str person-name " (Person) ")
-    [:a {:href "#" :on-click edit-person-switch}
-     "(Edit)"]]
-   [info-items person-disp item]
-   [:h3.infotitle (str "Emails to " person-name)]
-   [email-table [:current-node s/email-to] s/email-to
-    (partial u/update-emails-person! s/email-to)]
-   [:h3.infotitle (str "Emails from " person-name)]
-   [email-table [:current-node s/email-from] s/email-from
-    (partial u/update-emails-person! s/email-from)]])
+(defn show-person [person-name email-addr item]
+  (let [disp-name (if person-name person-name email-addr)]
+    [:div
+     [:h3.infotitle
+      (str (if person-name person-name "(No name listed)")
+           " (Person) ")
+      [:a {:href "#" :on-click edit-person-switch}
+       "(Edit)"]]
+     [info-items person-disp item]
+     [:h3.infotitle (str "Emails to " disp-name)]
+     [email-table [:current-node s/email-to] s/email-to
+      (partial u/update-emails-person! s/email-to)]
+     [:h3.infotitle (str "Emails from " disp-name)]
+     [email-table [:current-node s/email-from] s/email-from
+      (partial u/update-emails-person! s/email-from)]]))
 
 (defn show-email [email-name item]
   [:div
