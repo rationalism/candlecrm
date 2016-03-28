@@ -1,7 +1,7 @@
 (ns spectra.weka
   (:require [clojure.string :as str]
             [clojure.edn :as edn]
-            [clojure.core.async :as async]
+            [spectra.async :as async]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [weka.classifiers Evaluation]
@@ -26,43 +26,6 @@
 (def email-sep-key "emailbreak")
 
 (defonce models (atom {}))
-(defonce workers (atom {}))
-(defonce outfeed (atom nil))
-
-(defonce in-chan (async/chan))
-(defonce out-chan (async/chan))
-
-(defn process [line]
-  (Thread/sleep 10000)
-  line)
-
-(defn async-worker []
-  (async/thread
-    (while true
-      (let [line (async/<!! in-chan)
-            data (process line)]
-        (async/>!! out-chan data)))))
-
-(defn add-worker! [worker n]
-  (swap! workers assoc n worker))
-
-(defn start-async-workers! []
-  (->> num-threads range
-       (map #(add-worker! (async-worker) %))
-       dorun))
-
-(defn start-async-infeed [lines]
-  (doseq [line lines]
-    (async/>!! in-chan line)))
-
-(defn async-outfeed []
-  (async/thread
-    (while true
-      (let [data (async/<!! out-chan)]
-        (println data)))))
-
-(defn start-async-outfeed! []
-  (reset! outfeed (async-outfeed)))
 
 (defn serialize [forest filename]
   (-> filename
