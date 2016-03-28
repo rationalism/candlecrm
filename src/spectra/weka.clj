@@ -51,6 +51,13 @@
 (defn load-models! []
   (new-model! email-sep-key models-dir))
 
+(defn get-copy-fn [class dir]
+  (let [model (deserialize (str dir "/" class ".dat"))]
+    (fn [] (FilteredClassifier/makeCopy model))))
+
+(defn email-sep-model-fn []
+  (get-copy-fn email-sep-key models-dir))
+
 (defn attr-gen [n]
   (Attribute. (str "attr" n)))
 
@@ -171,12 +178,8 @@
        (.distributionForInstance bayes)
        (into [])))
 
-(defn classify-email-line [l]
-  (-> @models (get email-sep-key)
-      (classify-bayes l)))
-
-(defn is-header? [l]
-  (->> l classify-email-line
+(defn is-header? [sep-model l]
+  (->> (classify-bayes sep-model l)
        second (< 0.5)))
 
 (defn read-trainset [filename]

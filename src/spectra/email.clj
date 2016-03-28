@@ -1,6 +1,7 @@
 (ns spectra.email
   (:require [clojure.string :as str]
             [crypto.random :as rnd]
+            [spectra.async :as async]
             [spectra.auth :as auth]
             [spectra.common :as com]
             [spectra.datetime :as dt]
@@ -22,11 +23,15 @@
            [javax.mail.internet InternetAddress]
            [com.sun.mail.imap IMAPFolder$FetchProfileItem]))
 
+;; Global variables
 (def inbox-folder-name "[Gmail]/All Mail")
 (def plain-type "text/plain")
 (def html-type "text/html")
 (def multi-type "multipart")
+(def parse-threads 6)
 (def batch-size 100)
+
+(defonce parse-channel (atom nil))
 
 (defn get-folder [store folder-name]
   (.getFolder store folder-name))
@@ -241,18 +246,18 @@
   (if (or (nil? coll) (empty? coll)) marks
       (assoc marks map-key (first coll))))
 
-(defn first-header [lines]
+(defn first-header [sep-model lines]
   (if (or (nil? lines) (empty? lines))
     0 (loop [cnt 0]
         (cond (= cnt (count lines)) (count lines)
-              (weka/is-header? (nth lines cnt)) cnt
+              (weka/is-header? sep-model (nth lines cnt)) cnt
               :else (recur (inc cnt))))))
 
-(defn first-body [lines]
+(defn first-body [sep-model lines]
   (if (or (nil? lines) (empty? lines))
     0 (loop [cnt 0]
         (cond (= cnt (count lines)) (count lines)
-              (not (weka/is-header? (nth lines cnt))) cnt
+              (not (weka/is-header? sep-model (nth lines cnt))) cnt
               :else (recur (inc cnt))))))
 
 ;; Arbitrary date: 1960-01-02 05:11:48.874
@@ -273,13 +278,13 @@
           (assoc-if-found :email-from-name (->> header-lines nlp/run-nlp-default
                                                 nlp/nlp-names (map first)))))))
 
-(defn find-end-header [marks lines]
-  (->> lines first-body
+(defn find-end-header [marks sep-model lines]
+  (->> lines (first-body sep-model)
        (assoc marks :end-header)))
 
-(defn find-end-body [marks lines]
+(defn find-end-body [marks sep-model lines]
   (->> lines (drop (:end-header marks))
-       first-header (+ (:end-header marks))
+       (first-header sep-model) (+ (:end-header marks))
        (assoc marks :end-body)))
 
 (defn remove-arrow [line depth]
@@ -309,12 +314,12 @@
 (defn chain-lines [chain]
   (-> chain find-top s/email-body))
 
-(defnp find-marks [depth chain]
+(defnp find-marks [sep-model depth chain]
   (let [lines (chain-lines chain)]
     (-> {:depth depth s/email-sent nil :email-from-name nil
          :email-from-addr nil}
-        (find-end-header lines)
-        (find-end-body lines)
+        (find-end-header sep-model lines)
+        (find-end-body sep-model lines)
         (start-tail lines)
         (find-header-vals lines))))
 
@@ -365,17 +370,19 @@
         (maybe-add-edges new-node email-from)
         (maybe-add-top chain marks new-node))))
 
-(defn recursive-split [depth chain]
+(defn recursive-split [sep-model depth chain]
   (if (>= depth 0)
-    (recur (dec depth) (-> depth (find-marks chain) (split-email chain)))
+    (recur sep-model (dec depth)
+           (-> sep-model (find-marks depth chain)
+               (split-email chain)))
     chain))
 
 (defn start-email-graph [body]
   (loom/build-graph [{s/email-body body}] []))
 
-(defnp raw-msg-chain [body]
+(defnp raw-msg-chain [body sep-model]
   (let [lines (str/split-lines body)]
-    (recursive-split (count-max-depth lines)
+    (recursive-split sep-model (count-max-depth lines)
                      (start-email-graph lines))))
 
 (defnp get-text-recursive [message]
@@ -462,10 +469,10 @@
   (vector (get-text-recursive message)
           (headers-fetch message folder)))
 
-(defnp full-parse [message]
+(defnp full-parse [message sep-model]
   (try (-> message first
            regex/strip-javascript
-           raw-msg-chain
+           (raw-msg-chain sep-model)
            (merge-bottom-headers (headers-parse (second message)))
            message-inference)
        (catch Exception e
@@ -548,12 +555,25 @@
 (defn use-nlp-graph [g]
   (reduce use-nlp g (recon/filter-memory g s/email)))
 
+(defn parse-and-insert! [sep-model message-and-user]
+  (println "parse-and-insert!")
+  (-> message-and-user :message
+      (full-parse sep-model)
+      (insert/push-graph! (:user message-and-user))))
+
+(defn make-parse-pool! []
+  (->> {:name "email-parse" :process parse-and-insert!
+        :param-gen (weka/email-sep-model-fn)
+        :callback identity :num-threads parse-threads}
+       async/create-pool!
+       (reset! parse-channel)))
+
 (defn insert-raw-range! [user lower upper]
   (let [folder (fetch-imap-folder user)]
     (->> (fetch-messages folder lower upper)
          (pmap #(message-fetch % folder))
-         (map full-parse)
-         (map #(insert/push-graph! % user)))))
+         (map #(hash-map :user user :message %))
+         (map @parse-channel) dorun)))
 
 (defn insert-one-email! [user email-num]
   (insert-raw-range! user email-num email-num))
