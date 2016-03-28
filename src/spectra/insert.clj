@@ -54,8 +54,18 @@
   (link-cypher (id-map (first e)) (id-map (second e))
                (nth e 2)))
 
+(defn add-label-query [ids]
+  (str "MATCH (root) WHERE ID(root) IN ["
+       (str/join "," ids)
+       "] SET root:" (neo4j/esc-token s/nonlp)))
+
+(defn add-nlp-labels! [id-map]
+  (->> (filter #(-> % first s/type-label (= s/email)) id-map)
+       (map second) add-label-query neo4j/cypher-query-raw))
+
 (defnp push-graph! [g user]
   (let [id-map (insert-nodes! g user)]
+    (add-nlp-labels! id-map)
     (->> (mapcat #(id-pair-cypher % user) id-map)
          neo4j/cypher-combined-tx)
     (->> g loom/multi-edges
