@@ -438,6 +438,7 @@
   (->> chain loom/nodes
        (filter #(loom/out-edge-label chain % s/email-reply))
        (map #(make-to % chain))
+       (filter #(second %))
        (loom/add-edges chain)))
 
 (defn replace-subject [subject chain node]
@@ -451,11 +452,6 @@
           chain (->> chain loom/nodes
                      (filter #(loom/out-edge-label chain % s/email-from)))))
 
-(defnp message-inference [chain]
-  (-> chain
-      infer-email-chain
-      infer-subject))
-
 (defn merge-bottom-headers [chain headers]
   (as-> chain $
     (loom/merge-graphs [$ headers])
@@ -465,7 +461,7 @@
     (loom/replace-node $ (-> headers loom/top-nodes first)
                        (find-bottom $))))
 
-(defnp message-fetch [message folder]
+(defnp message-fetch [folder message]
   (vector (get-text-recursive message)
           (headers-fetch message folder)))
 
@@ -474,7 +470,7 @@
            regex/strip-javascript
            (raw-msg-chain sep-model)
            (merge-bottom-headers (headers-parse (second message)))
-           message-inference)
+           infer-email-chain infer-subject)
        (catch Exception e
          (do (println "Email parse error")
              (print e) {}))))
@@ -556,7 +552,6 @@
   (reduce use-nlp g (recon/filter-memory g s/email)))
 
 (defn parse-and-insert! [sep-model message-and-user]
-  (println "parse-and-insert!")
   (-> message-and-user :message
       (full-parse sep-model)
       (insert/push-graph! (:user message-and-user))))
@@ -571,9 +566,10 @@
 (defn insert-raw-range! [user lower upper]
   (let [folder (fetch-imap-folder user)]
     (->> (fetch-messages folder lower upper)
-         (pmap #(message-fetch % folder))
-         (map #(hash-map :user user :message %))
-         (map @parse-channel) dorun)))
+         (pmap #(->> (message-fetch folder %)
+                     (hash-map :user user :message)
+                     (@parse-channel)))
+         dorun)))
 
 (defn insert-one-email! [user email-num]
   (insert-raw-range! user email-num email-num))
