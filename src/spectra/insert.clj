@@ -64,8 +64,6 @@
        (map second) add-label-query neo4j/cypher-query-raw))
 
 (defnp push-graph! [g user]
-  (println "push-graph!")
-  (println (loom/nodes g))
   (let [id-map (insert-nodes! g user)]
     (add-nlp-labels! id-map)
     (->> (mapcat #(id-pair-cypher % user) id-map)
