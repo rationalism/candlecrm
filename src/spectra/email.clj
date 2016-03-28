@@ -551,6 +551,14 @@
 (defn use-nlp-graph [g]
   (reduce use-nlp g (recon/filter-memory g s/email)))
 
+(defn graph-from-id [id]
+  (let [vals (->> [[s/email-body] [s/email-from s/s-name]]
+                  (mlrecon/fetch-paths id) (map first))]
+    (->> [{s/type-label s/email s/email-body (first vals)}
+          {s/s-name (second vals)} s/email-from]
+         vector (loom/build-graph [])
+         use-nlp-graph)))
+  
 (defn parse-and-insert! [sep-model message-and-user]
   (-> message-and-user :message
       (full-parse sep-model)
@@ -583,3 +591,4 @@
        (map #(get-in % [:data :body]))
        (map regex/strip-tags)
        (map nlp/run-nlp-openie)))
+
