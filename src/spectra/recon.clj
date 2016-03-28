@@ -28,20 +28,6 @@
        (filter #(nil? (:data %)))
        (remove #(loom/out-edge-label g % :database-match))))
 
-(defn name-email-map [names emails]
-  (cond
-    (> (count names) (count emails))
-    (as-> (count names) $
-      (- $ (count emails)) (repeat $ nil)
-      (reduce conj emails $)
-      (zipmap names $))
-    (< (count names) (count emails))
-    (as-> (count emails) $
-      (- $ (count names)) (repeat $ nil)
-      (reduce conj names $)
-      (zipmap $ emails))
-    :else (zipmap names emails)))
-
 (defn map-node [node attr]
   (cond
     (nil? (attr node)) nil

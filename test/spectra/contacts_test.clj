@@ -11,11 +11,10 @@
     (.addEmailAddress (doto (Email. )
                         (.setAddress "foobar2@gmail.com")))))
 
-;; THIS IS BROKEN
-
 (def expected-person
   {:label :person
-   :email-addr '("foobar2@gmail.com")})
+   :email-addr '("foobar1@gmail.com"
+                 "foobar2@gmail.com")})
 
 (deftest contact-extraction
   (testing "Extraction of information from contacts"

@@ -1,12 +1,10 @@
 (ns spectra.contacts
   (:require [spectra.auth :as auth]
             [spectra.common :as com]
-            [spectra.corenlp :as nlp]
             [spectra.datetime :as dt]
             [spectra.google :as google]
             [spectra.insert :as insert]
             [spectra.neo4j :as neo4j]
-            [spectra.recon :as recon]
             [spectra_cljc.schema :as s])
   (:import [com.google.gdata.client Query]
            [com.google.gdata.client.contacts ContactsService]
@@ -81,29 +79,18 @@
 (defn maybe-add [m k v]
   (if v (assoc m k v) m))
 
-(defn pair-person [pair]
-  (-> (assoc {} s/type-label s/person)
-      (maybe-add s/s-name (key pair))
-      (maybe-add s/email-addr (val pair))))
-
-(defn label-if-none [m]
-  (if (empty? m)
-    {s/type-label s/person}
-    m))
-
 (defn contact->person [contact]
-  (->> (emails contact)
-       (recon/name-email-map (names contact))
-       (map pair-person)
-       recon/merge-nodes label-if-none
-       (conj [{s/phone-num (phones contact)
-               s/birthday (birthday contact)
-               s/gender (gender contact)
-               s/occupation (occupation contact)
-               s/mail-address (addresses contact)
-               s/website (websites contact)
-               s/org-member (organizations contact)}])
-       (apply merge) filter-map))
+  (filter-map
+   {s/type-label s/person
+    s/s-name (names contact)
+    s/email-addr (emails contact)
+    s/phone-num (phones contact)
+    s/birthday (birthday contact)
+    s/gender (gender contact)
+    s/occupation (occupation contact)
+    s/mail-address (addresses contact)
+    s/website (websites contact)
+    s/org-member (organizations contact)}))
 
 (defn batch-insert! [user contacts]
   (-> (map contact->person contacts)
