@@ -61,6 +61,7 @@
 
 (defn add-nlp-labels! [id-map]
   (->> (filter #(-> % first s/type-label (= s/email)) id-map)
+       (remove #(-> % first :id))
        (map second) add-label-query neo4j/cypher-query-raw))
 
 (defnp push-graph! [g user]

@@ -56,6 +56,7 @@
        (into {})))
 
 (defn cypher-query-raw [query]
+  (spit "/home/alyssa/cypherlog.txt" query :append true)
   (try
     (cy/tquery @conn query)
     (catch Exception e
@@ -106,6 +107,7 @@
       (cypher-tx-exception queries e))))
 
 (defn cypher-combined-tx [queries]
+  (spit "/home/alyssa/cypherlog.txt" queries :append true)
   (trampoline cypher-combined-tx-recur queries))
 
 (defn find-by-id [id]
