@@ -559,9 +559,16 @@
          vector (loom/build-graph [])
          (use-nlp message))))
 
+(defn delete-email-body! [id]
+  (neo4j/cypher-query-raw
+   (str "MATCH (root)-[:" (neo4j/esc-token s/email-body)
+        "]->(b) WHERE ID(root) = " id
+        " DETACH DELETE b")))
+
 (defn run-email-nlp! []
   (let [email (queries/email-for-nlp)
         graph (-> email :id graph-from-id)]
+    (-> email :id delete-email-body!)
     (-> (loom/remove-nodes graph (->> (loom/select-edges graph s/email-from)
                                       (map second)))
         (insert/push-graph! (s/user email)))))

@@ -1,6 +1,5 @@
 (ns spectra_cljs.regex
   (:require [clojure.string :as str]
-            [cljs.reader :as reader]
             [spectra_cljc.schema :as s]))
 
 ;; My own regexes
@@ -9,12 +8,11 @@
 (def bracket-regex #"\>(.+)\<")
 (def esc-char-regex #"\^|\[|\]|\.|\$|\{|\}|\(|\)|\\|\*|\+|\||\?|\<|\>")
 
-;; FIX THIS - NOT TRUSTED!
 (defn node-map [hypertext]
   {:text (-> bracket-regex (re-seq hypertext)
              first second)
    :link (-> node-param-regex (re-seq hypertext)
-             first second reader/read-string)
+             first second)
    :original hypertext})
 
 (defn node-parse [text]
