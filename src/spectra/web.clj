@@ -70,7 +70,7 @@
         (let [user (-> req auth/user-from-req :data s/email-addr
                        auth/lookup-user)]
           (quartz/add-new-queue! user)
-;          (quartz/schedule-contacts! user)
+          (quartz/schedule-contacts! user)
           (home-with-message "Congrats! Authentication successful"))))
   (GET google/callback-url req
        (friend/authenticated

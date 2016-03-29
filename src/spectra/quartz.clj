@@ -185,7 +185,7 @@
 (defn schedule-contacts! [user]
   (qs/schedule @scheduler
                (make-job LoadContacts "jobs.contacts.load.1" {s/user user})
-               (once-trigger 20000 "jobs.contacts.trigger.1")))
+               (once-trigger 2000 "jobs.contacts.trigger.1")))
 
 (defn start! []
   (reset! scheduler (qs/start (qs/initialize)))
