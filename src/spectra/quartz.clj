@@ -145,7 +145,7 @@
 
 (defn user-job [ctx]
   (-> ctx qc/from-job-data
-      (get s/user) (get "id")
+      (get "user") (get "id")
       neo4j/find-by-id))
 
 (jobs/defjob LoadContacts [ctx]
@@ -191,7 +191,7 @@
   (reset! scheduler (qs/start (qs/initialize)))
   (qs/schedule @scheduler
                (make-job EmailLoad "jobs.email.load.1")
-               (periodic-trigger 5000 nil "email.trigger.1"))
+               (periodic-trigger 2000 nil "email.trigger.1"))
   (qs/schedule @scheduler
                (make-job EmailRefresh "jobs.email.load.2")
                (periodic-trigger 3600000 nil "email.trigger.2"))
