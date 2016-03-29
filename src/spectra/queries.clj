@@ -237,9 +237,15 @@
          (map (comp include-pred search-row id-row))
          flatten)))
 
-(defn email-for-nlp [user]
-  (->> ["MATCH (root:" (neo4j/prop-label user s/email)
-        ":" (neo4j/esc-token s/nonlp)
-        ") RETURN ID(root) LIMIT 1"]
-       (apply str) neo4j/cypher-query-raw
-       first vals first))
+(defn filter-decode-labels [labels]
+  (->> labels (filter #(.contains % "_user_"))
+       first neo4j/decode-label
+       first neo4j/find-by-id))
+
+(defn email-for-nlp []
+  (-> (str "MATCH (root:" (neo4j/esc-token s/nonlp)
+           ")-[:" (neo4j/esc-token s/email-body)
+           "]->(b) RETURN ID(root), labels(root) LIMIT 1")
+      neo4j/cypher-query-raw first
+      (update "labels(root)" filter-decode-labels)
+      (set/rename-keys {"ID(root)" :id "labels(root)" s/user})))

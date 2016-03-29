@@ -135,7 +135,7 @@
   (when nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
-  (when nil (email/run-email-nlp! nil)))
+  (when nil (email/run-email-nlp!)))
 
 (jobs/defjob EmailRefresh [ctx]
   (when nil
@@ -205,5 +205,5 @@
                (periodic-trigger 5000 nil "recon.trigger.1"))
   (qs/schedule @scheduler
                (make-job EmailNLP "jobs.nlp.email.1")
-               (periodic-trigger 5000 nil "nlp.trigger.1")))
+               (periodic-trigger 500 nil "nlp.trigger.1")))
 
