@@ -21,7 +21,7 @@
    (:center-node person)])
 
 (defn show-email [email]
-  [html/show-email (-> email :center-node :subject)
+  [html/show-email (-> email :center-node :subject first)
    (:center-node email)])
 
 (defn show-organization [organization]

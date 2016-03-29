@@ -172,7 +172,7 @@
                   s/email-subject "Subject"})
 
 (defn email-link [email attr]
-  [node-link (email attr) (email :id) s/email])
+  [node-link (-> email attr first) (email :id) s/email])
 
 (defn email-cell [email attr]
   [:td (cond
