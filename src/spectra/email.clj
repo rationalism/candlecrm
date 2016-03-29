@@ -560,10 +560,11 @@
          (use-nlp message))))
 
 (defn delete-email-body! [id]
-  (neo4j/cypher-query-raw
-   (str "MATCH (root)-[:" (neo4j/esc-token s/email-body)
+  (->> ["MATCH (root)-[:" (neo4j/esc-token s/email-body)
         "]->(b) WHERE ID(root) = " id
-        " DETACH DELETE b")))
+        " DETACH DELETE b"]
+       (apply str) vector
+       neo4j/cypher-combined-tx))
 
 (defn run-email-nlp! []
   (let [email (queries/email-for-nlp)]
