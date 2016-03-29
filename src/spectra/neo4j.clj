@@ -92,7 +92,9 @@
 (defn cypher-tx-exception [queries e]
   (if (not (deadlock-throw? e))
     (do (println "Cypher query exception")
-        (println (.getMessage e)) {})
+        (println (.getMessage e))
+        (println "First query: " (first queries))
+        {})
     (cypher-combined-tx queries)))
 
 (defn cypher-combined-tx-recur [queries]
