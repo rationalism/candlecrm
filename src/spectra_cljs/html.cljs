@@ -31,7 +31,9 @@
            "MMM Do, h:mm a"))
 
 (defn date-display [item]
-  [:span (format-date item)])
+  [:span (format-date
+          (if (coll? item)
+            (first item) item))])
 
 (defn count-cells [attr cache]
   (->> attr vector (concat cache) (apply state/look)
@@ -387,9 +389,9 @@
 
 (defn string-item [item prop]
   [:span
-   (cond (coll? item) (str/join ", " item)
-         (= prop s/email-body) [body-links item]
-         (some #{prop} s/date-times) [date-display item]
+   (cond (some #{prop} s/date-times) [date-display item]
+         (= prop s/email-body) [body-links (first item)]
+         (coll? item) (str/join ", " item)
          :else item)])
 
 (defn str-item [n k v]
