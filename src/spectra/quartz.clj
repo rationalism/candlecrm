@@ -191,7 +191,7 @@
   (reset! scheduler (qs/start (qs/initialize)))
   (qs/schedule @scheduler
                (make-job EmailLoad "jobs.email.load.1")
-               (periodic-trigger 2000 nil "email.trigger.1"))
+               (periodic-trigger 5000 nil "email.trigger.1"))
   (qs/schedule @scheduler
                (make-job EmailRefresh "jobs.email.load.2")
                (periodic-trigger 3600000 nil "email.trigger.2"))
