@@ -573,7 +573,7 @@
     (-> (loom/remove-nodes graph (->> (loom/select-edges graph s/email-from)
                                       (map second)))
         (insert/push-graph! (s/user email)))
-    (-> email :id (neo4j/remove-label s/norecon))))
+    (-> email :id (neo4j/remove-label! s/nonlp))))
 
 (defn parse-and-insert! [sep-model message-and-user]
   (-> message-and-user :message

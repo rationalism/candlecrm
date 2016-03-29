@@ -123,7 +123,7 @@
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (when nil (queue-pop!)))
+  (queue-pop!))
 
 (jobs/defjob NewGeocodes [ctx]
   (geocode/geocode-batch 10))
@@ -205,5 +205,5 @@
                (periodic-trigger 5000 nil "recon.trigger.1"))
   (qs/schedule @scheduler
                (make-job EmailNLP "jobs.nlp.email.1")
-               (periodic-trigger 500 nil "nlp.trigger.1")))
+               (periodic-trigger 100 nil "nlp.trigger.1")))
 
