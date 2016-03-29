@@ -557,11 +557,14 @@
     (->> [{s/type-label s/email :id id}
           {s/s-name (second vals)} s/email-from]
          vector (loom/build-graph [])
-         (use-nlp {s/email-body (first vals)}))))
+         (use-nlp {s/email-body (first vals) s/type-label s/email}))))
 
 (defn run-email-nlp! []
-  (let [email (queries/email-for-nlp)]
-    (-> email :id graph-from-id
+  (let [email (queries/email-for-nlp)
+        graph (-> email :id graph-from-id)]
+    (-> (loom/remove-nodes graph (->> (loom/select-edges graph s/email-from)
+                                      (map second)))
+        loom/display-graph
         (insert/push-graph! (s/user email)))))
 
 (defn parse-and-insert! [sep-model message-and-user]
