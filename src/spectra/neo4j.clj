@@ -222,9 +222,9 @@
 (defn add-label! [id label]
   (cypher-query-raw
    (str "MATCH (root) WHERE ID(root) = " id
-        " SET root:" (neo4j/esc-token label))))
+        " SET root:" (esc-token label))))
 
 (defn remove-label! [id label]
   (cypher-query-raw
    (str "MATCH (root) WHERE ID(root) = " id
-        " REMOVE root:" (neo4j/esc-token label))))
+        " REMOVE root:" (esc-token label))))
