@@ -114,10 +114,11 @@
       neo4j/cypher-list first))
 
 (defn queue-data [n]
-  (->> [[s/loaded-bottom] [s/loaded-top] [s/top-uid] [s/modified]]
-       (mlrecon/fetch-paths (:id n)) (map first)
-       (zipmap [s/loaded-bottom s/loaded-top s/top-uid s/modified])
-       (merge {:id (:id n)})))
+  (when n
+    (->> [[s/loaded-bottom] [s/loaded-top] [s/top-uid] [s/modified]]
+         (mlrecon/fetch-paths (:id n)) (map first)
+         (zipmap [s/loaded-bottom s/loaded-top s/top-uid s/modified])
+         (merge {:id (:id n)}))))
 
 (defn next-email-queue []
   (-> (str "MATCH (root)-[:" (neo4j/esc-token s/user-queue)
@@ -256,8 +257,9 @@
          flatten)))
 
 (defn find-user-labels [labels]
-  (->> labels filter-decode-labels
-       first neo4j/find-by-id))
+  (when labels
+    (->> labels filter-decode-labels
+         first neo4j/find-by-id)))
 
 (defn email-for-nlp []
   (-> (str "MATCH (root:" (neo4j/esc-token s/nonlp)

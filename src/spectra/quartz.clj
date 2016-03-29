@@ -92,9 +92,10 @@
                            (range-top (:queue queue-user))))
 
 (defn queue-pop! []
-  (when-let [queue-user (queries/next-email-queue)]
-    (queue-reset! (:queue queue-user))
-    (run-insertion! queue-user)))
+  (let [queue-user (queries/next-email-queue)]
+    (when (:queue queue-user)
+      (queue-reset! (:queue queue-user))
+      (run-insertion! queue-user))))
 
 (defn new-queue-map [top-uid]
   {s/top-uid top-uid
@@ -135,7 +136,7 @@
   (when nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
-  (email/run-email-nlp!))
+  (when nil (email/run-email-nlp!)))
 
 (jobs/defjob EmailRefresh [ctx]
   (when nil

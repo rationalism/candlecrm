@@ -566,14 +566,16 @@
         " DETACH DELETE b")))
 
 (defn run-email-nlp! []
-  (let [email (queries/email-for-nlp)
-        graph (-> email :id graph-from-id)]
-    (println "run email nlp")
-    (-> email :id delete-email-body!)
-    (-> (loom/remove-nodes graph (->> (loom/select-edges graph s/email-from)
-                                      (map second)))
-        (insert/push-graph! (s/user email)))
-    (-> email :id (neo4j/remove-label! s/nonlp))))
+  (let [email (queries/email-for-nlp)]
+    (when (s/user email)
+      (let [graph (-> email :id graph-from-id)]
+        (println "run email nlp")
+        (-> email :id delete-email-body!)
+        (-> (loom/remove-nodes
+             graph (->> (loom/select-edges graph s/email-from)
+                        (map second)))
+            (insert/push-graph! (s/user email)))
+        (-> email :id (neo4j/remove-label! s/nonlp))))))
 
 (defn parse-and-insert! [sep-model message-and-user]
   (-> message-and-user :message
