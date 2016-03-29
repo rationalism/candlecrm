@@ -25,8 +25,6 @@
 (def models-dir "/home/alyssa/clojure/spectra/resources/models")
 (def email-sep-key "emailbreak")
 
-(defonce models (atom {}))
-
 (defn serialize [forest filename]
   (-> filename
       (FileOutputStream. )
@@ -42,14 +40,6 @@
   (-> filename
       (FileInputStream. )
       deserialize-stream))
-
-(defn new-model! [class dir]
-  (->> (str dir "/" class ".dat")
-       deserialize
-       (swap! models assoc class)))
-
-(defn load-models! []
-  (new-model! email-sep-key models-dir))
 
 (defn get-copy-fn [class dir]
   (let [model (deserialize (str dir "/" class ".dat"))]

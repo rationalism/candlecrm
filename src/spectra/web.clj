@@ -134,7 +134,6 @@
   (email/make-parse-pool!)
   (ajax/start!)
   (mlrecon/load-models!)
-  (weka/load-models!)
   (geocode/define-context!)
   (quartz/start!)
   (println "Ready to start server")
