@@ -10,7 +10,7 @@
 
 (defn pipeline-ready [f]
   (nlp/load-pipeline!)
-  (weka/load-models!)
+  (make-parse-pool!)
   (f))
 
 (use-fixtures :once pipeline-ready)
@@ -26,7 +26,7 @@
 (deftest email-chaining
   (testing "Turn an email into a chain"
     (is (-> test-email regex/strip-javascript
-            raw-msg-chain message-inference))))
+            raw-msg-chain))))
 
 (deftest email-nlp
   (testing "Split an email into an NLP graph"
