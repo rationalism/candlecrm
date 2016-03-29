@@ -24,12 +24,20 @@
        (remove empty?)
        (map first-table-vals)))
 
+(defn filter-decode-labels [labels]
+  (->> labels (filter #(.contains % "_user_"))
+       first neo4j/decode-label))
+
 (defn mapify-params [params]
   (if (or (nil? params) (empty? params))
-    nil (->> (map #(drop 1 %) params)
-             (map #(hash-map (keyword (first %)) (vector (second %))))
+    nil (->> (map #(drop 2 %) params)
+             (map #(hash-map (keyword (first %))
+                             (vector (second %))))
              (apply merge-with concat)
-             (merge {:id (ffirst params)}))))
+             (merge {:id (ffirst params)
+                     s/type-label (-> params first second
+                                      filter-decode-labels
+                                      second)}))))
 
 (defn mapify-hits [hits]
   (->> hits first vals first
@@ -38,7 +46,8 @@
 
 (defn vals-collect []
   (str " MATCH (root)-[r]->(v)"
-       " WITH collect([ID(root), type(r), v." (neo4j/esc-token s/value)
+       " WITH collect([ID(root), labels(root),"
+       " type(r), v." (neo4j/esc-token s/value)
        "]) as vs RETURN vs"))
 
 (defn person-from-user [user query-map]
@@ -89,6 +98,15 @@
 (defn node-by-id [user query-map]
   (-> user (node-from-id (:id query-map) (:type query-map))
       first (merge {:type (:type query-map)})))
+
+(defn key-link [user query-map]
+  (-> (str "MATCH (k:" (neo4j/prop-label user s/link-id)
+           ")<-[:" (neo4j/esc-token s/link-id)
+           "]-(l)-[:" (neo4j/esc-token s/link-to)
+           "]->(root) WHERE k." (neo4j/esc-token s/value)
+           " = " (-> query-map :key neo4j/esc-val)
+           " WITH root" (vals-collect))
+      neo4j/cypher-query-raw mapify-hits first))
 
 (defn email-queue []
   (-> (str "MATCH (root:" s/email-queue
@@ -141,11 +159,11 @@
        (str/join "|")))
 
 (defn rel-query [user]
-    (str "MATCH (root:" (neo4j/prop-label user s/person)
-         ")<-[" (escape-rels [s/email-to s/email-from s/email-mentions])
-         "]-(em:" (neo4j/prop-label user s/email)
-         ")-[:" (neo4j/esc-token s/email-mentions)
-         "]->(ev:"))
+  (str "MATCH (root:" (neo4j/prop-label user s/person)
+       ")<-[" (escape-rels [s/email-to s/email-from s/email-mentions])
+       "]-(em:" (neo4j/prop-label user s/email)
+       ")-[:" (neo4j/esc-token s/email-mentions)
+       "]->(ev:"))
 
 (defn people-by-reltype [user query-map]
   (-> (str (rel-query user)
@@ -237,9 +255,8 @@
          (map (comp include-pred search-row id-row))
          flatten)))
 
-(defn filter-decode-labels [labels]
-  (->> labels (filter #(.contains % "_user_"))
-       first neo4j/decode-label
+(defn find-user-labels [labels]
+  (->> labels filter-decode-labels
        first neo4j/find-by-id))
 
 (defn email-for-nlp []
@@ -247,5 +264,5 @@
            ")-[:" (neo4j/esc-token s/email-body)
            "]->(b) RETURN ID(root), labels(root) LIMIT 1")
       neo4j/cypher-query-raw first
-      (update "labels(root)" filter-decode-labels)
+      (update "labels(root)" find-user-labels)
       (set/rename-keys {"ID(root)" :id "labels(root)" s/user})))

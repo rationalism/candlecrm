@@ -17,6 +17,11 @@
    {:href "#" :on-click #(u/go-node! id type)}
    text])
 
+(defn key-link [text key]
+  [:a.go-node
+   {:href "#" :on-click #(u/go-key! key)}
+   text])
+
 (defn set-field! [& args]
   (fn [this]
     (state/set! args (-> this .-target .-value))))
@@ -229,7 +234,7 @@
 
 (defn event-source [start end timezone callback]
   (-> :cal-events state/look clj->js callback))
-  
+
 (defn cal-params []
   (clj->js {:events event-source
             :dayClick day-click
@@ -281,7 +286,7 @@
     (state/set! [:map-markers :clicked] vars)
     (.open (state/look :map-markers :window)
            (state/look :map-obj) marker)))
-  
+
 (defn map-marker [vars]
   (let [marker (google.maps.Marker. (clj->js vars))]
     (.addListener marker "click" (window-open marker vars))
@@ -378,7 +383,7 @@
 (defn body-link [piece]
   (if (string? piece)
     [add-newlines piece]
-    [node-link (:text piece) (-> piece :link :id)
+    [key-link (:text piece) (:link piece)
      (-> piece :link :type)]))
 
 (defn body-links [item]

@@ -73,6 +73,8 @@
                                       :keys [:person-id :start :limit]}
                 :update/user-data {:fn queries/user-data-public
                                    :keys []}
+                :update/key-link {:fn queries/key-link
+                                 :keys [:key]}
                 :update/fetch-node {:fn queries/node-by-id
                                     :keys [:id :type]}
                 :update/search {:fn queries/full-search

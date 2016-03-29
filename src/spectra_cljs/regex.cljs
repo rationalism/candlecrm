@@ -12,7 +12,7 @@
   {:text (-> bracket-regex (re-seq hypertext)
              first second)
    :link (-> node-param-regex (re-seq hypertext)
-             first second)
+             first second (subs 1))
    :original hypertext})
 
 (defn node-parse [text]

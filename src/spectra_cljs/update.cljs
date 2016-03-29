@@ -59,7 +59,7 @@
    {:id id :type type}])
 
 (defn new-node [req type]
-  (assoc {:center-node req} :type type))
+  {:center-node req :type type})
 
 (defn update-node [type]
   (fn [req]
@@ -71,6 +71,12 @@
 
 (defn go-node! [id type]
   (send! (node-req id type) (update-node type)))
+
+(defn key-req [key]
+  [:update/key-link {:key key}])
+
+(defn go-key! [key]
+  (send! (key-req key) (update-node :fish)))
 
 (defn rel-map [rel-type]
   {:reltype rel-type
