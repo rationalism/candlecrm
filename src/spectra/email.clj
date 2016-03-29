@@ -564,7 +564,6 @@
         graph (-> email :id graph-from-id)]
     (-> (loom/remove-nodes graph (->> (loom/select-edges graph s/email-from)
                                       (map second)))
-        loom/display-graph
         (insert/push-graph! (s/user email)))))
 
 (defn parse-and-insert! [sep-model message-and-user]
