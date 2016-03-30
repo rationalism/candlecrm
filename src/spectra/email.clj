@@ -268,14 +268,14 @@
        (remove dt/has-ms?)
        (remove #(= "1960" (dt/format-year %)))))
 
-(defn find-header-vals [marks lines]
+(defn find-header-vals [marks models lines]
   (let [header-lines (->> [0 (:end-header marks) lines]
                           (apply com/slice)
                           (str/join " "))]
     (when (not= " " header-lines)
       (-> (assoc-if-found marks s/email-sent (sent-date header-lines))
           (assoc-if-found :email-from-addr (regex/find-email-addrs header-lines))
-          (assoc-if-found :email-from-name (->> header-lines nlp/run-nlp-default
+          (assoc-if-found :email-from-name (->> header-lines (nlp/run-nlp-default models)
                                                 nlp/nlp-names (map first)))))))
 
 (defn find-end-header [marks sep-model lines]
@@ -314,14 +314,14 @@
 (defn chain-lines [chain]
   (-> chain find-top s/email-body))
 
-(defnp find-marks [sep-model depth chain]
+(defnp find-marks [models depth chain]
   (let [lines (chain-lines chain)]
     (-> {:depth depth s/email-sent nil :email-from-name nil
          :email-from-addr nil}
-        (find-end-header sep-model lines)
-        (find-end-body sep-model lines)
+        (find-end-header (:sep models) lines)
+        (find-end-body (:sep models) lines)
         (start-tail lines)
-        (find-header-vals lines))))
+        (find-header-vals (:nlp models) lines))))
 
 (defn remove-arrows-if [lines]
   (if (<= 1 (count-min-depth lines))
@@ -370,19 +370,19 @@
         (maybe-add-edges new-node email-from)
         (maybe-add-top chain marks new-node))))
 
-(defn recursive-split [sep-model depth chain]
+(defn recursive-split [models depth chain]
   (if (>= depth 0)
-    (recur sep-model (dec depth)
-           (-> sep-model (find-marks depth chain)
+    (recur models (dec depth)
+           (-> models (find-marks models depth chain)
                (split-email chain)))
     chain))
 
 (defn start-email-graph [body]
   (loom/build-graph [{s/email-body body}] []))
 
-(defnp raw-msg-chain [body sep-model]
+(defnp raw-msg-chain [body models]
   (let [lines (str/split-lines body)]
-    (recursive-split sep-model (count-max-depth lines)
+    (recursive-split models (count-max-depth lines)
                      (start-email-graph lines))))
 
 (defnp get-text-recursive [message]
@@ -465,10 +465,10 @@
   (vector (get-text-recursive message)
           (headers-fetch message folder)))
 
-(defnp full-parse [message sep-model]
+(defnp full-parse [message models]
   (try (-> message first
            regex/strip-javascript
-           (raw-msg-chain sep-model)
+           (raw-msg-chain models)
            (merge-bottom-headers (headers-parse (second message)))
            infer-email-chain infer-subject)
        (catch Exception e
@@ -530,10 +530,10 @@
   (->> (loom/select-edges chain s/link-to)
        (map link-pair) (apply merge)))
 
-(defn use-nlp [message chain]
+(defn use-nlp [models message chain]
   (if (com/nil-or-empty? (s/email-body message)) chain
       (as-> (->> (s/email-body message)
-                 (nlp/run-nlp-full (author-name chain message))
+                 (nlp/run-nlp-full models (author-name chain message))
                  append-hyperlinks (conj [chain])
                  loom/merge-graphs) $
         (loom/add-edges $ (->> $ hyperlink-nodes
@@ -548,16 +548,17 @@
         (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/s-name])
         (loom/remove-nodes $ (->> s/has-type (loom/select-edges $) (map second))))))
 
-(defn use-nlp-graph [g]
-  (reduce use-nlp (recon/filter-memory g s/email) g))
+(defn use-nlp-graph [models g]
+  (reduce (partial use-nlp models)
+          (recon/filter-memory g s/email) g))
 
-(defn graph-from-id [id]
+(defn graph-from-id [models id]
   (let [vals (->> [[s/email-body] [s/email-from s/s-name]]
                   (mlrecon/fetch-paths id) (map first))
         message {s/type-label s/email :id id s/email-body (first vals)}]
     (->> [message {s/s-name (second vals)} s/email-from]
          vector (loom/build-graph [])
-         (use-nlp message))))
+         (use-nlp models message))))
 
 (defn delete-email-body! [id]
   (->> ["MATCH (root)-[:" (neo4j/esc-token s/email-body)
@@ -578,9 +579,9 @@
                         (map second)))
             (insert/push-graph! (s/user email)))))))
 
-(defn parse-and-insert! [sep-model message-and-user]
+(defn parse-and-insert! [models message-and-user]
   (-> message-and-user :message
-      (full-parse sep-model) 
+      (full-parse models) 
       (insert/push-graph! (:user message-and-user))))
 
 (defn make-parse-pool! []

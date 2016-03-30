@@ -81,10 +81,7 @@
          (make-pipeline annotators pcfg-parse-model)))
 
 (defn load-pipeline! []
-  (new-pipeline! :token sentence-annotators)
-  (new-pipeline! :ner ner-annotators)
-  (new-pipeline! :mention mention-annotators)
-  (new-pipeline! :openie openie-annotators))
+  (new-pipeline! :token sentence-annotators))
 
 (defonce letter-count (atom 0))
 
@@ -104,15 +101,8 @@
 (defn tokenize [text]
   (run-nlp (:token @pipelines) text))
 
-(defn run-ner [text]
-  (run-nlp (:ner @pipelines) text))
-
-(defnp get-mentions [annotation]
-  (.annotate (:mention @pipelines) annotation)
-  annotation)
-
-(defnp run-openie [annotation]
-  (.annotate (:openie @pipelines) annotation)
+(defnp run-annotate [pipeline annotation]
+  (.annotate pipeline annotation)
   annotation)
 
 (defn get-tokens [words]
@@ -310,9 +300,11 @@
     (->> triples triples-graph
          (attach-pos-map sent-num tokens))))
   
-(defn recursive-triples [sent-num tokens]
+(defn recursive-triples [models sent-num tokens]
   (->> tokens tokens-str
-       run-ner get-mentions run-openie
+       (run-nlp (:ner models))
+       (run-annotate (:mention models))
+       (run-annotate (:openie models))
        get-sentences first get-triples
        (recursive-graph sent-num tokens)))
 
@@ -633,21 +625,27 @@
        (map str/capitalize)
        (str/join " ")))
 
-(defn run-nlp-default [text]
-  (-> text run-ner library-annotate-all
-      get-mentions nlp-graph))
+(defn run-nlp-default [models text]
+  (->> text (run-nlp (:ner models))
+       library-annotate-all
+       (run-annotate (:mention models))
+       nlp-graph))
 
-(defn run-nlp-full [author text]
-  (cond-> (-> text strip-parens
-              (fpp-replace author)
-              run-ner library-annotate-all
-              get-mentions nlp-graph)
+(defn run-nlp-full [models author text]
+  (cond-> (->> (fpp-replace (strip-parens text) author)
+               (run-nlp (:ner models))
+               library-annotate-all
+               (run-annotate (:mention models))
+               nlp-graph)
     (env :coreference) rewrite-pronouns))
 
-(defn run-nlp-openie [text]
+(defn run-nlp-openie [models text]
   (-> text strip-parens ;; (fpp-replace author)
-      run-ner library-annotate-all
-      get-mentions run-openie nlp-graph))
+      (run-nlp (:ner models))
+      library-annotate-all
+      (run-annotate (:mention models))
+      (run-annotate (:openie models))
+      nlp-graph))
 
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))
@@ -663,9 +661,10 @@
        get-sentences (mapcat get-tokens) (map true-case)
        (str/join " ") fix-punct))
 
-(defn name-from-email [email]
+(defn name-from-email [models email]
   (as-> (-> (str/split email #"@")
             first (str/replace #"[-\.\+]" " ")
             (str/replace #"[0-9]" "")) $
     (when (-> $ (str/split #" ") count (> 1))
-      (-> $ capitalize-words run-nlp-default nlp-names first))))
+      (->> $ capitalize-words (run-nlp-default models)
+           nlp-names first))))

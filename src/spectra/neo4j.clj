@@ -232,3 +232,4 @@
   (cypher-query-raw
    (str "MATCH (root) WHERE ID(root) = " id
         " REMOVE root:" (esc-token label))))
+
