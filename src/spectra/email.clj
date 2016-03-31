@@ -289,20 +289,11 @@
        (first-header sep-model) (+ (:end-header marks))
        (assoc marks :end-body)))
 
-(defn remove-arrow [line depth]
-  (str/replace-first line (str/join (repeat depth ">"))
-                     (str/join (repeat (dec depth) ">"))))
-
-(defn has-full-arrows? [line depth]
-  (if (< (count line) depth) false
-      (->> ">" (repeat depth) (apply str)
-           (= (subs line 0 depth)))))
+(defn remove-arrow [line]
+  (str/replace-first line ">" ""))
 
 (defn remove-arrows [lines]
-  (let [depth (count-max-depth lines)]
-    (map #(if (has-full-arrows? % 1)
-            (remove-arrow % depth) %)
-         lines)))
+  (map remove-arrow lines))
 
 (defn start-tail [marks lines]
   (assoc marks :start-tail
@@ -349,10 +340,6 @@
          (concat (com/slice (:end-header marks) (:end-body marks) lines))
          (sub-email marks))))
 
-(defn dec-depth [chain]
-  (->> remove-arrows (update (find-top chain) s/email-body)
-       (loom/replace-node chain (find-top chain))))
-
 (defn maybe-add-edges [chain new-node email-from]
   (if email-from
     (loom/add-edges chain [[new-node email-from s/email-from]])
@@ -376,7 +363,7 @@
   (if (>= depth 0)
     (recur models (dec depth)
            (-> models (find-marks depth chain)
-               (split-email chain)))
+               com/debug (split-email chain)))
     chain))
 
 (defn start-email-graph [body]
