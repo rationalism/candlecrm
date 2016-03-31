@@ -111,11 +111,12 @@
     [[s/email-to s/email-addr] [is-eq]]
     [[s/email-uid] [is-eq]]]
    s/person
-   [[[s/s-name] [overlap lcs]]
+   [[[s/s-name] [overlap lcs lev]]
     [[s/email-addr] [overlap is-eq]]
     [[s/phone-num] [overlap is-eq]]
-    [[s/email-from s/email-sent] [overlap]]
-    [[s/email-to s/email-sent] [overlap]]]
+    [[s/email-from s/email-sent] [overlap is-eq]]
+    [[s/email-to s/email-sent] [overlap is-eq]]
+    [[s/link-to s/has-link s/email-sent] [is-eq]]]
    s/tool
    [[[s/tool-category] [is-eq]]
     [[s/vendor-name] [is-eq]]
