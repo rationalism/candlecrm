@@ -131,6 +131,7 @@
 (defn app-init! []
   (neo4j/define-graph!)
   (email/make-parse-pool!)
+  (email/make-nlp-pool!)
   (ajax/start!)
   (mlrecon/load-models!)
   (geocode/define-context!)

@@ -29,9 +29,11 @@
 (def html-type "text/html")
 (def multi-type "multipart")
 (def parse-threads 6)
+(def nlp-threads 6)
 (def batch-size 100)
 
 (defonce parse-channel (atom nil))
+(defonce nlp-channel (atom nil))
 
 (defn get-folder [store folder-name]
   (.getFolder store folder-name))
@@ -567,17 +569,32 @@
        (apply str) vector
        neo4j/cypher-combined-tx))
 
-(defn run-email-nlp! []
-  (let [email (queries/email-for-nlp)]
-    (when (s/user email)
-      (-> email :id (neo4j/remove-label! s/nonlp))
-      (let [graph (->> email :id graph-from-id)]
-        (println "run email nlp")
-        (-> email :id delete-email-body!)
-        (-> (loom/remove-nodes
-             graph (->> (loom/select-edges graph s/email-from)
-                        (map second)))
-            (insert/push-graph! (s/user email)))))))
+(defn run-email-nlp! [models email]
+  (-> email :id (neo4j/remove-label! s/nonlp))
+  (let [graph (->> email :id (graph-from-id models))]
+    (-> email :id delete-email-body!)
+    (-> (loom/remove-nodes
+         graph (->> (loom/select-edges graph s/email-from)
+                    (map second)))
+        (insert/push-graph! (s/user email)))))
+
+(defn push-email-nlp! []
+  (let [emails (queries/email-for-nlp batch-size)]
+    (when (not (empty? emails))
+      (println "run email nlp")
+      (dorun (pmap @nlp-channel emails)))))
+
+(defn nlp-models-fn []
+  {:ner ((nlp/get-ner-fn))
+   :mention ((nlp/get-mention-fn))
+   :token ((nlp/get-tokenize-fn))})
+
+(defn make-nlp-pool! []
+  (->> {:name "email-nlp" :process run-email-nlp!
+        :param-gen nlp-models-fn
+        :callback identity :num-threads nlp-threads}
+       async/create-pool!
+       (reset! nlp-channel)))
 
 (defn parse-and-insert! [models message-and-user]
   (-> message-and-user :message

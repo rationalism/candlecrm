@@ -261,10 +261,11 @@
     (->> labels filter-decode-labels
          first neo4j/find-by-id)))
 
-(defn email-for-nlp []
-  (-> (str "MATCH (root:" (neo4j/esc-token s/nonlp)
-           ")-[:" (neo4j/esc-token s/email-body)
-           "]->(b) RETURN ID(root), labels(root) LIMIT 1")
-      neo4j/cypher-query-raw first
-      (update "labels(root)" find-user-labels)
-      (set/rename-keys {"ID(root)" :id "labels(root)" s/user})))
+(defn email-for-nlp [limit]
+  (->> (str "MATCH (root:" (neo4j/esc-token s/nonlp)
+            ")-[:" (neo4j/esc-token s/email-body)
+            "]->(b) RETURN ID(root), labels(root) LIMIT " limit)
+       neo4j/cypher-query-raw
+       (pmap #(update % "labels(root)" find-user-labels))
+       (map #(set/rename-keys % {"ID(root)" :id
+                                 "labels(root)" s/user}))))

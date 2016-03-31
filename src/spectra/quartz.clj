@@ -206,5 +206,8 @@
                (periodic-trigger 5000 nil "recon.trigger.1"))
   (qs/schedule @scheduler
                (make-job EmailNLP "jobs.nlp.email.1")
-               (periodic-trigger 10 nil "nlp.trigger.1")))
+               (periodic-trigger 3000 nil "nlp.trigger.1")))
 
+(defn restart! []
+  (reset! scheduler nil)
+  (start!))
