@@ -57,9 +57,11 @@
       1.0 0.0)))
 
 (defn min-len [a b]
-  (->> [a b] (apply concat)
-       (map count)
-       (apply min)))
+  (if (or (empty? a) (empty? b))
+    default-score
+    (->> [a b] (apply concat)
+         (map count)
+         (apply min))))
 
 (defn overlap [a b]
   (if (or (empty? a) (empty? b))
@@ -375,7 +377,7 @@
                    (->> body-map (map second)
                         choose-body))
                body-map)
-       (map first) (remove nil?) (remove empty?)
+       (map first) (remove nil?)
        (map delete-body)
        neo4j/cypher-combined-tx))
 
