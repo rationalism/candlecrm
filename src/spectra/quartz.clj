@@ -124,7 +124,7 @@
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (queue-pop!))
+  (when nil (queue-pop!)))
 
 (jobs/defjob NewGeocodes [ctx]
   (geocode/geocode-batch 10))
@@ -136,7 +136,7 @@
   (when nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
-  (email/push-email-nlp!))
+  (when nil (email/push-email-nlp!)))
 
 (jobs/defjob EmailRefresh [ctx]
   (when nil

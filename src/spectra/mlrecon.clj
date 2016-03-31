@@ -251,16 +251,16 @@
 
 (defn email-candidate-meta [user]
   (str (email-candidate-pattern user)
-       ")-->(p:" (neo4j/prop-label user s/person)
-       ") RETURN ID(root), ID(p)"))
+       ")-->(m:" (neo4j/prop-label user s/person)
+       ") RETURN ID(root), ID(m)"))
 
 (defn email-candidate-links [user]
   (str (email-candidate-pattern user)
        ")-[:" (neo4j/esc-token s/has-link)
        "]->(l2:" (neo4j/prop-label user s/hyperlink)
        ")-[:" (neo4j/esc-token s/link-to)
-       "]->(p:" (neo4j/prop-label user s/person)
-       ") RETURN ID(root), ID(p)"))
+       "]->(m:" (neo4j/prop-label user s/person)
+       ") RETURN ID(root), ID(m)"))
 
 (defn optional-search [user class query]
   (if (= class s/person)
