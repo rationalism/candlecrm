@@ -61,22 +61,22 @@
 (defn new-node [req type]
   {:center-node req :type type})
 
-(defn update-node [type]
+(defn update-node []
   (fn [req]
-    (state/set! [:current-node] (new-node req type))
+    (state/set! [:current-node] (new-node req (s/type-label req)))
     (state/set! [:tabid] 6)
-    (when (= type s/person)
+    (when (= (s/type-label req) s/person)
       (update-emails-person! s/email-to)
       (update-emails-person! s/email-from))))
 
 (defn go-node! [id type]
-  (send! (node-req id type) (update-node type)))
+  (send! (node-req id type) (update-node)))
 
 (defn key-req [key]
   [:update/key-link {:key key}])
 
 (defn go-key! [key]
-  (send! (key-req key) (update-node :fish)))
+  (send! (key-req key) (update-node)))
 
 (defn rel-map [rel-type]
   {:reltype rel-type
