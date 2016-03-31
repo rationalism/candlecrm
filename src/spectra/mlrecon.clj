@@ -241,12 +241,39 @@
        "] AND type(r2) = type(r1)"
        " RETURN ID(root), ID(m)"))
 
+(defn email-candidate-pattern [user]
+  (str "MATCH (root:" (neo4j/prop-label user s/person)
+       ")<-[:" (neo4j/esc-token s/link-to)
+       "]-(l:" (neo4j/prop-label user s/hyperlink)
+       ")<-[:" (neo4j/esc-token s/has-link)
+       "]-(e:" (neo4j/prop-label user s/email)))
+
+(defn email-candidate-meta [user]
+  (str (email-candidate-pattern user)
+       ")-->(p:" (neo4j/prop-label user s/person)
+       ") RETURN ID(root), ID(p)"))
+
+(defn email-candidate-links [user]
+  (str (email-candidate-pattern user)
+       ")-[:" (neo4j/esc-token s/has-link)
+       "]->(l2:" (neo4j/prop-label user s/hyperlink)
+       ")-[:" (neo4j/esc-token s/link-to)
+       "]->(p:" (neo4j/prop-label user s/person)
+       ") RETURN ID(root), ID(p)"))
+
+(defn optional-search [user class query]
+  (if (= class s/person)
+    (concat query [(email-candidate-meta user)
+                   (email-candidate-links user)])
+    query))
+
 (defn find-candidates [user class]
   (->> class (get candidates) (map name)
        (map #(str "'" % "'"))
        (str/join ", ")
        (candidate-query (neo4j/prop-label user class))
-       neo4j/cypher-query-raw
+       vector (optional-search user class)
+       (mapcat neo4j/cypher-query-raw)
        (map (juxt #(get % "ID(root)") #(get % "ID(m)")))
        (map sort) distinct))
 
