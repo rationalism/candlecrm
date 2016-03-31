@@ -598,7 +598,7 @@
 
 (defn parse-and-insert! [models message-and-user]
   (-> message-and-user :message
-      (full-parse models) com/debug
+      (full-parse models)
       (insert/push-graph! (:user message-and-user))))
 
 (defn parse-models-fn []
