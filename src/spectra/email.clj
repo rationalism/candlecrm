@@ -363,7 +363,7 @@
   (if (>= depth 0)
     (recur models (dec depth)
            (-> models (find-marks depth chain)
-               com/debug (split-email chain)))
+               (split-email chain)))
     chain))
 
 (defn start-email-graph [body]
