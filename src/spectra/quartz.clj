@@ -136,7 +136,7 @@
   (when nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
-  (email/run-email-nlp!))
+  (email/push-email-nlp!))
 
 (jobs/defjob EmailRefresh [ctx]
   (when nil
