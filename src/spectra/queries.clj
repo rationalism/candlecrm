@@ -163,7 +163,9 @@
   (str "MATCH (root:" (neo4j/prop-label user s/person)
        ")<-[" (escape-rels [s/email-to s/email-from s/email-mentions])
        "]-(em:" (neo4j/prop-label user s/email)
-       ")-[:" (neo4j/esc-token s/email-mentions)
+       ")-[:" (neo4j/esc-token s/has-link)
+       "]->(m:" (neo4j/prop-label user s/hyperlink)
+       ")-[:" (neo4j/esc-token s/link-to)
        "]->(ev:"))
 
 (defn people-by-reltype [user query-map]
