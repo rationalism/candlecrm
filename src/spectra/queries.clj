@@ -61,7 +61,9 @@
 
 (defn emails-from-user [user query-map]
   (-> (str "MATCH (root:" (neo4j/prop-label user s/email)
-           ") WITH root ORDER BY root." (neo4j/esc-token s/email-sent)
+           ")-[:" (neo4j/esc-token s/email-sent)
+           "]-(sd:" (neo4j/prop-label user s/email-sent)
+           ") WITH root, sd ORDER BY sd." (neo4j/esc-token s/value)
            " DESC SKIP " (:start query-map) " LIMIT " (:limit query-map)
            (vals-collect))
       neo4j/cypher-query-raw mapify-hits))
@@ -77,10 +79,12 @@
       neo4j/cypher-query-raw mapify-hits))
 
 (defn emails-with-dates [user start limit]
-  (-> (str "MATCH (root:" (neo4j/prop-label user s/email)
+  (-> (str "MATCH (sd:" (neo4j/prop-label user s/email-sent)
+           ")<-[:" (neo4j/esc-token s/email-sent)
+           "]-(root:" (neo4j/prop-label user s/email)
            ")-[:" (neo4j/esc-token s/email-mentions)
            "]->(d:" (neo4j/prop-label user s/event)
-           ") WITH root ORDER BY root." (neo4j/esc-token s/email-sent)
+           ") WITH root, sd ORDER BY sd." (neo4j/esc-token s/value)
            " DESC SKIP " start " LIMIT " limit
            (vals-collect))
       neo4j/cypher-query-raw mapify-hits))
