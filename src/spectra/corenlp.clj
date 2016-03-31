@@ -74,15 +74,6 @@
      (.setProperty "openie.triple.all_nominals" "true"))
    false))
 
-(defonce pipelines (atom {:token nil :ner nil :mention nil :openie nil}))
-
-(defn new-pipeline! [token annotators]
-  (swap! pipelines assoc token
-         (make-pipeline annotators pcfg-parse-model)))
-
-(defn load-pipeline! []
-  (new-pipeline! :token sentence-annotators))
-
 (defn get-copy-fn [annotators]
   (fn [] (make-pipeline annotators pcfg-parse-model)))
 
@@ -91,6 +82,12 @@
 
 (defn get-mention-fn []
   (get-copy-fn mention-annotators))
+
+(defn get-tokenize-fn []
+  (get-copy-fn sentence-annotators))
+
+(defn get-openie-fn []
+  (get-copy-fn openie-annotators))
 
 (defonce letter-count (atom 0))
 

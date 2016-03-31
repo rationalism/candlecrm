@@ -373,7 +373,7 @@
 (defn recursive-split [models depth chain]
   (if (>= depth 0)
     (recur models (dec depth)
-           (-> models (find-marks models depth chain)
+           (-> models (find-marks depth chain)
                (split-email chain)))
     chain))
 
