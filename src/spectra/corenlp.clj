@@ -69,8 +69,8 @@
      (.setProperty "ner.useSUTime" "false")
      (.setProperty "ner.model" (str/join "," ner-models))
      (.setProperty "parse.model" parse-model)
-     ;(.setProperty "openie.resolve_coref"
-     ;              (if (env :coreference) "true" "false"))
+                                        ;(.setProperty "openie.resolve_coref"
+                                        ;              (if (env :coreference) "true" "false"))
      (.setProperty "openie.triple.all_nominals" "true"))
    false))
 
@@ -103,9 +103,6 @@
           (println text)
           (println "Error message:")
           (print e)))))
-
-(defn tokenize [text]
-  (run-nlp (:token @pipelines) text))
 
 (defnp run-annotate [pipeline annotation]
   (.annotate pipeline annotation)
@@ -511,8 +508,9 @@
   (interleave pieces
               (conj (mapv #(swap-fpp author %) fpps) "")))
 
-(defn fpp-replace [text author]
-  (let [fpps (->> text tokenize get-tokens (filter is-fpp?))]
+(defn fpp-replace [models text author]
+  (let [fpps (->> text (run-nlp (:token models))
+                  get-tokens (filter is-fpp?))]
     (->> (mapcat char-pos fpps)
          (char-ends text) (partition 2)
          (map #(subs-vec text %))
@@ -638,7 +636,7 @@
        nlp-graph))
 
 (defn run-nlp-full [models author text]
-  (cond-> (->> (fpp-replace (strip-parens text) author)
+  (cond-> (->> (fpp-replace models (strip-parens text) author)
                (run-nlp (:ner models))
                library-annotate-all
                (run-annotate (:mention models))
@@ -646,7 +644,7 @@
     (env :coreference) rewrite-pronouns))
 
 (defn run-nlp-openie [models text]
-  (-> text strip-parens ;; (fpp-replace author)
+  (-> text strip-parens ;; (fpp-replace models author)
       (run-nlp (:ner models))
       library-annotate-all
       (run-annotate (:mention models))

@@ -130,7 +130,6 @@
 
 (defn app-init! []
   (neo4j/define-graph!)
-  (nlp/load-pipeline!)
   (email/make-parse-pool!)
   (ajax/start!)
   (mlrecon/load-models!)
