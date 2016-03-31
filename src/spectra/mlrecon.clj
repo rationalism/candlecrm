@@ -16,7 +16,7 @@
            [org.apache.commons.lang3 StringUtils]))
 
 (def default-score 0.5)
-(def min-match-score {s/email 0.4 s/person 0.4 s/tool 0.8})
+(def min-match-score {s/email 0.4 s/person 0.9 s/tool 0.8})
 (def models-dir "/home/alyssa/clojure/spectra/resources/models")
 
 (defonce recon-models (atom {s/email nil}))
