@@ -83,6 +83,15 @@
 (defn load-pipeline! []
   (new-pipeline! :token sentence-annotators))
 
+(defn get-copy-fn [annotators]
+  (fn [] (make-pipeline annotators pcfg-parse-model)))
+
+(defn get-ner-fn []
+  (get-copy-fn ner-annotators))
+
+(defn get-mention-fn []
+  (get-copy-fn mention-annotators))
+
 (defonce letter-count (atom 0))
 
 (defnp run-nlp [pipeline text]

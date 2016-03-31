@@ -571,7 +571,7 @@
   (let [email (queries/email-for-nlp)]
     (when (s/user email)
       (-> email :id (neo4j/remove-label! s/nonlp))
-      (let [graph (-> email :id graph-from-id)]
+      (let [graph (->> email :id graph-from-id)]
         (println "run email nlp")
         (-> email :id delete-email-body!)
         (-> (loom/remove-nodes
@@ -584,9 +584,14 @@
       (full-parse models) 
       (insert/push-graph! (:user message-and-user))))
 
+(defn parse-models-fn []
+  {:sep ((weka/email-sep-model-fn))
+   :nlp {:ner ((nlp/get-ner-fn))
+         :mention ((nlp/get-mention-fn))}})
+
 (defn make-parse-pool! []
   (->> {:name "email-parse" :process parse-and-insert!
-        :param-gen (weka/email-sep-model-fn)
+        :param-gen parse-models-fn
         :callback identity :num-threads parse-threads}
        async/create-pool!
        (reset! parse-channel)))
