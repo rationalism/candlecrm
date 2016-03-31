@@ -570,7 +570,6 @@
        neo4j/cypher-combined-tx))
 
 (defn run-email-nlp! [models email]
-  (-> email :id (neo4j/remove-label! s/nonlp))
   (let [graph (->> email :id (graph-from-id models))]
     (-> email :id delete-email-body!)
     (-> (loom/remove-nodes
@@ -582,6 +581,7 @@
   (let [emails (queries/email-for-nlp batch-size)]
     (when (not (empty? emails))
       (println "run email nlp")
+      (dorun (pmap #(-> % :id (neo4j/remove-label! s/nonlp)) emails))
       (dorun (pmap @nlp-channel emails)))))
 
 (defn nlp-models-fn []
