@@ -437,7 +437,7 @@
 
 (defn infer-subject [chain]
   (reduce (partial replace-subject
-                   (-> chain find-top s/email-subject))
+                   (-> chain find-bottom s/email-subject))
           chain (->> chain loom/nodes
                      (filter #(loom/out-edge-label chain % s/email-from)))))
 
