@@ -18,4 +18,3 @@
            (.setFrom (s/email-from email))
            (.setSubject (s/email-subject email))
            (.setText (s/email-body email)))))
-

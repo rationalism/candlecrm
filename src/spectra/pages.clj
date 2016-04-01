@@ -35,3 +35,7 @@
 (defn reset-pwd [req]
   (html/base-template
    (html/reset-pwd)))
+
+(defn new-password [user token]
+  (html/base-template
+   (html/new-password user token)))

@@ -275,3 +275,9 @@
        (pmap #(update % "labels(root)" find-user-labels))
        (map #(set/rename-keys % {"ID(root)" :id
                                  "labels(root)" s/user}))))
+
+(defn users-reset-tokens []
+  (->> (str "MATCH (root:" (neo4j/esc-token s/user)
+            ") WHERE root." (neo4j/esc-token s/pwd-reset-token)
+            " IS NOT NULL RETURN root")
+       neo4j/cypher-list))

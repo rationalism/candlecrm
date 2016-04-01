@@ -122,6 +122,11 @@
        (map #(vector (neo4j/find-by-id (first %)) (second %)))
        first maybe-run-recon!))
 
+(defn delete-reset-tokens! []
+  (->> (queries/users-reset-tokens)
+       (map #(println "Token should be deleted for ID: " %))
+       dorun))
+
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
   (when nil (queue-pop!)))
@@ -142,6 +147,9 @@
   (when nil
     (doseq [user (auth/list-users)]
       (refresh-queue! user))))
+
+(jobs/defjob DeleteResetTokens [ctx]
+  (delete-reset-tokens!))
 
 (defn user-job [ctx]
   (-> ctx qc/from-job-data
@@ -206,7 +214,10 @@
                (periodic-trigger 5000 nil "recon.trigger.1"))
   (qs/schedule @scheduler
                (make-job EmailNLP "jobs.nlp.email.1")
-               (periodic-trigger 3000 nil "nlp.trigger.1")))
+               (periodic-trigger 3000 nil "nlp.trigger.1"))
+  (qs/schedule @scheduler
+               (make-job DeleteResetTokens "jobs.tokens.delete.1")
+               (periodic-trigger 1200000 nil "tokens.trigger.1")))
 
 (defn restart! []
   (reset! scheduler nil)

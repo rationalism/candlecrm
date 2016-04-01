@@ -2,6 +2,7 @@
   (:require [environ.core :refer [env]]
             [hiccup.core :refer :all]
             [hiccup.page :refer :all]
+            [spectra_cljc.schema :as s]
             [ring.util.anti-forgery :refer :all]))
 
 ;; TODO: Reorganize this by page
@@ -137,6 +138,30 @@
      [:div.pure-controls
       [:input {:class "pure-button pure-button-primary"
                :value "Request reset" :type "submit"}]]]]])
+
+(defn new-password [user token]
+  [:div
+   [:form {:method "POST" :action "set-password"
+           :class "pure-form pure-form-aligned"
+           :id "changePassForm" :novalidate ""}
+    [:fieldset
+     (anti-forgery-field)
+     [:legend [:h2 "Set a new password for "
+               (-> user :data s/email-addr)]]
+     [:input {:type "hidden" :name "reset-token"
+              :id "setPwdToken" :required "required"
+              :value token}]
+     [:div.pure-control-group
+      [:label {:for "setPwd"} "New password "]
+      [:input {:type "password" :name "password"
+               :id "setPwd" :required "required"}]]
+     [:div.pure-control-group
+      [:label {:for "setPwdConfirm"} "Confirm new password "]
+      [:input {:type "password" :name "confirm"
+               :id "setPwdConfirm" :required "required"}]]
+     [:div.pure-controls
+      [:input {:class "pure-button pure-button-primary"
+               :value "Set new password" :type "submit"}]]]]])
 
 (defn login-needed [uri]
   [:h2 "You do not have sufficient privileges to access " uri])

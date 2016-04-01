@@ -1,5 +1,6 @@
 (ns spectra.auth
   (:require [clojure.string :as str]
+            [environ.core :refer [env]]
             [spectra.google :as google]
             [spectra.index :as index]
             [spectra.insert :as insert]
@@ -7,6 +8,7 @@
             [spectra.regex :as regex]
             [spectra.sendgrid :as sendgrid]
             [spectra_cljc.schema :as s]
+            [crypto.random :as random]
             [cemerick.friend :as friend]
             (cemerick.friend [credentials :as creds]))
   (:import java.net.URI
@@ -14,8 +16,8 @@
 
 (defn user-vertex! [email-addr pwd-hash]
   (neo4j/create-vertex! s/user 
-   {s/email-addr email-addr
-    s/pwd-hash pwd-hash}))
+                        {s/email-addr email-addr
+                         s/pwd-hash pwd-hash}))
 
 (defn friend-user [u]
   {:identity (get-in u (:data s/email-addr))})
@@ -93,7 +95,28 @@
       (when-not (.isValid result)
         (str/join " " (.getMessages validator result))))))
 
+(defn pwd-reset-email [token]
+  (->> ["Hello. You have requested a password reset on Spectra."
+        ""
+        "To reset your password, just follow this link:"
+        ""
+        (str (env :app-domain) "/reset-confirm?token=" token)
+        ""
+        "This link will expire after 20 minutes."]
+       (str/join "\n")))
+
 (defn pwd-reset! [req]
-  (println "A reset has been requested.")
-  (println "Here is the request:")
-  (println req))
+  (let [reset-token (random/base32 30)]
+    (when-let [user (-> req :params :username lookup-user)]
+      (neo4j/set-property! user s/pwd-reset-token reset-token)
+      (sendgrid/send-email!
+       {s/email-subject "Password reset"
+        s/email-body (pwd-reset-email reset-token)
+        s/email-from "alyssamvance@gmail.com"
+        s/email-to (-> req :params :username)}))))
+
+(defn set-password! [user params]
+  (if-let [err-msg (new-user-check (-> user :data s/email-addr)
+                                   (:password params) (:confirm params))]
+    err-msg
+    ))

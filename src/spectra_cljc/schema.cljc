@@ -5,6 +5,7 @@
 (def value :val)
 (def val-node :value)
 (def pwd-hash :pwd-hash)
+(def pwd-reset-token :pwd-reset-token)
 (def google-token :google-token)
 (def type-label :label)
 (def date-time :date-time)

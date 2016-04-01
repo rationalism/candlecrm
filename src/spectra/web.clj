@@ -47,6 +47,12 @@
        (html-wrapper (pages/login req)))
   (GET "/reset-password" req
        (html-wrapper (pages/reset-pwd req)))
+  (GET "/reset-confirm" req
+       (let [token (-> req :params :token)]
+         (if-let [user (->> token (hash-map s/pwd-reset-token)
+                            (neo4j/get-vertex s/user))]
+           (html-wrapper (pages/new-password user token))
+           (home-with-message "Error: Invalid reset link"))))
   (GET "/app" req
        (friend/authenticated
         (html-wrapper (pages/app-page req))))
@@ -61,6 +67,12 @@
   (POST "/request-reset" req
         (auth/pwd-reset! req)
         (home-with-message "Password reset requested."))
+  (POST "/set-password" req
+        (if-let [user (->> req :params :token (hash-map s/pwd-reset-token)
+                           (neo4j/get-vertex s/user))]
+          (do (auth/set-password! user (:params req))
+              (home-with-message "Password has been reset."))
+          (home-with-message "Error: Invalid reset link")))
   (POST "/create-account" {{:keys [username password confirm] :as params} :params :as req}
         (if-let [err-msg (auth/new-user-check username password confirm)]
           (home-with-message err-msg)
