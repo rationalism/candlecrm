@@ -177,3 +177,14 @@
     (send! (delete-account-req) identity)
     (js/alert (str "Account not deleted. "
                    "Please select Yes to delete your account."))))
+
+(defn delete-req []
+  [:update/delete-entity
+   {:id (state/look :current-node :center-node :id)
+    :type (state/look :current-node :center-node :type)}])
+
+(defn confirm-delete [resp]
+  (js/alert "Entity deleted"))
+
+(defn delete-entity! []
+  (send! (delete-req) confirm-delete))

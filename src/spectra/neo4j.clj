@@ -186,6 +186,13 @@
 (defn delete-vertex! [vertex]
   (-> vertex :id delete-id!))
 
+(defn node-exists? [user id type]
+  (->> ["MATCH (root:" (prop-label user type)
+        ") WHERE ID(root) = " id
+        " RETURN ID(root)"]
+       (apply str) cypher-query-raw
+       first empty? not))
+
 (defn val-query [prop]
   (str "MATCH (root)-[:" (-> prop key esc-token)
        "]-(v) WHERE v.val = " (-> prop val esc-val) ""))

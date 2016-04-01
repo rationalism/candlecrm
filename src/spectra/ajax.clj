@@ -79,6 +79,8 @@
                                   :keys [:key]}
                 :update/fetch-node {:fn queries/node-by-id
                                     :keys [:id :type]}
+                :update/delete-entity {:fn auth/delete-entity!
+                                       :keys [:id :type]}
                 :update/search {:fn queries/full-search
                                 :keys [:query]}})
 

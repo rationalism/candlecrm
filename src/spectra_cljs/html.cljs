@@ -457,6 +457,10 @@
   (state/update! [:current-node :center-node] ids-if-coll)
   (state/set! [:tabid] 8))
 
+(defn delete-person-switch []
+  (u/delete-entity!)
+  (state/set! [:tabid] 1))
+
 (defn show-person [person-name email-addr item]
   (let [disp-name (if person-name person-name email-addr)]
     [:div
@@ -464,7 +468,9 @@
       (str (if person-name person-name "(No name listed)")
            " (Person) ")
       [:a {:href "#" :on-click edit-person-switch}
-       "(Edit)"]]
+       "(Edit)"] " "
+      [:a {:href "#" :on-click delete-person-switch}
+       "(Delete)"]]
      [info-items person-disp item]
      [:h3.infotitle (str "Emails to " disp-name)]
      [email-table [:current-node s/email-to] s/email-to
