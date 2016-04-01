@@ -71,10 +71,12 @@
                                       :keys [:person-id :start :limit]}
                 :pages/person-places {:fn queries/loc-related
                                       :keys [:person-id :start :limit]}
+                :update/delete-account {:fn auth/delete-req!
+                                        :keys [:confirmed]}
                 :update/user-data {:fn queries/user-data-public
                                    :keys []}
                 :update/key-link {:fn queries/key-link
-                                 :keys [:key]}
+                                  :keys [:key]}
                 :update/fetch-node {:fn queries/node-by-id
                                     :keys [:id :type]}
                 :update/search {:fn queries/full-search

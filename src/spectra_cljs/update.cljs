@@ -167,3 +167,13 @@
 
 (defn run-search! []
   (send! (search-req) list-search-results!))
+
+(defn delete-account-req []
+  [:update/delete-account
+   {:confirmed (state/look :delete-account :confirm-button)}])
+
+(defn delete-account! []
+  (if (= "yes" (state/look :delete-account :confirm-button))
+    (send! (delete-account-req) identity)
+    (js/alert (str "Account not deleted. "
+                   "Please select Yes to delete your account."))))

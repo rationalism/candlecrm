@@ -113,11 +113,38 @@
    (into [:div {:class "pure-u-5-6"}]
          content)])
 
+(defn confirm-box []
+  [:div
+   [:p "Your account will be deleted."]
+   [:p "All data will be lost permanently!"]
+   [:p "Are you sure you want to delete your account?"]
+   [:form {:class "pure-form" :action "/logout"}
+    [:label {:class "pure-radio" :for "yes-delete"}
+     [:input {:id "yes-delete" :type "radio"
+              :name "delete-radio" :value "yes"
+              :on-change (set-field! :delete-account :confirm-button)}]
+     "Yes, please delete my account"]
+    [:label {:class "pure-radio" :for "no-delete"}
+     [:input {:id "no-delete" :type "radio"
+              :name "delete-radio" :value "no"
+              :on-change (set-field! :delete-account :confirm-button)}]
+     "No, don't delete my account"]
+    [:button {:type "submit"
+              :class "pure-button pure-button-primary"
+              :on-click #(u/delete-account!)}
+     "Confirm delete"]]])
+
 (defn user-footer []
   [:div
    [:p
     [:a {:href "/logout" :class "pure-button"}
-     "Logout here"]]])
+     "Logout here"]]
+   [:p
+    [:a {:href "#" :class "pure-button"
+         :on-click #(state/set! [:delete-account :confirm-box] :true)}
+     "Close account"]]
+   (when (state/look :delete-account :confirm-box)
+     [confirm-box])])
 
 (def person-attrs [s/s-name s/email-addr s/phone-num
                    s/birthday s/gender s/website])

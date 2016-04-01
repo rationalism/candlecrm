@@ -63,6 +63,10 @@
   (index/drop-constraints! user)
   (neo4j/delete-id! (:id user)))
 
+(defn delete-req! [user query-map]
+  (when (= "yes" (:confirmed query-map))
+    (delete-user! user)))
+
 (defn new-user-check [username password confirm]
   (cond
     (str/blank? username) "Email address blank"

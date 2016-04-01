@@ -23,7 +23,8 @@
     :new-entity {}
     :new-entity-msg nil
     :search ""
-    :search-results nil}))
+    :search-results nil
+    :delete-account {}}))
 
 (defn look [& args]
   (get-in @a args))
