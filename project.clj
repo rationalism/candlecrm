@@ -67,7 +67,8 @@
                  [crypto-random "1.2.0"]
                  [com.googlecode.concurrent-trees/concurrent-trees "2.5.0"]
                  [clojure-csv/clojure-csv "2.0.2"]
-                 [org.apache.commons/commons-lang3 "3.4"]]
+                 [org.apache.commons/commons-lang3 "3.4"]
+                 [com.sendgrid/sendgrid-java "2.2.2"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.2"]
             [lein-kibit "0.1.2"]

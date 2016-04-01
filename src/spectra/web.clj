@@ -16,6 +16,7 @@
             [spectra.corenlp :as nlp]
             [spectra.pages :as pages]
             [spectra.quartz :as quartz]
+            [spectra.sendgrid :as sendgrid]
             [spectra.weka :as weka]
             [cemerick.friend :as friend]
             (cemerick.friend [workflows :as workflows]
@@ -130,6 +131,7 @@
 
 (defn app-init! []
   (neo4j/define-graph!)
+  (sendgrid/init-server!)
   (email/make-parse-pool!)
   (email/make-nlp-pool!)
   (ajax/start!)
