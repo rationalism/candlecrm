@@ -3,7 +3,7 @@
             [spectra_cljc.schema :as s]))
 
 (def unique-exists-vals
-  [s/email-addr s/phone-num s/birthday s/gender s/occupation
+  [s/email-addr s/phone-num s/birthday s/gender s/occupation s/org-member
    s/mail-address s/website s/email-subject s/email-body
    s/email-received s/email-sent s/lat s/lng
    s/start-time s/stop-time s/s-name

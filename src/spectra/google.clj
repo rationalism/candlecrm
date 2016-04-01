@@ -1,6 +1,6 @@
 (ns spectra.google
   (:require [environ.core :refer [env]]
-            [spectra.auth :as auth]
+            [clj-http.client :as client]
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s])
   (:import [com.google.api.client.googleapis.auth.oauth2 GoogleAuthorizationCodeRequestUrl
@@ -24,6 +24,9 @@
 
 (def callback-url
   "/googleauthcallback")
+
+(def revoke-url
+  "https://accounts.google.com/o/oauth2/revoke")
 
 (defn full-callback-url []
   (str (env :app-domain) callback-url))
@@ -87,6 +90,10 @@
 
 (defn get-access-token! [refresh-token]
   (.getAccessToken (build-google-cred! refresh-token)))
+
+(defn revoke-access-token! [user]
+  (client/post revoke-url
+               {:form-params {:token (lookup-token user)}}))
 
 ;; TODO: get the user's email via a Google API
 (defn get-imap-store! [access-token email]

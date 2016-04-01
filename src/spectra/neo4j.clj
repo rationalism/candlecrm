@@ -126,8 +126,10 @@
       decode-label-parts reverse))
 
 (defn get-property [vertex property]
-  (let [value (property (:data vertex))]
-    (if (coll? value) (set value) value)))
+  (->> ["MATCH (root) WHERE ID(root) = " (:id vertex)
+        " RETURN root." (esc-token property)]
+       (apply str) cypher-query-raw
+       first vals first))
 
 (defn set-property! [vertex property value]
   (nn/set-property @conn vertex property
