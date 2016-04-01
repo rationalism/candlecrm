@@ -83,18 +83,22 @@
   (when (= "yes" (:confirmed query-map))
     (delete-user! user)))
 
-(defn new-user-check [username password confirm]
+(defn password-check [password confirm]
   (cond
-    (str/blank? username) "Email address blank"
     (str/blank? password) "Password blank"
     (not= password confirm) "Passwords don't match"
-    (lookup-user username) "This user already exists"
-    (not (regex/one-email? username)) "Not a valid email address"
     :else
     (let [validator (PasswordValidator. [(LengthRule. 8 64)])
           result (.validate validator (PasswordData. password))]
       (when-not (.isValid result)
         (str/join " " (.getMessages validator result))))))
+
+(defn new-user-check [username password confirm]
+  (cond
+    (str/blank? username) "Email address blank"
+    (lookup-user username) "This user already exists"
+    (not (regex/one-email? username)) "Not a valid email address"
+    :else (password-check password confirm)))
 
 (defn pwd-reset-email [token]
   (->> ["Hello. You have requested a password reset on Spectra."
@@ -118,8 +122,7 @@
         s/email-to (-> req :params :username)}))))
 
 (defn set-password! [user params]
-  (if-let [err-msg (new-user-check (-> user :data s/email-addr)
-                                   (:password params) (:confirm params))]
+  (if-let [err-msg (password-check (:password params) (:confirm params))]
     err-msg
     (do (neo4j/delete-property! user s/pwd-reset-token)
         (->> params :password creds/hash-bcrypt 
