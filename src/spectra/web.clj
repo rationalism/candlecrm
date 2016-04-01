@@ -45,6 +45,8 @@
   ;; TODO: Make this return an error message when credentials are invalid
   (GET "/login" req
        (html-wrapper (pages/login req)))
+  (GET "/reset-password" req
+       (html-wrapper (pages/reset-pwd req)))
   (GET "/app" req
        (friend/authenticated
         (html-wrapper (pages/app-page req))))
@@ -56,6 +58,9 @@
         (ajax/ring-ajax-post req))
   (POST "/login-test" req
         (ajax/login! req))
+  (POST "/request-reset" req
+        (auth/pwd-reset! req)
+        (home-with-message "Password reset requested."))
   (POST "/create-account" {{:keys [username password confirm] :as params} :params :as req}
         (if-let [err-msg (auth/new-user-check username password confirm)]
           (home-with-message err-msg)

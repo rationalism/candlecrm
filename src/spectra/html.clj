@@ -117,8 +117,26 @@
      [:div.pure-controls
       [:input {:class "pure-button pure-button-primary"
                :value "Login" :type "submit"}]
+      [:a {:id "pass-reset-link" :href "/reset-password"}
+       "(Forgot password?)"]
       [:span {:style "padding:0 0 0 10px;color:red;"
               :id "loginError"}]]]]])
+
+(defn reset-pwd []
+  [:div
+   [:form {:method "POST" :action "request-reset"
+           :class "pure-form pure-form-aligned"
+           :id "resetPassForm" :novalidate ""}
+    [:fieldset
+     (anti-forgery-field)
+     [:legend [:h2 "Reset password"]]
+     [:div.pure-control-group
+      [:label {:for "resetUsername"} "Email "]
+      [:input {:type "text" :name "username"
+               :id "resetUsername"}]]
+     [:div.pure-controls
+      [:input {:class "pure-button pure-button-primary"
+               :value "Request reset" :type "submit"}]]]]])
 
 (defn login-needed [uri]
   [:h2 "You do not have sufficient privileges to access " uri])
@@ -151,9 +169,9 @@
     [:form {:method "POST" :action "load-emails" :class "columns small-4"}
      [:div.row "Start with: " [:input {:type "text" :name "lower" :required "required"}]]
      [:div.row "End with: " [:input {:type "text" :name "upper" :required "required"}]]
-      [:div.row
-       [:input {:type "submit" :class "button" :value "Load"}]
-       [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]]]
+     [:div.row
+      [:input {:type "submit" :class "button" :value "Load"}]
+      [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]]]
    [:a {:href "/"} "Return home"]
    [:p "Currently disabled - do this via Ajax calls"]])
 

@@ -66,3 +66,7 @@ tbody#people-rows td {
 a.new-link {
     margin-left: 0.5em;
 }
+
+a#pass-reset-link {
+    margin-left: 1em;
+}

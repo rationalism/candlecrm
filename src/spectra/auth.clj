@@ -5,6 +5,7 @@
             [spectra.insert :as insert]
             [spectra.neo4j :as neo4j]
             [spectra.regex :as regex]
+            [spectra.sendgrid :as sendgrid]
             [spectra_cljc.schema :as s]
             [cemerick.friend :as friend]
             (cemerick.friend [credentials :as creds]))
@@ -91,3 +92,8 @@
           result (.validate validator (PasswordData. password))]
       (when-not (.isValid result)
         (str/join " " (.getMessages validator result))))))
+
+(defn pwd-reset! [req]
+  (println "A reset has been requested.")
+  (println "Here is the request:")
+  (println req))

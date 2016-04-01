@@ -27,7 +27,11 @@
 (defn login-needed [uri]
   (html/base-template
    (html/login-needed uri)))
-  
+
 (defn ajax-test [req]
   (html/base-template
    (html/ajax-test)))
+
+(defn reset-pwd [req]
+  (html/base-template
+   (html/reset-pwd)))
