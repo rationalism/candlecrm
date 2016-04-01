@@ -1,6 +1,7 @@
 (ns spectra.auth
   (:require [clojure.string :as str]
             [environ.core :refer [env]]
+            [spectra.datetime :as dt]
             [spectra.google :as google]
             [spectra.index :as index]
             [spectra.insert :as insert]
@@ -102,13 +103,14 @@
         ""
         (str (env :app-domain) "/reset-confirm?token=" token)
         ""
-        "This link will expire after 20 minutes."]
+        "This link will expire after 60 minutes."]
        (str/join "\n")))
 
 (defn pwd-reset! [req]
   (let [reset-token (random/base32 30)]
     (when-let [user (-> req :params :username lookup-user)]
       (neo4j/set-property! user s/pwd-reset-token reset-token)
+      (neo4j/set-property! user s/modified (dt/now))
       (sendgrid/send-email!
        {s/email-subject "Password reset"
         s/email-body (pwd-reset-email reset-token)
@@ -119,4 +121,6 @@
   (if-let [err-msg (new-user-check (-> user :data s/email-addr)
                                    (:password params) (:confirm params))]
     err-msg
-    ))
+    (do (neo4j/delete-property! user s/pwd-reset-token)
+        (->> params :password creds/hash-bcrypt password
+             (neo4j/set-property! user s/pwd-hash)))))

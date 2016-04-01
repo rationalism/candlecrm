@@ -124,7 +124,8 @@
 
 (defn delete-reset-tokens! []
   (->> (queries/users-reset-tokens)
-       (map #(println "Token should be deleted for ID: " %))
+       (filter #(-> % :data s/modified (< (dt/hours-ago 1))))
+       (map #(neo4j/delete-property! % s/pwd-reset-token))
        dorun))
 
 ;; Nils here allow for easy switching on/off
@@ -217,7 +218,7 @@
                (periodic-trigger 3000 nil "nlp.trigger.1"))
   (qs/schedule @scheduler
                (make-job DeleteResetTokens "jobs.tokens.delete.1")
-               (periodic-trigger 1200000 nil "tokens.trigger.1")))
+               (periodic-trigger 600000 nil "tokens.trigger.1")))
 
 (defn restart! []
   (reset! scheduler nil)
