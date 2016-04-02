@@ -127,4 +127,3 @@
     (do (neo4j/delete-property! user s/pwd-reset-token)
         (->> params :password creds/hash-bcrypt 
              (neo4j/set-property! user s/pwd-hash)))))
-

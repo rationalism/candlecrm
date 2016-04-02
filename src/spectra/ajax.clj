@@ -77,6 +77,8 @@
                                    :keys []}
                 :update/key-link {:fn queries/key-link
                                   :keys [:key]}
+                :update/change-password {:fn auth/set-password!
+                                         :keys [:password :confirm]}
                 :update/fetch-node {:fn queries/node-by-id
                                     :keys [:id :type]}
                 :update/delete-entity {:fn auth/delete-entity!

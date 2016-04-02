@@ -189,5 +189,14 @@
 (defn delete-entity! []
   (send! (delete-req) confirm-delete))
 
+(defn change-pwd-req []
+  [:update/change-password
+   (-> :change-pwd state/look
+       (select-keys [:password :confirm]))])
+
+(defn confirm-changed [resp]
+  (js/alert "Password changed")
+  (state/set! [:tabid] 1))
+
 (defn change-password! []
-  (js/alert "Password changed"))
+  (send! (change-pwd-req) confirm-changed))
