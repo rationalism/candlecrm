@@ -215,9 +215,9 @@
   (->> labels first
        (map #(hash-map % (second labels)))))
 
-(defn norecon-count [user type]
-  (->> ["MATCH (root:" (neo4j/prop-label user type)
-        ":" (neo4j/esc-token s/norecon)
+(defn nonlp-count [user]
+  (->> ["MATCH (root:" (neo4j/prop-label user s/email)
+        ":" (neo4j/esc-token s/nonlp)
         ") RETURN count(root)"]
        (apply str) neo4j/cypher-query-raw
        first vals first))

@@ -22,7 +22,7 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
-(def norecon-insert-limit 250)
+(def nonlp-insert-limit 250)
 
 (defn message-count [user]
   (-> user email/fetch-imap-folder email/message-count))
@@ -99,8 +99,8 @@
 (defn queue-pop! []
   (let [queue-user (queries/next-email-queue)]
     (when (:queue queue-user)
-      (if (-> queue-user :user (queries/norecon-count s/email)
-              (< norecon-insert-limit))
+      (if (-> queue-user :user (queries/nonlp-count)
+              (< nonlp-insert-limit))
         (do (queue-reset! (:queue queue-user))
             (run-insertion! queue-user))
         (queue-time-reset! (:queue queue-user))))))
