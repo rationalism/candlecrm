@@ -160,13 +160,11 @@
   (->> old-id neo4j/all-links
        (map #(swap-ids old-id new-id %))
        (map merge-link)
-       (append-delete old-id)
-       (neo4j/cypher-combined-tx)))
+       (append-delete old-id)))
 
-(defn merge-all! [id-set]
+(defn merge-all [id-set]
   (->> id-set rest
-       (map #(merge-into! % (first id-set)))
-       dorun))
+       (mapcat #(merge-into! % (first id-set)))))
 
 (defn one-link [n1 n2 pred]
   (str "[:" (neo4j/esc-token pred)
@@ -226,15 +224,11 @@
        parse-paths
        (zipmap ids)))
 
-(defn recon-finished! [user class]
-  (neo4j/cypher-one-tx
-   (str "MATCH (root:" (neo4j/prop-label user class)
-        ":" (neo4j/esc-token s/norecon)
-        ") SET root:" (neo4j/esc-token s/recon)))
-  (neo4j/cypher-one-tx
-   (str "MATCH (root:" (neo4j/prop-label user class)
-        ":" (neo4j/esc-token s/norecon)
-        ") REMOVE root:" (neo4j/esc-token s/norecon))))
+(defn recon-finished [ids]
+  [(str "MATCH (root) WHERE ID(root) IN [" (str/join "," ids)
+        "] SET root:" (neo4j/esc-token s/recon))
+   (str "MATCH (root) WHERE ID(root) IN [" (str/join "," ids)
+        "] REMOVE root:" (neo4j/esc-token s/norecon))])
 
 (defn candidate-query [label preds]
   (str "MATCH (root:" label
@@ -372,23 +366,22 @@
   (str "MATCH (a) WHERE ID(a) = " id
        " DETACH DELETE a"))
 
-(defn delete-bodies! [body-map]
+(defn delete-bodies [body-map]
   (->> (remove #(= (second %)
                    (->> body-map (map second)
                         choose-body))
                body-map)
        (map first) (remove nil?)
-       (map delete-body)
-       neo4j/cypher-combined-tx))
+       (map delete-body)))
 
 (defn run-recon! [user class]
   (let [recon-groups (->> class (score-all user)
-                          (groups-to-recon class))]
-    (->> recon-groups (map body-ids)
-         (map delete-bodies!) dorun)
-    (->> recon-groups
-         (map merge-all!) dorun)
-    (recon-finished! user class)))
+                          (groups-to-recon class))
+        ids-to-delete (map body-ids recon-groups)]
+    (->> recon-groups (map first) recon-finished
+         (concat (mapcat merge-all recon-groups))
+         (concat (mapcat delete-bodies ids-to-delete))
+         neo4j/cypher-combined-tx)))
 
 (defn prop-and-id [user class prop]
   (str "MATCH (root:" (neo4j/prop-label user class)

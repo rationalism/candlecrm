@@ -59,20 +59,22 @@
        (str/join "," ids)
        "] SET root:" (neo4j/esc-token s/nonlp)))
 
-(defn add-nlp-labels! [id-map]
+(defn add-nlp-labels [id-map]
   (->> (filter #(-> % first s/type-label (= s/email)) id-map)
        (remove #(-> % first :id))
-       (map second) add-label-query neo4j/cypher-query-raw))
+       (map second) add-label-query vector))
 
-(defnp push-graph! [g user]
-  (let [id-map (insert-nodes! g user)]
-    (add-nlp-labels! id-map)
-    (->> (mapcat #(id-pair-cypher % user) id-map)
-         neo4j/cypher-combined-tx)
-    (->> g loom/multi-edges
-         (map #(edge-cypher % id-map))
-         neo4j/cypher-combined-tx)
-    (vals id-map)))
+(defnp push-graph!
+  ([g user]
+   (push-graph! g user []))
+  ([g user post-queries]
+   (let [id-map (insert-nodes! g user)]
+     (->> [(add-nlp-labels id-map)
+           (mapcat #(id-pair-cypher % user) id-map)
+           (map #(edge-cypher % id-map) (loom/multi-edges g))
+           post-queries]
+          (apply concat) neo4j/cypher-combined-tx)
+     (vals id-map))))
 
 (defn push-entities! [coll user]
   (push-graph! (loom/build-graph coll [])
@@ -99,20 +101,18 @@
   (let [fields (:fields query-map)
         attrs (->> (dissoc fields :id :type) keys
                    (map neo4j/esc-token) (str/join "|"))]
-    (neo4j/cypher-one-tx
-     (str (vals-query (:id fields) attrs) " WITH v MATCH (v)<--(x)"
-          " WITH v, count(x) as n WHERE n = 1 DETACH DELETE v"))
-    (neo4j/cypher-one-tx
-     (str (vals-query (:id fields) attrs) " DELETE r"))
-    (-> fields (dissoc :id :type)
-        vals-map (hash-map (:id fields)) first
-        (id-pair-cypher user) neo4j/cypher-combined-tx)
-    (neo4j/cypher-one-tx
-     (str "MATCH (root) WHERE ID(root) = " (:id fields)
-          " SET root:" (neo4j/esc-token s/norecon)))
-    (neo4j/cypher-one-tx
-     (str "MATCH (root) WHERE ID(root) = " (:id fields)
-          " REMOVE root:" (neo4j/esc-token s/recon)))))
+    (->> (-> fields (dissoc :id :type)
+             vals-map (hash-map (:id fields)) first
+             (id-pair-cypher user))
+         (concat
+          [(str "MATCH (root) WHERE ID(root) = " (:id fields)
+                " SET root:" (neo4j/esc-token s/norecon))
+           (str "MATCH (root) WHERE ID(root) = " (:id fields)
+                " REMOVE root:" (neo4j/esc-token s/recon))
+           (str (vals-query (:id fields) attrs) " WITH v MATCH (v)<--(x)"
+                " WITH v, count(x) as n WHERE n = 1 DETACH DELETE v")
+           (str (vals-query (:id fields) attrs) " DELETE r")])
+         neo4j/cypher-combined-tx)))
 
 (defn load-csv [filename]
   (let [csv-lines (-> filename slurp csv/parse-csv)]

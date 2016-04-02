@@ -549,20 +549,25 @@
          vector (loom/build-graph [])
          (use-nlp models message))))
 
-(defn delete-email-body! [id]
+(defn delete-email-body [id]
   (->> ["MATCH (root)-[:" (neo4j/esc-token s/email-body)
         "]->(b) WHERE ID(root) = " id
         " DETACH DELETE b"]
-       (apply str) vector
-       neo4j/cypher-combined-tx))
+       (apply str)))
+
+(defn remove-nonlp [id]
+  (str "MATCH (root) WHERE ID(root) = " id
+       " REMOVE root:" (neo4j/esc-token s/nonlp)))
 
 (defn run-email-nlp! [models email]
   (let [graph (->> email :id (graph-from-id models))]
-    (-> email :id delete-email-body!)
-    (-> (loom/remove-nodes
-         graph (->> (loom/select-edges graph s/email-from)
-                    (map second)))
-        (insert/push-graph! (s/user email)))))
+    (insert/push-graph!
+     (loom/remove-nodes
+      graph (->> (loom/select-edges graph s/email-from)
+                 (map second)))
+     (s/user email)
+     (vector (-> email :id delete-email-body)
+             (-> email :id remove-nonlp)))))
 
 (defn push-email-nlp! []
   (let [emails (queries/email-for-nlp batch-size)]
