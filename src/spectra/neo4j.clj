@@ -93,14 +93,14 @@
 (declare cypher-combined-tx)
 
 (defn cypher-tx-exception [retry queries e]
-  (cond (not retry)
-        (println "Deadlock detected, not retrying")
-        (not (deadlock-throw? e))
+  (cond (not (deadlock-throw? e))
         (do (println "Cypher query exception")
             (println (.getMessage e))
             (println "First query: " (first queries))
             (println "Stack trace: " e)
             {})
+        (not retry)
+        (println "Deadlock detected, not retrying")
         :else
         (do (println "Deadlock detected, retrying")
             (cypher-combined-tx true queries))))
