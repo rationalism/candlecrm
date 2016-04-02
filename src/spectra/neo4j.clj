@@ -101,6 +101,7 @@
             (println "First query: " (first queries))
             (println "Stack trace: " e)
             {})
+        :else
         (do (println "Deadlock detected, retrying")
             (cypher-combined-tx true queries))))
 
