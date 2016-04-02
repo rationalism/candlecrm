@@ -24,7 +24,8 @@
     :new-entity-msg nil
     :search ""
     :search-results nil
-    :delete-account {}}))
+    :delete-account {}
+    :change-pwd {}}))
 
 (defn look [& args]
   (get-in @a args))

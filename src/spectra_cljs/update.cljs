@@ -188,3 +188,6 @@
 
 (defn delete-entity! []
   (send! (delete-req) confirm-delete))
+
+(defn change-password! []
+  (js/alert "Password changed"))
