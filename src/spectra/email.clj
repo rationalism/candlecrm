@@ -451,8 +451,10 @@
                        (find-bottom $))))
 
 (defnp message-fetch [folder message]
-  (vector (get-text-recursive message)
-          (headers-fetch message folder)))
+  (let [message-text (get-text-recursive message)]
+    (vector (if (or (nil? message-text) (empty? message-text))
+              "(No body)" message-text)
+            (headers-fetch message folder))))
 
 (defnp full-parse [message models]
   (try (-> message first
