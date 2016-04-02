@@ -92,26 +92,32 @@
 
 (declare cypher-combined-tx)
 
-(defn cypher-tx-exception [queries e]
-  (if (not (deadlock-throw? e))
-    (do (println "Cypher query exception")
-        (println (.getMessage e))
-        (println "First query: " (first queries))
-        (println "Stack trace: " e)
-        {})
-    (cypher-combined-tx queries)))
+(defn cypher-tx-exception [retry queries e]
+  (cond (not retry)
+        (println "Deadlock detected, not retrying")
+        (not (deadlock-throw? e))
+        (do (println "Cypher query exception")
+            (println (.getMessage e))
+            (println "First query: " (first queries))
+            (println "Stack trace: " e)
+            {})
+        (do (println "Deadlock detected, retrying")
+            (cypher-combined-tx true queries))))
 
-(defn cypher-combined-tx-recur [queries]
+(defn cypher-combined-tx-recur [retry queries]
   (try
     (->> (map tx/statement queries)
          (apply tx/in-transaction @conn)
          (map cy/tableize))
     (catch Exception e
-      (cypher-tx-exception queries e))))
+      (cypher-tx-exception retry queries e))))
 
-(defn cypher-combined-tx [queries]
-  (spit "/home/alyssa/cypherlog.txt" queries :append true)
-  (trampoline cypher-combined-tx-recur queries))
+(defn cypher-combined-tx
+  ([queries]
+   (cypher-combined-tx true queries))
+  ([retry queries]
+   (spit "/home/alyssa/cypherlog.txt" queries :append true)
+   (trampoline cypher-combined-tx-recur retry queries)))
 
 (defn find-by-id [id]
   (first

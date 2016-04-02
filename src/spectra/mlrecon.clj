@@ -383,7 +383,7 @@
     (->> (recon-finished user class)
          (concat (mapcat merge-all recon-groups))
          (concat (mapcat delete-bodies ids-to-delete))
-         neo4j/cypher-combined-tx)))
+         (neo4j/cypher-combined-tx nil))))
 
 (defn prop-and-id [user class prop]
   (str "MATCH (root:" (neo4j/prop-label user class)
