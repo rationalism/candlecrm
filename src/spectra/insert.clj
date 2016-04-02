@@ -67,12 +67,11 @@
 (defnp push-graph!
   ([g user]
    (push-graph! g user []))
-  ([g user post-queries]
+  ([g user pre-queries]
    (let [id-map (insert-nodes! g user)]
-     (->> [(add-nlp-labels id-map)
+     (->> [pre-queries (add-nlp-labels id-map)
            (mapcat #(id-pair-cypher % user) id-map)
-           (map #(edge-cypher % id-map) (loom/multi-edges g))
-           post-queries]
+           (map #(edge-cypher % id-map) (loom/multi-edges g))]
           (apply concat) neo4j/cypher-combined-tx)
      (vals id-map))))
 
