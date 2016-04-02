@@ -100,7 +100,7 @@
   (let [queue-user (queries/next-email-queue)]
     (when (:queue queue-user)
       (if (-> queue-user :user (queries/norecon-count s/email)
-              (> norecon-insert-limit))
+              (< norecon-insert-limit))
         (do (queue-reset! (:queue queue-user))
             (run-insertion! queue-user))
         (queue-time-reset! (:queue queue-user))))))
@@ -139,7 +139,7 @@
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (when nil (queue-pop!)))
+  (queue-pop!))
 
 (jobs/defjob NewGeocodes [ctx]
   (geocode/geocode-batch 10))
@@ -148,15 +148,14 @@
   (geocode/geocode-cached 20))
 
 (jobs/defjob ProcessRecon [ctx]
-  (when nil (run-recon!)))
+  (run-recon!))
 
 (jobs/defjob EmailNLP [ctx]
-  (when nil (email/push-email-nlp!)))
+  (email/push-email-nlp!))
 
 (jobs/defjob EmailRefresh [ctx]
-  (when nil
-    (doseq [user (auth/list-users)]
-      (refresh-queue! user))))
+  (doseq [user (auth/list-users)]
+    (refresh-queue! user)))
 
 (jobs/defjob DeleteResetTokens [ctx]
   (delete-reset-tokens!))

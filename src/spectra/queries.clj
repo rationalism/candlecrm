@@ -230,7 +230,7 @@
        flatten (apply merge-with +)
        (map vec) (map reverse)
        (sort-by first >)
-       (remove #(= (second %) (name s/norecon)))
+       (filter #(.contains (second %) "_user_"))
        (map #(vector (first %) (neo4j/decode-label (second %))))))
 
 (defn partial-val-query [user query prop]
