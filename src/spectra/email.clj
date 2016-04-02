@@ -289,11 +289,10 @@
        (first-header sep-model) (+ (:end-header marks))
        (assoc marks :end-body)))
 
-(defn remove-arrow [line]
-  (str/replace-first line ">" ""))
-
-(defn remove-arrows [lines]
-  (map remove-arrow lines))
+(defn remove-arrows [num lines]
+  (map #(str/replace-first
+         % (apply str (repeat num ">")) "")
+       lines))
 
 (defn start-tail [marks lines]
   (assoc marks :start-tail
@@ -317,8 +316,7 @@
         (find-header-vals (:nlp models) lines))))
 
 (defn remove-arrows-if [lines]
-  (if (<= 1 (count-min-depth lines))
-    (remove-arrows lines) lines))
+  (remove-arrows (count-min-depth lines) lines))
 
 (defn new-top [marks chain]
   (let [new-slice (com/slice (:end-body marks) (:start-tail marks)
@@ -361,7 +359,9 @@
 
 (defn recursive-split [models depth chain]
   (if (>= depth 0)
-    (recur models (dec depth)
+    (recur models
+           (-> chain chain-lines count-max-depth
+               (min (dec depth)))
            (-> models (find-marks depth chain)
                (split-email chain)))
     chain))
