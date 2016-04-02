@@ -156,7 +156,7 @@
    (str "MATCH (root) WHERE ID(root) = " old-id
         " DETACH DELETE root")))
 
-(defn merge-into! [old-id new-id]
+(defn merge-into [old-id new-id]
   (->> old-id neo4j/all-links
        (map #(swap-ids old-id new-id %))
        (map merge-link)
@@ -164,7 +164,7 @@
 
 (defn merge-all [id-set]
   (->> id-set rest
-       (mapcat #(merge-into! % (first id-set)))))
+       (mapcat #(merge-into % (first id-set)))))
 
 (defn one-link [n1 n2 pred]
   (str "[:" (neo4j/esc-token pred)
