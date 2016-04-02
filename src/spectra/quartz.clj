@@ -222,5 +222,5 @@
                (periodic-trigger 600000 nil "tokens.trigger.1")))
 
 (defn restart! []
-  (reset! scheduler nil)
+  (qs/shutdown @scheduler)
   (start!))
