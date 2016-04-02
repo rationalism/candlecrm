@@ -113,6 +113,9 @@
   (spit "/home/alyssa/cypherlog.txt" queries :append true)
   (trampoline cypher-combined-tx-recur queries))
 
+(defn cypher-one-tx [query]
+  (-> query vector cypher-combined-tx))
+
 (defn find-by-id [id]
   (first
    (cypher-list

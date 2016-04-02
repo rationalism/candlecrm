@@ -227,11 +227,11 @@
        (zipmap ids)))
 
 (defn recon-finished! [user class]
-  (neo4j/cypher-query
+  (neo4j/cypher-one-tx
    (str "MATCH (root:" (neo4j/prop-label user class)
         ":" (neo4j/esc-token s/norecon)
         ") SET root:" (neo4j/esc-token s/recon)))
-  (neo4j/cypher-query
+  (neo4j/cypher-one-tx
    (str "MATCH (root:" (neo4j/prop-label user class)
         ":" (neo4j/esc-token s/norecon)
         ") REMOVE root:" (neo4j/esc-token s/norecon))))
