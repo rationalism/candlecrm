@@ -61,7 +61,9 @@
     (cy/tquery @conn query)
     (catch Exception e
       (do (println "ERROR: Cypher query invalid")
-          (println "Query:" query) {}))))
+          (println "Query:" query)
+          (println "Error message:" e)
+          {}))))
 
 (defn cypher-query [query]
   (map cypher-map->node
@@ -95,6 +97,7 @@
     (do (println "Cypher query exception")
         (println (.getMessage e))
         (println "First query: " (first queries))
+        (println "Stack trace: " e)
         {})
     (cypher-combined-tx queries)))
 
