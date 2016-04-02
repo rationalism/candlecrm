@@ -22,6 +22,8 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
+(def norecon-insert-limit 250)
+
 (defn message-count [user]
   (-> user email/fetch-imap-folder email/message-count))
 
@@ -44,9 +46,12 @@
         (range-bottom queue))
      (dec email/batch-size)))
 
-(defn queue-reset! [queue]
+(defn queue-time-reset! [queue]
   (neo4j/update-vals! (:id queue) s/modified
-                      (s/modified queue) (dt/now))
+                      (s/modified queue) (dt/now)))
+
+(defn queue-reset! [queue]
+  (queue-time-reset! queue)
   (if (queue-new? queue)
     (neo4j/update-vals! (:id queue) s/loaded-top
                         (s/loaded-top queue) (range-top queue))
@@ -94,8 +99,11 @@
 (defn queue-pop! []
   (let [queue-user (queries/next-email-queue)]
     (when (:queue queue-user)
-      (queue-reset! (:queue queue-user))
-      (run-insertion! queue-user))))
+      (if (-> queue-user :user (queries/norecon-count s/email)
+              (> norecon-insert-limit))
+        (do (queue-reset! (:queue queue-user))
+            (run-insertion! queue-user))
+        (queue-time-reset! (:queue queue-user))))))
 
 (defn new-queue-map [top-uid]
   {s/top-uid top-uid
@@ -116,7 +124,7 @@
   (when params (apply mlrecon/run-recon! params)))
 
 (defn run-recon! []
-  (->> (queries/norecon-count) (map second)
+  (->> (queries/norecon-count-all) (map second)
        (filter #(some #{(second %)}
                       (keys @mlrecon/recon-models)))
        (map #(vector (neo4j/find-by-id (first %)) (second %)))

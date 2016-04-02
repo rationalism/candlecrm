@@ -215,7 +215,14 @@
   (->> labels first
        (map #(hash-map % (second labels)))))
 
-(defn norecon-count []
+(defn norecon-count [user type]
+  (->> ["MATCH (root:" (neo4j/prop-label user type)
+        ":" (neo4j/esc-token s/norecon)
+        ") RETURN count(root)"]
+       (apply str) neo4j/cypher-query-raw
+       first vals first))
+
+(defn norecon-count-all []
   (->> (str "MATCH (root:" (neo4j/esc-token s/norecon)
             ") RETURN labels(root), count(*)")
        neo4j/cypher-query-raw (map vals)
