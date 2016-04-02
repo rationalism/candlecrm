@@ -175,13 +175,15 @@
    (when (state/look :delete-account :confirm-box)
      [confirm-box])])
 
-(def person-attrs [s/s-name s/email-addr s/phone-num
-                   s/birthday s/gender s/website])
+(def entity-attrs
+  {s/person [s/s-name s/email-addr s/phone-num
+             s/birthday s/gender s/website]})
 
-(defn new-person-switch []
-  (state/set! [:input-meta :type] s/person)
-  (state/set! [:input-meta :attr-list] person-attrs)
-  (doseq [attr person-attrs]
+(defn new-entity-switch [type]
+  (state/set! [:input-meta :type] type)
+  (state/set! [:input-meta :attr-list]
+              (type entity-attrs))
+  (doseq [attr (type entity-attrs)]
     (state/set! [:new-entity attr] {0 ""}))
   (state/set! [:tabid] 7))
 
@@ -202,7 +204,7 @@
          (first (person attr)))])
 
 (defn person-row [person]
-  [:tr (for [attr (add-ids s/person-attrs)]
+  [:tr (for [attr (add-ids (s/person entity-attrs))]
          ^{:key (first attr)}
          [person-cell person (second attr)])])
 
@@ -219,7 +221,7 @@
   [:div
    [:table {:id "people-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "people-header"}
-     (for [attr (add-ids s/person-attrs)]
+     (for [attr (add-ids (s/person entity-attrs))]
        ^{:key (first attr)}
        [:td (get s/attr-names (second attr))])]
     [:tbody {:id "people-rows"}
@@ -228,7 +230,7 @@
        [person-row (second p-row)])]]
    [prev-next-box :people u/update-people!
     (count (state/look :people-rows)) :people]
-   [:p>a {:href "#" :on-click new-person-switch
+   [:p>a {:href "#" :on-click #(new-entity-switch s/person)
           :id "add-new-person" :class "pure-button"} "Add new person"]])
 
 (def email-attrs {s/email-sent "Date"
@@ -477,16 +479,18 @@
 (def event-disp [s/start-time s/stop-time])
 (def money-disp [s/s-name])
 
-(defn ids-if-coll [m]
+(defn ids-if-coll [type m]
   (let [id-fn #(->> % add-ids (map vec) vec (into {}))]
     (reduce #(update %1 %2 id-fn)
-            m (vec (keep (set person-attrs) (set (keys m)))))))
+            m (vec (keep (set (type entity-attrs))
+                         (set (keys m)))))))
 
-(defn edit-person-switch []
-  (state/update! [:current-node :center-node] ids-if-coll)
+(defn edit-entity-switch [type]
+  (state/update! [:current-node :center-node]
+                 (partial ids-if-coll type))
   (state/set! [:tabid] 8))
 
-(defn delete-person-switch []
+(defn delete-entity-switch []
   (u/delete-entity!)
   (state/set! [:tabid] 1))
 
@@ -496,9 +500,9 @@
      [:h3.infotitle
       (str (if person-name person-name "(No name listed)")
            " (Person) ")
-      [:a {:href "#" :on-click edit-person-switch}
+      [:a {:href "#" :on-click #(edit-entity-switch s/person)}
        "(Edit)"] " "
-      [:a {:href "#" :on-click delete-person-switch}
+      [:a {:href "#" :on-click delete-entity-switch}
        "(Delete)"]]
      [info-items person-disp item]
      [:h3.infotitle (str "Emails to " disp-name)]
