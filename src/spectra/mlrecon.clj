@@ -153,8 +153,8 @@
 
 (defn append-delete [old-id coll]
   (conj coll 
-   (str "MATCH (root) WHERE ID(root) = " old-id
-        " DETACH DELETE root")))
+        (str "MATCH (root) WHERE ID(root) = " old-id
+             " DETACH DELETE root")))
 
 (defn merge-into [old-id new-id]
   (->> old-id neo4j/all-links
@@ -224,11 +224,13 @@
        parse-paths
        (zipmap ids)))
 
-(defn recon-finished [ids]
-  [(str "MATCH (root) WHERE ID(root) IN [" (str/join "," ids)
-        "] SET root:" (neo4j/esc-token s/recon))
-   (str "MATCH (root) WHERE ID(root) IN [" (str/join "," ids)
-        "] REMOVE root:" (neo4j/esc-token s/norecon))])
+(defn recon-finished [user class]
+  [(str "MATCH (root:" (neo4j/prop-label user class)
+        ":" (neo4j/esc-token s/norecon)
+        ") SET root:" (neo4j/esc-token s/recon))
+   (str "MATCH (root:" (neo4j/prop-label user class)
+        ":" (neo4j/esc-token s/norecon)
+        ") REMOVE root:" (neo4j/esc-token s/norecon))])
 
 (defn candidate-query [label preds]
   (str "MATCH (root:" label
@@ -378,7 +380,7 @@
   (let [recon-groups (->> class (score-all user)
                           (groups-to-recon class))
         ids-to-delete (map body-ids recon-groups)]
-    (->> recon-groups (map first) recon-finished
+    (->> (recon-finished user class)
          (concat (mapcat merge-all recon-groups))
          (concat (mapcat delete-bodies ids-to-delete))
          neo4j/cypher-combined-tx)))
