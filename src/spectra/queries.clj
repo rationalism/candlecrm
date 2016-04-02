@@ -276,6 +276,7 @@
 
 (defn email-for-nlp [limit]
   (->> (str "MATCH (root:" (neo4j/esc-token s/nonlp)
+            ":" (neo4j/esc-token s/recon)
             ")-[:" (neo4j/esc-token s/email-body)
             "]->(b) RETURN ID(root), labels(root) LIMIT " limit)
        neo4j/cypher-query-raw
