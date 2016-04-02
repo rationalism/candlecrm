@@ -630,10 +630,16 @@
        (str/join " ")))
 
 (defn run-nlp-default [models text]
-  (->> text (run-nlp (:ner models))
-       library-annotate-all
-       (run-annotate (:mention models))
-       nlp-graph))
+  (try
+    (->> text (run-nlp (:ner models))
+         library-annotate-all
+         (run-annotate (:mention models))
+         nlp-graph)
+    (catch Exception e
+      (do (println "NLP parsing error on text:")
+          (println text)
+          (println "Error message:")
+          (print e)))))
 
 (defn run-nlp-full [models author text]
   (cond-> (->> (fpp-replace models (strip-parens text) author)
