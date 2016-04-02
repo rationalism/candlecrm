@@ -121,8 +121,9 @@
       (neo4j/create-edge! user s/user-queue)))
 
 (defn maybe-run-recon! [params]
-  (println "running recon")
-  (when params (apply mlrecon/run-recon! params)))
+  (when params
+    (println "running recon")
+    (apply mlrecon/run-recon! params)))
 
 (defn run-recon! []
   (->> (queries/norecon-count-all) (map second)
