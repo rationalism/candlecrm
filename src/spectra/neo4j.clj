@@ -119,8 +119,7 @@
   ([retry queries]
    (spit "/home/alyssa/cypherlog.txt" "BEGIN TRANSACTION\n\n" :append true)
    (dorun (map #(spit "/home/alyssa/cypherlog.txt" (str % "\n\n") :append true) queries))
-   (trampoline cypher-combined-tx-recur retry queries)
-   (spit "/home/alyssa/cypherlog.txt" "END TRANSACTION\n\n" :append true)))
+   (trampoline cypher-combined-tx-recur retry queries)))
 
 (defn find-by-id [id]
   (first
