@@ -30,7 +30,7 @@
 (def multi-type "multipart")
 (def parse-threads 6)
 (def nlp-threads 6)
-(def batch-size 100)
+(def batch-size 10)
 
 (defonce parse-channel (atom nil))
 (defonce nlp-channel (atom nil))
