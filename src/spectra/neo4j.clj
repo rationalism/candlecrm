@@ -56,7 +56,7 @@
        (into {})))
 
 (defn cypher-query-raw [query]
-  (spit "/home/alyssa/cypherlog.txt" query :append true)
+  (spit "/home/alyssa/cypherlog.txt" (str query "\n\n") :append true)
   (try
     (cy/tquery @conn query)
     (catch Exception e
@@ -117,8 +117,10 @@
   ([queries]
    (cypher-combined-tx true queries))
   ([retry queries]
-   (spit "/home/alyssa/cypherlog.txt" queries :append true)
-   (trampoline cypher-combined-tx-recur retry queries)))
+   (spit "/home/alyssa/cypherlog.txt" "BEGIN TRANSACTION\n\n" :append true)
+   (dorun (map #(spit "/home/alyssa/cypherlog.txt" (str % "\n\n") :append true) queries))
+   (trampoline cypher-combined-tx-recur retry queries)
+   (spit "/home/alyssa/cypherlog.txt" "END TRANSACTION\n\n" :append true)))
 
 (defn find-by-id [id]
   (first
