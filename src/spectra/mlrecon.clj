@@ -103,6 +103,10 @@
            (.toString)
            (max-lcs coll1 coll2)))))
 
+(defn shortest [coll1 coll2]
+  (->> [coll1 coll2] flatten
+       (map count) (apply min)))
+
 (def scoring
   {s/email
    [[[s/email-body] [is-eq min-len]]
@@ -126,7 +130,9 @@
     [[s/catalog-name] [is-eq lcs lev]]
     [[s/desc1] [is-eq lcs lev]]
     [[s/desc2] [is-eq lcs lev]]
-    [[s/item-cost] [is-eq abs]]]})
+    [[s/item-cost] [is-eq abs]]]
+   s/location
+   [[[s/s-name] [is-eq lcs lev shortest]]]})
 
 (def candidates
   {s/email
@@ -136,7 +142,9 @@
    [s/s-name s/email-addr s/phone-num]
    s/tool
    [s/part-name s/catalog-name s/desc1
-    s/desc2 s/item-cost]})
+    s/desc2 s/item-cost]
+   s/location
+   [s/s-name]})
 
 (defn merge-link [link]
   (str "MATCH (a) WHERE ID(a) = " (first link)
