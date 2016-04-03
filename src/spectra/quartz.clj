@@ -22,7 +22,7 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
-(def nonlp-insert-limit 120)
+(def nonlp-insert-limit 20)
 
 (defn message-count [user]
   (-> user email/fetch-imap-folder email/message-count))
