@@ -559,9 +559,9 @@
        "]->(b) WHERE ID(root) = " id))
 
 (defn delete-email-body [id]
-  [(str body-query " WITH b MATCH (b)<--(x)"
+  [(str (body-query id) " WITH b MATCH (b)<--(x)"
         " WITH b, count(x) as n WHERE n = 1 DETACH DELETE b")
-   (str body-query " DELETE r")])
+   (str (body-query id) " DELETE r")])
 
 (defn remove-nonlp [id]
   (str "MATCH (root) WHERE ID(root) = " id
