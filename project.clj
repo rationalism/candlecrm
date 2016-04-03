@@ -1,9 +1,9 @@
-(defproject spectra "0.1.1"
+(defproject spectra "0.1.2"
   :description "Personal semantic graphs"
   :url "http://spectra.herokuapp.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.8.34"
+                 [org.clojure/clojurescript "1.8.40"
                   :exclusions [args4j com.google.code.findbugs/jsr305]]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [ns-tracker "0.3.0"]
@@ -68,16 +68,17 @@
                  [com.googlecode.concurrent-trees/concurrent-trees "2.5.0"]
                  [clojure-csv/clojure-csv "2.0.2"]
                  [org.apache.commons/commons-lang3 "3.4"]
-                 [com.sendgrid/sendgrid-java "2.2.2"]]
+                 [com.sendgrid/sendgrid-java "2.2.2"]
+                 [reagent-forms "0.5.22"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.2"]
             [lein-kibit "0.1.2"]
-            [lein-figwheel "0.5.1"]
+            [lein-figwheel "0.5.2"]
             [lein-cljsbuild "1.1.3"]
             [cider/cider-nrepl "0.11.0"]
             [jonase/eastwood "0.2.3"]
             [venantius/yagni "0.1.4"]
-            [lein-ancient "0.6.8"]
+            [lein-ancient "0.6.10"]
             [lein-cloverage "1.0.6"]]
   :resource-paths ["config" "resources"]
   :source-paths ["src"]
