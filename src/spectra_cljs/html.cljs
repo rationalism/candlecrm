@@ -266,7 +266,8 @@
 
 (defn person-option [person]
   [:option {:value (:id person)}
-   (str (s/s-name person) " (" (s/email-addr person) ")")])
+   (str (first (s/s-name person))
+        " (" (first (s/email-addr person)) ")")])
 
 (defn people-ranks [rel-type]
   [:div>span "Select a person: "
