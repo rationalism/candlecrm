@@ -554,11 +554,14 @@
          vector (loom/build-graph [])
          (use-nlp models message))))
 
+(defn body-query [id]
+  (str "MATCH (root)-[r:" (neo4j/esc-token s/email-body)
+       "]->(b) WHERE ID(root) = " id))
+
 (defn delete-email-body [id]
-  (->> ["MATCH (root)-[:" (neo4j/esc-token s/email-body)
-        "]->(b) WHERE ID(root) = " id
-        " DETACH DELETE b"]
-       (apply str)))
+  [(str body-query " WITH b MATCH (b)<--(x)"
+        " WITH b, count(x) as n WHERE n = 1 DETACH DELETE b")
+   (str body-query " DELETE r")])
 
 (defn remove-nonlp [id]
   (str "MATCH (root) WHERE ID(root) = " id
@@ -571,8 +574,8 @@
       graph (->> (loom/select-edges graph s/email-from)
                  (map second)))
      (s/user email)
-     (vector (-> email :id delete-email-body)
-             (-> email :id remove-nonlp)))
+     (conj (-> email :id delete-email-body)
+           (-> email :id remove-nonlp)))
     (-> email :id remove-nonlp
         neo4j/cypher-query-raw)))
 
