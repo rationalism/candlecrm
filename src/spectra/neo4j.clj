@@ -5,6 +5,7 @@
             [spectra_cljc.schema :as s]
             [environ.core :refer [env]]
             [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.constraints :as co]
             [clojurewerkz.neocons.rest.cypher :as cy]
             [clojurewerkz.neocons.rest.labels :as nl]
             [clojurewerkz.neocons.rest.nodes :as nn]
@@ -253,3 +254,12 @@
    (str "MATCH (root) WHERE ID(root) = " id
         " REMOVE root:" (esc-token label))))
 
+(defn all-constraints []
+  (co/get-all @conn))
+
+(defn drop-constraint! [label prop]
+  (co/drop-unique @conn label prop))
+
+(defn drop-all-constraints! []
+  (map #(drop-constraint! (:label %) (first (:property_keys %)))
+       (all-constraints)))
