@@ -28,7 +28,8 @@
 
 (defn load-models! []
   (new-model! s/email models-dir)
-  (new-model! s/person models-dir))
+  (new-model! s/person models-dir)
+  (new-model! s/location models-dir))
 
 (defn lev-distance [a b]
   (/ (StringUtils/getLevenshteinDistance a b)
