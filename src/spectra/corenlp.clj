@@ -629,6 +629,12 @@
        (map str/capitalize)
        (str/join " ")))
 
+(defn nlp-display-error [e text]
+  (do (println "NLP parsing error on text:")
+      (println text)
+      (println "Error message:")
+      (print e)))
+
 (defn run-nlp-default [models text]
   (try
     (->> text (run-nlp (:ner models))
@@ -636,18 +642,18 @@
          (run-annotate (:mention models))
          nlp-graph)
     (catch Exception e
-      (do (println "NLP parsing error on text:")
-          (println text)
-          (println "Error message:")
-          (print e)))))
+      (nlp-display-error e text))))
 
 (defn run-nlp-full [models author text]
-  (cond-> (->> (fpp-replace models (strip-parens text) author)
-               (run-nlp (:ner models))
-               library-annotate-all
-               (run-annotate (:mention models))
-               nlp-graph)
-    (env :coreference) rewrite-pronouns))
+  (try
+    (cond-> (->> (fpp-replace models (strip-parens text) author)
+                 (run-nlp (:ner models))
+                 library-annotate-all
+                 (run-annotate (:mention models))
+                 nlp-graph)
+      (env :coreference) rewrite-pronouns)
+    (catch Exception e
+      (nlp-display-error e text))))
 
 (defn run-nlp-openie [models text]
   (-> text strip-parens ;; (fpp-replace models author)
