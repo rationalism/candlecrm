@@ -597,10 +597,10 @@
        async/create-pool!
        (reset! nlp-channel)))
 
-(defn parse-and-insert! [models message-and-user]
-  (-> message-and-user :message
-      (full-parse models)
-      (insert/push-graph! (:user message-and-user))))
+(defn parse! [models message-and-user]
+  [(-> message-and-user :message
+       (full-parse models))
+   (:user message-and-user)])
 
 (defn parse-models-fn []
   {:sep ((weka/email-sep-model-fn))
@@ -608,9 +608,10 @@
          :mention ((nlp/get-mention-fn))}})
 
 (defn make-parse-pool! []
-  (->> {:name "email-parse" :process parse-and-insert!
+  (->> {:name "email-parse" :process parse!
         :param-gen parse-models-fn
-        :callback identity :num-threads parse-threads}
+        :callback #(apply insert/push-graph! %)
+        :num-threads parse-threads}
        async/create-pool!
        (reset! parse-channel)))
 
