@@ -521,27 +521,30 @@
   (->> (loom/select-edges chain s/link-to)
        (map link-pair) (apply merge)))
 
-(defn use-nlp [models message chain]
-  (if (com/nil-or-empty? (s/email-body message)) chain
-      (as-> (->> (s/email-body message)
-                 (nlp/run-nlp-full models (author-name chain message))
-                 append-hyperlinks (conj [chain])
-                 loom/merge-graphs) $
-        (loom/add-edges $ (->> $ hyperlink-nodes
-                               (map #(vector message % s/has-link))))
-        (loom/replace-node $ message
-                           (->> (link-map $)
-                                (hyperlink-text (s/email-body message))
-                                (assoc message s/email-body)))
-        (reduce import-label $ (loom/select-edges $ s/has-type))
-        (reduce parse-datetime $ (->> $ loom/nodes
-                                      (filter #(= s/event (:label %)))))
-        (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/s-name])
-        (loom/remove-nodes $ (->> s/has-type (loom/select-edges $) (map second))))))
+(defn make-nlp-chain [models message chain]
+  (when (-> message s/email-body com/nil-or-empty? not)
+    (let [nlp-result
+          (->> message s/email-body
+               (nlp/run-nlp-full models (author-name chain message)))]
+      (when (-> nlp-result loom/nodes empty? not)
+        (->> nlp-result append-hyperlinks
+             (conj [chain] loom/merge-graphs))))))
 
-(defn use-nlp-graph [models g]
-  (reduce (partial use-nlp models)
-          (recon/filter-memory g s/email) g))
+(defn use-nlp [models message chain]
+  (when-let [nlp-chain (make-nlp-chain models message chain)]
+    (as-> nlp-chain $
+      (loom/add-edges $ (->> $ hyperlink-nodes
+                             (map #(vector message % s/has-link))))
+      (loom/replace-node $ message
+                         (->> (link-map $)
+                              (hyperlink-text (s/email-body message))
+                              (assoc message s/email-body)))
+      (reduce import-label $ (loom/select-edges $ s/has-type))
+      (reduce parse-datetime $ (->> $ loom/nodes
+                                    (filter #(= s/event (:label %)))))
+      (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/s-name])
+      (loom/remove-nodes
+       $ (->> s/has-type (loom/select-edges $) (map second))))))
 
 (defn graph-from-id [models id]
   (let [vals (->> [[s/email-body] [s/email-from s/s-name]]
@@ -562,7 +565,7 @@
        " REMOVE root:" (neo4j/esc-token s/nonlp)))
 
 (defn run-email-nlp! [models email]
-  (let [graph (->> email :id (graph-from-id models))]
+  (when-let [graph (->> email :id (graph-from-id models))]
     (insert/push-graph!
      (loom/remove-nodes
       graph (->> (loom/select-edges graph s/email-from)
