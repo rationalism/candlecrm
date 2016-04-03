@@ -572,13 +572,20 @@
             :on-change (set-field! :search) :value (state/look :search)
             :on-key-press search-key}]])
 
+(defn result-row [res]
+  [:div [:hr]
+   [:ul
+    (for [id-param (add-ids res)]
+      ^{:key (first id-param)}
+      [:li (str (second id-param))])
+    [:li [node-link "Link to result" (:id res) (s/type-label res)]]]])
+
 (defn search-results []
   [:div
    [:h2 "Search Results"]
-   [:ul]
    (for [id-res (-> :search-results state/look add-ids)]
      ^{:key (first id-res)}
-     [:li (-> id-res second str)])])
+     [result-row (second id-res)])])
 
 (defn home-header []
   [:div#menu-bar {:class "pure-g"}
