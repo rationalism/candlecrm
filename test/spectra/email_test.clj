@@ -15,6 +15,7 @@
 (def test-body-none "There is no content in this message.")
 
 (def models (parse-models-fn))
+(def nlp-models (nlp-models-fn))
 
 (deftest email-splitting
   (testing "Split recursively"
@@ -38,7 +39,7 @@
     (def g2 (loom/build-graph [message2 author]
                               [[message2 author s/email-from]]))
 
-    (def r1 (use-nlp models message1 g1))
-    (def r2 (use-nlp models message2 g2))
+    (def r1 (use-nlp nlp-models message1 g1))
+    (def r2 (use-nlp nlp-models message2 g2))
     (is r1)
     (is (not r2))))

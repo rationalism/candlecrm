@@ -528,7 +528,7 @@
                (nlp/run-nlp-full models (author-name chain message)))]
       (when (-> nlp-result loom/nodes empty? not)
         (->> nlp-result append-hyperlinks
-             (conj [chain] loom/merge-graphs))))))
+             (conj [chain]) loom/merge-graphs)))))
 
 (defn use-nlp [models message chain]
   (when-let [nlp-chain (make-nlp-chain models message chain)]
