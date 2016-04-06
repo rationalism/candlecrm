@@ -33,7 +33,7 @@
                   :exclusions [com.google.guava/guava org.apache.httpcomponents/httpclient
                                com.google.code.findbugs/jsr305]]
                  [org.passay/passay "1.1.0"]
-                 [com.google.apis/google-api-services-oauth2 "v2-rev107-1.21.0"]
+                 [com.google.apis/google-api-services-oauth2 "v2-rev108-1.21.0"]
                  [com.google.http-client/google-http-client-jackson "1.21.0"
                   :exclusions [org.apache.httpcomponents/httpclient
                                com.google.code.findbugs/jsr305]]
