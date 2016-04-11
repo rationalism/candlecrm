@@ -129,7 +129,7 @@
 
 (defn remove-running [jobs]
   (let [running-ids (queries/users-recon-running)]
-    (remove #(some #{(first %)} running-ids))))
+    (remove #(some #{(first %)} running-ids) jobs)))
 
 (defn run-recon! []
   (->> (queries/norecon-count-all) (map second)
