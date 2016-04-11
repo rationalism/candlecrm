@@ -303,6 +303,6 @@
 (defn users-recon-running []
   (->> (str "MATCH (root:" (neo4j/esc-token s/user)
             ") WHERE root." (neo4j/esc-token s/recon-run)
-            " = false RETURN ID(root)")
+            " = true RETURN ID(root)")
        neo4j/cypher-query-raw
        (map vals) (map first)))
