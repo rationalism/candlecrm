@@ -42,13 +42,13 @@
       str/join neo4j/cypher-list))
 
 (defn insert-query [geocode]
-  (str/join
-   ["MATCH (root:" (neo4j/esc-token s/location)
-    ") WHERE ID(root) = " (:id geocode)
-    " CREATE (root)-[:" (neo4j/esc-token s/has-coord)
-    "]->(g:" (neo4j/esc-token s/geocode)
-    " " (-> geocode (get s/geocode) neo4j/cypher-properties)
-    ") RETURN g"]))
+  [(str "MATCH (root:" (neo4j/esc-token s/location)
+        ") WHERE ID(root) = {id}"
+        " CREATE (root)-[:" (neo4j/esc-token s/has-coord)
+        "]->(g:" (neo4j/esc-token s/geocode)
+        " {geocode}) RETURN g")
+   {:geocode (get s/geocode geocode)
+    :id (:id geocode)}])
 
 (defn geocode-batch [limit]
   (->> (queries/bare-locations limit)

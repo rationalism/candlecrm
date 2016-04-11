@@ -77,8 +77,8 @@
        (if (string? v) "'" "")))
 
 (defn cypher-property [prop]
-  (str (esc-token (key prop)) ": "
-       (esc-val (val prop))))
+  (str (esc-token (key prop)) ": {"
+       (esc-token (key prop)) "}"))
 
 (defn cypher-properties [props]
   (str "{ "
@@ -131,10 +131,10 @@
    (trampoline cypher-combined-tx-recur retry queries)))
 
 (defnp find-by-id [id]
-  (first
-   (cypher-list
-    (str "MATCH (a) WHERE ID(a)= " id
-         " RETURN a"))))
+  (->> [(str "MATCH (a) WHERE ID(a) = {id}"
+             " RETURN a")
+        {:id id}]
+       cypher-list first))
 
 (defn decode-label-parts [parts]
   [(-> parts first keyword)
@@ -146,9 +146,10 @@
       decode-label-parts reverse))
 
 (defn get-property [vertex property]
-  (->> ["MATCH (root) WHERE ID(root) = " (:id vertex)
-        " RETURN root." (esc-token property)]
-       (apply str) cypher-query-raw
+  (->> [(str "MATCH (root) WHERE ID(root) = {id}"
+             " RETURN root." (esc-token property))
+        {:id (:id vertex)}]
+       cypher-query-raw
        first vals first))
 
 (defn set-property! [vertex property value]
@@ -164,16 +165,16 @@
           (keyword (get l "TYPE(b)"))))
 
 (defn all-links [id]
-  (->> ["MATCH (a)-[b]-(c) WHERE ID(a)=" id
-        " RETURN ID(STARTNODE(b)), TYPE(b), ID(a), ID(c)"]
-       (apply str) (cy/tquery @conn)
-       (map format-link)))
+  (->> [(str "MATCH (a)-[b]-(c) WHERE ID(a) = {id}" 
+             " RETURN ID(STARTNODE(b)), TYPE(b), ID(a), ID(c)")
+        {:id id}]
+       cypher-query-raw (map format-link)))
 
 (defn delete-property! [vertex property]
-  (-> (str "MATCH (a) WHERE ID(a)= " (:id vertex)
-           " REMOVE a." (esc-token property)
-           " RETURN a")
-      cypher-query))
+  (-> [(str "MATCH (a) WHERE ID(a) = {id}"
+            " REMOVE a." (esc-token property))
+       {:id (:id vertex)}]
+      cypher-query-raw))
 
 (defn filter-props [props]
   (->> props
@@ -194,24 +195,24 @@
     nodes))
 
 (defn delete-id! [id]
-  (cypher-query
-   (str "MATCH (root)-->(v) WHERE ID(root) = " id
-        " AND v." (esc-token s/value)
-        " IS NOT NULL WITH v MATCH (v)<--(x)"
-        " WITH v, count(x) as n WHERE n = 1 DETACH DELETE v"))
-  (cypher-query
-   (str "MATCH (root) WHERE ID(root) = " id
-        " DETACH DELETE root")))
+  (cypher-query-raw
+   [(str "MATCH (root)-->(v) WHERE ID(root) = {id}"
+         " AND v." (esc-token s/value)
+         " IS NOT NULL WITH v MATCH (v)<--(x)"
+         " WITH v, count(x) as n WHERE n = {nval} DETACH DELETE v")
+    {:id id :nval 1}])
+  (cypher-query-raw
+   ["MATCH (root) WHERE ID(root) = {id} DETACH DELETE root"
+    {:id id}]))
 
 (defn delete-vertex! [vertex]
   (-> vertex :id delete-id!))
 
 (defn node-exists? [user id type]
-  (->> ["MATCH (root:" (prop-label user type)
-        ") WHERE ID(root) = " id
-        " RETURN ID(root)"]
-       (apply str) cypher-query-raw
-       first empty? not))
+  (->> [(str "MATCH (root:" (prop-label user type)
+             ") WHERE ID(root) = {id} RETURN ID(root)")
+        {:id id}]
+       cypher-query-raw first empty? not))
 
 (defn val-query [prop]
   (str "MATCH (root)-[:" (-> prop key esc-token)
@@ -227,10 +228,11 @@
        add-return cypher-list))
 
 (defn get-vertex [class props]
-  (->> ["MATCH (root:" (esc-token class)
-        " " (cypher-properties props)
-        ") RETURN root"]
-       (apply str) cypher-list first))
+  (->> [(str "MATCH (root:" (esc-token class)
+             " " (cypher-properties props)
+             ") RETURN root")
+        props]
+       cypher-list first))
 
 (defn get-vertices-class [class]
   (cypher-list (str "MATCH (root:" class
@@ -246,28 +248,31 @@
   (nrl/create @conn out in class))
 
 (defn update-vals! [id pred old-val new-val]
-  (cypher-query
-   (str "MATCH (root)-[:" (esc-token pred)
-        "]->(n) WHERE ID(root) = " id
-        " AND n.val = " (esc-val old-val)
-        " SET n.val = " (esc-val new-val))))
+  (cypher-query-raw
+   [(str "MATCH (root)-[:" (esc-token pred)
+         "]->(n) WHERE ID(root) = {id}"
+         " AND n.val = {oldval} SET n.val = {newval}")
+    {:id id :oldval old-val :newval new-val}]))
 
 (defn add-label! [id label]
   (cypher-query-raw
-   (str "MATCH (root) WHERE ID(root) = " id
-        " SET root:" (esc-token label))))
+   [(str "MATCH (root) WHERE ID(root) = {id}"
+         " SET root:" (esc-token label))
+    {:id id}]))
 
 (defn remove-label! [id label]
   (cypher-query-raw
-   (str "MATCH (root) WHERE ID(root) = " id
-        " REMOVE root:" (esc-token label))))
+   [(str "MATCH (root) WHERE ID(root) = "
+         " REMOVE root:" (esc-token label))
+    {:id id}]))
 
 (defn all-constraints []
   (co/get-all @conn))
 
-(defn drop-constraint! [label prop]
-  (co/drop-unique @conn label prop))
+(defn drop-constraint! [vals]
+  (when (= (:type vals) "UNIQUENESS")
+    (co/drop-unique
+     @conn (:label vals) (first (:property_keys vals)))))
 
 (defn drop-all-constraints! []
-  (map #(drop-constraint! (:label %) (first (:property_keys %)))
-       (all-constraints)))
+  (map drop-constraint! (all-constraints)))
