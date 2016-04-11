@@ -57,7 +57,6 @@
        (into {})))
 
 (defn cypher-query-raw [query]
-  (spit "/home/alyssa/cypherlog.txt" (str query "\n\n") :append true)
   (try
     (cy/tquery @conn query)
     (catch Exception e
