@@ -509,12 +509,19 @@
               (conj (mapv #(swap-fpp author %) fpps) "")))
 
 (defn fpp-replace [models text author]
-  (let [fpps (->> text (run-nlp (:token models))
-                  get-tokens (filter is-fpp?))]
-    (->> (mapcat char-pos fpps)
-         (char-ends text) (partition 2)
-         (map #(subs-vec text %))
-         (mesh-fpps author fpps) (str/join ""))))
+  (try
+    (let [fpps (->> text (run-nlp (:token models))
+                    get-tokens (filter is-fpp?))]
+      (->> (mapcat char-pos fpps)
+           (char-ends text) (partition 2)
+           (map #(subs-vec text %))
+           (mesh-fpps author fpps) (str/join "")))
+    (catch Exception e
+      (println "fpp-replace error")
+      (println "text: " text)
+      (println "author: " author)
+      (println e)
+      text)))
 
 (defn library-map [text]
   (loop [rem-text text lib-map {}
