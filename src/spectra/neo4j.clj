@@ -260,9 +260,12 @@
   (co/get-all @conn))
 
 (defn drop-constraint! [vals]
-  (when (= (:type vals) "UNIQUENESS")
+  (if (= (:type vals) "UNIQUENESS")
     (co/drop-unique
-     @conn (:label vals) (first (:property_keys vals)))))
+     @conn (:label vals) (first (:property_keys vals)))
+    (cypher-query-raw
+     (str "DROP CONSTRAINT ON (root:" (esc-token (:label vals))
+          ") ASSERT exists(root." (first (:property_keys vals)) ")"))))
 
 (defn drop-all-constraints! []
   (map drop-constraint! (all-constraints)))
