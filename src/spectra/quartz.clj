@@ -123,12 +123,19 @@
 (defn maybe-run-recon! [params]
   (when params
     (println "running recon")
-    (apply mlrecon/run-recon! params)))
+    (neo4j/set-property! (first params) s/recon-run true)
+    (apply mlrecon/run-recon! params)
+    (neo4j/set-property! (first params) s/recon-run false)))
+
+(defn remove-running [jobs]
+  (let [running-ids (queries/users-recon-running)]
+    (remove #(some #{(first %)} running-ids))))
 
 (defn run-recon! []
   (->> (queries/norecon-count-all) (map second)
        (filter #(some #{(second %)}
                       (keys @mlrecon/recon-models)))
+       remove-running
        (map #(vector (neo4j/find-by-id (first %)) (second %)))
        first maybe-run-recon!))
 

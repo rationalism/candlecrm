@@ -82,6 +82,7 @@
 
 (def recon :recon)
 (def norecon :norecon)
+(def recon-run :recon-run)
 (def nonlp :nonlp)
 
 (def repeated-attr [s-name person-name org-name email-addr phone-num

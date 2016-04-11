@@ -299,3 +299,10 @@
             ") WHERE root." (neo4j/esc-token s/pwd-reset-token)
             " IS NOT NULL RETURN root")
        neo4j/cypher-list))
+
+(defn users-recon-running []
+  (->> (str "MATCH (root:" (neo4j/esc-token s/user)
+            ") WHERE root." (neo4j/esc-token s/recon-run)
+            " = false RETURN ID(root)")
+       neo4j/cypher-query-raw
+       (map vals) (map first)))

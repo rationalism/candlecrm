@@ -18,7 +18,8 @@
 (defn user-vertex! [email-addr pwd-hash]
   (neo4j/create-vertex! s/user 
                         {s/email-addr email-addr
-                         s/pwd-hash pwd-hash}))
+                         s/pwd-hash pwd-hash
+                         s/recon-run false}))
 
 (defn friend-user [u]
   {:identity (get-in u (:data s/email-addr))})
