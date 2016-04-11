@@ -241,9 +241,10 @@
        (map #(vector (first %) (neo4j/decode-label (second %))))))
 
 (defn partial-val-query [user query prop]
-  (str "MATCH (v:" (neo4j/prop-label user prop)
-       ")<--(r) WHERE v.val STARTS WITH " (neo4j/esc-val query)
-       " RETURN ID(r)"))
+  [(str "MATCH (v:" (neo4j/prop-label user prop)
+        ")<--(r) WHERE v.val STARTS WITH {query}"
+        " RETURN ID(r)")
+   {:query query}])
 
 (defn id-row [row]
   [(first row)

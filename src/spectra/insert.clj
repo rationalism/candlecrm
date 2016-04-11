@@ -32,12 +32,12 @@
   (if (coll? val)
     (mapcat #(prop-cypher user id prop %) val)
     (when (and val (not= val ""))
-      [(str "MATCH (a) WHERE ID(a) = " id
-            " MERGE (b:" (neo4j/prop-label user prop)
-            " {" (neo4j/esc-token s/value) ": "
-            (neo4j/esc-val val) "}) CREATE (a)-[r:"
-            (neo4j/esc-token prop)
-            "]->(b)")])))
+      [[(str "MATCH (a) WHERE ID(a) = {id}"
+             " MERGE (b:" (neo4j/prop-label user prop)
+             " {" (neo4j/esc-token s/value) ": {v}"
+             "}) CREATE (a)-[r:" (neo4j/esc-token prop)
+             "]->(b)")
+        {:id id :v (dt/catch-dates val)}]])))
 
 (defn id-pair-cypher [id-pair user]
   (->> (apply dissoc (key id-pair) s/exclude-upload)
@@ -45,19 +45,20 @@
                              (key %) (val %)))))
 
 (defn link-cypher [id1 id2 prop]
-  (str "MATCH (a) WHERE ID(a) = " id1
-       " WITH a MATCH (b) WHERE ID(b) = " id2
-       " CREATE (a)-[r:" (neo4j/esc-token prop)
-       "]->(b)"))
+  [(str "MATCH (a) WHERE ID(a) = {id1}"
+        " WITH a MATCH (b) WHERE ID(b) = {id2}"
+        " CREATE (a)-[r:" (neo4j/esc-token prop)
+        "]->(b)")
+   {:id1 id1 :id2 id2}])
 
 (defn edge-cypher [e id-map]
   (link-cypher (id-map (first e)) (id-map (second e))
                (nth e 2)))
 
 (defn add-label-query [ids]
-  (str "MATCH (root) WHERE ID(root) IN ["
-       (str/join "," ids)
-       "] SET root:" (neo4j/esc-token s/nonlp)))
+  [(str "MATCH (root) WHERE ID(root) IN {ids}"
+        " SET root:" (neo4j/esc-token s/nonlp))
+   {:ids ids}])
 
 (defn add-nlp-labels [id-map]
   (->> (filter #(-> % first s/type-label (= s/email)) id-map)
@@ -87,9 +88,9 @@
       (push-entities! user)
       first (new-resp (-> query-map :fields s/type-label))))
 
-(defn vals-query [id attrs]
+(defn vals-query [attrs]
   (str "MATCH (root)-[r:" attrs
-       "]->(v) WHERE ID(root) = " id
+       "]->(v) WHERE ID(root) = {id}"
        " AND v." (neo4j/esc-token s/value)
        " IS NOT NULL"))
 
@@ -104,13 +105,17 @@
              vals-map (hash-map (:id fields)) first
              (id-pair-cypher user))
          (concat
-          [(str "MATCH (root) WHERE ID(root) = " (:id fields)
-                " SET root:" (neo4j/esc-token s/norecon))
-           (str "MATCH (root) WHERE ID(root) = " (:id fields)
-                " REMOVE root:" (neo4j/esc-token s/recon))
-           (str (vals-query (:id fields) attrs) " WITH v MATCH (v)<--(x)"
-                " WITH v, count(x) as n WHERE n = 1 DETACH DELETE v")
-           (str (vals-query (:id fields) attrs) " DELETE r")])
+          [[(str "MATCH (root) WHERE ID(root) = {id}"
+                 " SET root:" (neo4j/esc-token s/norecon))
+            {:id (:id fields)}]
+           [(str "MATCH (root) WHERE ID(root) = {id}"
+                 " REMOVE root:" (neo4j/esc-token s/recon))
+            {:id (:id fields)}]
+           [(str (vals-query attrs) " WITH v MATCH (v)<--(x)"
+                 " WITH v, count(x) as n WHERE n = {limit} DETACH DELETE v")
+            {:id (:id fields) :limit 1}]
+           [(str (vals-query attrs) " DELETE r")
+            {:id (:id fields)}]])
          neo4j/cypher-combined-tx)))
 
 (defn load-csv [filename]

@@ -39,11 +39,6 @@
 (defn define-graph! []
   (reset! conn (get-graph)))
 
-(defn cypher-esc [value]
-  (when-not (nil? value)
-    (-> value dt/catch-dates
-        (str/replace #"[\\'\"]" #(str "\\" %1)))))
-
 (defn esc-token [token]
   (str "`" (name token) "`"))
 
@@ -70,11 +65,6 @@
 (defn cypher-query [query]
   (map cypher-map->node
        (cypher-query-raw query)))
-
-(defn esc-val [v]
-  (str (if (string? v) "'" "")
-       (cypher-esc v)
-       (if (string? v) "'" "")))
 
 (defn cypher-property [prop]
   (str (esc-token (key prop)) ": {"
@@ -216,16 +206,16 @@
 
 (defn val-query [prop]
   (str "MATCH (root)-[:" (-> prop key esc-token)
-       "]-(v) WHERE v.val = " (-> prop val esc-val) ""))
+       "]-(v) WHERE v.val = {" (-> prop key esc-token) "}"))
 
-(defn add-return [s]
-  (str s " RETURN root"))
+(defn add-return [props s]
+  [(str s " RETURN root") props])
 
 (defn get-vertices [user class props]
   (->> props (filter com/val-not-nil?) (map val-query)
        (concat [(str "MATCH (root:" (prop-label user class) ")")])
        (str/join " WITH root ")
-       add-return cypher-list))
+       (add-return props) cypher-list))
 
 (defn get-vertex [class props]
   (->> [(str "MATCH (root:" (esc-token class)

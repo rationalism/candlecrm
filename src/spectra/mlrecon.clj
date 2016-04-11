@@ -148,10 +148,11 @@
    [s/s-name]})
 
 (defn merge-link [link]
-  (str "MATCH (a) WHERE ID(a) = " (first link)
-       " WITH a MATCH (b) WHERE ID(b) = " (second link)
-       " MERGE (a)-[:" (-> link (nth 2) neo4j/esc-token)
-       "]->(b)"))
+  [(str "MATCH (a) WHERE ID(a) = {id1}"
+        " WITH a MATCH (b) WHERE ID(b) = {id2}"
+        " MERGE (a)-[:" (-> link (nth 2) neo4j/esc-token)
+        "]->(b)")
+   {:id1 (first link) :id2 (second link)}])
 
 (defn swap-ids [old-id new-id l]
   (cond (= (first l) old-id)
@@ -162,8 +163,9 @@
 
 (defn append-delete [old-id coll]
   (conj coll 
-        (str "MATCH (root) WHERE ID(root) = " old-id
-             " DETACH DELETE root")))
+        [(str "MATCH (root) WHERE ID(root) = {id}"
+              " DETACH DELETE root")
+         {:id old-id}]))
 
 (defn merge-into [old-id new-id]
   (->> old-id neo4j/all-links
@@ -214,10 +216,10 @@
   (reduce #(update %1 %2 vector) m (keys m)))
 
 (defn fetch-paths-query [id paths]
-  (->> ["MATCH (root) WHERE ID(root) = " id
+  [(str "MATCH (root) WHERE ID(root) = {id}"
         " WITH root " (all-paths paths)
-        " " (ret-vals (count paths))]
-       (apply str)))
+        " " (ret-vals (count paths)))
+   {:id id}])
 
 (defn parse-paths [rs]
   (map (comp second first vals first) rs))
@@ -364,9 +366,9 @@
           :else (first b)))))
 
 (defn body-id [email-id]
-  (str "MATCH (a)-[:" (neo4j/esc-token s/email-body)
-       "]->(b) WHERE ID(a) = " email-id
-       " RETURN ID(b), b.val"))
+  [(str "MATCH (a)-[:" (neo4j/esc-token s/email-body)
+        "]->(b) WHERE ID(a) = {id} RETURN ID(b), b.val")
+   {:id email-id}])
 
 (defn body-ids [id-group]
   (->> id-group (map body-id)
@@ -374,8 +376,9 @@
        (map (comp second first vals first))))
 
 (defn delete-body [id]
-  (str "MATCH (a) WHERE ID(a) = " id
-       " DETACH DELETE a"))
+  [(str "MATCH (a) WHERE ID(a) = {id}"
+        " DETACH DELETE a")
+   {:id id}])
 
 (defn delete-bodies [body-map]
   (->> (remove #(= (second %)
