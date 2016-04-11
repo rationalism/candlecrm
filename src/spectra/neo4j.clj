@@ -58,7 +58,9 @@
 
 (defn cypher-query-raw [query]
   (try
-    (cy/tquery @conn query)
+    (if (coll? query)
+      (apply cy/tquery (concat [@conn] query))
+      (cy/tquery @conn query))
     (catch Exception e
       (do (println "ERROR: Cypher query invalid")
           (println "Query:" query)
@@ -90,6 +92,11 @@
   (->> (cypher-query query)
        (map first) (map val)))
 
+(defn cypher-statement [cypher]
+  (if (coll? cypher)
+    (apply tx/statement cypher)
+    (tx/statement cypher)))
+
 (declare cypher-combined-tx)
 
 (defn cypher-tx-exception [retry queries e]
@@ -107,7 +114,7 @@
 
 (defnp cypher-combined-tx-recur [retry queries]
   (try
-    (->> (map tx/statement queries)
+    (->> (map cypher-statement queries)
          (apply tx/in-transaction @conn)
          (map cy/tableize))
     (catch Exception e
