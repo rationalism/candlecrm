@@ -245,15 +245,7 @@
 
 (defn delete-user! [user]
   (qs/shutdown @scheduler)
-  (when (google/lookup-token user)
-    (google/revoke-access-token! user))
-  (index/drop-constraints! user)
-  (index/delete-all! user)
-  (->> [s/email-queue s/loaded-top s/loaded-bottom
-        s/top-uid s/modified]
-       (map #(neo4j/prop-label user %))
-       (map neo4j/delete-class!) dorun)
-  (neo4j/delete-id! (:id user))
+  (auth/delete-user! user)
   (start!))
 
 (defn delete-req! [user query-map]
