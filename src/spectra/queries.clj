@@ -5,7 +5,9 @@
             [spectra.common :as com]
             [spectra.mlrecon :as mlrecon] 
             [spectra.neo4j :as neo4j]
-            [spectra_cljc.schema :as s]))
+            [spectra_cljc.schema :as s]
+            [taoensso.timbre.profiling :as profiling
+             :refer (pspy pspy* profile defnp p p*)]))
 
 (defn first-if-coll [coll]
   (if (coll? coll) (first coll) coll))
@@ -222,7 +224,7 @@
        (apply str) neo4j/cypher-query-raw
        first vals first))
 
-(defn norecon-count-all []
+(defnp norecon-count-all []
   (->> (str "MATCH (root:" (neo4j/esc-token s/norecon)
             ") RETURN labels(root), count(*)")
        neo4j/cypher-query-raw (map vals)

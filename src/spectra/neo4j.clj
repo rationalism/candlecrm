@@ -106,7 +106,7 @@
         (do (println "Deadlock detected, retrying")
             (cypher-combined-tx true queries))))
 
-(defn cypher-combined-tx-recur [retry queries]
+(defnp cypher-combined-tx-recur [retry queries]
   (try
     (->> (map tx/statement queries)
          (apply tx/in-transaction @conn)
@@ -114,15 +114,17 @@
     (catch Exception e
       (cypher-tx-exception retry queries e))))
 
+(defn dump-queries [queries]
+  (spit "/home/alyssa/cypherlog.txt" "BEGIN TRANSACTION\n\n" :append true)
+  (dorun (map #(spit "/home/alyssa/cypherlog.txt" (str % "\n\n") :append true) queries)))
+
 (defn cypher-combined-tx
   ([queries]
    (cypher-combined-tx true queries))
   ([retry queries]
-   (spit "/home/alyssa/cypherlog.txt" "BEGIN TRANSACTION\n\n" :append true)
-   (dorun (map #(spit "/home/alyssa/cypherlog.txt" (str % "\n\n") :append true) queries))
    (trampoline cypher-combined-tx-recur retry queries)))
 
-(defn find-by-id [id]
+(defnp find-by-id [id]
   (first
    (cypher-list
     (str "MATCH (a) WHERE ID(a)= " id

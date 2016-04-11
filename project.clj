@@ -8,7 +8,7 @@
                  [org.clojure/tools.nrepl "0.2.12"]
                  [ns-tracker "0.3.0"]
                  [clj-time "0.11.0"]
-                 [clj-http "2.1.0"]
+                 [clj-http "3.0.0"]
                  [http-kit "2.1.19"]
                  [ring/ring-core "1.4.0"
                   :exclusions [joda-time commons-codec]]

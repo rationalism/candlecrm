@@ -275,7 +275,7 @@
                    (email-candidate-links user)])
     query))
 
-(defn find-candidates [user class]
+(defnp find-candidates [user class]
   (->> class (get candidates) (map name)
        (map #(str "'" % "'"))
        (str/join ", ")
@@ -299,7 +299,7 @@
        (partition 2)
        (map diff-pair) flatten))
 
-(defn get-diffs [user class cs]
+(defnp get-diffs [user class cs]
   (let [rules (get scoring class)
         vs (->> cs flatten distinct
                 (fetch-all-paths (map first rules)))]
@@ -321,7 +321,7 @@
        (apply concat)
        weka/make-forest))
 
-(defn score-map [forest mo]
+(defnp score-map [forest mo]
   (reduce
    #(update %1 %2 (partial weka/classify forest))
    mo (keys mo)))
