@@ -2,6 +2,7 @@
   (:require
    [spectra.auth       :as auth]
    [spectra.insert    :as insert]
+   [spectra.quartz    :as quartz]
    [spectra.queries    :as queries]
    [clojure.core.async :as async  :refer (<! <!! >! >!! put! chan go go-loop)]
    [taoensso.timbre    :as timbre :refer (tracef debugf infof warnf errorf)]
@@ -71,7 +72,7 @@
                                       :keys [:person-id :start :limit]}
                 :pages/person-places {:fn queries/loc-related
                                       :keys [:person-id :start :limit]}
-                :update/delete-account {:fn auth/delete-req!
+                :update/delete-account {:fn quartz/delete-req!
                                         :keys [:confirmed]}
                 :update/user-data {:fn queries/user-data-public
                                    :keys []}

@@ -14,6 +14,8 @@
             [spectra.datetime :as dt]
             [spectra.email :as email]
             [spectra.geocode :as geocode]
+            [spectra.google :as google]
+            [spectra.index :as index]
             [spectra.insert :as insert]
             [spectra.mlrecon :as mlrecon]
             [spectra.neo4j :as neo4j]
@@ -240,3 +242,20 @@
 (defn restart! []
   (qs/shutdown @scheduler)
   (start!))
+
+(defn delete-user! [user]
+  (qs/shutdown @scheduler)
+  (when (google/lookup-token user)
+    (google/revoke-access-token! user))
+  (index/drop-constraints! user)
+  (index/delete-all! user)
+  (->> [s/email-queue s/loaded-top s/loaded-bottom
+        s/top-uid s/modified]
+       (map #(neo4j/prop-label user %))
+       (map neo4j/delete-class!) dorun)
+  (neo4j/delete-id! (:id user))
+  (start!))
+
+(defn delete-req! [user query-map]
+  (when (= "yes" (:confirmed query-map))
+    (delete-user! user)))

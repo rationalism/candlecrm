@@ -2,7 +2,6 @@
   (:require [clojure.string :as str]
             [environ.core :refer [env]]
             [spectra.datetime :as dt]
-            [spectra.google :as google]
             [spectra.index :as index]
             [spectra.insert :as insert]
             [spectra.neo4j :as neo4j]
@@ -68,21 +67,6 @@
   (let [id (:id query-map)]
     (when (neo4j/node-exists? user id (:type query-map))
       (neo4j/delete-id! id))))
-
-(defn delete-user! [user]
-  (when (google/lookup-token user)
-    (google/revoke-access-token! user))
-  (index/delete-all! user)
-  (index/drop-constraints! user)
-  (->> [s/email-queue s/loaded-top s/loaded-bottom
-        s/top-uid s/modified]
-       (map #(neo4j/prop-label user %))
-       (map neo4j/delete-class!) dorun)
-  (neo4j/delete-id! (:id user)))
-
-(defn delete-req! [user query-map]
-  (when (= "yes" (:confirmed query-map))
-    (delete-user! user)))
 
 (defn password-check [password confirm]
   (cond
