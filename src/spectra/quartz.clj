@@ -24,7 +24,7 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
-(def nonlp-insert-limit 600000)
+(def nonlp-insert-limit 60)
 
 (defn message-count [user]
   (-> user email/fetch-imap-folder email/message-count))
@@ -150,7 +150,7 @@
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (when nil (queue-pop!)))
+  (queue-pop!))
 
 (jobs/defjob NewGeocodes [ctx]
   (geocode/geocode-batch 10))
@@ -159,10 +159,10 @@
   (geocode/geocode-cached 20))
 
 (jobs/defjob ProcessRecon [ctx]
-  (when nil (run-recon!)))
+  (run-recon!))
 
 (jobs/defjob EmailNLP [ctx]
-  (when nil (email/push-email-nlp!)))
+  (email/push-email-nlp!))
 
 (jobs/defjob EmailRefresh [ctx]
   (doseq [user (auth/list-users)]
@@ -219,7 +219,7 @@
   (reset! scheduler (qs/start (qs/initialize)))
   (qs/schedule @scheduler
                (make-job EmailLoad "jobs.email.load.1")
-               (periodic-trigger 2000 nil "email.trigger.1"))
+               (periodic-trigger 1000 nil "email.trigger.1"))
   (qs/schedule @scheduler
                (make-job EmailRefresh "jobs.email.load.2")
                (periodic-trigger 3600000 nil "email.trigger.2"))
@@ -231,10 +231,10 @@
                (periodic-trigger 5000 nil "geocode.trigger.2"))
   (qs/schedule @scheduler
                (make-job ProcessRecon "jobs.recon.do.1")
-               (periodic-trigger 2000 nil "recon.trigger.1"))
+               (periodic-trigger 1000 nil "recon.trigger.1"))
   (qs/schedule @scheduler
                (make-job EmailNLP "jobs.nlp.email.1")
-               (periodic-trigger 2000 nil "nlp.trigger.1"))
+               (periodic-trigger 1000 nil "nlp.trigger.1"))
   (qs/schedule @scheduler
                (make-job DeleteResetTokens "jobs.tokens.delete.1")
                (periodic-trigger 600000 nil "tokens.trigger.1")))

@@ -554,18 +554,21 @@
          vector (loom/build-graph [])
          (use-nlp models message))))
 
-(defn body-query [id]
+(defn body-query []
   (str "MATCH (root)-[r:" (neo4j/esc-token s/email-body)
-       "]->(b) WHERE ID(root) = " id))
+       "]->(b) WHERE ID(root) = {id}"))
 
 (defn delete-email-body [id]
-  [(str (body-query id) " WITH b MATCH (b)<--(x)"
-        " WITH b, count(x) as n WHERE n = 1 DETACH DELETE b")
-   (str (body-query id) " DELETE r")])
+  [[(str (body-query) " WITH b MATCH (b)<--(x)"
+         " WITH b, count(x) as n WHERE n = {limit} DETACH DELETE b")
+    {:id id :limit 1}]
+   [(str (body-query) " DELETE r")
+    {:id id}]])
 
 (defn remove-nonlp [id]
-  (str "MATCH (root) WHERE ID(root) = " id
-       " REMOVE root:" (neo4j/esc-token s/nonlp)))
+  [(str "MATCH (root) WHERE ID(root) = {id}"
+        " REMOVE root:" (neo4j/esc-token s/nonlp))
+   {:id id}])
 
 (defn run-email-nlp! [models email]
   (if-let [graph (->> email :id (graph-from-id models))]
