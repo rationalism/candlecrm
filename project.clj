@@ -57,7 +57,7 @@
                   :exclusions [commons-logging commons-codec]]
                  [clojurewerkz/neocons "3.1.0"]
                  [pandect "0.5.4"]
-                 [aysylu/loom "0.5.4"]
+                 [aysylu/loom "0.6.0"]
                  [com.taoensso/sente "1.8.1"]
                  [clojurewerkz/quartzite "2.0.0"]
                  [reagent "0.5.1"]
