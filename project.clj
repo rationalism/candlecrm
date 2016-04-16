@@ -8,7 +8,7 @@
                  [org.clojure/tools.nrepl "0.2.12"]
                  [ns-tracker "0.3.0"]
                  [clj-time "0.11.0"]
-                 [clj-http "3.0.0"]
+                 [clj-http "3.0.1"]
                  [http-kit "2.1.19"]
                  [ring/ring-core "1.4.0"
                   :exclusions [joda-time commons-codec]]
@@ -63,7 +63,7 @@
                  [reagent "0.5.1"]
                  [jayq "2.5.4"]
                  [com.google.maps/google-maps-services "0.1.12"]
-                 [nz.ac.waikato.cms.weka/weka-dev "3.7.13"]
+                 [nz.ac.waikato.cms.weka/weka-dev "3.9.0"]
                  [crypto-random "1.2.0"]
                  [com.googlecode.concurrent-trees/concurrent-trees "2.5.0"]
                  [clojure-csv/clojure-csv "2.0.2"]
