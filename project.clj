@@ -63,7 +63,7 @@
                  [reagent "0.5.1"]
                  [jayq "2.5.4"]
                  [com.google.maps/google-maps-services "0.1.12"]
-                 [nz.ac.waikato.cms.weka/weka-dev "3.9.0"]
+                 [nz.ac.waikato.cms.weka/weka-dev "3.7.13"]
                  [crypto-random "1.2.0"]
                  [com.googlecode.concurrent-trees/concurrent-trees "2.5.0"]
                  [clojure-csv/clojure-csv "2.0.2"]
