@@ -88,3 +88,14 @@
     (neo4j/delete-vertex! (first fish))
     (neo4j/delete-vertex! (first phyla))
     (auth/delete-user! user)))
+
+(deftest samples
+  (testing "Sample some things from a set without replacement"
+    (is (= [26.0 [[:b 1] [:d 1] [:g 1] [:j 1] [:l 1]
+                  [:o 1] [:q 1] [:t 1] [:w 1] [:y 1]]]
+           (reduce (partial sample-one 10 26) [0.0 []]
+                   (partition 2 (interleave [:a :b :c :d :e :f :g
+                                             :h :i :j :k :l :m :n
+                                             :o :p :q :r :s :t :u
+                                             :v :w :x :y :z]
+                                            (repeat 26 1))))))))

@@ -334,6 +334,28 @@
        (score-map (get @recon-models class))
        (into [])))
 
+(defn log2 [x]
+  (/ (Math/log x) (Math/log 2)))
+
+(defn bin-entropy [x]
+  (if (or (>= x 1) (<= x 0)) 0.0
+      (- (* x -1 (log2 x))
+         (* (- 1 x) (log2 (- 1 x))))))
+
+(defn sample-one [n total accum sample]
+  (let [i (+ (first accum) (second sample))]
+    (if (-> accum second count (+ 0.5)
+            (* total) (/ n) (< i))
+      [i (conj (second accum) sample)]
+      [i (second accum)])))
+
+(defn candidate-sample [user class n]
+  (let [samples (->> (score-all user class)
+                     (mapv #(update % 1 bin-entropy)))
+        total (->> samples (map second) (apply +))]
+    (reduce (partial sample-one n total)
+            [0.0 []] samples)))
+
 (defn groups-to-recon [class score-map]
   (->> score-map
        (remove #(> (get min-match-score class)
