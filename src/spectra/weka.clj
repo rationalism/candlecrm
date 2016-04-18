@@ -7,6 +7,7 @@
   (:import [weka.classifiers Evaluation]
            [weka.classifiers.bayes NaiveBayes]
            [weka.classifiers.evaluation.output.prediction HTML]
+           [weka.classifiers.functions Logistic]
            [weka.classifiers.meta FilteredClassifier]
            [weka.classifiers.trees RandomForest]
            [weka.core Attribute FastVector
@@ -59,17 +60,25 @@
   (doto attrs (.addElement new-attr)))
 
 (defn class-vals [points]
-  (->> points (map second) 
+  (->> points (map last) 
        distinct (into '())
        sort))
 
+(defn class-attr [points]
+  (Attribute. "@@class@@" (class-vals points)))
+
 (defn make-attributes [points]
-  (if (-> points ffirst string?)
-    (doto (FastVector. )
-      (add-element (Attribute. "text" (cast FastVector nil)))
-      (add-element (Attribute. "@@class@@" (class-vals points))))
-    (reduce #(add-element %1 %2) (FastVector. )
-            (all-attributes (first points)))))
+  (cond (-> points ffirst string?)
+        (doto (FastVector. )
+          (add-element (Attribute. "text" (cast FastVector nil)))
+          (add-element (class-attr points)))
+        (-> points first last number?)
+        (reduce #(add-element %1 %2) (FastVector. )
+                (all-attributes (first points)))
+        :else
+        (reduce #(add-element %1 %2) (FastVector. )
+                (-> points first drop-last all-attributes vec
+                    (conj (class-attr points))))))
 
 (defn double-if-num [n]
   (if (number? n) (double n) n))
@@ -106,6 +115,10 @@
 (defn make-forest [points]
   (doto (RandomForest. )
     (.setNumTrees num-trees)
+    (.buildClassifier (instances points))))
+
+(defn make-logit [points]
+  (doto (Logistic. )
     (.buildClassifier (instances points))))
 
 (defn classify [model point]
