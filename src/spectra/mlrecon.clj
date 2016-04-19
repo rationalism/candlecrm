@@ -356,6 +356,13 @@
     (reduce (partial sample-one n total)
             [0.0 []] samples)))
 
+(defn old-model-candidates [user class]
+  (->> (find-candidates user class)
+       (get-diffs user class) (into [])
+       (mapv #(conj % (weka/classify (get @recon-models class)
+                                     (second %))))
+       (mapv rest) frequencies))
+
 (defn groups-to-recon [class score-map]
   (->> score-map
        (remove #(> (get min-match-score class)
