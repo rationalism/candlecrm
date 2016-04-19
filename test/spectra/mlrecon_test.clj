@@ -99,3 +99,9 @@
                                              :o :p :q :r :s :t :u
                                              :v :w :x :y :z]
                                             (repeat 26 1))))))))
+
+(deftest select-test
+  (testing "Candidate selection"
+    (is (= (select-candidates [[[1] 0.23] [[2] 0.23] [[4] 0.23]
+                               [[5] 0.23] [[6] 0.23] [[7] 6.4]]))
+        [6 7 7 7 7 7 7])))

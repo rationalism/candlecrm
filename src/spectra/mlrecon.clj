@@ -356,12 +356,40 @@
     (reduce (partial sample-one n total)
             [0.0 []] samples)))
 
-(defn old-model-candidates [user class]
+(defn split-neg-pos [freqs]
+  [(remove #(<= (second (first %)) 0.95) freqs)
+   (remove #(<= 0.05 (second (first %))) freqs)])
+
+(defn adjust-weight [n]
+  (fn [point]
+    (update point 1 #(/ % n))))
+
+(defn adjust-weights [n freqs]
+  (let [total (->> freqs (map second) (apply +))]
+    (mapv #(update % 1 (adjust-weight (/ total n))) freqs)))
+
+(defn update-sqrt [point]
+  (update point 1 #(Math/sqrt %)))
+
+(defn select-candidate [accum point]
+  [(concat (first accum)
+           (repeat (- (int (+ (second point) (second accum)))
+                      (int (second accum)))
+                   (ffirst point)))
+   (+ (second accum) (second point))])
+
+(defn select-candidates [freqs]
+  (first (reduce select-candidate [[] 0.0] freqs)))
+
+(defn old-model-candidates [user class n]
   (->> (find-candidates user class)
        (get-diffs user class) (into [])
        (mapv #(conj % (weka/classify (get @recon-models class)
                                      (second %))))
-       (mapv rest) frequencies))
+       (mapv rest) frequencies (into [])
+       (mapv update-sqrt) split-neg-pos
+       (mapv #(adjust-weights n %))
+       (map select-candidates)))
 
 (defn groups-to-recon [class score-map]
   (->> score-map
