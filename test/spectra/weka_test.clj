@@ -26,3 +26,14 @@
     
     (is (> 0.01 (first (classify-bayes nb "furry fluffy doggy"))))
     (is (< 0.99 (first (classify-bayes nb "The Jose Dog"))))))
+
+(deftest logit-test
+  (testing "Test of logistic regression classifier"
+    (def l (make-logit [[0.0 "f"] [0.5 "f"] [1.0 "t"] [1.5 "t"]]))
+    (is (< (classify-logit l [0.0]) (classify-logit l [0.5])))
+    
+    (is (< (classify-logit l [0.5]) 0.5))
+    
+    (is (< 0.5 (classify-logit l [1.0])))
+    
+    (is (< (classify-logit l [1.0]) (classify-logit l [1.5])))))
