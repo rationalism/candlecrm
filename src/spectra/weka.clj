@@ -6,7 +6,7 @@
              :refer (pspy pspy* profile defnp p p*)])
   (:import [weka.classifiers Evaluation]
            [weka.classifiers.bayes NaiveBayes]
-           [weka.classifiers.evaluation.output.prediction HTML]
+           [weka.classifiers.evaluation.output.prediction CSV HTML]
            [weka.classifiers.functions Logistic]
            [weka.classifiers.meta FilteredClassifier]
            [weka.classifiers.trees RandomForest]
@@ -20,11 +20,13 @@
             ObjectInputStream ObjectOutputStream]))
 
 (def num-trees 200)
-(def crossval-folds 5)
+(def crossval-folds 10)
 (def num-threads 4)
 (def token-delims " \r\n\t.,@;&_/:\"()?!\\>=")
 (def models-dir "/home/alyssa/clojure/spectra/resources/models")
 (def email-sep-key "emailbreak")
+(def traindat-temp "/tmp/traindat.txt")
+(def crossval-temp "/tmp/crossval.csv")
 
 (defn serialize [forest filename]
   (-> filename
@@ -41,6 +43,13 @@
   (-> filename
       (FileInputStream. )
       deserialize-stream))
+
+(defn save-traindat [traindat]
+  (spit traindat-temp (vec traindat))
+  traindat)
+
+(defn load-traindat [filename]
+  (edn/read-string (slurp filename)))
 
 (defn get-copy-fn [class dir]
   (let [model (deserialize (str dir "/" class ".dat"))]
@@ -204,7 +213,7 @@
 (defn html-out [outfile]
   (doto (HTML. )
     (.setOutputFile (File. outfile))
-    (.setAttributes "1-2")
+    (.setAttributes "1-13")
     (.setBuffer (StringBuffer. ))))
 
 (defn crossval-bayes [outfile points]
@@ -214,3 +223,18 @@
      (int crossval-folds)
      (java.util.Random. )
      (into-array Object [(html-out outfile)]))))
+
+(defn csv-out [outfile]
+  (doto (CSV. )
+    (.setOutputFile (File. outfile))
+    (.setBuffer (StringBuffer. ))))
+
+(defn forest-curve [points]
+  (let [traindat (instances points)]
+    (doto (Evaluation. traindat)
+      (.crossValidateModel
+       (doto (RandomForest. )
+         (.setNumTrees num-trees))
+       traindat (int crossval-folds)
+       (java.util.Random. )
+       (into-array Object [(html-out crossval-temp)])))))
