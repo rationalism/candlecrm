@@ -1,6 +1,8 @@
 (ns spectra.weka
   (:require [clojure.string :as str]
             [clojure.edn :as edn]
+            [clojure-csv.core :as csv]
+            [clojure.java.io :as io]
             [spectra.async :as async]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -213,7 +215,7 @@
 (defn html-out [outfile]
   (doto (HTML. )
     (.setOutputFile (File. outfile))
-    (.setAttributes "1-13")
+    (.setAttributes "1-2")
     (.setBuffer (StringBuffer. ))))
 
 (defn crossval-bayes [outfile points]
@@ -229,6 +231,16 @@
     (.setOutputFile (File. outfile))
     (.setBuffer (StringBuffer. ))))
 
+(defn replace-question [s]
+  (str/replace s #"\?" "0"))
+
+(defn to-doubles [point]
+  (map #(Double/parseDouble %) point))
+
+(defn replace-class [point]
+  (update (vec point) 1
+          #(if (>= % 0.5) "t" "f")))
+
 (defn forest-curve [points]
   (let [traindat (instances points)]
     (doto (Evaluation. traindat)
@@ -237,4 +249,11 @@
          (.setNumTrees num-trees))
        traindat (int crossval-folds)
        (java.util.Random. )
-       (into-array Object [(html-out crossval-temp)])))))
+       (into-array Object [(csv-out crossval-temp)])))
+    (let [scores (slurp crossval-temp)]
+      (io/delete-file crossval-temp)
+      (->> scores csv/parse-csv rest drop-last
+           (map (comp replace-class reverse to-doubles
+                      #(update % 1 replace-question)
+                      vec drop-last #(drop 1 %)))
+           make-logit))))
