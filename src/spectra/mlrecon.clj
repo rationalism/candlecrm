@@ -17,6 +17,7 @@
 
 (def default-score 0.5)
 (def min-match-score {s/email 0.4 s/person 0.9 s/location 0.5 s/tool 0.8})
+(def model-rollover 40)
 (def models-dir "/home/alyssa/clojure/spectra/resources/models")
 
 (defonce recon-models (atom {s/email nil}))
@@ -309,20 +310,6 @@
          (map #(score-diff rules %))
          (zipmap cs))))
 
-(defn append-scores [pos-and-neg]
-  [(->> pos-and-neg first
-        (map vec) (map #(conj % 1.0)))
-   (->> pos-and-neg second
-        (map vec) (map #(conj % 0.0)))])
-
-(defn train-forest [user class pos-cs neg-cs]
-  (->> [pos-cs neg-cs]
-       (map #(get-diffs user class %))
-       (map vals)
-       append-scores
-       (apply concat)
-       weka/make-forest))
-
 (defnp score-map [forest mo]
   (reduce
    #(update %1 %2 (partial weka/classify forest))
@@ -397,6 +384,20 @@
        (mapv update-sqrt) split-neg-pos
        (mapv #(adjust-weights n %))
        (map select-candidates)))
+
+(defn append-scores [pos-and-neg]
+  [(->> pos-and-neg first
+        (map vec) (map #(conj % 1.0)))
+   (->> pos-and-neg second
+        (map vec) (map #(conj % 0.0)))])
+
+(defn train-forest [user class pos-cs neg-cs]
+  (->> [pos-cs neg-cs]
+       (map #(get-diffs user class %)) (map vals)
+       (vector (old-model-candidates user class model-rollover))
+       (apply map vector) (map #(apply concat %))
+       append-scores (apply concat)
+       weka/make-forest))
 
 (defn groups-to-recon [class score-map]
   (->> score-map
