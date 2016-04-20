@@ -348,7 +348,8 @@
     (->> (reduce (partial sample-one n total)
                  [0.0 []] samples)
          second (mapv first) (mapv vec)
-         (mapv training-query))))
+         (mapv training-query)
+         (map println) dorun)))
 
 (defn split-neg-pos [freqs]
   [(remove #(<= (second (first %)) 0.95) freqs)
@@ -383,8 +384,7 @@
        (mapv rest) frequencies (into [])
        (mapv update-sqrt) split-neg-pos
        (mapv #(adjust-weights n %))
-       (map select-candidates)
-       (map println) dorun))
+       (map select-candidates)))
 
 (defn append-scores [pos-and-neg]
   [(->> pos-and-neg first
