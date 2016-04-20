@@ -366,7 +366,7 @@
 
 (defn adjust-weights [n freqs]
   (let [total (->> freqs (map second) (apply +))]
-    (mapv #(update % 1 (adjust-weight (/ total n))) freqs)))
+    (mapv (adjust-weight (/ total n)) freqs)))
 
 (defn update-sqrt [point]
   (update point 1 #(Math/sqrt %)))
