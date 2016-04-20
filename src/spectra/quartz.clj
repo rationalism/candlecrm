@@ -162,7 +162,7 @@
   (when nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
-  (email/push-email-nlp!))
+  (when nil (email/push-email-nlp!)))
 
 (jobs/defjob EmailRefresh [ctx]
   (doseq [user (auth/list-users)]

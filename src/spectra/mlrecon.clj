@@ -337,9 +337,9 @@
       [i (second accum)])))
 
 (defn training-query [ids]
-  (str "MATCH (a)--(b) WHERE ID(a) IN ["
+  (str "MATCH (a)--(b)--(c) WHERE ID(a) IN ["
        (first ids) ", " (second ids)
-       "] RETURN a, b"))
+       "] RETURN a, b, c"))
 
 (defn sample-display [candidates]
   (->> (map training-query candidates)
