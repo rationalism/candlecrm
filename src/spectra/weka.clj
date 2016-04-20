@@ -257,3 +257,14 @@
                       #(update % 1 replace-question)
                       vec drop-last #(drop 1 %)))
            make-logit))))
+
+(defn reverse-logit [logit y]
+  (loop [x 0.5 interval 0.5]
+    (cond (< interval 0.0000001) x
+          (< y (classify-logit logit [(- x interval)]))
+          (recur (- x interval) interval)
+          (< (classify-logit logit [(+ x interval)]) y)
+          (recur (+ x interval) interval)
+          :else
+          (recur x (/ interval 2.0)))))
+
