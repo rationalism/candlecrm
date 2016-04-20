@@ -337,9 +337,9 @@
       [i (second accum)])))
 
 (defn training-query [ids]
-  (str "MATCH (a)--(b) WHERE ID(a) IN ["
-       (first ids) " " (second ids)
-       "] RETURN a, b"))
+  (str "MATCH (a)--(b)--(c) WHERE ID(a) IN ["
+       (first ids) ", " (second ids)
+       "] RETURN a, b, c LIMIT 30"))
 
 (defn candidate-sample [user class n]
   (let [samples (->> (score-all user class)
@@ -383,7 +383,8 @@
        (mapv rest) frequencies (into [])
        (mapv update-sqrt) split-neg-pos
        (mapv #(adjust-weights n %))
-       (map select-candidates)))
+       (map select-candidates)
+       (map println) dorun))
 
 (defn append-scores [pos-and-neg]
   [(->> pos-and-neg first
