@@ -341,6 +341,12 @@
        (first ids) ", " (second ids)
        "] RETURN a, b, c LIMIT 30"))
 
+(defn sample-display [candidates]
+  (->> (map training-query candidates)
+       (map println) dorun)
+  (->> (map println candidates)
+       dorun))
+
 (defn candidate-sample [user class n]
   (let [samples (->> (score-all user class)
                      (mapv #(update % 1 bin-entropy)))
@@ -348,8 +354,7 @@
     (->> (reduce (partial sample-one n total)
                  [0.0 []] samples)
          second (mapv first) (mapv vec)
-         (mapv training-query)
-         (map println) dorun)))
+         sample-display)))
 
 (defn split-neg-pos [freqs]
   [(remove #(<= (second (first %)) 0.95) freqs)
