@@ -349,12 +349,19 @@
       [i (conj (second accum) sample)]
       [i (second accum)])))
 
+(defn training-query [ids]
+  (str "MATCH (a)--(b) WHERE ID(a) IN ["
+       (first ids) " " (second ids)
+       "] RETURN a, b"))
+
 (defn candidate-sample [user class n]
   (let [samples (->> (score-all user class)
                      (mapv #(update % 1 bin-entropy)))
         total (->> samples (map second) (apply +))]
-    (reduce (partial sample-one n total)
-            [0.0 []] samples)))
+    (->> (reduce (partial sample-one n total)
+                 [0.0 []] samples)
+         second (mapv first) (mapv vec)
+         (mapv training-query))))
 
 (defn split-neg-pos [freqs]
   [(remove #(<= (second (first %)) 0.95) freqs)
