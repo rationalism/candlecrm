@@ -1,5 +1,6 @@
 (ns spectra.mlrecon
   (:require [clojure.string :as str]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [spectra.common :as com]
             [spectra.auth :as auth]
@@ -401,6 +402,9 @@
 (defn save-traindat [traindat]
   (spit traindat-temp (vec traindat))
   traindat)
+
+(defn load-traindat [filename]
+  (edn/read-string (slurp filename)))
 
 (defn train-forest [user class pos-cs neg-cs]
   (->> [pos-cs neg-cs]
