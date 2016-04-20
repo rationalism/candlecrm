@@ -399,7 +399,7 @@
         (map vec) (map #(conj % 0.0)))])
 
 (defn save-traindat [traindat]
-  (spit traindat-temp traindat)
+  (spit traindat-temp (vec traindat))
   traindat)
 
 (defn train-forest [user class pos-cs neg-cs]
