@@ -16,11 +16,12 @@
            [org.apache.commons.lang3 StringUtils]))
 
 (def default-score 0.5)
-(def min-match-score {s/email 0.4 s/person 0.9 s/location 0.5 s/tool 0.8})
+(def min-match-prob 0.99)
 (def model-rollover 40)
 (def models-dir "/home/alyssa/clojure/spectra/resources/models")
 
-(defonce recon-models (atom {s/email nil}))
+(defonce recon-models (atom {}))
+(defonce min-match-score (atom {}))
 
 (defn new-model! [class dir]
   (->> (str dir "/" (name class) ".dat")
@@ -28,7 +29,19 @@
        (swap! recon-models assoc class)))
 
 (defn load-models! []
+  (reset! recon-models {})
   (new-model! s/person models-dir))
+
+(defn load-curve! [class]
+  (weka/deserialize
+   (str models-dir "/" (name class) "-curve.dat")))
+
+(defn load-thresholds! []
+  (let [classes (keys @recon-models)]
+    (->> (map load-curve! classes)
+         (map #(weka/reverse-logit % min-match-prob))
+         (zipmap classes)
+         (reset! min-match-score))))
 
 (defn lev-distance [a b]
   (/ (StringUtils/getLevenshteinDistance a b)
@@ -405,7 +418,7 @@
 
 (defn groups-to-recon [class score-map]
   (->> score-map
-       (remove #(> (get min-match-score class)
+       (remove #(> (get @min-match-score class)
                    (second %)))
        (mapv first) (map vec) (map #(conj % :is))
        (loom/build-graph [])
