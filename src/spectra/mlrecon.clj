@@ -19,6 +19,7 @@
 (def min-match-score {s/email 0.4 s/person 0.9 s/location 0.5 s/tool 0.8})
 (def model-rollover 40)
 (def models-dir "/home/alyssa/clojure/spectra/resources/models")
+(def traindat-temp "/tmp/traindat.txt")
 
 (defonce recon-models (atom {s/email nil}))
 
@@ -397,13 +398,17 @@
    (->> pos-and-neg second
         (map vec) (map #(conj % 0.0)))])
 
+(defn save-traindat [traindat]
+  (spit traindat-temp traindat)
+  traindat)
+
 (defn train-forest [user class pos-cs neg-cs]
   (->> [pos-cs neg-cs]
        (map #(get-diffs user class %)) (map vals)
        (vector (old-model-candidates user class model-rollover))
        (apply map vector) (map #(apply concat %))
        append-scores (apply concat)
-       weka/make-forest))
+       save-traindat weka/make-forest))
 
 (defn groups-to-recon [class score-map]
   (->> score-map
