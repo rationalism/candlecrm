@@ -41,7 +41,7 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.0"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.0"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.3.0"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.3.1"]
                  [org.deeplearning4j/deeplearning4j-core "0.4-rc3.8"
                   :exclusions [org.apache.commons/commons-lang3 commons-logging
                                com.fasterxml.jackson.core/jackson-core junit

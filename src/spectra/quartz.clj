@@ -150,7 +150,7 @@
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (queue-pop!))
+  (when nil (queue-pop!)))
 
 (jobs/defjob NewGeocodes [ctx]
   (geocode/geocode-batch 10))
