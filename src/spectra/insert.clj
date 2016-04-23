@@ -45,11 +45,17 @@
                              (key %) (val %)))))
 
 (defn link-cypher [id1 id2 prop]
-  [(str "MATCH (a) WHERE ID(a) = {id1}"
-        " WITH a MATCH (b) WHERE ID(b) = {id2}"
-        " CREATE (a)-[r:" (neo4j/esc-token prop)
-        "]->(b)")
-   {:id1 id1 :id2 id2}])
+  (if (coll? prop)
+    [(str "MATCH (a) WHERE ID(a) = {id1}"
+          " WITH a MATCH (b) WHERE ID(b) = {id2}"
+          " CREATE (a)-[r:" (neo4j/esc-token (:label prop))
+          " {props}]->(b)")
+     {:id1 id1 :id2 id2 :props (dissoc prop :label)}]
+    [(str "MATCH (a) WHERE ID(a) = {id1}"
+          " WITH a MATCH (b) WHERE ID(b) = {id2}"
+          " CREATE (a)-[r:" (neo4j/esc-token prop)
+          "]->(b)")
+     {:id1 id1 :id2 id2}]))
 
 (defn edge-cypher [e id-map]
   (link-cypher (id-map (first e)) (id-map (second e))
