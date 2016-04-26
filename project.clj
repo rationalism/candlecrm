@@ -3,7 +3,7 @@
   :url "http://spectra.herokuapp.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.8.40"
+                 [org.clojure/clojurescript "1.8.51"
                   :exclusions [args4j com.google.code.findbugs/jsr305]]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [ns-tracker "0.3.0"]
@@ -69,7 +69,7 @@
                  [clojure-csv/clojure-csv "2.0.2"]
                  [org.apache.commons/commons-lang3 "3.4"]
                  [com.sendgrid/sendgrid-java "2.2.2"]
-                 [reagent-forms "0.5.22"]]
+                 [reagent-forms "0.5.23"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.2"]
             [lein-kibit "0.1.2"]

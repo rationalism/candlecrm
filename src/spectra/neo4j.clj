@@ -66,6 +66,18 @@
   (map cypher-map->node
        (cypher-query-raw query)))
 
+(defn cypher-property [prop]
+  (str (esc-token (key prop)) ": {"
+       (esc-token (key prop)) "}"))
+
+(defn cypher-properties [props]
+  (str "{ "
+       (->> props
+            (filter com/val-not-nil?)
+            (map cypher-property)
+            (str/join ", "))
+       " }"))
+
 (defn cypher-list [query]
   (->> (cypher-query query)
        (map first) (map val)))
@@ -207,8 +219,9 @@
 
 (defn get-vertex [class props]
   (->> [(str "MATCH (root:" (esc-token class)
-             ") WHERE {props} RETURN root")
-        {:props props}]
+             " " (cypher-properties props)
+             ") RETURN root")
+        props]
        cypher-list first))
 
 (defn get-vertices-class [class]
