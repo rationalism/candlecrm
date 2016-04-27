@@ -73,7 +73,7 @@
 
 (defn cypher-list [query]
   (->> (cypher-query query)
-       (map first) (map val)))
+       (map vals) (apply concat)))
 
 (defn cypher-statement [cypher]
   (if (coll? cypher)
