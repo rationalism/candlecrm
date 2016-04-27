@@ -234,7 +234,7 @@
    {:id id}])
 
 (defn parse-paths [rs]
-  (map (comp second first vals first) rs))
+  (map (comp vals first) rs))
 
 (defn fetch-paths [id paths]
   (-> (fetch-paths-query id paths)

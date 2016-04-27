@@ -42,9 +42,9 @@
     (is (= 2 (count fish)))
     (is (= 2 (count phyla)))
 
-    (->> [(first phyla) (second phyla)] (map :id)
+    (->> [(first phyla) (second phyla)] (map #(.id %))
          (apply merge-into) neo4j/cypher-combined-tx)
-    (->> [(first tuna) (first salmon)] (map :id)
+    (->> [(first tuna) (first salmon)] (map #(.id %))
          (apply merge-into) neo4j/cypher-combined-tx)
 
     (get-fish! user)
@@ -73,7 +73,7 @@
     (get-fish! user)
 
     (is (= [["tuna"] ["Vertebrates"] []]
-           (fetch-paths (:id (first fish))
+           (fetch-paths (.id (first fish))
                         [[:species]
                          [:has-phylum :phy-name]
                          [:notarealvalue]])))
