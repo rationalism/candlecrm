@@ -25,7 +25,7 @@
        neo4j/cypher-query first vals first))
 
 (defn friend-user [u]
-  {:identity (get-in u (:data s/email-addr))})
+  {:identity (.get u (name s/email-addr))})
 
 (defn user-person [email]
   [{s/type-label s/person s/email-addr email}])

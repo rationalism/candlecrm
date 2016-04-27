@@ -14,20 +14,6 @@
        (map #(assoc {} % (neo4j/get-property entity %)))
        (apply merge)))
 
-(defn lookup-hash [prop-name node]
-  (->> node key :data prop-name
-       (map #(hash-map % (hash-map (key node) (val node))))
-       (apply merge)))
-
-(defn filter-type [g type-name]
-  (->> (loom/nodes g)
-       (filter #(= (s/type-label %) type-name))))
-
-(defn filter-memory [g type-name]
-  (->> (filter-type g type-name)
-       (filter #(nil? (:data %)))
-       (remove #(loom/out-edge-label g % :database-match))))
-
 (defn map-node [node attr]
   (cond
     (nil? (attr node)) nil

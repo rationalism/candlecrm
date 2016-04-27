@@ -19,7 +19,7 @@
        (reduce merge)))
 
 (defn node-attrs [node]
-  (merge (:data node) (hash-map :id (.id node))))
+  (merge (.asMap node) (hash-map :id (.id node))))
 
 (defn tablify-hits [hits]
   (->> (map node-attrs hits)
@@ -92,8 +92,8 @@
       neo4j/cypher-query mapify-hits))
 
 (defn user-data-public [user query-map]
-  (-> user (get :data)
-      (dissoc s/pwd-hash) (dissoc s/google-token)))
+  (-> (.asMap user) (dissoc s/pwd-hash)
+      (dissoc s/google-token)))
 
 (defn node-from-id [user id node-type]
   (-> [(str "MATCH (root:" (neo4j/prop-label user node-type)

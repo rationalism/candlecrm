@@ -147,7 +147,7 @@
     [:fieldset
      (anti-forgery-field)
      [:legend [:h2 "Set a new password for "
-               (-> user :data s/email-addr)]]
+               (.get user (name s/email-addr))]]
      [:input {:type "hidden" :name "reset-token"
               :id "setPwdToken" :required "required"
               :value token}]

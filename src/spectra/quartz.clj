@@ -143,8 +143,8 @@
 
 (defn delete-reset-tokens! []
   (->> (queries/users-reset-tokens)
-       (filter #(-> % :data s/modified (- 3600000)
-                    (< (dt/to-ms (dt/now)))))
+       (filter #(-> % (.get (name s/modified))
+                    (- 3600000) (< (dt/to-ms (dt/now)))))
        (map #(neo4j/delete-property! % s/pwd-reset-token))
        dorun))
 

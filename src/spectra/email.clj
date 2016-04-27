@@ -504,7 +504,7 @@
 
 (defn author-name [chain message]
   (-> (loom/out-edge-label chain message s/email-from)
-      second (get-in [:data s/s-name])))
+      second (.get (name s/s-name))))
 
 (defn append-hyperlinks [chain]
   (->> chain mention-nodes
@@ -635,6 +635,6 @@
 
 (defn date-graphs [user start limit]
   (->> (queries/emails-with-dates user start limit)
-       (map #(get-in % [:data :body]))
+       (map #(.get % "body"))
        (map regex/strip-tags)
        (map nlp/run-nlp-openie)))
