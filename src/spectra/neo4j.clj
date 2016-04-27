@@ -114,7 +114,7 @@
           resp (->> (map cypher-statement queries)
                     (map #(.run tx (first %) (second %)))
                     resp-clojure)]
-      (.success tx) resp)
+      (.success tx) (.close tx) resp)
     (catch Exception e
       (cypher-tx-exception retry queries e))))
 
