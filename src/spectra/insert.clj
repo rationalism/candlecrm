@@ -50,7 +50,10 @@
           " WITH a MATCH (b) WHERE ID(b) = {id2}"
           " CREATE (a)-[r:" (neo4j/esc-token (:label prop))
           " {props}]->(b)")
-     {:id1 id1 :id2 id2 :props (dissoc prop :label)}]
+     {:id1 id1 :id2 id2
+      :props (-> prop (dissoc :label)
+                 clojure.walk/stringify-keys
+                 (java.util.HashMap. ))}]
     [(str "MATCH (a) WHERE ID(a) = {id1}"
           " WITH a MATCH (b) WHERE ID(b) = {id2}"
           " CREATE (a)-[r:" (neo4j/esc-token prop)
