@@ -77,7 +77,7 @@
             ") WHERE ID(p) = {`person-id`}"
             " WITH root ORDER BY root." (neo4j/esc-token s/email-sent)
             " DESC SKIP {start} LIMIT {limit}" (vals-collect))
-       query-map]
+       (dissoc query-map :link)]
       neo4j/cypher-query mapify-hits))
 
 (defn emails-with-dates [user start limit]
