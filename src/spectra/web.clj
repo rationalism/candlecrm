@@ -155,7 +155,7 @@
   (mlrecon/load-models!)
   (mlrecon/load-thresholds!)
   (geocode/define-context!)
-  (quartz/start!)
+;  (quartz/start!)
   (println "Ready to start server")
   (nrepl-server/start-server
    :port 9998

@@ -22,8 +22,7 @@
 (defn get-graph []
   (->> (AuthTokens/basic (env :database-username)
                          (env :database-password))
-       (GraphDatabase/driver (env :database-url))
-       (.session)))
+       (GraphDatabase/driver (env :database-url))))
 
 (defonce conn (atom nil))
 
@@ -42,18 +41,26 @@
        (into {})))
 
 (defn to-values [params]
-  (->> params (into []) (apply concat)
-       (apply #(Values/parameters %&))))
+  (->> params (into [])
+       (map #(update % 0 name)) (apply concat)
+       (into-array Object) (Values/parameters)))
 
 (defn tquery
-  ([query] (.run @conn query))
-  ([query params] (.run @conn query (to-values params))))
+  ([query] (.run (.session @conn) query))
+  ([query params] (.run (.session @conn) query
+                        (to-values params))))
+
+(defn resp-clojure [resp]
+  (->> (map #(.list %) resp)
+       (map (fn [records]
+              (map #(.asMap %) records)))))
 
 (defn cypher-query-raw [query]
   (try
-    (if (coll? query)
-      (apply tquery query)
-      (tquery query))
+    (resp-clojure
+     (if (coll? query)
+       (apply tquery query)
+       (tquery query)))
     (catch Exception e
       (do (println "ERROR: Cypher query invalid")
           (println "Query:" query)
@@ -100,11 +107,15 @@
         (do (println "Deadlock detected, retrying")
             (cypher-combined-tx true queries))))
 
+(defnp start-tx []
+  (.beginTransaction (.session @conn)))
+
 (defnp cypher-combined-tx-recur [retry queries]
   (try
-    (let [tx (.beginTransaction @conn)
+    (let [tx (start-tx)
           resp (->> (map cypher-statement queries)
-                    (map #(.run tx (first %) (second %))))]
+                    (map #(.run tx (first %) (second %)))
+                    resp-clojure)]
       (.success tx) resp)
     (catch Exception e
       (cypher-tx-exception retry queries e))))
@@ -146,7 +157,7 @@
 (defn set-property! [vertex property value]
   (cypher-query-raw
    [(str "MATCH (n) WHERE ID(n) = {id}"
-         " SET n." (neo4j/esc-token property)
+         " SET n." (esc-token property)
          " = {val}")
     {:id (:id vertex) :val (dt/catch-dates value)}]))
 

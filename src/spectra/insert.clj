@@ -24,8 +24,8 @@
     (->> (map s/type-label fulls)
          (map #(create-cypher user %))
          neo4j/cypher-combined-tx
-         (map (comp first second first vals first))
-         (zipmap fulls)
+         (apply concat) (map (comp vals))
+         com/debug (zipmap fulls)
          (merge (zipmap emptys (map :id emptys))))))
 
 (defn prop-cypher [user id prop val]

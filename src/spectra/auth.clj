@@ -17,7 +17,7 @@
 
 (defn user-vertex! [email-addr pwd-hash]
   (neo4j/cypher-query-raw
-   [(str "CREATE (u:" s/user " {"
+   [(str "CREATE (u:" (neo4j/esc-token s/user) " {"
          (neo4j/esc-token s/email-addr) ": {email}, "
          (neo4j/esc-token s/pwd-hash) ": {pwdhash}, "
          (neo4j/esc-token s/recon-run) ": {reconrun}})")
