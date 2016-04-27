@@ -150,26 +150,40 @@
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (when nil (queue-pop!)))
+  (binding [neo4j/*session* (.session neo4j/conn)]
+    (when nil (queue-pop!))
+    (.close neo4j/*session*)))
 
 (jobs/defjob NewGeocodes [ctx]
-  (geocode/geocode-batch 10))
+  (binding [neo4j/*session* (.session neo4j/conn)]
+    (geocode/geocode-batch 10)
+    (.close neo4j/*session*)))
 
 (jobs/defjob CachedGeocodes [ctx]
-  (geocode/geocode-cached 20))
+  (binding [neo4j/*session* (.session neo4j/conn)]
+    (geocode/geocode-cached 20)
+    (.close neo4j/*session*)))
 
 (jobs/defjob ProcessRecon [ctx]
-  (when nil (run-recon!)))
+  (binding [neo4j/*session* (.session neo4j/conn)]
+    (when nil (run-recon!))
+    (.close neo4j/*session*)))
 
 (jobs/defjob EmailNLP [ctx]
-  (when nil (email/push-email-nlp!)))
+  (binding [neo4j/*session* (.session neo4j/conn)]
+    (when nil (email/push-email-nlp!))
+    (.close neo4j/*session*)))
 
 (jobs/defjob EmailRefresh [ctx]
-  (doseq [user (auth/list-users)]
-    (refresh-queue! user)))
+  (binding [neo4j/*session* (.session neo4j/conn)]
+    (doseq [user (auth/list-users)]
+      (refresh-queue! user))
+    (.close neo4j/*session*)))
 
 (jobs/defjob DeleteResetTokens [ctx]
-  (delete-reset-tokens!))
+  (binding [neo4j/*session* (.session neo4j/conn)]
+    (delete-reset-tokens!)
+    (.close neo4j/*session*)))
 
 (defn user-job [ctx]
   (-> ctx qc/from-job-data

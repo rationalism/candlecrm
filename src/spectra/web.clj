@@ -147,7 +147,6 @@
   (wrap-defaults (friend-authenticate app) (middleware-config)))
 
 (defn app-init! []
-  (neo4j/define-graph!)
   (sendgrid/init-server!)
   (email/make-parse-pool!)
   (email/make-nlp-pool!)
@@ -155,7 +154,7 @@
   (mlrecon/load-models!)
   (mlrecon/load-thresholds!)
   (geocode/define-context!)
-;  (quartz/start!)
+                                        ;  (quartz/start!)
   (println "Ready to start server")
   (nrepl-server/start-server
    :port 9998

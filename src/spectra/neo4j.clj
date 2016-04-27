@@ -24,10 +24,8 @@
                          (env :database-password))
        (GraphDatabase/driver (env :database-url))))
 
-(defonce conn (atom nil))
-
-(defn define-graph! []
-  (reset! conn (get-graph)))
+(defonce conn (get-graph))
+(def ^:dynamic *session* (.session conn))
 
 (defn esc-token [token]
   (str "`" (name token) "`"))
@@ -46,8 +44,8 @@
        (into-array Object) (Values/parameters)))
 
 (defn tquery
-  ([query] (.run (.session @conn) query))
-  ([query params] (.run (.session @conn) query
+  ([query] (.run *session* query))
+  ([query params] (.run *session* query
                         (to-values params))))
 
 (defn resp-clojure [resp]
@@ -108,7 +106,7 @@
             (cypher-combined-tx true queries))))
 
 (defnp start-tx []
-  (.beginTransaction (.session @conn)))
+  (.beginTransaction *session*))
 
 (defnp cypher-combined-tx-recur [retry queries]
   (try
