@@ -16,10 +16,12 @@
            [org.passay PasswordData PasswordValidator LengthRule]))
 
 (defn user-vertex! [email-addr pwd-hash]
-  (neo4j/create-vertex! s/user 
-                        {s/email-addr email-addr
-                         s/pwd-hash pwd-hash
-                         s/recon-run false}))
+  (neo4j/cypher-query-raw
+   [(str "CREATE (u:" s/user " {"
+         (neo4j/esc-token s/email-addr) ": {email}, "
+         (neo4j/esc-token s/pwd-hash) ": {pwdhash}, "
+         (neo4j/esc-token s/recon-run) ": {reconrun}})")
+    {:email email-addr :pwdhash pwd-hash :reconrun false}]))
 
 (defn friend-user [u]
   {:identity (get-in u (:data s/email-addr))})

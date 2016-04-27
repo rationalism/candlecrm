@@ -4,16 +4,9 @@
             [spectra.datetime :as dt]
             [spectra_cljc.schema :as s]
             [environ.core :refer [env]]
-            [clojurewerkz.neocons.rest :as nr]
-            [clojurewerkz.neocons.rest.constraints :as co]
-            [clojurewerkz.neocons.rest.cypher :as cy]
-            [clojurewerkz.neocons.rest.labels :as nl]
-            [clojurewerkz.neocons.rest.nodes :as nn]
-            [clojurewerkz.neocons.rest.records :as rec]
-            [clojurewerkz.neocons.rest.relationships :as nrl]
-            [clojurewerkz.neocons.rest.transaction :as tx]
             [taoensso.timbre.profiling :as profiling
-             :refer (pspy pspy* profile defnp p p*)]))
+             :refer (pspy pspy* profile defnp p p*)])
+  (:import [org.neo4j.driver.v1 AuthTokens GraphDatabase Values]))
 
 (defn user-label [user]
   (str "user_" (:id user)))
@@ -26,13 +19,11 @@
   (.contains (.getMessage e)
              ":stackTrace \"org.neo4j.kernel.DeadlockDetectedException"))
 
-(defn make-graph-url []
-  (str "http://" (env :database-username)
-       ":" (env :database-password)
-       "@" (env :database-url)))
-
 (defn get-graph []
-  (nr/connect (make-graph-url)))
+  (->> (AuthTokens/basic (env :database-username)
+                         (env :database-password))
+       (GraphDatabase/driver (env :database-url))
+       (.session)))
 
 (defonce conn (atom nil))
 
@@ -43,19 +34,26 @@
   (str "`" (name token) "`"))
 
 (defn cypher-pair->node [pair]
-  [(key pair)
-   (rec/instantiate-node-from (val pair))])
+  [(key pair) (val pair)])
 
 (defn cypher-map->node [cymap]
   (->> cymap
        (map cypher-pair->node)
        (into {})))
 
+(defn to-values [params]
+  (->> params (into []) (apply concat)
+       (apply #(Values/parameters %&))))
+
+(defn tquery
+  ([query] (.run @conn query))
+  ([query params] (.run @conn query (to-values params))))
+
 (defn cypher-query-raw [query]
   (try
     (if (coll? query)
-      (apply cy/tquery (concat [@conn] query))
-      (cy/tquery @conn query))
+      (apply tquery query)
+      (tquery query))
     (catch Exception e
       (do (println "ERROR: Cypher query invalid")
           (println "Query:" query)
@@ -84,8 +82,8 @@
 
 (defn cypher-statement [cypher]
   (if (coll? cypher)
-    (apply tx/statement cypher)
-    (tx/statement cypher)))
+    (update cypher 1 to-values)
+    [cypher (to-values [])]))
 
 (declare cypher-combined-tx)
 
@@ -104,15 +102,18 @@
 
 (defnp cypher-combined-tx-recur [retry queries]
   (try
-    (->> (map cypher-statement queries)
-         (apply tx/in-transaction @conn)
-         (map cy/tableize))
+    (let [tx (.beginTransaction @conn)
+          resp (->> (map cypher-statement queries)
+                    (map #(.run tx (first %) (second %))))]
+      (.success tx) resp)
     (catch Exception e
       (cypher-tx-exception retry queries e))))
 
 (defn dump-queries [queries]
   (spit "/home/alyssa/cypherlog.txt" "BEGIN TRANSACTION\n\n" :append true)
-  (dorun (map #(spit "/home/alyssa/cypherlog.txt" (str % "\n\n") :append true) queries)))
+  (dorun (map #(spit "/home/alyssa/cypherlog.txt"
+                     (str % "\n\n") :append true)
+              queries)))
 
 (defn cypher-combined-tx
   ([queries]
@@ -143,8 +144,11 @@
        first vals first))
 
 (defn set-property! [vertex property value]
-  (nn/set-property @conn vertex property
-                   (dt/catch-dates value)))
+  (cypher-query-raw
+   [(str "MATCH (n) WHERE ID(n) = {id}"
+         " SET n." (neo4j/esc-token property)
+         " = {val}")
+    {:id (:id vertex) :val (dt/catch-dates value)}]))
 
 (defn format-link [l]
   (vector (get l "ID(STARTNODE(b))")
@@ -172,17 +176,6 @@
        (into {})
        (map dt/catch-dates-map)
        (into {})))
-
-(defnp create-vertex! [labels properties]
-  (let [vertex (nn/create @conn (filter-props properties))]
-    (nl/add @conn vertex labels)
-    vertex))
-
-(defnp batch-insert! [items]
-  (let [nodes (nn/create-batch
-               @conn (map #(filter-props (:props %)) items))]
-    (dorun (pmap #(nl/add @conn %1 (:labels %2)) nodes items))
-    nodes))
 
 (defn delete-id! [id]
   (cypher-query-raw
@@ -235,7 +228,11 @@
                      ") DELETE root")))
 
 (defnp create-edge! [out in class]
-  (nrl/create @conn out in class))
+  (cypher-query-raw
+   [(str "MATCH (a) WHERE ID(a) = {outid} WITH a"
+         " MATCH (b) WHERE ID(b) = {inid} WITH a, b"
+         " CREATE (a)-[r:" (esc-token class) "]->(b)")
+    {:outid (:id out) :inid (:id in)}]))
 
 (defn update-vals! [id pred old-val new-val]
   (cypher-query-raw
@@ -257,12 +254,13 @@
     {:id id}]))
 
 (defn all-constraints []
-  (co/get-all @conn))
+  (cypher-query-raw "CALL db.constraints()"))
 
 (defn drop-constraint! [vals]
   (if (= (:type vals) "UNIQUENESS")
-    (co/drop-unique
-     @conn (:label vals) (first (:property_keys vals)))
+    (cypher-query-raw
+     (str "DROP CONSTRAINT ON (root:" (esc-token (:label vals))
+          ") ASSERT root." (first (:property_keys vals)) " IS UNIQUE"))
     (cypher-query-raw
      (str "DROP CONSTRAINT ON (root:" (esc-token (:label vals))
           ") ASSERT exists(root." (first (:property_keys vals)) ")"))))

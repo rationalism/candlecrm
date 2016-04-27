@@ -55,7 +55,7 @@
                   :exclusions [com.google.guava/guava]]
                  [com.joestelmach/natty "0.12"
                   :exclusions [commons-logging commons-codec]]
-                 [clojurewerkz/neocons "3.1.0"]
+                 [org.neo4j.driver/neo4j-java-driver "1.0.0"]
                  [pandect "0.5.4"]
                  [aysylu/loom "0.6.0"]
                  [com.taoensso/sente "1.8.1"]
