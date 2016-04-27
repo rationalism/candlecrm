@@ -103,7 +103,7 @@
     (let [tx (start-tx)
           resp (->> (map cypher-statement queries)
                     (map #(.run tx (first %) (second %)))
-                    resp-clojure dorun)]
+                    resp-clojure doall)]
       (.success tx) (.close tx) resp)
     (catch Exception e
       (cypher-tx-exception retry queries e))))
@@ -255,14 +255,16 @@
 (defn all-constraints []
   (cypher-query "CALL db.constraints()"))
 
-(defn drop-constraint! [vals]
-  (if (= (:type vals) "UNIQUENESS")
-    (cypher-query
-     (str "DROP CONSTRAINT ON (root:" (esc-token (:label vals))
-          ") ASSERT root." (first (:property_keys vals)) " IS UNIQUE"))
-    (cypher-query
-     (str "DROP CONSTRAINT ON (root:" (esc-token (:label vals))
-          ") ASSERT exists(root." (first (:property_keys vals)) ")"))))
+(defn drop-constraint [query]
+  (-> (str "DROP " query)
+      (str/replace-first #"\( " "( `")
+      (str/replace-first #" \)" "` )")
+      (str/replace-first #"\:" "`:`")
+      (str/replace-first #"exists\(" "exists(`")
+      (str/replace-first #"\." "`.")
+      (str/replace-first #"ASSERT " "ASSERT `")
+      (str/replace-first #"ASSERT `exists" "ASSERT exists")))
 
 (defn drop-all-constraints! []
-  (map drop-constraint! (all-constraints)))
+  (->> (all-constraints) (map vals) (map first)
+       (map drop-constraint) (map cypher-query) dorun))
