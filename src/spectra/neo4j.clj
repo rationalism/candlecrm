@@ -188,7 +188,7 @@
     {:id id}]))
 
 (defn delete-vertex! [vertex]
-  (-> vertex :id delete-id!))
+  (-> vertex (.id) delete-id!))
 
 (defn node-exists? [user id type]
   (->> [(str "MATCH (root:" (prop-label user type)
