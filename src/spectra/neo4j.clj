@@ -49,7 +49,8 @@
                         (to-values params))))
 
 (defn resp-clojure [resp]
-  (->> (map #(.list %) resp)
+  (->> (if (coll? resp) resp (vector resp))
+       (map #(.list %))
        (map (fn [records]
               (map #(.asMap %) records)))))
 
