@@ -16,12 +16,13 @@
            [org.passay PasswordData PasswordValidator LengthRule]))
 
 (defn user-vertex! [email-addr pwd-hash]
-  (neo4j/cypher-query
-   [(str "CREATE (u:" (neo4j/esc-token s/user) " {"
-         (neo4j/esc-token s/email-addr) ": {email}, "
-         (neo4j/esc-token s/pwd-hash) ": {pwdhash}, "
-         (neo4j/esc-token s/recon-run) ": {reconrun}})")
-    {:email email-addr :pwdhash pwd-hash :reconrun false}]))
+  (->> [(str "CREATE (u:" (neo4j/esc-token s/user) " {"
+             (neo4j/esc-token s/email-addr) ": {email}, "
+             (neo4j/esc-token s/pwd-hash) ": {pwdhash}, "
+             (neo4j/esc-token s/recon-run) ": {reconrun}})"
+             " RETURN u")
+        {:email email-addr :pwdhash pwd-hash :reconrun false}]
+       neo4j/cypher-query first vals first))
 
 (defn friend-user [u]
   {:identity (get-in u (:data s/email-addr))})
@@ -80,7 +81,7 @@
         s/top-uid s/modified]
        (map #(neo4j/prop-label user %))
        (map neo4j/delete-class!) dorun)
-  (neo4j/delete-id! (:id user)))
+  (neo4j/delete-id! (.id user)))
 
 (defn password-check [password confirm]
   (cond

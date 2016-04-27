@@ -9,7 +9,7 @@
   (:import [org.neo4j.driver.v1 AuthTokens GraphDatabase Values]))
 
 (defn user-label [user]
-  (str "user_" (:id user)))
+  (str "user_" (.id user)))
 
 (defn prop-label [user prop]
   (str "`" (name prop) "_"
@@ -138,7 +138,7 @@
 (defn get-property [vertex property]
   (->> [(str "MATCH (root) WHERE ID(root) = {id}"
              " RETURN root." (esc-token property))
-        {:id (:id vertex)}]
+        {:id (.id vertex)}]
        cypher-query
        first vals first))
 
@@ -147,7 +147,7 @@
    [(str "MATCH (n) WHERE ID(n) = {id}"
          " SET n." (esc-token property)
          " = {val}")
-    {:id (:id vertex) :val (dt/catch-dates value)}]))
+    {:id (.id vertex) :val (dt/catch-dates value)}]))
 
 (defn format-link [l]
   (vector (get l "ID(STARTNODE(b))")
@@ -166,7 +166,7 @@
 (defn delete-property! [vertex property]
   (-> [(str "MATCH (a) WHERE ID(a) = {id}"
             " REMOVE a." (esc-token property))
-       {:id (:id vertex)}]
+       {:id (.id vertex)}]
       cypher-query))
 
 (defn filter-props [props]
@@ -231,7 +231,7 @@
    [(str "MATCH (a) WHERE ID(a) = {outid} WITH a"
          " MATCH (b) WHERE ID(b) = {inid} WITH a, b"
          " CREATE (a)-[r:" (esc-token class) "]->(b)")
-    {:outid (:id out) :inid (:id in)}]))
+    {:outid (.id out) :inid (.id in)}]))
 
 (defn update-vals! [id pred old-val new-val]
   (cypher-query

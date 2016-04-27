@@ -19,7 +19,7 @@
        (reduce merge)))
 
 (defn node-attrs [node]
-  (merge (:data node) (hash-map :id (:id node))))
+  (merge (:data node) (hash-map :id (.id node))))
 
 (defn tablify-hits [hits]
   (->> (map node-attrs hits)
@@ -148,7 +148,7 @@
             ")-[:" (neo4j/esc-token s/scanned)
             "]->(s:" (neo4j/esc-token s/time-scanned)
             ") WHERE ID(root) = {id} RETURN s")
-       {:id (:id user)}]
+       {:id (.id user)}]
       neo4j/cypher-list))
 
 (defn scan-overlaps [user time]
@@ -159,7 +159,7 @@
             " AND s." (neo4j/esc-token s/start-time)
             " <= {limtime} AND s." (neo4j/esc-token s/stop-time)
             " >= {limtime} RETURN s")
-       {:id (:id user) :limtime time}]
+       {:id (.id user) :limtime time}]
       neo4j/cypher-list))
 
 (defn escape-rels [rels]

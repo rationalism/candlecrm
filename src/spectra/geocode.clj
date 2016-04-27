@@ -48,7 +48,7 @@
         "]->(g:" (neo4j/esc-token s/geocode)
         " {geocode}) RETURN g")
    {:geocode (get s/geocode geocode)
-    :id (:id geocode)}])
+    :id (.id geocode)}])
 
 (defn geocode-batch [limit]
   (->> (queries/bare-locations limit)
