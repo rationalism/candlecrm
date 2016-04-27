@@ -99,14 +99,14 @@
   (.beginTransaction *session*))
 
 (defnp cypher-combined-tx-recur [retry queries]
-  (try
-    (let [tx (start-tx)
-          resp (->> (map cypher-statement queries)
-                    (map #(.run tx (first %) (second %)))
-                    resp-clojure doall)]
-      (.success tx) (.close tx) resp)
-    (catch Exception e
-      (cypher-tx-exception retry queries e))))
+  (let [tx (start-tx)]
+    (try (let [resp (->> (map cypher-statement queries)
+                         (map #(.run tx (first %) (second %)))
+                         resp-clojure doall)]
+           (.success tx) (.close tx) resp)
+         (catch Exception e
+           (.failure tx) (.close tx)
+           (cypher-tx-exception retry queries e)))))
 
 (defn dump-queries [queries]
   (spit "/home/alyssa/cypherlog.txt" "BEGIN TRANSACTION\n\n" :append true)
