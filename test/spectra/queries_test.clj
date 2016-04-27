@@ -5,13 +5,6 @@
             [spectra_cljc.schema :as s]
             [spectra.queries :refer :all]))
 
-(defn graph-ready [f]
-  (neo4j/define-graph!)
-  (f)
-  nil)
-
-(use-fixtures :once graph-ready)
-
 (def test-username "someemail@foo.com")
 (def test-password "notarealpassword")
 

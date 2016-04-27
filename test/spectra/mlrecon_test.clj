@@ -6,13 +6,6 @@
             [spectra.mlrecon :refer :all]
             [spectra.neo4j :as neo4j]))
 
-(defn graph-ready [f]
-  (neo4j/define-graph!)
-  (f)
-  nil)
-
-(use-fixtures :once graph-ready)
-
 (def test-username "someemail@foo.com")
 (def test-password "notarealpassword")
 
