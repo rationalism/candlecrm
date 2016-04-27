@@ -16,7 +16,7 @@
            [org.passay PasswordData PasswordValidator LengthRule]))
 
 (defn user-vertex! [email-addr pwd-hash]
-  (neo4j/cypher-query-raw
+  (neo4j/cypher-query
    [(str "CREATE (u:" (neo4j/esc-token s/user) " {"
          (neo4j/esc-token s/email-addr) ": {email}, "
          (neo4j/esc-token s/pwd-hash) ": {pwdhash}, "

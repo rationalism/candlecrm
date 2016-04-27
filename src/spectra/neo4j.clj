@@ -30,14 +30,6 @@
 (defn esc-token [token]
   (str "`" (name token) "`"))
 
-(defn cypher-pair->node [pair]
-  [(key pair) (val pair)])
-
-(defn cypher-map->node [cymap]
-  (->> cymap
-       (map cypher-pair->node)
-       (into {})))
-
 (defn to-values [params]
   (->> params (into [])
        (map #(update % 0 name)) (apply concat)
@@ -54,21 +46,18 @@
        (map (fn [records]
               (map #(.asMap %) records)))))
 
-(defn cypher-query-raw [query]
+(defn cypher-query [query]
   (try
-    (resp-clojure
-     (if (coll? query)
-       (apply tquery query)
-       (tquery query)))
+    (first
+     (resp-clojure
+      (if (coll? query)
+        (apply tquery query)
+        (tquery query))))
     (catch Exception e
       (do (println "ERROR: Cypher query invalid")
           (println "Query:" query)
           (println "Error message:" e)
           {}))))
-
-(defn cypher-query [query]
-  (map cypher-map->node
-       (cypher-query-raw query)))
 
 (defn cypher-property [prop]
   (str (esc-token (key prop)) ": {"
@@ -150,11 +139,11 @@
   (->> [(str "MATCH (root) WHERE ID(root) = {id}"
              " RETURN root." (esc-token property))
         {:id (:id vertex)}]
-       cypher-query-raw
+       cypher-query
        first vals first))
 
 (defn set-property! [vertex property value]
-  (cypher-query-raw
+  (cypher-query
    [(str "MATCH (n) WHERE ID(n) = {id}"
          " SET n." (esc-token property)
          " = {val}")
@@ -172,13 +161,13 @@
   (->> [(str "MATCH (a)-[b]-(c) WHERE ID(a) = {id}" 
              " RETURN ID(STARTNODE(b)), TYPE(b), ID(a), ID(c)")
         {:id id}]
-       cypher-query-raw (map format-link)))
+       cypher-query (map format-link)))
 
 (defn delete-property! [vertex property]
   (-> [(str "MATCH (a) WHERE ID(a) = {id}"
             " REMOVE a." (esc-token property))
        {:id (:id vertex)}]
-      cypher-query-raw))
+      cypher-query))
 
 (defn filter-props [props]
   (->> props
@@ -188,13 +177,13 @@
        (into {})))
 
 (defn delete-id! [id]
-  (cypher-query-raw
+  (cypher-query
    [(str "MATCH (root)-->(v) WHERE ID(root) = {id}"
          " AND v." (esc-token s/value)
          " IS NOT NULL WITH v MATCH (v)<--(x)"
          " WITH v, count(x) as n WHERE n = {nval} DETACH DELETE v")
     {:id id :nval 1}])
-  (cypher-query-raw
+  (cypher-query
    ["MATCH (root) WHERE ID(root) = {id} DETACH DELETE root"
     {:id id}]))
 
@@ -205,7 +194,7 @@
   (->> [(str "MATCH (root:" (prop-label user type)
              ") WHERE ID(root) = {id} RETURN ID(root)")
         {:id id}]
-       cypher-query-raw first empty? not))
+       cypher-query first empty? not))
 
 (defn val-query [prop]
   (str "MATCH (root)-[:" (-> prop key esc-token)
@@ -238,40 +227,40 @@
                      ") DELETE root")))
 
 (defnp create-edge! [out in class]
-  (cypher-query-raw
+  (cypher-query
    [(str "MATCH (a) WHERE ID(a) = {outid} WITH a"
          " MATCH (b) WHERE ID(b) = {inid} WITH a, b"
          " CREATE (a)-[r:" (esc-token class) "]->(b)")
     {:outid (:id out) :inid (:id in)}]))
 
 (defn update-vals! [id pred old-val new-val]
-  (cypher-query-raw
+  (cypher-query
    [(str "MATCH (root)-[:" (esc-token pred)
          "]->(n) WHERE ID(root) = {id}"
          " AND n.val = {oldval} SET n.val = {newval}")
     {:id id :oldval old-val :newval new-val}]))
 
 (defn add-label! [id label]
-  (cypher-query-raw
+  (cypher-query
    [(str "MATCH (root) WHERE ID(root) = {id}"
          " SET root:" (esc-token label))
     {:id id}]))
 
 (defn remove-label! [id label]
-  (cypher-query-raw
+  (cypher-query
    [(str "MATCH (root) WHERE ID(root) = "
          " REMOVE root:" (esc-token label))
     {:id id}]))
 
 (defn all-constraints []
-  (cypher-query-raw "CALL db.constraints()"))
+  (cypher-query "CALL db.constraints()"))
 
 (defn drop-constraint! [vals]
   (if (= (:type vals) "UNIQUENESS")
-    (cypher-query-raw
+    (cypher-query
      (str "DROP CONSTRAINT ON (root:" (esc-token (:label vals))
           ") ASSERT root." (first (:property_keys vals)) " IS UNIQUE"))
-    (cypher-query-raw
+    (cypher-query
      (str "DROP CONSTRAINT ON (root:" (esc-token (:label vals))
           ") ASSERT exists(root." (first (:property_keys vals)) ")"))))
 

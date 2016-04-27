@@ -580,7 +580,7 @@
      (conj (-> email :id delete-email-body)
            (-> email :id remove-nonlp)))
     (-> email :id remove-nonlp
-        neo4j/cypher-query-raw)))
+        neo4j/cypher-query)))
 
 (defn push-email-nlp! []
   (let [emails (queries/email-for-nlp batch-size)]

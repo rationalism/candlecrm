@@ -25,14 +25,14 @@
     (push-graph! g user)
     (is (= 1 (count (neo4j/get-vertices user :fish {:species "tuna"}))))
     (is (= 1 (count (neo4j/get-vertices user :phylum {:phy-name "Vertebrates"}))))
-    (is (= 1 (count (neo4j/cypher-query-raw query))))
+    (is (= 1 (count (neo4j/cypher-query query))))
 
     (neo4j/delete-vertex! (first (neo4j/get-vertices user :fish {:species "tuna"})))
     (neo4j/delete-vertex! (first (neo4j/get-vertices user :phylum {:phy-name "Vertebrates"})))
     
     (is (= 0 (count (neo4j/get-vertices user :fish {:species "tuna"}))))
     (is (= 0 (count (neo4j/get-vertices user :phylum {:phy-name "Vertebrates"}))))
-    (is (= 0 (count (neo4j/cypher-query-raw query))))
+    (is (= 0 (count (neo4j/cypher-query query))))
     
     (auth/delete-user! (auth/lookup-user test-username))))
 

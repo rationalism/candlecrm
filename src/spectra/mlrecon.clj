@@ -295,7 +295,7 @@
        (str/join ", ")
        (candidate-query (neo4j/prop-label user class))
        vector (optional-search user class)
-       (mapcat neo4j/cypher-query-raw)
+       (mapcat neo4j/cypher-query)
        (map (juxt #(get % "ID(root)") #(get % "ID(m)")))
        (map sort) distinct))
 
