@@ -91,14 +91,6 @@
   (if (-> id namespace (= "auth"))
     {} (auth/user-from-token token)))
 
-(defn event-msg-handler*
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (if-let [fetch-spec (get reply-map id)]
-    (if-let [user (auth-check (-> ?data :auth-token) id)]
-      (?reply-fn ((make-fetch-fn fetch-spec) user ?data))
-      (?reply-fn (unauthorized event)))
-    (when ?reply-fn (?reply-fn (no-reply event)))))
-
 ;; Wrap for logging, catching, etc.:
 (defn event-msg-handler*
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
