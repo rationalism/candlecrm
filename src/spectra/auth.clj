@@ -47,7 +47,9 @@
            nil))))
 
 (defn user-from-req [req]
-  (-> req :identity user-from-token))
+  (println "user-from-req")
+  (println req)
+  (-> req :identity :token user-from-token))
 
 (defn make-token [user]
   {:token
