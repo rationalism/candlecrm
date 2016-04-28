@@ -18,9 +18,6 @@
             [spectra.quartz :as quartz]
             [spectra.sendgrid :as sendgrid]
             [spectra.weka :as weka]
-            [cemerick.friend :as friend]
-            (cemerick.friend [workflows :as workflows]
-                             [credentials :as creds])
             [environ.core :refer [env]]
             [clojure.tools.nrepl.server :as nrepl-server]
             [cider.nrepl :refer (cider-nrepl-handler)])
@@ -54,8 +51,7 @@
            (html-wrapper (pages/new-password user token))
            (home-with-message "Error: Invalid reset link"))))
   (GET "/app" req
-       (friend/authenticated
-        (html-wrapper (pages/app-page req))))
+       (html-wrapper (pages/app-page req)))
   (GET "/ajax-test" req
        (html-wrapper (pages/ajax-test req)))
   (GET "/chsk" req
@@ -77,37 +73,35 @@
         (if-let [err-msg (auth/new-user-check username password confirm)]
           (home-with-message err-msg)
           (->> [:username :password] (select-keys params)
-               auth/create-user! auth/friend-user
-               (friend/merge-authentication (resp/redirect "/gmail")))))
-  (GET "/logout" req (friend/logout* (logout req)))
+               auth/create-user! (resp/redirect "/gmail"))))
+  (POST "/login" {{:keys [username password] :as params} :params :as req}
+        (when-let [user-token (auth/login-handler params)]
+          (home-with-message "Login successful!")))
+  (GET "/logout" req (logout req))
   (GET "/gmail" req
-       (friend/authenticated
-        (html-wrapper (pages/gmail req))))
+       (html-wrapper (pages/gmail req)))
   (GET "/init-account" req
-       (friend/authenticated
-        (let [user (-> req auth/user-from-req :data s/email-addr
-                       auth/lookup-user)]
-          (quartz/add-new-queue! user)
-          (quartz/schedule-contacts! user)
-          (home-with-message "Congrats! Authentication successful"))))
+       (let [user (-> req auth/user-from-req :data s/email-addr
+                      auth/lookup-user)]
+         (quartz/add-new-queue! user)
+         (quartz/schedule-contacts! user)
+         (home-with-message "Congrats! Authentication successful")))
   (GET google/callback-url req
-       (friend/authenticated
-        (let [auth-response (google/response-from-req req)
-              user (auth/user-from-req req)]
-          (if-let [auth-err (.getError auth-response)]
-            (assoc (resp/redirect "/gmail") :flash auth-err)
-            (if-let [token (google/get-token! (.getCode auth-response))]
-              (do (google/write-token! user token)
-                  (resp/redirect "/init-account"))
-              (assoc (resp/redirect "/gmail")
-                     :flash "Error: Could not get auth token"))))))
+       (let [auth-response (google/response-from-req req)
+             user (auth/user-from-req req)]
+         (if-let [auth-err (.getError auth-response)]
+           (assoc (resp/redirect "/gmail") :flash auth-err)
+           (if-let [token (google/get-token! (.getCode auth-response))]
+             (do (google/write-token! user token)
+                 (resp/redirect "/init-account"))
+             (assoc (resp/redirect "/gmail")
+                    :flash "Error: Could not get auth token")))))
   (POST "/load-emails" {{:keys [lower upper] :as params} :params :as req}
-        (friend/authenticated
-         (if-let [user (auth/user-from-req req)]
-           (do (email/insert-raw-range!
-                user (Integer/parseInt lower) (Integer/parseInt upper))
-               (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
-           (home-with-message "Error: Could not log in"))))
+        (if-let [user (auth/user-from-req req)]
+          (do (email/insert-raw-range!
+               user (Integer/parseInt lower) (Integer/parseInt upper))
+              (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
+          (home-with-message "Error: Could not log in")))
   (route/files "/resources/public/js" {:root "./resources/public/js"})
   (route/resources "/")
   (route/not-found (slurp (io/resource "public/404.html"))))
@@ -134,17 +128,10 @@
         resp/response
         (resp/status 401))))
 
-(defn friend-authenticate [app]
-  (friend/authenticate app
-   {:allow-anon? true
-    :login-uri "/login"
-    :default-landing-uri "/"
-    :unauthorized-handler unauthorized-handler
-    :credential-fn (partial creds/bcrypt-credential-fn auth/get-user-pwd)
-    :workflows [(workflows/interactive-form)]}))
-
 (def secure-app
-  (wrap-defaults (friend-authenticate app) (middleware-config)))
+  (wrap-defaults
+   (-> app (wrap-authentication (auth/backend)))
+   (middleware-config)))
 
 (defn app-init! []
   (sendgrid/init-server!)
@@ -154,7 +141,7 @@
   (mlrecon/load-models!)
   (mlrecon/load-thresholds!)
   (geocode/define-context!)
-                                        ;  (quartz/start!)
+  (quartz/start!)
   (println "Ready to start server")
   (nrepl-server/start-server
    :port 9998

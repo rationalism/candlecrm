@@ -10,10 +10,45 @@
             [spectra.sendgrid :as sendgrid]
             [spectra_cljc.schema :as s]
             [crypto.random :as random]
-            [cemerick.friend :as friend]
-            (cemerick.friend [credentials :as creds]))
+            [buddy.auth.backends.token :refer (jwe-backend)]
+            [buddy.hashers :as hashers]
+            [buddy.sign.jwe :as jwe]
+            [buddy.core.keys :as keys])
   (:import java.net.URI
            [org.passay PasswordData PasswordValidator LengthRule]))
+
+(def encryption {:alg :rsa-oaep :enc :a192gcm})
+(def hash-alg {:alg :bcrypt+blake2b-512})
+(def pubkey (keys/public-key "pubkey.pem"))
+(def privkey (keys/private-key "privkey.pem" (env :privkey-pwd)))
+
+(defn backend []
+  (jwe-backend {:secret privkey :options encryption}))
+
+(defn hash-pwd [query-map]
+  (-> query-map :password (hashers/encrypt hash-alg)))
+
+(defn lookup-user [username]
+  (when-let [user (neo4j/get-vertex s/user {s/email-addr username})]
+    user))
+
+(defn find-user [email password]
+  (when-let [user (lookup-user email)]
+    (when (hashers/check password (:pwdhash user))
+      user)))
+
+(defn user-from-token [token]
+  (when token
+    (try (jwe/decrypt token privkey encryption)
+         (catch clojure.lang.ExceptionInfo e
+           (prn (str "Error: Bad token - " token " - " e))
+           nil))))
+
+(defn make-token [user]
+  {:token
+   (jwe/encrypt {:user user
+                 :exp (-> 3 hours from-now)}
+                pubkey encryption)})
 
 (defn user-vertex! [email-addr pwd-hash]
   (->> [(str "CREATE (u:" (neo4j/esc-token s/user) " {"
@@ -24,9 +59,6 @@
         {:email email-addr :pwdhash pwd-hash :reconrun false}]
        neo4j/cypher-query first vals first))
 
-(defn friend-user [u]
-  {:identity (.get u (name s/email-addr))})
-
 (defn user-person [email]
   [{s/type-label s/person s/email-addr email}])
 
@@ -35,17 +67,13 @@
 
 (defn create-user!
   [{:keys [username password] :as user-data}]
-  (let [user (user-vertex! username (creds/hash-bcrypt password))]
+  (let [user (user-vertex! username (hashers/encrypt password hash-alg))]
     (-> username user-person
         (insert/push-entities! user)
         first neo4j/find-by-id
         (user-person-edge! user))
     (index/make-constraints! user)
-    user))
-
-(defn lookup-user [username]
-  (when-let [user (neo4j/get-vertex s/user {s/email-addr username})]
-    user))
+    (make-token user)))
 
 (defn get-username [user]
   (neo4j/get-property user s/email-addr))
@@ -55,14 +83,6 @@
     (when user
       {:username username
        :password (neo4j/get-property user s/pwd-hash)})))
-
-(defn get-user-obj [friend-map]
-  (when friend-map
-    (:current friend-map)))
-
-(defn user-from-req [req]
-  (let [u (get-user-obj (friend/identity req))]
-    (if (string? u) (lookup-user u) u)))
 
 (defn list-users []
   (neo4j/get-vertices-class (name s/user)))
@@ -125,5 +145,10 @@
   (if-let [err-msg (password-check (:password params) (:confirm params))]
     err-msg
     (do (neo4j/delete-property! user s/pwd-reset-token)
-        (->> params :password creds/hash-bcrypt 
+        (->> params hash-pwd
              (neo4j/set-property! user s/pwd-hash)))))
+
+(defn login-handler [query-map]
+  (when-let [record (find-user (:user-id query-map)
+                               (:password query-map))]
+    (make-token (select-keys record [:id]))))
