@@ -131,7 +131,7 @@
 
 (def secure-app
   (wrap-defaults
-   (-> app (wrap-authentication (auth/backend)))
+   (wrap-authentication app (auth/backend))
    (middleware-config)))
 
 (defn app-init! []
