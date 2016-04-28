@@ -38,7 +38,9 @@
   {:status 302
    :headers {"Location" url}
    :body ""
-   :cookies {"token" {:value token}}})
+   :cookies {"token" {:value token :http-only true
+                      :max-age (* 3600 auth/exp-hours)
+                      :secure true :domain (env :app-domain)}}})
 
 (defroutes app
   (GET "/" req

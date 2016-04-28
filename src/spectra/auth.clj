@@ -22,6 +22,7 @@
 (def hash-alg {:alg :bcrypt+blake2b-512})
 (def pubkey (keys/public-key "pubkey.pem"))
 (def privkey (keys/private-key "privkey.pem" (env :privkey-pwd)))
+(def exp-hours 3)
 
 (defn hash-pwd [query-map]
   (-> query-map :password (hashers/encrypt hash-alg)))
@@ -46,7 +47,7 @@
 (defn make-token [user]
   {:token
    (jwe/encrypt {:user {:id (.id user)}
-                 :exp (-> 3 hours from-now)}
+                 :exp (-> exp-hours hours from-now)}
                 pubkey encryption)})
 
 (defn user-vertex! [email-addr pwd-hash]
