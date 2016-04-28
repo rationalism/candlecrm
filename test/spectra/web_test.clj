@@ -1,7 +1,7 @@
 (ns spectra.web-test
   (:require [clojure.test :refer :all]
             [ring.middleware.defaults :refer :all]
-            [spectra.auth :refer :all]
+            [spectra.auth :as auth]
             [spectra.web :refer :all]
             [buddy.auth.middleware :refer (wrap-authentication)]))
 
