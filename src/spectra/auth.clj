@@ -10,6 +10,7 @@
             [spectra.sendgrid :as sendgrid]
             [spectra_cljc.schema :as s]
             [crypto.random :as random]
+            [clj-time.core :refer [hours from-now]]
             [buddy.auth.backends.token :refer (jwe-backend)]
             [buddy.hashers :as hashers]
             [buddy.sign.jwe :as jwe]
@@ -46,7 +47,7 @@
 
 (defn make-token [user]
   {:token
-   (jwe/encrypt {:user user
+   (jwe/encrypt {:user {:id (.id user)}
                  :exp (-> 3 hours from-now)}
                 pubkey encryption)})
 
