@@ -88,6 +88,8 @@
           (token-cookie user-token "/")))
   (GET "/logout" req (logout req))
   (GET "/gmail" req
+       (println "get gmail")
+       (println req)
        (html-wrapper (pages/gmail req)))
   (GET "/init-account" req
        (let [user (-> req :identity :data s/email-addr
@@ -139,8 +141,8 @@
 
 (defn wrap-authentication [handler]
   (fn [request]
-    (handler (->> request :cookies "token" :value
-                  auth/user-from-token
+    (handler (->> (get-in [:cookies "token" :value] request)
+                  auth/user-from-token 
                   (assoc request :identity)))))
 
 (def secure-app
