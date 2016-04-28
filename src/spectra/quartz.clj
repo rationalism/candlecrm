@@ -187,8 +187,7 @@
 
 (defn user-job [ctx]
   (-> ctx qc/from-job-data
-      (get "user") (get "id")
-      neo4j/find-by-id))
+      (get "user")))
 
 (jobs/defjob LoadContacts [ctx]
   (let [user (user-job ctx)]
