@@ -38,9 +38,8 @@
   {:status 302
    :headers {"Location" url}
    :body ""
-   :cookies {"token" {:value token :http-only true
-                      :max-age (* 3600 auth/exp-hours)
-                      :secure true :domain (env :app-domain)}}})
+   :cookies {"token" {:value token :http-only true :secure true
+                      :max-age (* 3600 auth/exp-hours)}}})
 
 (defroutes app
   (GET "/" req
@@ -82,14 +81,12 @@
           (home-with-message err-msg)
           (->> [:username :password] (select-keys params)
                auth/create-user! auth/make-token
-               (token-cookie "/gmail"))))
+               :token (token-cookie "/gmail"))))
   (POST "/login" {{:keys [username password] :as params} :params :as req}
         (when-let [user-token (auth/login-handler params)]
-          (token-cookie user-token "/")))
+          (token-cookie (:token user-token) "/")))
   (GET "/logout" req (logout req))
   (GET "/gmail" req
-       (println "get gmail")
-       (println req)
        (html-wrapper (pages/gmail req)))
   (GET "/init-account" req
        (let [user (-> req :identity :data s/email-addr
@@ -141,7 +138,7 @@
 
 (defn wrap-authentication [handler]
   (fn [request]
-    (handler (->> (get-in [:cookies "token" :value] request)
+    (handler (->> (get-in request [:cookies "token" :value])
                   auth/user-from-token 
                   (assoc request :identity)))))
 
