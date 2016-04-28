@@ -40,7 +40,8 @@
 
 (defn user-from-token [token]
   (when token
-    (try (jwe/decrypt token privkey encryption)
+    (try (-> token (jwe/decrypt privkey encryption)
+             :id neo4j/find-by-id)
          (catch clojure.lang.ExceptionInfo e
            (prn (str "Error: Bad token - " token " - " e))
            nil))))
@@ -74,7 +75,7 @@
         first neo4j/find-by-id
         (user-person-edge! user))
     (index/make-constraints! user)
-    (make-token user)))
+    user))
 
 (defn get-username [user]
   (neo4j/get-property user s/email-addr))

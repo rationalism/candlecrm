@@ -74,7 +74,8 @@
         (if-let [err-msg (auth/new-user-check username password confirm)]
           (home-with-message err-msg)
           (->> [:username :password] (select-keys params)
-               auth/create-user! (resp/redirect "/gmail"))))
+               auth/create-user! auth/make-token
+               (resp/redirect "/gmail"))))
   (POST "/login" {{:keys [username password] :as params} :params :as req}
         (when-let [user-token (auth/login-handler params)]
           (home-with-message "Login successful!")))
