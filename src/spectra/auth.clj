@@ -1,6 +1,7 @@
 (ns spectra.auth
   (:require [clojure.string :as str]
             [environ.core :refer [env]]
+            [spectra.common :as com]
             [spectra.datetime :as dt]
             [spectra.google :as google]
             [spectra.index :as index]
@@ -39,7 +40,7 @@
 (defn user-from-token [token]
   (when token
     (try (-> token (jwe/decrypt privkey encryption)
-             :id neo4j/find-by-id)
+             :user :id neo4j/find-by-id)
          (catch clojure.lang.ExceptionInfo e
            (prn (str "Error: Bad token - " token " - " e))
            nil))))
