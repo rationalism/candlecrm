@@ -20,8 +20,7 @@
             [spectra.weka :as weka]
             [environ.core :refer [env]]
             [clojure.tools.nrepl.server :as nrepl-server]
-            [cider.nrepl :refer (cider-nrepl-handler)]
-            [buddy.auth.middleware :refer (wrap-authentication)])
+            [cider.nrepl :refer (cider-nrepl-handler)])
   (:use [org.httpkit.server :only [run-server]]))
 
 (defn logout [req]
@@ -35,9 +34,11 @@
    :headers {"Content-Type" "text/html"}
    :body body})
 
-(defn token-wrapper [token]
-  {:status 200
-   :body token})
+(defn token-cookie [url token]
+  {:status 302
+   :headers {"Location" url}
+   :body ""
+   :cookies {"token" {:value token}}})
 
 (defroutes app
   (GET "/" req
@@ -79,24 +80,22 @@
           (home-with-message err-msg)
           (->> [:username :password] (select-keys params)
                auth/create-user! auth/make-token
-               (assoc (:session req) :identity)
-               (assoc (resp/redirect "/gmail") :session))))
+               (token-cookie "/gmail"))))
   (POST "/login" {{:keys [username password] :as params} :params :as req}
         (when-let [user-token (auth/login-handler params)]
-          (->> user-token (assoc (:session req) :identity)
-               (assoc (resp/redirect "/") :session))))
+          (token-cookie user-token "/")))
   (GET "/logout" req (logout req))
   (GET "/gmail" req
        (html-wrapper (pages/gmail req)))
   (GET "/init-account" req
-       (let [user (-> req auth/user-from-req :data s/email-addr
+       (let [user (-> req :identity :data s/email-addr
                       auth/lookup-user)]
          (quartz/add-new-queue! user)
          (quartz/schedule-contacts! user)
          (home-with-message "Congrats! Authentication successful")))
   (GET google/callback-url req
        (let [auth-response (google/response-from-req req)
-             user (auth/user-from-req req)]
+             user (:identity req)]
          (if-let [auth-err (.getError auth-response)]
            (assoc (resp/redirect "/gmail") :flash auth-err)
            (if-let [token (google/get-token! (.getCode auth-response))]
@@ -105,7 +104,7 @@
              (assoc (resp/redirect "/gmail")
                     :flash "Error: Could not get auth token")))))
   (POST "/load-emails" {{:keys [lower upper] :as params} :params :as req}
-        (if-let [user (auth/user-from-req req)]
+        (if-let [user (:identity req)]
           (do (email/insert-raw-range!
                user (Integer/parseInt lower) (Integer/parseInt upper))
               (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
@@ -136,9 +135,15 @@
         resp/response
         (resp/status 401))))
 
+(defn wrap-authentication [handler]
+  (fn [request]
+    (handler (->> request :cookies "token" :value
+                  auth/user-from-token
+                  (assoc request :identity)))))
+
 (def secure-app
   (wrap-defaults
-   (wrap-authentication app (auth/backend))
+   (wrap-authentication app)
    (middleware-config)))
 
 (defn app-init! []

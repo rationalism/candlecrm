@@ -23,9 +23,6 @@
 (def pubkey (keys/public-key "pubkey.pem"))
 (def privkey (keys/private-key "privkey.pem" (env :privkey-pwd)))
 
-(defn backend []
-  (jwe-backend {:secret privkey :options encryption}))
-
 (defn hash-pwd [query-map]
   (-> query-map :password (hashers/encrypt hash-alg)))
 
@@ -45,11 +42,6 @@
          (catch clojure.lang.ExceptionInfo e
            (prn (str "Error: Bad token - " token " - " e))
            nil))))
-
-(defn user-from-req [req]
-  (println "user-from-req")
-  (println req)
-  (-> req :identity :token user-from-token))
 
 (defn make-token [user]
   {:token
