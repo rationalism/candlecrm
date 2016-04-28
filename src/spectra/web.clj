@@ -20,7 +20,8 @@
             [spectra.weka :as weka]
             [environ.core :refer [env]]
             [clojure.tools.nrepl.server :as nrepl-server]
-            [cider.nrepl :refer (cider-nrepl-handler)])
+            [cider.nrepl :refer (cider-nrepl-handler)]
+            [buddy.auth.middleware :refer (wrap-authentication)])
   (:use [org.httpkit.server :only [run-server]]))
 
 (defn logout [req]
