@@ -36,7 +36,7 @@
 
 (defroutes app
   (GET "/" req
-       (if (auth/user-from-req req)
+       (if (auth/user-from-token req)
          (resp/redirect "/app")
          (html-wrapper (pages/login req))))
   ;; TODO: Make this return an error message when credentials are invalid
@@ -81,14 +81,14 @@
   (GET "/gmail" req
        (html-wrapper (pages/gmail req)))
   (GET "/init-account" req
-       (let [user (-> req auth/user-from-req :data s/email-addr
+       (let [user (-> req auth/user-from-token :data s/email-addr
                       auth/lookup-user)]
          (quartz/add-new-queue! user)
          (quartz/schedule-contacts! user)
          (home-with-message "Congrats! Authentication successful")))
   (GET google/callback-url req
        (let [auth-response (google/response-from-req req)
-             user (auth/user-from-req req)]
+             user (auth/user-from-token req)]
          (if-let [auth-err (.getError auth-response)]
            (assoc (resp/redirect "/gmail") :flash auth-err)
            (if-let [token (google/get-token! (.getCode auth-response))]
@@ -97,7 +97,7 @@
              (assoc (resp/redirect "/gmail")
                     :flash "Error: Could not get auth token")))))
   (POST "/load-emails" {{:keys [lower upper] :as params} :params :as req}
-        (if-let [user (auth/user-from-req req)]
+        (if-let [user (auth/user-from-token req)]
           (do (email/insert-raw-range!
                user (Integer/parseInt lower) (Integer/parseInt upper))
               (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
