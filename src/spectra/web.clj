@@ -83,7 +83,8 @@
                (assoc (resp/redirect "/gmail") :session))))
   (POST "/login" {{:keys [username password] :as params} :params :as req}
         (when-let [user-token (auth/login-handler params)]
-          (home-with-message "Login successful!")))
+          (->> user-token (assoc (:session req) :identity)
+               (assoc (resp/redirect "/") :session))))
   (GET "/logout" req (logout req))
   (GET "/gmail" req
        (html-wrapper (pages/gmail req)))
