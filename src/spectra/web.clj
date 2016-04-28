@@ -35,9 +35,13 @@
    :headers {"Content-Type" "text/html"}
    :body body})
 
+(defn token-wrapper [token]
+  {:status 200
+   :body token})
+
 (defroutes app
   (GET "/" req
-       (if (auth/user-from-token req)
+       (if (:identity req)
          (resp/redirect "/app")
          (html-wrapper (pages/login req))))
   ;; TODO: Make this return an error message when credentials are invalid
@@ -75,7 +79,7 @@
           (home-with-message err-msg)
           (->> [:username :password] (select-keys params)
                auth/create-user! auth/make-token
-               (resp/redirect "/gmail"))))
+               (hash-map :token) token-wrapper)))
   (POST "/login" {{:keys [username password] :as params} :params :as req}
         (when-let [user-token (auth/login-handler params)]
           (home-with-message "Login successful!")))
