@@ -46,6 +46,9 @@
            (prn (str "Error: Bad token - " token " - " e))
            nil))))
 
+(defn user-from-req [req]
+  (-> req :identity user-from-token))
+
 (defn make-token [user]
   {:token
    (jwe/encrypt {:user {:id (.id user)}

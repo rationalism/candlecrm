@@ -79,7 +79,8 @@
           (home-with-message err-msg)
           (->> [:username :password] (select-keys params)
                auth/create-user! auth/make-token
-               (hash-map :token) token-wrapper)))
+               (assoc (:session req) :identity)
+               (assoc (resp/redirect "/gmail") :session))))
   (POST "/login" {{:keys [username password] :as params} :params :as req}
         (when-let [user-token (auth/login-handler params)]
           (home-with-message "Login successful!")))
@@ -87,14 +88,14 @@
   (GET "/gmail" req
        (html-wrapper (pages/gmail req)))
   (GET "/init-account" req
-       (let [user (-> req auth/user-from-token :data s/email-addr
+       (let [user (-> req auth/user-from-req :data s/email-addr
                       auth/lookup-user)]
          (quartz/add-new-queue! user)
          (quartz/schedule-contacts! user)
          (home-with-message "Congrats! Authentication successful")))
   (GET google/callback-url req
        (let [auth-response (google/response-from-req req)
-             user (auth/user-from-token req)]
+             user (auth/user-from-req req)]
          (if-let [auth-err (.getError auth-response)]
            (assoc (resp/redirect "/gmail") :flash auth-err)
            (if-let [token (google/get-token! (.getCode auth-response))]
@@ -103,7 +104,7 @@
              (assoc (resp/redirect "/gmail")
                     :flash "Error: Could not get auth token")))))
   (POST "/load-emails" {{:keys [lower upper] :as params} :params :as req}
-        (if-let [user (auth/user-from-token req)]
+        (if-let [user (auth/user-from-req req)]
           (do (email/insert-raw-range!
                user (Integer/parseInt lower) (Integer/parseInt upper))
               (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
