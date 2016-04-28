@@ -13,7 +13,7 @@
   (html/app-template))
 
 (defn gmail [req]
-  (let [user (auth/user-from-req req)]
+  (let [user (auth/user-from-token req)]
     (html/base-template
      (if (google/lookup-token user)
        (html/gmail-finished (:flash req)
