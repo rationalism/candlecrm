@@ -46,9 +46,17 @@
     (is (= '([1 2 :cat] [1 2 :horse] [1 42 :dog] [2 4 :fish] [6 7 :cow]
              [42 43 :pig] [43 44 :goat] [44 5 :bear] [44 5 :rat] [44 6 :fox])
            (sort (multi-edges g))))))
-    
+
 (deftest spider
   (testing "Spidering a graph"
     (def g (build-graph test-nodes test-edges))
     (is (= (spider-edges g '())
            '(([3 5 :bear]) ([1 2 :cat]) ([3 5 :rat]) ([1 2 :horse] [2 4 :fish]) ([1 3 :dog] [3 6 :fox] [6 7 :cow]))))))
+
+(deftest graph-components
+  (testing "Find connected components in a graph"
+    (def g (build-graph [] [[1 2 1] [1 3 1] [1 4 1] [2 4 1]
+                            [4 5 1] [5 6 1] [6 7 1] [8 9 1]
+                            [10 11 1] [11 12 1] [12 13 1]]))
+    (is (->> g subgraphs (map set) set
+             (= #{#{7 1 4 6 3 2 5} #{9 8} #{13 12 11 10}})))))
