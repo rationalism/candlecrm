@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [spectra.common :as com]
             [spectra.auth :as auth]
+            [spectra.cluster :as cluster]
             [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra.weka :as weka]
