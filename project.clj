@@ -18,14 +18,14 @@
                  [environ "1.0.2"]
                  [com.taoensso/timbre "4.3.1"]
                  [buddy "0.13.0"]
-                 [com.google.api-client/google-api-client "1.21.0"
+                 [com.google.api-client/google-api-client "1.22.0"
                   :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [com.google.gdata/core "1.47.1"
                   :exclusions [com.google.guava/guava
                                com.google.code.findbugs/jsr305]]
                  [org.passay/passay "1.1.0"]
                  [com.google.apis/google-api-services-oauth2 "v2-rev109-1.21.0"]
-                 [com.google.http-client/google-http-client-jackson "1.21.0"]
+                 [com.google.http-client/google-http-client-jackson "1.22.0"]
                  [com.sun.mail/javax.mail "1.5.5"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.0"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.0"
