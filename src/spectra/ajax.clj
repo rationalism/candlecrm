@@ -90,7 +90,8 @@
 ;; Wrap for logging, catching, etc.:
 (defn event-msg-handler*
   [{:as ev-msg :keys [event id identity ?data ring-req ?reply-fn send-fn]}]
-  (when-let [user identity]
+  (when-let [user (:identity ring-req)]
+    (println "ajax request received")
     (if-let [fetch-spec (get reply-map id)]
       (?reply-fn ((make-fetch-fn fetch-spec) user ?data))
       (when ?reply-fn (?reply-fn (no-reply event))))))
@@ -102,14 +103,14 @@
 (defn start-broadcaster! []
   (go-loop [i 0]
     (<! (async/timeout 10000))
-    ; (println (format "Broadcasting server>user: %s" @connected-uids))
+                                        ; (println (format "Broadcasting server>user: %s" @connected-uids))
     (doseq [uid (:any @connected-uids)]
       (chsk-send! uid
-        [:some/broadcast
-         {:what-is-this "A broadcast pushed from server"
-          :how-often    "Every 10 seconds"
-          :to-whom uid
-          :i i}]))
+                  [:some/broadcast
+                   {:what-is-this "A broadcast pushed from server"
+                    :how-often    "Every 10 seconds"
+                    :to-whom uid
+                    :i i}]))
     (recur (inc i))))
 
 ; Note that this'll be fast+reliable even over Ajax!:
