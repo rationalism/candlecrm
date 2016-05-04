@@ -9,6 +9,9 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
+(defn clojure-map [m]
+  (into {} (java.util.HashMap. m)))
+
 (defn first-if-coll [coll]
   (if (coll? coll) (first coll) coll))
 
@@ -91,9 +94,13 @@
        {:start start :limit limit}]
       neo4j/cypher-query mapify-hits))
 
+(defn token-keys [m]
+  (->> (map #(update % 0 keyword) m)
+       (into {})))
+
 (defn user-data-public [user query-map]
-  (-> (.asMap user) (dissoc s/pwd-hash)
-      (dissoc s/google-token)))
+  (-> (.asMap user) clojure-map token-keys
+      (dissoc s/pwd-hash) (dissoc s/google-token)))
 
 (defn node-from-id [user id node-type]
   (-> [(str "MATCH (root:" (neo4j/prop-label user node-type)
@@ -126,9 +133,6 @@
          (mlrecon/fetch-paths (.id n)) (map first)
          (zipmap [s/loaded-bottom s/loaded-top s/top-uid s/modified])
          (merge {:id (.id n)}))))
-
-(defn clojure-map [m]
-  (into {} (java.util.HashMap. m)))
 
 (defn next-email-queue []
   (-> [(str "MATCH (root)-[:" (neo4j/esc-token s/user-queue)
