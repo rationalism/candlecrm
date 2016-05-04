@@ -55,9 +55,11 @@
   (->> [(str "CREATE (u:" (neo4j/esc-token s/user) " {"
              (neo4j/esc-token s/email-addr) ": {email}, "
              (neo4j/esc-token s/pwd-hash) ": {pwdhash}, "
-             (neo4j/esc-token s/recon-run) ": {reconrun}})"
+             (neo4j/esc-token s/recon-run) ": {reconrun}, "
+             (neo4j/esc-token s/index-run) ": {indexrun}})"
              " RETURN u")
-        {:email email-addr :pwdhash pwd-hash :reconrun false}]
+        {:email email-addr :pwdhash pwd-hash
+         :reconrun false :indexrun false}]
        neo4j/cypher-query first vals first))
 
 (defn user-person [email]
@@ -95,7 +97,8 @@
 (defn delete-user! [user]
   (when (google/lookup-token user)
     (google/revoke-access-token! user))
-  (index/drop-constraints! user)
+  (when (neo4j/get-property user s/index-run)
+    (index/drop-constraints! user))
   (index/delete-all! user)
   (->> [s/email-queue s/loaded-top s/loaded-bottom
         s/top-uid s/modified]

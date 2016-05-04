@@ -195,7 +195,8 @@
 
 (jobs/defjob MakeIndexes [ctx]
   (let [user (user-job ctx)]
-    (index/make-constraints! user)))
+    (index/make-constraints! user)
+    (neo4j/set-property! user s/index-run true)))
 
 (defn make-job
   ([job-type job-name]
