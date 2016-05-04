@@ -30,11 +30,16 @@
 (defn esc-token [token]
   (str "`" (name token) "`"))
 
+(defn catch-keywords [pair]
+  (update pair 1
+          #(if (keyword? %)
+             (name %) %)))
+
 (defn filter-props [props]
   (->> props
        (filter #(com/not-nil-ext? (val %)))
-       (into {})
        (map dt/catch-dates-map)
+       (map catch-keywords)
        (into {})))
 
 (defn to-values [params]
