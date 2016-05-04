@@ -419,11 +419,9 @@
 
 (defn groups-to-recon [class score-map]
   (->> score-map
-       (remove #(> (get @min-match-score class)
-                   (second %)))
-       (mapv first) (map vec) (map #(conj % :is))
+       (mapv #(apply conj)) (map vec)
        (loom/build-graph [])
-       loom/subgraphs))
+       cluster/vote-clustering))
 
 (defn make-pairs [coll]
   (->> coll (mapcat #(repeat 2 %))
