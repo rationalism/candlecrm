@@ -30,8 +30,15 @@
 (defn esc-token [token]
   (str "`" (name token) "`"))
 
+(defn filter-props [props]
+  (->> props
+       (filter #(com/not-nil-ext? (val %)))
+       (into {})
+       (map dt/catch-dates-map)
+       (into {})))
+
 (defn to-values [params]
-  (->> params (into [])
+  (->> params filter-props (into [])
        (map #(update % 0 name)) (apply concat)
        (into-array Object) (Values/parameters)))
 
@@ -170,13 +177,6 @@
             " REMOVE a." (esc-token property))
        {:id (.id vertex)}]
       cypher-query))
-
-(defn filter-props [props]
-  (->> props
-       (filter #(com/not-nil-ext? (val %)))
-       (into {})
-       (map dt/catch-dates-map)
-       (into {})))
 
 (defn delete-id! [id]
   (cypher-query
