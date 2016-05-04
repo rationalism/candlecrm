@@ -418,7 +418,7 @@
        weka/save-traindat weka/make-forest))
 
 (defn groups-to-recon [class score-map]
-  (->> score-map
+  (->> score-map (map #(update % 0 vec))
        (mapv #(apply conj %)) (map vec)
        (loom/build-graph [])
        cluster/vote-clustering))
