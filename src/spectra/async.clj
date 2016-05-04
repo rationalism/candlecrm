@@ -1,6 +1,7 @@
 (ns spectra.async
   (:require [clojure.core.async :as async]
             [clojure.set :as set]
+            [spectra.neo4j :as neo4j]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
@@ -10,10 +11,12 @@
   (let [pool-data (get @store pool-name)
         params ((get pool-data :param-gen))]
     (async/thread
-      (while true
-        (let [data-in (async/<!! (get pool-data :in-chan))
-              data-out ((get pool-data :process) params data-in)]
-          (async/>!! (get pool-data :out-chan) data-out))))))
+      (binding [neo4j/*session* (.session neo4j/conn)]
+        (while true
+          (let [data-in (async/<!! (get pool-data :in-chan))
+                data-out ((get pool-data :process) params data-in)]
+            (async/>!! (get pool-data :out-chan) data-out)))  
+        (.close neo4j/*session*)))))
 
 (defn async-outfeed [pool-name]
   (let [pool-data (get @store pool-name)]
