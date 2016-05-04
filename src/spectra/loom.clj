@@ -4,13 +4,16 @@
             [loom.graph :as graph]
             [loom.io :as gviz]))
 
+(defn has-edge? [g edge]
+  (graph/has-edge? g (first edge) (second edge)))
+
 (defn multi-edge [g edge]
   (map #(conj edge %) (attr/attr g edge :label)))
 
 (defn add-edge [g edge]
   {:pre [(= 3 (count edge))]}
   (cond
-    (graph/has-edge? g (first edge) (second edge))
+    (has-edge? g edge)
     (->> (attr/attr g (vec (take 2 edge)) :label)
          (cons (nth edge 2)) distinct
          (attr/add-attr g edge :label))
@@ -76,7 +79,7 @@
 (defn remove-edge [g edge]
   {:pre [(= 3 (count edge))]}
   (cond
-    (not (graph/has-edge? g (first edge) (second edge))) g
+    (not (has-edge? g edge)) g
     (not (some #{(nth edge 2)} (attr/attr g (vec (take 2 edge)) :label))) g
     (one-label-left? g edge)
     (-> (attr/remove-attr g (vec (take 2 edge)) :label)
