@@ -410,7 +410,7 @@
   (loom/build-graph
    [(first headers)]
    (->> (second headers) (apply merge)
-        decode-addr-map com/debug
+        decode-addr-map 
         (mapcat #(make-headers % (first headers))))))
 
 (defn label-headers [graph]
