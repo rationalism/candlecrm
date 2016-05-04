@@ -20,6 +20,7 @@
      2.0))
 
 (defn prob-weights [g]
+  (loom/display-graph g)
   (->> g loom/multi-edges
        (map #(update % 2 prob-weight))
        (loom/build-graph (loom/nodes g))))
@@ -65,5 +66,14 @@
     (new-cluster clusters node)))
 
 (defn vote-clustering [g]
-  (reduce (partial add-cluster g) [{} {} 0]
-          (loom/nodes g)))
+  (->> g loom/nodes
+       (reduce (partial add-cluster g) [{} {} 0])
+       second vals))
+
+(defn cluster-graph [clusters]
+  (->> clusters
+       (map (fn [nodes]
+              (map #(vector (first nodes) % 1)
+                   (rest nodes))))
+       (remove empty?) (apply concat)
+       (loom/build-graph (apply concat clusters))))
