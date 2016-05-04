@@ -193,6 +193,10 @@
   (let [user (user-job ctx)]
     (contacts/load-all-contacts! user)))
 
+(jobs/defjob MakeIndexes [ctx]
+  (let [user (user-job ctx)]
+    (index/make-constraints! user)))
+
 (defn make-job
   ([job-type job-name]
    (make-job job-type job-name {}))
@@ -227,6 +231,11 @@
   (qs/schedule @scheduler
                (make-job LoadContacts "jobs.contacts.load.1" {s/user user})
                (once-trigger 2000 "jobs.contacts.trigger.1")))
+
+(defn schedule-indexing! [user]
+  (qs/schedule @scheduler
+               (make-job MakeIndexes "jobs.index.make.1" {s/user user})
+               (once-trigger 2000 "jobs.index.trigger.1")))
 
 (defn start! []
   (reset! scheduler (qs/start (qs/initialize)))
@@ -264,3 +273,7 @@
 (defn delete-req! [user query-map]
   (when (= "yes" (:confirmed query-map))
     (delete-user! user)))
+
+(defn create-user! [req]
+  (let [user (auth/create-user! req)]
+    (schedule-indexing! user) user))

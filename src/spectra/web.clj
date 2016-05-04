@@ -80,7 +80,7 @@
         (if-let [err-msg (auth/new-user-check username password confirm)]
           (home-with-message err-msg)
           (->> [:username :password] (select-keys params)
-               auth/create-user! auth/make-token
+               quartz/create-user! auth/make-token
                :token (token-cookie "/gmail"))))
   (POST "/login" {{:keys [username password] :as params} :params :as req}
         (when-let [user-token (auth/login-handler params)]

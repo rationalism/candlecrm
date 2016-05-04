@@ -73,7 +73,6 @@
         (insert/push-entities! user)
         first neo4j/find-by-id
         (user-person-edge! user))
-    (index/make-constraints! user)
     user))
 
 (defn get-username [user]
