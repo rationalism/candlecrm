@@ -35,6 +35,12 @@
        (map #(update % 0 name)) (apply concat)
        (into-array Object) (Values/parameters)))
 
+(defn dump-queries [queries]
+  (spit "/home/alyssa/cypherlog.txt" "BEGIN TRANSACTION\n\n" :append true)
+  (dorun (map #(spit "/home/alyssa/cypherlog.txt"
+                     (str % "\n\n") :append true)
+              queries)))
+
 (defn tquery
   ([query] (.run *session* query))
   ([query params] (.run *session* query
@@ -47,6 +53,7 @@
               (map #(.asMap %) records)))))
 
 (defn cypher-query [query]
+  (dump-queries [query])
   (try
     (first
      (resp-clojure
@@ -108,16 +115,11 @@
            (.failure tx) (.close tx)
            (cypher-tx-exception retry queries e)))))
 
-(defn dump-queries [queries]
-  (spit "/home/alyssa/cypherlog.txt" "BEGIN TRANSACTION\n\n" :append true)
-  (dorun (map #(spit "/home/alyssa/cypherlog.txt"
-                     (str % "\n\n") :append true)
-              queries)))
-
 (defn cypher-combined-tx
   ([queries]
    (cypher-combined-tx true queries))
   ([retry queries]
+   (dump-queries queries)
    (trampoline cypher-combined-tx-recur retry queries)))
 
 (defnp find-by-id [id]
