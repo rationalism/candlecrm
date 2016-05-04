@@ -23,3 +23,47 @@
   (->> g loom/multi-edges
        (map #(update % 2 prob-weight))
        (loom/build-graph (loom/nodes g))))
+
+(defn filter-edge [node edge]
+  [(if (= node (first edge))
+     (second edge) (first edge))
+   (nth edge 2)])
+
+(defn new-cluster [clusters node]
+  [(-> clusters first (assoc node (nth clusters 2)))
+   (-> clusters second (assoc (nth clusters 2) [node]))
+   (-> clusters (nth 2) inc)])
+
+(defn sum-score [node-scores]
+  [(ffirst node-scores)
+   (->> node-scores (map second)
+        (apply +))])
+
+(defn check-best [clusters node best]
+  (if (pos? (second best))
+    (let [cluster-id (->> best first (get (first clusters)))]
+      [(-> clusters first (assoc node cluster-id))
+       (-> clusters second
+           (update cluster-id #(conj % node)))
+       (nth clusters 2)])
+    (new-cluster clusters node)))
+
+(defn add-cluster [g clusters node]
+  (if-let [candidates
+           (->> (loom/all-edges g node)
+                (map #(filter-edge node %))
+                (filter #(contains? (first clusters) (first %)))
+                seq)]
+    (->> (map first candidates)
+         (map (first clusters))
+         distinct (map (second clusters))
+         (map #(map (zipmap (map first candidates)
+                            candidates) %))
+         (map #(remove nil? %)) (map sum-score)
+         (sort-by second >) first
+         (check-best clusters node))
+    (new-cluster clusters node)))
+
+(defn vote-clustering [g]
+  (reduce (partial add-cluster g) [{} {} 0]
+          (loom/nodes g)))
