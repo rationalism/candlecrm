@@ -419,7 +419,7 @@
 
 (defn groups-to-recon [class score-map]
   (->> score-map
-       (mapv #(apply conj)) (map vec)
+       (mapv #(apply conj %)) (map vec)
        (loom/build-graph [])
        cluster/vote-clustering))
 
