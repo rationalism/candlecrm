@@ -123,9 +123,12 @@
 (defn queue-data [n]
   (when n
     (->> [[s/loaded-bottom] [s/loaded-top] [s/top-uid] [s/modified]]
-         (mlrecon/fetch-paths (:id n)) (map first)
+         (mlrecon/fetch-paths (.id n)) (map first)
          (zipmap [s/loaded-bottom s/loaded-top s/top-uid s/modified])
-         (merge {:id (:id n)}))))
+         (merge {:id (.id n)}))))
+
+(defn clojure-map [m]
+  (into {} (java.util.HashMap. m)))
 
 (defn next-email-queue []
   (-> [(str "MATCH (root)-[:" (neo4j/esc-token s/user-queue)
@@ -139,7 +142,7 @@
             " RETURN root, u ORDER BY m." (neo4j/esc-token s/value)
             " LIMIT {limit}")
        {:queuebound 270000 :limit 1}]
-      neo4j/cypher-query first
+      neo4j/cypher-query first clojure-map
       (set/rename-keys {"root" :queue "u" :user})
       (update :queue queue-data)))
 
