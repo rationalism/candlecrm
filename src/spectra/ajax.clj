@@ -91,7 +91,6 @@
 (defn event-msg-handler*
   [{:as ev-msg :keys [event id identity ?data ring-req ?reply-fn send-fn]}]
   (when-let [user (:identity ring-req)]
-    (println "ajax request received")
     (if-let [fetch-spec (get reply-map id)]
       (?reply-fn ((make-fetch-fn fetch-spec) user ?data))
       (when ?reply-fn (?reply-fn (no-reply event))))))
