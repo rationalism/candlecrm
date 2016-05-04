@@ -11,12 +11,11 @@
   (let [pool-data (get @store pool-name)
         params ((get pool-data :param-gen))]
     (async/thread
-      (binding [neo4j/*session* (.session neo4j/conn)]
-        (while true
+      (neo4j/thread-wrap
+       #(while true
           (let [data-in (async/<!! (get pool-data :in-chan))
                 data-out ((get pool-data :process) params data-in)]
-            (async/>!! (get pool-data :out-chan) data-out)))  
-        (.close neo4j/*session*)))))
+            (async/>!! (get pool-data :out-chan) data-out)))))))
 
 (defn async-outfeed [pool-name]
   (let [pool-data (get @store pool-name)]

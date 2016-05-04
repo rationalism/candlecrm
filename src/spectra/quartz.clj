@@ -150,40 +150,27 @@
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (binding [neo4j/*session* (.session neo4j/conn)]
-    (when nil (queue-pop!))
-    (.close neo4j/*session*)))
+  (neo4j/thread-wrap #(when nil (queue-pop!))))
 
 (jobs/defjob NewGeocodes [ctx]
-  (binding [neo4j/*session* (.session neo4j/conn)]
-    (geocode/geocode-batch 10)
-    (.close neo4j/*session*)))
+  (neo4j/thread-wrap #(geocode/geocode-batch 10)))
 
 (jobs/defjob CachedGeocodes [ctx]
-  (binding [neo4j/*session* (.session neo4j/conn)]
-    (geocode/geocode-cached 20)
-    (.close neo4j/*session*)))
+  (neo4j/thread-wrap #(geocode/geocode-cached 20)))
 
 (jobs/defjob ProcessRecon [ctx]
-  (binding [neo4j/*session* (.session neo4j/conn)]
-    (when nil (run-recon!))
-    (.close neo4j/*session*)))
+  (neo4j/thread-wrap #(when nil (run-recon!))))
 
 (jobs/defjob EmailNLP [ctx]
-  (binding [neo4j/*session* (.session neo4j/conn)]
-    (when nil (email/push-email-nlp!))
-    (.close neo4j/*session*)))
+  (neo4j/thread-wrap #(when nil (email/push-email-nlp!))))
 
 (jobs/defjob EmailRefresh [ctx]
-  (binding [neo4j/*session* (.session neo4j/conn)]
-    (doseq [user (auth/list-users)]
-      (refresh-queue! user))
-    (.close neo4j/*session*)))
+  (neo4j/thread-wrap
+   #(doseq [user (auth/list-users)]
+      (refresh-queue! user))))
 
 (jobs/defjob DeleteResetTokens [ctx]
-  (binding [neo4j/*session* (.session neo4j/conn)]
-    (delete-reset-tokens!)
-    (.close neo4j/*session*)))
+  (neo4j/thread-wrap #(delete-reset-tokens!)))
 
 (defn user-job [ctx]
   (-> ctx qc/from-job-data
@@ -191,12 +178,14 @@
 
 (jobs/defjob LoadContacts [ctx]
   (let [user (user-job ctx)]
-    (contacts/load-all-contacts! user)))
+    (neo4j/thread-wrap
+     #(contacts/load-all-contacts! user))))
 
 (jobs/defjob MakeIndexes [ctx]
   (let [user (user-job ctx)]
-    (index/make-constraints! user)
-    (neo4j/set-property! user s/index-run true)))
+    (neo4j/thread-wrap
+     #(do (index/make-constraints! user)
+          (neo4j/set-property! user s/index-run true)))))
 
 (defn make-job
   ([job-type job-name]

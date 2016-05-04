@@ -27,6 +27,10 @@
 (defonce conn (get-graph))
 (def ^:dynamic *session* (.session conn))
 
+(defn thread-wrap [f]
+  (binding [*session* (.session conn)]
+    (f) (.close *session*)))
+
 (defn esc-token [token]
   (str "`" (name token) "`"))
 
