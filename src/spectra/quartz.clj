@@ -49,15 +49,15 @@
      (dec email/batch-size)))
 
 (defn queue-time-reset! [queue]
-  (neo4j/update-vals! (.id queue) s/modified
+  (neo4j/update-vals! (:id queue) s/modified
                       (s/modified queue) (dt/now)))
 
 (defn queue-reset! [queue]
   (queue-time-reset! queue)
   (if (queue-new? queue)
-    (neo4j/update-vals! (.id queue) s/loaded-top
+    (neo4j/update-vals! (:id queue) s/loaded-top
                         (s/loaded-top queue) (range-top queue))
-    (neo4j/update-vals! (.id queue) s/loaded-bottom
+    (neo4j/update-vals! (:id queue) s/loaded-bottom
                         (s/loaded-bottom queue) (range-bottom queue))))
 
 (defn scan-check [user email-times]
