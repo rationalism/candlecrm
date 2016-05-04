@@ -35,6 +35,8 @@
 (defonce parse-channel (atom nil))
 (defonce nlp-channel (atom nil))
 
+(def email-name-blacklist ["linkedin.com"])
+
 (defn get-folder [store folder-name]
   (.getFolder store folder-name))
 
@@ -152,10 +154,17 @@
 (defn maybe-add [m k v]
   (if v (assoc m k v) m))
 
+(defn blacklist-check [m email addr]
+  (if (->> email-name-blacklist
+           (map #(.contains email %))
+           (some identity) not) m
+      (maybe-add m s/s-name (.getPersonal addr))))
+
 (defn addr-person [addr]
-  (-> (assoc {} s/type-label s/person)
-      (maybe-add s/s-name (.getPersonal addr))
-      (maybe-add s/email-addr (.getAddress addr))))
+  (let [email-addr (.getAddress addr)]
+    (-> (assoc {} s/type-label s/person)
+        (maybe-add s/email-addr email-addr)
+        (blacklist-check email-addr addr))))
 
 (defn decode-addresses [addresses]
   (map addr-person addresses))
