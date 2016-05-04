@@ -280,12 +280,10 @@
        (remove #(= "1960" (dt/format-year %)))))
 
 (defn find-header-vals [marks models lines]
-  (println "find-header-vals")
   (let [header-lines (->> [0 (:end-header marks) lines]
                           (apply com/slice)
-                          com/debug
-                          (str/join " "))]
-    (when (not= " " header-lines)
+                          (str/join ""))]
+    (when (not= "" header-lines)
       (-> (assoc-if-found marks s/email-sent (sent-date header-lines))
           (assoc-if-found :email-from-addr (regex/find-email-addrs header-lines))
           (assoc-if-found :email-from-name (->> header-lines (nlp/run-nlp-default models)
