@@ -65,14 +65,15 @@
                (nth e 2)))
 
 (defn add-label-query [ids]
-  [(str "MATCH (root) WHERE ID(root) IN {ids}"
-        " SET root:" (neo4j/esc-token s/nonlp))
-   {:ids ids}])
+  (if ids
+    [[(str "MATCH (root) WHERE ID(root) IN {ids}"
+           " SET root:" (neo4j/esc-token s/nonlp))
+      {:ids ids}]] []))
 
 (defn add-nlp-labels [id-map]
   (->> (filter #(-> % first s/type-label (= s/email)) id-map)
        (remove #(-> % first :id))
-       (map second) add-label-query vector))
+       (map second) seq add-label-query))
 
 (defnp push-graph!
   ([g user]
