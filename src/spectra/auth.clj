@@ -34,7 +34,8 @@
 
 (defn find-user [email password]
   (when-let [user (lookup-user email)]
-    (when (hashers/check password (:pwdhash user))
+    (when (->> "pwd-hash" (.get user) (.asObject)
+               (hashers/check password))
       user)))
 
 (defn user-from-token [token]
@@ -152,6 +153,6 @@
              (neo4j/set-property! user s/pwd-hash)))))
 
 (defn login-handler [query-map]
-  (when-let [record (find-user (:user-id query-map)
+  (when-let [record (find-user (:username query-map)
                                (:password query-map))]
-    (make-token (select-keys record [:id]))))
+    (make-token record)))

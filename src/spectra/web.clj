@@ -24,7 +24,11 @@
   (:use [org.httpkit.server :only [run-server]]))
 
 (defn logout [req]
-  (assoc (resp/redirect "/") :session nil))
+  {:status 302
+   :headers {"Location" "/"}
+   :body ""
+   :cookies {"token" {:value "" :http-only true
+                      :secure true :max-age 0}}})
 
 (defn home-with-message [message]
   (assoc (resp/redirect "/") :flash message))
@@ -83,8 +87,9 @@
                quartz/create-user! auth/make-token
                :token (token-cookie "/gmail"))))
   (POST "/login" {{:keys [username password] :as params} :params :as req}
-        (when-let [user-token (auth/login-handler params)]
-          (token-cookie (:token user-token) "/")))
+        (if-let [user-token (auth/login-handler params)]
+          (token-cookie (:token user-token) "/")
+          (home-with-message "Error: Could not login.")))
   (GET "/logout" req (logout req))
   (GET "/gmail" req
        (html-wrapper (pages/gmail req)))

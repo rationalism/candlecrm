@@ -157,7 +157,7 @@
 (defn blacklist-check [m email addr]
   (if (->> email-name-blacklist
            (map #(.contains email %))
-           (some identity) not) m
+           (some identity)) m
       (maybe-add m s/s-name (.getPersonal addr))))
 
 (defn addr-person [addr]
@@ -410,7 +410,7 @@
   (loom/build-graph
    [(first headers)]
    (->> (second headers) (apply merge)
-        decode-addr-map
+        decode-addr-map com/debug
         (mapcat #(make-headers % (first headers))))))
 
 (defn label-headers [graph]
