@@ -76,7 +76,7 @@
     (to-ms value) value))
 
 (defn catch-dates-map [pair]
-  [(key pair) (catch-dates (val pair))])
+  (update pair 1 catch-dates))
 
 (def formatter (format/formatters :rfc822))
 
