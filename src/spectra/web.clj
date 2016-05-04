@@ -88,7 +88,7 @@
                :token (token-cookie "/gmail"))))
   (POST "/login" {{:keys [username password] :as params} :params :as req}
         (if-let [user-token (auth/login-handler params)]
-          (token-cookie (:token user-token) "/")
+          (token-cookie "/app" (:token user-token))
           (home-with-message "Error: Could not login.")))
   (GET "/logout" req (logout req))
   (GET "/gmail" req
