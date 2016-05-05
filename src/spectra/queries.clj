@@ -10,7 +10,9 @@
              :refer (pspy pspy* profile defnp p p*)]))
 
 (defn clojure-map [m]
-  (into {} (java.util.HashMap. m)))
+  (if m
+    (into {} (java.util.HashMap. m))
+    {}))
 
 (defn first-if-coll [coll]
   (if (coll? coll) (first coll) coll))

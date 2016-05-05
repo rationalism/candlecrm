@@ -74,3 +74,6 @@
     
     (auth/delete-user! test-user)))
 
+(deftest email-queue-test
+  (testing "Fetch the next email queue"
+    (is (some #{:queue} (keys (next-email-queue))))))
