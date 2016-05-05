@@ -15,5 +15,9 @@
     (is (app-page req))
     (is (gmail req))
     (is (reset-pwd req))
+    (is (login-form req))
+    (is (homepage req))
+    (is (reset-confirm {:params {:token "foobar"}}))
+    
     
     (auth/delete-user! test-user)))
