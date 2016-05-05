@@ -49,14 +49,60 @@
     (is (not r2))))
 
 (defprotocol FolderMockP
-  (open [this mode]))
+  (open [this mode])
+  (close [this mode])
+  (isOpen [this])
+  (getStore [this])
+  (getMessageCount [this])
+  (getUIDNext [this])
+  (getMessageByUID [this num])
+  (getMessagesByUID [this begin end]))
 
 (defrecord FolderMock []
   FolderMockP
-  (open [this mode] mode))
+  (open [this mode] mode)
+  (close [this mode] (not mode))
+  (isOpen [this] false)
+  (getStore [this] :fake-store)
+  (getMessageCount [this] 0)
+  (getUIDNext [this] 1)
+  (getMessageByUID [this num] :fake-message)
+  (getMessagesByUID [this begin end] [:fake-message]))
 
 (deftest folder-mock
   (testing "Mock an IMAP folder and run functions on it"
     (def mock (FolderMock. ))
     
-    (is (open-folder-read! mock))))
+    (is (open-folder-read! mock))
+    (is (close-folder! mock))
+    (is (not (folder-open? mock)))
+    (is (folder-store mock))
+    (is (= 0 (message-count mock)))
+    (is (= 0 (last-uid mock)))
+    (is (= :fake-message (get-message mock 0)))
+    (is (= :fake-message (first (messages-in-range mock 0 1))))))
+
+(defprotocol MessageMockP
+  (getSubject [this])
+  (getReceivedDate [this])
+  (getSentDate [this])
+  (getContent [this])
+  (getContentType [this]))
+
+(defrecord MessageMock []
+  MessageMockP
+  (getSubject [this] "subject")
+  (getReceivedDate [this] 17)
+  (getSentDate [this] 17)
+  (getContent [this] "message body")
+  (getContentType [this] "plaintext"))
+
+(deftest message-mock
+  (testing "Mock an email message and run function on it"
+    (def mock (MessageMock. ))
+
+    (is (= "subject" (subject mock)))
+    (is (= 17 (received-time mock)))
+    (is (= 17 (sent-time mock)))
+    (is (= "message body" (content mock)))
+    (is (= "plaintext" (content-type mock)))))
