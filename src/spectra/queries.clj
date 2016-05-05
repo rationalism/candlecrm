@@ -254,8 +254,7 @@
    {:query query}])
 
 (defn id-row [row]
-  [(first row)
-   (flatten (map (comp second first vals) (second row)))])
+  (update row 1 #(map (comp first vals) %)))
 
 (defn search-query [id]
   [(str "MATCH (root) WHERE ID(root) = {id}"
@@ -263,12 +262,11 @@
    {:id id}])
 
 (defn search-row [row]
-  [(first row)
-   (->> row second
-        (map (comp first mapify-hits
-                   neo4j/cypher-query
-                   search-query))
-        vec)])
+  (update row 1
+          #(vec (map (comp first mapify-hits
+                           neo4j/cypher-query
+                           search-query)
+                     %))))
 
 (defn include-pred [row]
   (map #(merge % {:pred (first row)})
