@@ -28,3 +28,8 @@
     (is (-> token :token user-from-token (.id)
             (= (.id test-user))))
     (delete-user! test-user)))
+
+(deftest user-checks
+  (testing "New user and password checks"
+    (is (not (password-check test-password test-password)))
+    (is (not (new-user-check test-username test-password test-password)))))
