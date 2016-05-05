@@ -4,7 +4,8 @@
             [spectra.insert :as insert]
             [spectra.loom :as loom]
             [spectra.mlrecon :refer :all]
-            [spectra.neo4j :as neo4j]))
+            [spectra.neo4j :as neo4j]
+            [spectra_cljc.schema :as s]))
 
 (def test-username "someemail@foo.com")
 (def test-password "notarealpassword")
@@ -98,3 +99,11 @@
     (is (= (select-candidates [[[1] 0.23] [[2] 0.23] [[4] 0.23]
                                [[5] 0.23] [[6] 0.23] [[7] 6.4]]))
         [6 7 7 7 7 7 7])))
+
+(deftest run-recon-test
+  (testing "Try running recon for a test user"
+    (def user (auth/create-user! {:username test-username
+                                  :password test-password}))
+    
+    (run-recon! user s/person)
+    (auth/delete-user! user)))
