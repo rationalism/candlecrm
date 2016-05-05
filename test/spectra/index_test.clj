@@ -1,6 +1,16 @@
 (ns spectra.index-test
   (:require [clojure.test :refer :all]
+            [spectra.auth :as auth]
             [spectra.index :refer :all]))
 
-(deftest first-test
-  (is "Tests should be written"))
+(def test-username "someemail@foo.com")
+(def test-password "notarealpassword")
+
+(deftest create-delete-indexes
+  (testing "Create a user, create and delete indexes"
+    (def test-user (auth/create-user! {:username test-username :password test-password}))
+
+    (is (make-constraints! test-user))
+    (is (drop-constraints! test-user))
+
+    (auth/delete-user! test-user)))

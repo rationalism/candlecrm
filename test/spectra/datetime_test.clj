@@ -15,5 +15,3 @@
   (testing "Parse some dates"
     (is (= 0 (count (dates-in-text empty-test))))
     (is (= 2 (count (dates-in-text two-test))))))
-
-

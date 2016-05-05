@@ -83,11 +83,3 @@
 (defn format-date [value]
   (->> (Date. value) coerce/from-date
        (format/unparse formatter)))
-
-(defn hours-ago
-  ([date] (hours-ago date (now)))
-  ([date ref]
-   (->> (coerce/from-date date) vector
-        (concat [(coerce/from-date ref)])
-        reverse (apply ctime/interval)
-        ctime/in-hours)))
