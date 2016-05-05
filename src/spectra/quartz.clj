@@ -251,12 +251,14 @@
                (make-job DeleteResetTokens "jobs.tokens.delete.1")
                (periodic-trigger 600000 nil "tokens.trigger.1")))
 
+(defn stop! []
+  (qs/shutdown @scheduler))
+
 (defn restart! []
-  (qs/shutdown @scheduler)
-  (start!))
+  (stop!) (start!))
 
 (defn delete-user! [user]
-  (qs/shutdown @scheduler)
+  (stop!)
   (auth/delete-user! user)
   (start!))
 

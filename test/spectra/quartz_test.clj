@@ -2,5 +2,7 @@
   (:require [clojure.test :refer :all]
             [spectra.quartz :refer :all]))
 
-(deftest first-test
-  (is "Tests should be written"))
+(deftest start-stop-test
+  (testing "Start and stop the Quartz scheduler"
+    (is (start!))
+    (is (not (stop!)))))
