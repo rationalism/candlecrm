@@ -77,3 +77,18 @@
 (deftest email-queue-test
   (testing "Fetch the next email queue"
     (is (some #{:queue} (keys (next-email-queue))))))
+
+(deftest recon-count-test
+  (testing "Count potential recon types"
+    (is (norecon-count-all))))
+
+(deftest search-test
+  (testing "Create and search for a user"
+    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (is test-user)
+    (is (->> test-username vector (zipmap [:query])
+             (full-search test-user)
+             first s/email-addr first
+             (= test-username)))
+    
+    (auth/delete-user! test-user) ))
