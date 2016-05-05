@@ -181,39 +181,3 @@
    [:h3 "Select an email provider"]
    [:a {:class "pure-button pure-button-primary" :href auth-url}
     [:h3 "GMail"]]])
-
-(defn gmail-finished [flash username email-total]
-  [:div
-   [:h2 "Congrats - your account is connected to GMail."]
-   [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
-   [:h3 (str "Welcome. Your username is: " username)]
-   [:h3 (str "The number of emails in your inbox is: " email-total)]
-   [:h3 "Load emails into database: "
-    [:small "(Enter a range of emails in your inbox to load.)"]]
-   [:div.row
-    [:form {:method "POST" :action "load-emails" :class "columns small-4"}
-     [:div.row "Start with: " [:input {:type "text" :name "lower" :required "required"}]]
-     [:div.row "End with: " [:input {:type "text" :name "upper" :required "required"}]]
-     [:div.row
-      [:input {:type "submit" :class "button" :value "Load"}]
-      [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]]]
-   [:a {:href "/"} "Return home"]
-   [:p "Currently disabled - do this via Ajax calls"]])
-
-(defn ajax-test []
-  [:div
-   [:h1 "Sente reference example"]
-   [:p "An Ajax/WebSocket connection has been configured (random)."]
-   [:hr]
-   [:p [:strong "Step 1: "] "Open browser's JavaScript console."]
-   [:p [:strong "Step 2: "] "Try: "
-    [:button#btn1 {:type "button"} "chsk-send! (w/o reply)"]
-    [:button#btn2 {:type "button"} "chsk-send! (with reply)"]]
-   ;;
-   [:p [:strong "Step 3: "] "See browser's console + nREPL's std-out." ]
-   ;;
-   [:hr]
-   [:h2 "Login with a user-id"]
-   [:p  "The server can use this id to send events to *you* specifically."]
-   [:p [:input#input-login {:type :text :placeholder "User-id"}]
-    [:button#btn-login {:type "button"} "Secure login!"]]])

@@ -8,7 +8,5 @@
     (is (app-template "foobar"))
     (is (login-form))
     (is (gmail-setup "" "foobar" "www.foobar.com"))
-    (is (gmail-finished "" "foobar" 9000))
-    (is (ajax-test))
     (is (signup-form "foobar"))))
 

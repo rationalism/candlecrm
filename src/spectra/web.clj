@@ -12,12 +12,9 @@
             [spectra.geocode :as geocode]
             [spectra.google :as google]
             [spectra.mlrecon :as mlrecon]
-            [spectra.neo4j :as neo4j]
-            [spectra.corenlp :as nlp]
             [spectra.pages :as pages]
             [spectra.quartz :as quartz]
             [spectra.sendgrid :as sendgrid]
-            [spectra.weka :as weka]
             [environ.core :refer [env]]
             [clojure.tools.nrepl.server :as nrepl-server]
             [cider.nrepl :refer (cider-nrepl-handler)])
@@ -30,41 +27,18 @@
    :cookies {"token" {:value "" :http-only true
                       :secure true :max-age 0}}})
 
-(defn home-with-message [message]
-  (assoc (resp/redirect "/") :flash message))
-
-(defn html-wrapper [body]
-  {:status 200
-   :headers {"Content-Type" "text/html"}
-   :body body})
-
-(defn token-cookie [url token]
-  {:status 302
-   :headers {"Location" url}
-   :body ""
-   :cookies {"token" {:value token :http-only true :secure true
-                      :max-age (* 3600 auth/exp-hours)}}})
-
 (defroutes app
   (GET "/" req
-       (if (:identity req)
-         (resp/redirect "/app")
-         (html-wrapper (pages/login req))))
+       (pages/homepage req))
   ;; TODO: Make this return an error message when credentials are invalid
   (GET "/login" req
-       (html-wrapper (pages/login req)))
+       (pages/login req))
   (GET "/reset-password" req
-       (html-wrapper (pages/reset-pwd req)))
+       (pages/reset-pwd req))
   (GET "/reset-confirm" req
-       (let [token (-> req :params :token)]
-         (if-let [user (->> token (hash-map s/pwd-reset-token)
-                            (neo4j/get-vertex s/user))]
-           (html-wrapper (pages/new-password user token))
-           (home-with-message "Error: Invalid reset link"))))
+       (pages/reset-confirm req))
   (GET "/app" req
-       (html-wrapper (pages/app-page req)))
-  (GET "/ajax-test" req
-       (html-wrapper (pages/ajax-test req)))
+       (pages/app-page req))
   (GET "/chsk" req
        (ajax/ring-ajax-get-or-ws-handshake req))
   (POST "/chsk" req
@@ -72,49 +46,23 @@
   (POST "/login-test" req
         (ajax/login! req))
   (POST "/request-reset" req
-        (auth/pwd-reset! req)
-        (home-with-message "Password reset requested."))
+        (pages/request-reset req))
   (POST "/set-password" req
-        (if-let [user (->> req :params :token (hash-map s/pwd-reset-token)
-                           (neo4j/get-vertex s/user))]
-          (do (auth/set-password! user (:params req))
-              (home-with-message "Password has been reset."))
-          (home-with-message "Error: Invalid reset link")))
-  (POST "/create-account" {{:keys [username password confirm] :as params} :params :as req}
-        (if-let [err-msg (auth/new-user-check username password confirm)]
-          (home-with-message err-msg)
-          (->> [:username :password] (select-keys params)
-               quartz/create-user! auth/make-token
-               :token (token-cookie "/gmail"))))
-  (POST "/login" {{:keys [username password] :as params} :params :as req}
-        (if-let [user-token (auth/login-handler params)]
-          (token-cookie "/app" (:token user-token))
-          (home-with-message "Error: Could not login.")))
-  (GET "/logout" req (logout req))
+        (pages/set-password req))
+  (POST "/create-account" {{:keys [username password confirm] :as params}
+                           :params :as req}
+        (pages/create-account params))
+  (POST "/login" {{:keys [username password] :as params}
+                  :params :as req}
+        (pages/login params))
+  (GET "/logout" req
+       (logout req))
   (GET "/gmail" req
-       (html-wrapper (pages/gmail req)))
+       (pages/gmail req))
   (GET "/init-account" req
-       (let [user (-> req :identity :data s/email-addr
-                      auth/lookup-user)]
-         (quartz/add-new-queue! user)
-         (quartz/schedule-contacts! user)
-         (home-with-message "Congrats! Authentication successful")))
+       (pages/init-account req))
   (GET google/callback-url req
-       (let [auth-response (google/response-from-req req)
-             user (:identity req)]
-         (if-let [auth-err (.getError auth-response)]
-           (assoc (resp/redirect "/gmail") :flash auth-err)
-           (if-let [token (google/get-token! (.getCode auth-response))]
-             (do (google/write-token! user token)
-                 (resp/redirect "/init-account"))
-             (assoc (resp/redirect "/gmail")
-                    :flash "Error: Could not get auth token")))))
-  (POST "/load-emails" {{:keys [lower upper] :as params} :params :as req}
-        (if-let [user (:identity req)]
-          (do (email/insert-raw-range!
-               user (Integer/parseInt lower) (Integer/parseInt upper))
-              (assoc (resp/redirect "/gmail") :flash "Congrats! Emails loaded"))
-          (home-with-message "Error: Could not log in")))
+       (pages/google-auth req))
   (route/files "/resources/public/js" {:root "./resources/public/js"})
   (route/resources "/")
   (route/not-found (slurp (io/resource "public/404.html"))))

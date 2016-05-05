@@ -14,7 +14,6 @@
     (is (login req))
     (is (app-page req))
     (is (gmail req))
-    (is (ajax-test req))
     (is (reset-pwd req))
     
     (auth/delete-user! test-user)))
