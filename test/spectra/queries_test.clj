@@ -91,4 +91,8 @@
              first s/email-addr first
              (= test-username)))
     
-    (auth/delete-user! test-user) ))
+    (auth/delete-user! test-user)))
+
+(deftest email-nlp-test
+  (testing "Search for emails for NLP"
+    (is (email-for-nlp 1))))
