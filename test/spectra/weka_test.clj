@@ -37,3 +37,10 @@
     (is (< 0.5 (classify-logit l [1.0])))
     
     (is (< (classify-logit l [1.0]) (classify-logit l [1.5])))))
+
+(deftest reverse-logit-test
+  (testing "Generate and reverse logit curve"
+    (def l (->> train-points (repeat 10)
+                (apply concat) forest-curve))
+    (is (> 0.5 (reverse-logit l 0.0)))
+    (is (< 0.5 (reverse-logit l 1.0)))))
