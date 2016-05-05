@@ -20,3 +20,11 @@
     (delete-user! (lookup-user test-username))
     (is (not (lookup-user test-username)))
     (is (= 0 (count (get-people test-email))))))
+
+(deftest token-test
+  (testing "Encode and decode a user's token"
+    (def test-user (create-user! {:username test-username :password test-password}))
+    (def token (make-token test-user))
+    (is (-> token :token user-from-token (.id)
+            (= (.id test-user))))
+    (delete-user! test-user)))
