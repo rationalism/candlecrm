@@ -1,5 +1,6 @@
 (ns spectra.email-test
   (:require [clojure.test :refer :all]
+            [spectra.common :as com]
             [spectra.corenlp :as nlp]
             [spectra.loom :as loom]
             [spectra.regex :as regex]
@@ -48,12 +49,22 @@
     (is r1)
     (is (not r2))))
 
+(defprotocol AddressMockP
+  (getAddress [this])
+  (getPersonal [this]))
+
+(defrecord AddressMock [name email]
+  AddressMockP
+  (getAddress [this] email)
+  (getPersonal [this] name))
+
 (defprotocol FolderMockP
   (open [this mode])
   (close [this mode])
   (isOpen [this])
   (getStore [this])
   (getMessageCount [this])
+  (getUID [this message])
   (getUIDNext [this])
   (getMessageByUID [this num])
   (getMessagesByUID [this begin end]))
@@ -65,6 +76,7 @@
   (isOpen [this] false)
   (getStore [this] :fake-store)
   (getMessageCount [this] 0)
+  (getUID [this message] 0)
   (getUIDNext [this] 1)
   (getMessageByUID [this num] :fake-message)
   (getMessagesByUID [this begin end] [:fake-message]))
@@ -86,6 +98,10 @@
   (getSubject [this])
   (getReceivedDate [this])
   (getSentDate [this])
+  (getFrom [this])
+  (getReplyTo [this])
+  (getRecipients [this type])
+  (getHeader [this type])
   (getContent [this])
   (getContentType [this]))
 
@@ -94,6 +110,10 @@
   (getSubject [this] "subject")
   (getReceivedDate [this] 17)
   (getSentDate [this] 17)
+  (getFrom [this] [(AddressMock. "Alice" "alice@gmail.com")])
+  (getReplyTo [this] [(AddressMock. "Carol" "carol@gmail.com")])
+  (getRecipients [this type] [(AddressMock. "Bob" "bob@gmail.com")])
+  (getHeader [this type] nil)
   (getContent [this] "message body")
   (getContentType [this] "plaintext"))
 
@@ -138,3 +158,23 @@
     
     (is (-> g1 infer-email-chain infer-subject loom/edges
             (= (loom/edges g2))))))
+
+(deftest headers-fetch-mock
+  (testing "Fetch data from fake headers"
+    (def mock-folder (FolderMock. ))
+    (def mock-message (MessageMock. ))
+
+    (def email {:received-date 17, :sent-date 17, :subject "subject", :email-uid 0})
+    (def alice {:label :person, :email-addr "alice@gmail.com", :name "Alice"})
+    (def bob {:label :person, :email-addr "bob@gmail.com", :name "Bob"})
+    (def carol {:label :person, :email-addr "carol@gmail.com", :name "Carol"})
+
+    (def expected-headers [[email bob s/email-bcc]
+                           [email bob s/email-cc]
+                           [email bob s/email-to]
+                           [email carol s/email-replyto]
+                           [email alice s/email-from]])
+
+    (is (->> mock-folder (headers-fetch mock-message)
+             headers-parse loom/edges 
+             (= expected-headers)))))
