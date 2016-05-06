@@ -36,4 +36,11 @@
     
     (auth/delete-user! (auth/lookup-user test-username))))
 
-
+(deftest editing-test
+  (testing "Edit things in the graph"
+    (def user (auth/create-user! {:username test-username
+                                  :password test-password}))
+    ;; TODO implement this
+    ;(is (edit-entity! user {}))
+    
+    (auth/delete-user! (auth/lookup-user test-username))))
