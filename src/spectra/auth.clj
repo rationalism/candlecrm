@@ -81,12 +81,6 @@
 (defn get-username [user]
   (neo4j/get-property user s/email-addr))
 
-(defn get-user-pwd [username]
-  (let [user (lookup-user username)]
-    (when user
-      {:username username
-       :password (neo4j/get-property user s/pwd-hash)})))
-
 (defn list-users []
   (neo4j/get-vertices-class (name s/user)))
 
