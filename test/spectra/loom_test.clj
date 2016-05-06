@@ -27,13 +27,13 @@
     (is (= test-nodes
            (sort (nodes g))))
     (is (= test-edges
-           (sort (multi-edges g))))
+           (sort (edges g))))
     (def g (replace-node g 3 42))
     (is (= '(1 2 4 5 6 7 42)
            (sort (nodes g))))
     (is (= '([1 2 :cat] [1 2 :horse] [1 42 :dog] [2 4 :fish]
-           [6 7 :cow] [42 5 :bear] [42 5 :rat] [42 6 :fox])
-           (sort (multi-edges g))))))
+             [6 7 :cow] [42 5 :bear] [42 5 :rat] [42 6 :fox])
+           (sort (edges g))))))
 
 (deftest split
   (testing "Splitting a graph node"
@@ -45,7 +45,7 @@
            (sort (nodes g))))
     (is (= '([1 2 :cat] [1 2 :horse] [1 42 :dog] [2 4 :fish] [6 7 :cow]
              [42 43 :pig] [43 44 :goat] [44 5 :bear] [44 5 :rat] [44 6 :fox])
-           (sort (multi-edges g))))))
+           (sort (edges g))))))
 
 (deftest spider
   (testing "Spidering a graph"

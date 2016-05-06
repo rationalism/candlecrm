@@ -24,11 +24,11 @@
 (defn nodes [g]
   (graph/nodes g))
   
-(defn edges [g]
+(defn edges-impl [g]
   (graph/edges g))
 
-(defn multi-edges [g]
-  (mapcat #(multi-edge g %) (edges g)))
+(defn edges [g]
+  (mapcat #(multi-edge g %) (edges-impl g)))
 
 (defn out-edges [g node]
   (mapcat #(multi-edge g %) (graph/out-edges g node)))
@@ -94,7 +94,7 @@
 (defn remove-edges-label [g label]
   (remove-edges
    g (filter #(= label (nth % 2))
-             (multi-edges g))))
+             (edges g))))
 
 (defn remove-nodes [g nodes]
   (as-> nodes $
@@ -118,7 +118,7 @@
        (filter #(= label (nth % 2)))))
 
 (defn select-edges [g edge-type]
-  (->> (multi-edges g)
+  (->> (edges g)
        (filter #(= edge-type (nth % 2)))))
 
 (defn replace-node [g old-node new-node]
@@ -145,8 +145,8 @@
   (map #(assoc % 1 (% 0) 0 (% 1)) edges))
 
 (defn reverse-graph [g]
-   (build-graph (nodes g)
-                (reverse-edges (multi-edges g))))
+  (build-graph (nodes g)
+               (reverse-edges (edges g))))
 
 (defn attach-all [g old-nodes new-node label]
   (-> (add-nodes g [new-node])
@@ -160,7 +160,7 @@
 
 (defn merge-graphs [graphs]
   (build-graph (mapcat nodes graphs)
-               (mapcat multi-edges graphs)))
+               (mapcat edges graphs)))
 
 (defn count-downstream [g node]
   (->> (galg/bf-span g node)
@@ -178,12 +178,14 @@
              (conj path edge)
              (second edge)))))
 
-(defn spider-edges [g edges]
-  (if (-> g multi-edges count (= 0))
-    edges (let [new-path (->> g nodes (sort-by (partial fan-out g) >)
-                              first (spider-path g '()))]
-            (recur (first new-path)
-                   (->> new-path rest reverse (conj edges))))))
+(defn spider-edges [g edge-set]
+  (if (-> g edges count (= 0)) edge-set
+      (let [new-path (->> g nodes
+                          (sort-by (partial fan-out g) >)
+                          first (spider-path g '()))]
+        (recur (first new-path)
+               (->> new-path rest reverse
+                    (conj edge-set))))))
 
 (defn display-graph [g]
   (gviz/view g) g)

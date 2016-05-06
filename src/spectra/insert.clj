@@ -82,7 +82,7 @@
    (let [id-map (insert-nodes! g user)]
      (->> [pre-queries (add-nlp-labels id-map)
            (mapcat #(id-pair-cypher % user) id-map)
-           (map #(edge-cypher % id-map) (loom/multi-edges g))]
+           (map #(edge-cypher % id-map) (loom/edges g))]
           (apply concat) neo4j/cypher-combined-tx)
      (vals id-map))))
 

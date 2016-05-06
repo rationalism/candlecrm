@@ -136,5 +136,5 @@
                  [after-1 alice s/email-to]
                  [after-2 bob s/email-to]]))
     
-    (is (-> g1 infer-email-chain infer-subject loom/multi-edges
-            (= (loom/multi-edges g2))))))
+    (is (-> g1 infer-email-chain infer-subject loom/edges
+            (= (loom/edges g2))))))

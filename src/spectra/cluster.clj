@@ -20,7 +20,7 @@
      2.0))
 
 (defn prob-weights [g]
-  (->> g loom/multi-edges
+  (->> g loom/edges
        (map #(update % 2 prob-weight))
        (loom/build-graph (loom/nodes g))))
 

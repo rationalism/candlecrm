@@ -427,7 +427,7 @@
 (defn stringify-graph [g]
   (loom/build-graph
    (map stringify-node (loom/nodes g))
-   (->> g loom/multi-edges
+   (->> g loom/edges
         (map string-vector))))
 
 (defn pronoun-node []
@@ -588,7 +588,7 @@
 (defn strip-graph [g]
   (loom/build-graph
    (->> g loom/nodes strip-nodes)
-   (->> g loom/multi-edges (map strip-edge))))
+   (->> g loom/edges (map strip-edge))))
 
 (defn lonely? [g pronoun]
   (as-> (loom/out-edges g pronoun) $
