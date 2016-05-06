@@ -63,3 +63,26 @@
     (is (= 0 (count (get-people test-email))))
     (is (= 0 (count (get-people test-phone))))))
 
+(deftest throw-exception-test
+  (testing "Make an invalid query that will throw exception"
+    (def caught-exception false)
+    
+    (with-redefs [println (fn [e] (def err-msg e))]
+      (try
+        (cypher-combined-tx ["MATCHMATCHMATCHMATCH"])
+        (catch Exception e
+          (def caught-exception true))))
+
+    (is caught-exception)))
+
+(deftest add-remove-label
+  (testing "Add and remove a node label"
+    (is (not (get-vertex :element {:uranium 92})))
+    (def id (-> "CREATE (a {uranium:92}) RETURN ID(a)"
+                cypher-query first vals first))
+    (is (not (get-vertex :element {:uranium 92})))
+    (add-label! id :element)
+    (is (get-vertex :element {:uranium 92}))
+    (remove-label! id :element)
+    (is (not (get-vertex :element {:uranium 92})))
+    (delete-id! id)))

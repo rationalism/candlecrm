@@ -259,7 +259,7 @@
 
 (defn remove-label! [id label]
   (cypher-query
-   [(str "MATCH (root) WHERE ID(root) = "
+   [(str "MATCH (root) WHERE ID(root) = {id}"
          " REMOVE root:" (esc-token label))
     {:id id}]))
 
