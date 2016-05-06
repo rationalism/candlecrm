@@ -106,3 +106,35 @@
     (is (= 17 (sent-time mock)))
     (is (= "message body" (content mock)))
     (is (= "plaintext" (content-type mock)))))
+
+(deftest infer-test
+  (testing "Inference on email graphs"
+    (def before-1 {:id 1 s/email-body "some body"})
+    (def before-2 {:id 2 s/email-body "some body"})
+    (def before-3 {:id 3 :subject "some subject" s/email-body "some body"})
+
+    (def after-1 {:id 1 s/email-body "some body" :subject "some subject"})
+    (def after-2 {:id 2 s/email-body "some body" :subject "some subject"})
+    (def after-3 {:id 3 :subject "some subject" s/email-body "some body"})    
+
+    (def alice {:name "Alice"})
+    (def bob {:name "Bob"})
+    
+    (def g1 (loom/build-graph
+             [] [[before-1 before-2 s/email-reply]
+                 [before-2 before-3 s/email-reply]
+                 [before-1 bob s/email-from]
+                 [before-2 alice s/email-from]
+                 [before-3 bob s/email-from]]))
+
+    (def g2 (loom/build-graph
+             [] [[after-1 after-2 s/email-reply]
+                 [after-2 after-3 s/email-reply]
+                 [after-1 bob s/email-from]
+                 [after-2 alice s/email-from]
+                 [after-3 bob s/email-from]
+                 [after-1 alice s/email-to]
+                 [after-2 bob s/email-to]]))
+    
+    (is (-> g1 infer-email-chain infer-subject loom/multi-edges
+            (= (loom/multi-edges g2))))))
