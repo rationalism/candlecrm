@@ -15,7 +15,7 @@
                  [ring/ring-defaults "0.2.0"]
                  [compojure "1.5.0"]
                  [hiccup "1.0.5"]
-                 [environ "1.0.2"]
+                 [environ "1.0.3"]
                  [com.taoensso/timbre "4.3.1"]
                  [buddy "0.13.0"]
                  [com.google.api-client/google-api-client "1.22.0"
@@ -64,7 +64,7 @@
                  [reagent-forms "0.5.23"
                   :exclusions [com.google.guava/guava]]]
   :min-lein-version "2.0.0"
-  :plugins [[lein-environ "1.0.2"]
+  :plugins [[lein-environ "1.0.3"]
             [lein-kibit "0.1.2"
              :exclusions [org.clojure/clojure]]
             [lein-figwheel "0.5.2"
