@@ -9,11 +9,6 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
-(defn expand-entity [entity properties]
-  (->> properties
-       (map #(assoc {} % (neo4j/get-property entity %)))
-       (apply merge)))
-
 (defn map-node [node attr]
   (cond
     (nil? (attr node)) nil
