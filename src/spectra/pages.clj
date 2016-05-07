@@ -75,7 +75,7 @@
 (defn reset-confirm [req]
   (let [token (-> req :params :token)]
     (if-let [user (->> token (hash-map s/pwd-reset-token)
-                       (neo4j/get-vertex s/user))]
+                       (neo4j/get-vertex-raw s/user))]
       (html-wrapper (new-password user token))
       (home-with-message "Error: Invalid reset link"))))
 
@@ -85,7 +85,7 @@
 
 (defn set-password [req]
   (if-let [user (->> req :params :token (hash-map s/pwd-reset-token)
-                     (neo4j/get-vertex s/user))]
+                     (neo4j/get-vertex-raw s/user))]
     (do (auth/set-password! user (:params req))
         (home-with-message "Password has been reset."))
     (home-with-message "Error: Invalid reset link")))

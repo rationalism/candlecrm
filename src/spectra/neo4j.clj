@@ -214,18 +214,18 @@
 (defn add-return [props s]
   [(str s " RETURN root") props])
 
-(defn get-vertices [user class props]
-  (->> props (filter com/val-not-nil?) (map val-query)
-       (concat [(str "MATCH (root:" (prop-label user class) ")")])
-       (str/join " WITH root ")
-       (add-return props) cypher-list))
-
-(defn get-vertex [class props]
+(defn get-vertex-raw [class props]
   (->> [(str "MATCH (root:" (esc-token class)
              " " (cypher-properties props)
              ") RETURN root")
         props]
        cypher-list first))
+
+(defn get-vertices [user class props]
+  (->> props (filter com/val-not-nil?) (map val-query)
+       (concat [(str "MATCH (root:" (prop-label user class) ")")])
+       (str/join " WITH root ")
+       (add-return props) cypher-list))
 
 (defn get-vertices-class [class]
   (cypher-list (str "MATCH (root:" class

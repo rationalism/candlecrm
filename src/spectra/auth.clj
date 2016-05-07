@@ -29,7 +29,7 @@
   (-> query-map :password (hashers/encrypt hash-alg)))
 
 (defn lookup-user [username]
-  (when-let [user (neo4j/get-vertex s/user {s/email-addr username})]
+  (when-let [user (neo4j/get-vertex-raw s/user {s/email-addr username})]
     user))
 
 (defn find-user [email password]

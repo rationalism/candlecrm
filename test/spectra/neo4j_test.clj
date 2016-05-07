@@ -77,12 +77,12 @@
 
 (deftest add-remove-label
   (testing "Add and remove a node label"
-    (is (not (get-vertex :element {:uranium 92})))
+    (is (not (get-vertex-raw :element {:uranium 92})))
     (def id (-> "CREATE (a {uranium:92}) RETURN ID(a)"
                 cypher-query first vals first))
-    (is (not (get-vertex :element {:uranium 92})))
+    (is (not (get-vertex-raw :element {:uranium 92})))
     (add-label! id :element)
-    (is (get-vertex :element {:uranium 92}))
+    (is (get-vertex-raw :element {:uranium 92}))
     (remove-label! id :element)
-    (is (not (get-vertex :element {:uranium 92})))
+    (is (not (get-vertex-raw :element {:uranium 92})))
     (delete-id! id)))
