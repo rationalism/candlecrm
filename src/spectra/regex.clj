@@ -24,9 +24,6 @@
   (->> (map regex-escape coll)
        (str/join "|") re-pattern))
 
-(defn replace-map [text new-map]
-  (str/replace text (-> new-map keys regex-or) new-map))
-
 (defn find-email-addrs [text]
   (re-seq email-regex text))
 
@@ -80,7 +77,7 @@
         text default-region)))
 
 (defn phone-person [number]
-  (assoc {} :phone number))
+  (assoc {} :phone number :label s/person))
 
 (defn find-phone-people [text]
   (->> (find-phone-nums text)

@@ -28,11 +28,15 @@
     (is (= {:email test-email}
            (parse-name-email test-email)))
     (is (= {:name test-name :email test-email}
-           (parse-name-email test-both)))))
+           (parse-name-email test-both)))
+    (is (= (find-email-people test-email)
+           [{:email-addr [test-email] :label :person}]))))
 
 (deftest phone-regex-test
   (testing "Parsing phone numbers"
     (is (empty? (find-phone-nums test-name)))
     (is (empty? (find-phone-nums test-email)))
     (is (= test-phone
-           (first (find-phone-nums test-phone-text))))))
+           (first (find-phone-nums test-phone-text))))
+    (is (= (find-phone-people test-phone)
+           [{:phone test-phone :label :person}]))))
