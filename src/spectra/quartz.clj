@@ -60,10 +60,6 @@
     (neo4j/update-vals! (:id queue) s/loaded-bottom
                         (s/loaded-bottom queue) (range-bottom queue))))
 
-(defn scan-check [user email-times]
-  (->> email-times
-       (mapv #(queries/scan-overlaps user %))))
-
 (defn in-range [bounds]
   (range (first bounds) (inc (second bounds))))
 

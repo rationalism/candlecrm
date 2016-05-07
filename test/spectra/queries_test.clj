@@ -10,7 +10,8 @@
 
 (deftest person-from-user-test
   (testing "Test the person-from-user database query"
-    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
     (is test-user)
     (is (= [test-username]
            (-> test-user (person-from-user {:start 0 :limit 10})
@@ -20,7 +21,8 @@
 
 (deftest emails-from-user-test
   (testing "Test the emails-from-user database query"
-    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
     (is test-user)
     (is (= '() (emails-from-user test-user {:start 0 :limit 10})))
     
@@ -28,15 +30,19 @@
 
 (deftest emails-linked-test
   (testing "Test the emails-linked database query"
-    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
     (is test-user)
-    (is (= '() (emails-linked test-user {:start 0 :limit 10 :person-id 17 :link s/email-to})))
+    (is (= '() (emails-linked
+                test-user {:start 0 :limit 10
+                           :person-id 17 :link s/email-to})))
     
     (auth/delete-user! test-user)))
 
 (deftest emails-with-dates-test
   (testing "Test the emails-with-dates database query"
-    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
     (is test-user)
     (is (= '() (emails-with-dates test-user 0 10)))
     
@@ -44,7 +50,8 @@
 
 (deftest all-scanned-test
   (testing "Test the all-scanned database query"
-    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
     (is test-user)
     (is (= '() (all-scanned test-user)))
     
@@ -52,7 +59,8 @@
 
 (deftest key-link-test
   (testing "Test finding links by keys"
-    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
     (is test-user)
     (is (nil? (key-link test-user {:key "notarealkey"})))
     
@@ -60,7 +68,8 @@
 
 (deftest node-id-test
   (testing "Test finding node from ID"
-    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
     (is test-user)
     (is (nil? (node-by-id test-user {:id 0 :type s/person})))
     
@@ -68,14 +77,16 @@
 
 (deftest nonlp-count-test
   (testing "Test finding nodes with no NLP"
-    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
     (is test-user)
     (is (= 0 (nonlp-count test-user)))
     (auth/delete-user! test-user)))
 
 (deftest scan-overlaps-test
   (testing "Test the scan-overlaps database query"
-    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
     (is test-user)
     (is (= '() (scan-overlaps test-user 1000000)))
     
@@ -83,17 +94,21 @@
 
 (deftest event-related-test
   (testing "Test the event-related database query"
-    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
     (is test-user)
-    (is (= '() (event-related test-user {:start 0 :limit 10 :person-id 17})))
+    (is (= '() (event-related test-user {:start 0 :limit 10
+                                         :person-id 17})))
     
     (auth/delete-user! test-user)))
 
 (deftest loc-related-test
   (testing "Test the loc-related database query"
-    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
     (is test-user)
-    (is (= '() (loc-related test-user {:start 0 :limit 10 :person-id 17})))
+    (is (= '() (loc-related test-user {:start 0 :limit 10
+                                       :person-id 17})))
     
     (auth/delete-user! test-user)))
 
@@ -107,7 +122,8 @@
 
 (deftest search-test
   (testing "Create and search for a user"
-    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
     (is test-user)
     (is (->> test-username vector (zipmap [:query])
              (full-search test-user)
