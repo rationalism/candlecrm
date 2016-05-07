@@ -51,7 +51,9 @@
   (testing "Spidering a graph"
     (def g (build-graph test-nodes test-edges))
     (is (= (spider-edges g '())
-           '(([3 5 :bear]) ([1 2 :cat]) ([3 5 :rat]) ([1 2 :horse] [2 4 :fish]) ([1 3 :dog] [3 6 :fox] [6 7 :cow]))))))
+           '(([3 5 :bear]) ([1 2 :cat]) ([3 5 :rat])
+             ([1 2 :horse] [2 4 :fish])
+             ([1 3 :dog] [3 6 :fox] [6 7 :cow]))))))
 
 (deftest graph-components
   (testing "Find connected components in a graph"
@@ -60,3 +62,13 @@
                             [10 11 1] [11 12 1] [12 13 1]]))
     (is (->> g subgraphs (map set) set
              (= #{#{7 1 4 6 3 2 5} #{9 8} #{13 12 11 10}})))))
+
+(deftest graph-structure-test
+  (testing "Reduce a graph to its structure for convenience"
+    (def g (build-graph [] [[{:name "Alice"} {:name "Bob"} :knows]
+                            [{:name "Alice"} {:name "Carol"} :knows]
+                            [{:name "Alice"} {:name "Dave"} :knows]
+                            [{:name "Dave"} {:name "Emily"} :knows]]))
+    (is (-> g structure edges
+            (= [[2 1 :knows] [2 3 :knows]
+                [2 5 :knows] [5 4 :knows]])))))
