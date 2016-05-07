@@ -43,11 +43,6 @@
   (max (if (queue-new? queue) (s/loaded-top queue) 270000)
        (-> queue range-top (- email/batch-size) inc)))
 
-(defn queue-small? [queue]
-  (< (- (range-top queue)
-        (range-bottom queue))
-     (dec email/batch-size)))
-
 (defn queue-time-reset! [queue]
   (neo4j/update-vals! (:id queue) s/modified
                       (s/modified queue) (dt/now)))

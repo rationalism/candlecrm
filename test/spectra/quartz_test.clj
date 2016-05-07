@@ -2,6 +2,7 @@
   (:require [clojure.test :refer :all]
             [spectra.auth :as auth]
             [spectra.email :as email]
+            [spectra.queries :as queries]
             [spectra.quartz :refer :all]))
 
 (def test-username "someemail@foo.com")
@@ -18,9 +19,11 @@
                                        :password test-password}))
 
     (with-redefs [email/fetch-imap-folder (fn [x] nil)
-                  email/last-uid (fn [x] 77777)
-                  println (fn [x] nil)]
+                  email/last-uid (fn [x] 777777)
+                  println (fn [& x] nil)]
       (add-new-queue! test-user)
-      (refresh-queue! test-user))
+      (refresh-queue! test-user)
+      (def q (queries/next-email-queue test-user))
+      (queue-reset! (:queue q)))
 
     (auth/delete-user! test-user)))

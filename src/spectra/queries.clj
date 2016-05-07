@@ -125,21 +125,24 @@
          (zipmap [s/loaded-bottom s/loaded-top s/top-uid s/modified])
          (merge {:id (.id n)}))))
 
-(defn next-email-queue []
-  (-> [(str "MATCH (root)-[:" (neo4j/esc-token s/user-queue)
-            "]->(u:" (neo4j/esc-token s/user)
-            ") WITH root, u"
-            " MATCH (root)-[:" (neo4j/esc-token s/loaded-bottom)
-            "]-(b) WITH root, u, b WHERE b." (neo4j/esc-token s/value)
-            " > {queuebound}"
-            " MATCH (root)-[:" (neo4j/esc-token s/modified)
-            "]-(m) WITH root, u, b, m "
-            " RETURN root, u ORDER BY m." (neo4j/esc-token s/value)
-            " LIMIT {limit}")
-       {:queuebound 270000 :limit 1}]
-      neo4j/cypher-query first clojure-map
-      (set/rename-keys {"root" :queue "u" :user})
-      (update :queue queue-data)))
+(defn next-email-queue
+  ([] (next-email-queue nil))
+  ([user]
+   (-> [(str "MATCH (root)-[:" (neo4j/esc-token s/user-queue)
+             "]->(u:" (neo4j/esc-token s/user) ") "
+             (if user (str "WHERE ID(u) = " (.id user)) "")
+             " WITH root, u"
+             " MATCH (root)-[:" (neo4j/esc-token s/loaded-bottom)
+             "]-(b) WITH root, u, b WHERE b." (neo4j/esc-token s/value)
+             " > {queuebound}"
+             " MATCH (root)-[:" (neo4j/esc-token s/modified)
+             "]-(m) WITH root, u, b, m "
+             " RETURN root, u ORDER BY m." (neo4j/esc-token s/value)
+             " LIMIT {limit}")
+        {:queuebound 270000 :limit 1}] com/debug
+       neo4j/cypher-query first clojure-map
+       (set/rename-keys {"root" :queue "u" :user})
+       (update :queue queue-data))))
 
 (defn all-scanned [user]
   (-> [(str "MATCH (root:" (neo4j/esc-token s/user)
