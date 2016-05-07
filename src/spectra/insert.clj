@@ -128,23 +128,4 @@
             {:id (:id fields)}]])
          neo4j/cypher-combined-tx)))
 
-(defn load-csv [filename]
-  (let [csv-lines (-> filename slurp csv/parse-csv)]
-    (->> csv-lines (drop 1)
-         (map #(zipmap (->> csv-lines first (map keyword)) %)))))
 
-(defonce blk-count (atom 0))
-
-(defn blk-print [blk]
-  (swap! blk-count #(+ % (count blk)))
-  (println "Finished loading item:" @blk-count))
-
-(defn import-csv! [user type filename]
-  (reset! blk-count 0)
-  (->> filename load-csv
-       (map #(assoc % s/type-label type))
-       (partition-all insert-csv-block)
-       (map #(loom/build-graph % []))
-       (map #(push-graph! % user))
-       (map blk-print)
-       dorun))
