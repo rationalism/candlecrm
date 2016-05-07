@@ -14,9 +14,6 @@
 (def tag-regex #"\<([^\>]*)\>")
 (def esc-char-regex #"\^|\[|\]|\.|\$|\{|\}|\(|\)|\\|\*|\+|\||\?|\<|\>")
 
-(defn filter-text [text]
-  (str/replace text (re-pattern "\r\n| > |\\s+") " "))
-
 (defn regex-escape [text]
   (str/replace text esc-char-regex #(str "\\" %1)))
 
