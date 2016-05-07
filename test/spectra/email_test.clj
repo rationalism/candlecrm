@@ -178,3 +178,20 @@
     (is (->> mock-folder (headers-fetch mock-message)
              headers-parse loom/edges 
              (= expected-headers)))))
+
+(deftest merge-headers-test
+  (testing "Merge header graph and email graph"
+    (def email {:id 1 s/email-body "some body"})
+    (def alice {:name "Alice"})
+    (def bob {:name "Bob"})
+
+    (def g1 (loom/build-graph [email] []))
+    (def g2 (loom/build-graph
+             [] [[{:id 1} alice s/email-to]
+                 [{:id 1} bob s/email-from]]))
+
+    (def expected-headers [[email bob s/email-from]
+                           [email alice s/email-to]])
+    
+    (is (->> g2 (merge-bottom-headers g1)
+             loom/edges (= expected-headers)))))
