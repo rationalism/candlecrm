@@ -95,3 +95,12 @@
     (remove-label! id :element)
     (is (not (get-vertex-raw :element {:uranium 92})))
     (delete-id! id)))
+
+(deftest add-drop-constraints
+  (testing "Add and remove some constraints"
+    (cypher-query "CREATE CONSTRAINT ON (book:Book) ASSERT exists(book.isbn)")
+    (cypher-query "CREATE CONSTRAINT ON (book:Book) ASSERT book.isbn IS UNIQUE")
+    (-> "CONSTRAINT ON ( book:Book ) ASSERT book.isbn IS UNIQUE"
+        drop-constraint cypher-query)
+    (-> "CONSTRAINT ON ( book:Book ) ASSERT exists(book.isbn)"
+        drop-constraint cypher-query)))
