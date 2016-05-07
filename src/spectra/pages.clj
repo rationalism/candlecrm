@@ -91,7 +91,8 @@
     (home-with-message "Error: Invalid reset link")))
 
 (defn create-account [params]
-  (if-let [err-msg (apply auth/new-user-check params)]
+  (if-let [err-msg (apply auth/new-user-check
+                          ((juxt :username :password :confirm) params))]
     (home-with-message err-msg)
     (->> [:username :password] (select-keys params)
          quartz/create-user! auth/make-token

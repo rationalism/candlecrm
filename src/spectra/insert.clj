@@ -109,9 +109,9 @@
 
 (defn edit-entity! [user query-map]
   (let [fields (:fields query-map)
-        attrs (->> (dissoc fields :id :type) keys
+        attrs (->> (dissoc fields :id :type :label) keys
                    (map neo4j/esc-token) (str/join "|"))]
-    (->> (-> fields (dissoc :id :type)
+    (->> (-> fields (dissoc :id :type :label)
              vals-map (hash-map (:id fields)) first
              (id-pair-cypher user))
          (concat
