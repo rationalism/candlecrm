@@ -14,22 +14,8 @@
     (into {} (java.util.HashMap. m))
     {}))
 
-(defn first-if-coll [coll]
-  (if (coll? coll) (first coll) coll))
-
-(defn first-table-vals [person]
-  (->> person
-       (map #(hash-map (key %)
-                       (first-if-coll (val %))))
-       (reduce merge)))
-
 (defn node-attrs [node]
   (merge (.asMap node) (hash-map :id (.id node))))
-
-(defn tablify-hits [hits]
-  (->> (map node-attrs hits)
-       (remove empty?)
-       (map first-table-vals)))
 
 (defn filter-decode-labels [labels]
   (->> labels (filter #(.contains % "_user_"))
@@ -110,9 +96,12 @@
        {:id id}]
       neo4j/cypher-query mapify-hits))
 
+(defn merge-if-exists [node query-map]
+  (when node (merge node {:type (:type query-map)})))
+
 (defn node-by-id [user query-map]
   (-> user (node-from-id (:id query-map) (:type query-map))
-      first (merge {:type (:type query-map)})))
+      first (merge-if-exists query-map)))
 
 (defn key-link [user query-map]
   (-> [(str "MATCH (k:" (neo4j/prop-label user s/link-id)

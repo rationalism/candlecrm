@@ -50,6 +50,29 @@
     
     (auth/delete-user! test-user)))
 
+(deftest key-link-test
+  (testing "Test finding links by keys"
+    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (is test-user)
+    (is (nil? (key-link test-user {:key "notarealkey"})))
+    
+    (auth/delete-user! test-user)))
+
+(deftest node-id-test
+  (testing "Test finding node from ID"
+    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (is test-user)
+    (is (nil? (node-by-id test-user {:id 0 :type s/person})))
+    
+    (auth/delete-user! test-user)))
+
+(deftest nonlp-count-test
+  (testing "Test finding nodes with no NLP"
+    (def test-user (auth/create-user! {:username test-username :password test-password}))
+    (is test-user)
+    (is (= 0 (nonlp-count test-user)))
+    (auth/delete-user! test-user)))
+
 (deftest scan-overlaps-test
   (testing "Test the scan-overlaps database query"
     (def test-user (auth/create-user! {:username test-username :password test-password}))
