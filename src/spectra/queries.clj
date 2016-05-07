@@ -139,7 +139,7 @@
              "]-(m) WITH root, u, b, m "
              " RETURN root, u ORDER BY m." (neo4j/esc-token s/value)
              " LIMIT {limit}")
-        {:queuebound 270000 :limit 1}] com/debug
+        {:queuebound 270000 :limit 1}]
        neo4j/cypher-query first clojure-map
        (set/rename-keys {"root" :queue "u" :user})
        (update :queue queue-data))))
