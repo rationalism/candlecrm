@@ -23,6 +23,9 @@
     (is (reset-pwd req))
     (is (login-form req))
     (is (homepage req))
+    (is (homepage {}))
+    (is (login-needed "/fake-url"))
+    (is (new-password test-user "fake-token"))
     (is (reset-confirm {:params {:token "foobar"}}))
     
     (auth/delete-user! test-user)))

@@ -137,3 +137,24 @@
     (is (= (double 1/9) (lev ["the house"] ["the hose"])))
     (is (= (double 5/9) (lev ["the house"] ["the rat"])))
     (is (= (double 1) (lev ["the house"] ["zzzzzzzzz"])))))
+
+(deftest iseq-test
+  (testing "Sets are equal"
+    (is (= default-score (is-eq [] [])))
+    (is (= 1.0 (is-eq [:cat] [:cat])))
+    (is (= 0.0 (is-eq [:cat] [:catt])))))
+
+(deftest minlen-test
+  (testing "Minimum length of strings"
+    (is (= default-score (min-len [] [])))
+    (is (= 0 (min-len [""] [""])))
+    (is (= 0 (min-len ["the kitten"] [""])))
+    (is (= 5 (min-len ["the kitten"] ["puppy"])))
+    (is (= 3 (min-len ["the kitten" "cat"] ["puppy"])))))
+
+(deftest entropy-test
+  (testing "Binary entropy calculation"
+    (is (= 0.0 (bin-entropy 0.0)))
+    (is (= 0.0 (bin-entropy 1.0)))
+    (is (< 0.0 (bin-entropy 0.25) (bin-entropy 0.5)))
+    (is (< 0.0 (bin-entropy 0.75) (bin-entropy 0.5)))))
