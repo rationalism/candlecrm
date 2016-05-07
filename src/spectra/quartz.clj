@@ -55,22 +55,6 @@
     (neo4j/update-vals! (:id queue) s/loaded-bottom
                         (s/loaded-bottom queue) (range-bottom queue))))
 
-(defn in-range [bounds]
-  (range (first bounds) (inc (second bounds))))
-
-(defonce cnt (atom 0))
-
-(defn count-up [n]
-  (swap! cnt dec)
-  (+ @cnt n))
-
-(defn first-last [coll]
-  [(first coll) (last coll)])
-
-(defn create-edges! [user queue]
-  (neo4j/create-edge! (queries/email-queue) queue s/has-queue)
-  (neo4j/create-edge! user queue s/has-queue))
-
 (defn refresh-queue! [user]
   (println "refreshing queue")
   (-> ["MATCH (root:" (neo4j/prop-label user s/top-uid)
