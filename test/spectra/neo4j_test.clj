@@ -73,6 +73,15 @@
         (catch Exception e
           (def caught-exception true))))
 
+    (is caught-exception)
+    (def caught-exception false)
+    
+    (with-redefs [println (fn [e] (def err-msg e))]
+      (try
+        (cypher-query "MATCHMATCHMATCHMATCH")
+        (catch Exception e
+          (def caught-exception true))))
+    
     (is caught-exception)))
 
 (deftest add-remove-label
