@@ -33,10 +33,7 @@
   (cond-> []
     (and (.hasName contact)
          (.hasFullName (.getName contact)))
-    (conj (.getValue (.getFullName (.getName contact))))
-    (and (.hasName contact)
-         (.hasAdditionalName (.getName contact)))
-    (conj (.getValue (.getAdditionalName (.getName contact))))))
+    (conj (.getValue (.getFullName (.getName contact))))))
 
 (defn emails [contact]
   (mapv #(.getAddress %) (.getEmailAddresses contact)))

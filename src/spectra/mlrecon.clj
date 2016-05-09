@@ -28,7 +28,7 @@
 (defn dump-recon-log [items]
   (spit recon-logs "BEGIN RECON LOG DUMP\n\n" :append true)
   (dorun (map #(spit recon-logs
-                     (pr-str % "\n\n") :append true)
+                     (str (pr-str %) "\n\n") :append true)
               items))
   items)
 
