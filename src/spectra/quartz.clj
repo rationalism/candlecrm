@@ -74,13 +74,14 @@
                            (range-top (:queue queue-user))))
 
 (defn queue-pop! []
-  (let [queue-user (queries/next-email-queue)]
-    (when (:queue queue-user)
-      (if (-> queue-user :user (queries/nonlp-count)
-              (< nonlp-insert-limit))
-        (do (queue-reset! (:queue queue-user))
-            (run-insertion! queue-user))
-        (queue-time-reset! (:queue queue-user))))))
+  (neo4j/thread-wrap
+   #(let [queue-user (queries/next-email-queue)]
+      (when (:queue queue-user)
+        (if (-> queue-user :user (queries/nonlp-count)
+                (< nonlp-insert-limit))
+          (do (queue-reset! (:queue queue-user))
+              (run-insertion! queue-user))
+          (queue-time-reset! (:queue queue-user)))))))
 
 (defn new-queue-map [top-uid]
   {s/top-uid top-uid
@@ -109,12 +110,14 @@
     (remove #(some #{(first %)} running-ids) jobs)))
 
 (defn run-recon! []
-  (->> (queries/norecon-count-all) (map second)
-       (filter #(some #{(second %)}
-                      (keys @mlrecon/recon-models)))
-       remove-running
-       (map #(vector (neo4j/find-by-id (first %)) (second %)))
-       first maybe-run-recon!))
+  (neo4j/thread-wrap
+   #(->> (queries/norecon-count-all) (map second)
+         (filter (fn [x] (some #{(second x)}
+                               (keys @mlrecon/recon-models))))
+         remove-running
+         (map (fn [x] (vector (neo4j/find-by-id
+                               (first x) (second x)))))
+         first maybe-run-recon!)))
 
 (defn delete-reset-tokens! []
   (->> (queries/users-reset-tokens)
@@ -125,7 +128,7 @@
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (neo4j/thread-wrap #(when nil (queue-pop!))))
+  (when nil (queue-pop!)))
 
 (jobs/defjob NewGeocodes [ctx]
   (neo4j/thread-wrap #(geocode/geocode-batch 10)))
@@ -134,7 +137,7 @@
   (neo4j/thread-wrap #(geocode/geocode-cached 20)))
 
 (jobs/defjob ProcessRecon [ctx]
-  (neo4j/thread-wrap #(when nil (run-recon!))))
+  (when nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
   (neo4j/thread-wrap #(when nil (email/push-email-nlp!))))
