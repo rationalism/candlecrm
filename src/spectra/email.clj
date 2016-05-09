@@ -36,6 +36,7 @@
 (defonce nlp-channel (atom nil))
 
 (def email-name-blacklist ["linkedin.com"])
+(def email-domains [".com" ".edu" ".org" ".net"])
 
 (defn get-folder [store folder-name]
   (.getFolder store folder-name))
@@ -279,10 +280,15 @@
        (remove dt/has-ms?)
        (remove #(= "1960" (dt/format-year %)))))
 
+(defn join-lines [lines]
+  (reduce #(str/replace %1 %2 (str %2 " "))
+          (str/join "" lines)
+          email-domains))
+
 (defn find-header-vals [marks models lines]
   (let [header-lines (->> [0 (:end-header marks) lines]
                           (apply com/slice)
-                          (str/join ""))]
+                          join-lines)]
     (if (empty? header-lines) marks
         (-> (assoc-if-found marks s/email-sent (sent-date header-lines))
             (assoc-if-found :email-from-addr (regex/find-email-addrs header-lines))
