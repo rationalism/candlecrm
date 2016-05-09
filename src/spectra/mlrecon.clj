@@ -20,9 +20,17 @@
 (def min-match-prob 0.99)
 (def model-rollover 40)
 (def models-dir "/home/alyssa/clojure/spectra/resources/models")
+(def recon-logs "/home/alyssa/recon_log.txt")
 
 (defonce recon-models (atom {}))
 (defonce min-match-score (atom {}))
+
+(defn dump-recon-log [items]
+  (spit recon-logs "BEGIN RECON LOG DUMP\n\n" :append true)
+  (dorun (map #(spit recon-logs
+                     (pr-str % "\n\n") :append true)
+              items))
+  items)
 
 (defn new-model! [class dir]
   (->> (str dir "/" (name class) ".dat")
@@ -319,6 +327,7 @@
         vs (->> cs flatten distinct
                 (fetch-all-paths (map first rules)))]
     (->> (map #(pair-map % vs) cs)
+         dump-recon-log
          (map #(score-diff rules %))
          (zipmap cs))))
 
@@ -330,6 +339,7 @@
 (defn score-all [user class]
   (->> (find-candidates user class)
        (get-diffs user class)
+       dump-recon-log
        (score-map (get @recon-models class))
        (into [])))
 
@@ -471,6 +481,7 @@
 
 (defn run-recon! [user class]
   (let [recon-groups (->> class (score-all user)
+                          dump-recon-log
                           (groups-to-recon class))
         ids-to-delete (map body-ids recon-groups)]
     (->> (recon-finished user class)
