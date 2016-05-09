@@ -22,7 +22,8 @@
        (str/join "|") re-pattern))
 
 (defn find-email-addrs [text]
-  (re-seq email-regex text))
+  (->> text (re-seq email-regex)
+       (remove #(.contains % "..."))))
 
 (defn find-urls [text]
   (map first (re-seq url-regex text)))
