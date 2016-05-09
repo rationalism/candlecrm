@@ -116,7 +116,7 @@
                                (keys @mlrecon/recon-models))))
          remove-running
          (map (fn [x] (vector (neo4j/find-by-id
-                               (first x) (second x)))))
+                               (first x)) (second x))))
          first maybe-run-recon!)))
 
 (defn delete-reset-tokens! []
