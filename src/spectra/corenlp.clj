@@ -112,7 +112,13 @@
   (.get words CoreAnnotations$TokensAnnotation))
 
 (defn get-sentences [parsed-text]
-  (.get parsed-text CoreAnnotations$SentencesAnnotation))
+  (try
+    (.get parsed-text CoreAnnotations$SentencesAnnotation)
+    (catch Exception e
+      (println "Error: Exception in get-sentences")
+      (println e)
+      (println (str "Parsed text: " parsed-text))
+      [])))
 
 (defn get-lemma [token]
   (.get token CoreAnnotations$LemmaAnnotation))
