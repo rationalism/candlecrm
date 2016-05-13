@@ -45,7 +45,7 @@
                  [org.nd4j/nd4j-x86 "0.4-rc3.8"
                   :exclusions [com.google.guava/guava]]
                  [com.joestelmach/natty "0.12"]
-                 [org.neo4j.driver/neo4j-java-driver "1.0.0"]
+                 [org.neo4j.driver/neo4j-java-driver "1.0.1"]
                  [pandect "0.5.4"
                   :exclusions [org.bouncycastle/bcprov-jdk15on]]
                  [aysylu/loom "0.6.0"]

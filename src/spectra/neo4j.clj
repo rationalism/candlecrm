@@ -17,7 +17,7 @@
 
 (defn deadlock-throw? [e]
   (.contains (.getMessage e)
-             ":stackTrace \"org.neo4j.kernel.DeadlockDetectedException"))
+             "org.neo4j.driver.v1.exceptions.TransientException"))
 
 (defn get-graph []
   (->> (AuthTokens/basic (env :database-username)
