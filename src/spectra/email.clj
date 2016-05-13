@@ -178,7 +178,12 @@
   {(.getName header) (.getValue header)})
 
 (defn get-recipients [message field]
-  (.getRecipients message field))
+  (try
+    (.getRecipients message field)
+    (catch Exception e
+      (do (println "Error: Exception in get-recipients"))
+      (do (println e))
+      [])))
 
 (defn decode-recipients [message]
   {s/email-to (get-recipients message Message$RecipientType/TO)
