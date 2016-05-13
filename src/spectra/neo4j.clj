@@ -69,7 +69,6 @@
               (map #(.asMap %) records)))))
 
 (defn cypher-query [query]
-  (dump-queries [query])
   (try
     (first
      (resp-clojure
@@ -136,7 +135,6 @@
   ([queries]
    (cypher-combined-tx true queries))
   ([retry queries]
-   (dump-queries queries)
    (trampoline cypher-combined-tx-recur retry queries)))
 
 (defnp find-by-id [id]

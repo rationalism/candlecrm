@@ -327,7 +327,6 @@
         vs (->> cs flatten distinct
                 (fetch-all-paths (map first rules)))]
     (->> (map #(pair-map % vs) cs)
-         dump-recon-log
          (map #(score-diff rules %))
          (zipmap cs))))
 
@@ -339,7 +338,6 @@
 (defn score-all [user class]
   (->> (find-candidates user class)
        (get-diffs user class)
-       dump-recon-log
        (score-map (get @recon-models class))
        (into [])))
 
@@ -379,8 +377,8 @@
          sample-display)))
 
 (defn split-neg-pos [freqs]
-  [(remove #(<= (second (first %)) 0.95) freqs)
-   (remove #(<= 0.05 (second (first %))) freqs)])
+  [(remove #(<= (second (first %)) 0.4) freqs)
+   (remove #(<= 0.2 (second (first %))) freqs)])
 
 (defn adjust-weight [n]
   (fn [point]
@@ -394,7 +392,7 @@
   (update point 1 #(Math/sqrt %)))
 
 (defn select-candidate [accum point]
-  [(concat (first accum)
+  [(reduce conj (first accum)
            (repeat (- (int (+ (second point) (second accum)))
                       (int (second accum)))
                    (ffirst point)))
@@ -481,7 +479,6 @@
 
 (defn run-recon! [user class]
   (let [recon-groups (->> class (score-all user)
-                          dump-recon-log
                           (groups-to-recon class))
         ids-to-delete (map body-ids recon-groups)]
     (->> (recon-finished user class)
