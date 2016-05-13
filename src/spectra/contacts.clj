@@ -95,6 +95,4 @@
 
 (defn load-all-contacts! [user]
   (->> user all-contacts
-       (batch-insert! user)
-       dorun)
-  :success)
+       (batch-insert! user)))

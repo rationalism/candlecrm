@@ -28,9 +28,9 @@
 
 (defn dump-recon-log [items]
   (spit recon-logs "BEGIN RECON LOG DUMP\n\n" :append true)
-  (dorun (map #(spit recon-logs
-                     (str (pr-str %) "\n\n") :append true)
-              items))
+  (run! #(spit recon-logs
+               (str (pr-str %) "\n\n") :append true)
+        items)
   items)
 
 (defn new-model! [class dir]
@@ -381,9 +381,8 @@
 
 (defn sample-display [candidates]
   (->> (map training-query candidates)
-       (map println) dorun)
-  (->> (map println candidates)
-       dorun))
+       (run! println))
+  (run! println candidates))
 
 (defn candidate-sample [user class n]
   (let [samples (->> (score-all user class)
@@ -508,7 +507,7 @@
 (defn run-recon! [user class]
   (let [recon-groups (->> class (score-all user)
                           (groups-to-recon class))
-        ids-to-delete (map body-ids recon-groups)]
+        ids-to-delete (doall (map body-ids recon-groups))]
     (->> (recon-finished user class)
          (concat (mapcat merge-all recon-groups))
          (concat (mapcat delete-bodies ids-to-delete))

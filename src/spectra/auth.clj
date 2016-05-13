@@ -98,7 +98,7 @@
   (->> [s/email-queue s/loaded-top s/loaded-bottom
         s/top-uid s/modified]
        (map #(neo4j/prop-label user %))
-       (map neo4j/delete-class!) dorun)
+       (run! neo4j/delete-class!))
   (neo4j/delete-id! (.id user)))
 
 (defn password-check [password confirm]

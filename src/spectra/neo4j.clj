@@ -53,9 +53,9 @@
 
 (defn dump-queries [queries]
   (spit "/home/alyssa/cypherlog.txt" "BEGIN TRANSACTION\n\n" :append true)
-  (dorun (map #(spit "/home/alyssa/cypherlog.txt"
-                     (str % "\n\n") :append true)
-              queries)))
+  (run! #(spit "/home/alyssa/cypherlog.txt"
+               (str % "\n\n") :append true)
+        queries))
 
 (defn tquery
   ([query] (.run *session* query))
@@ -277,4 +277,4 @@
 
 (defn drop-all-constraints! []
   (->> (all-constraints) (map vals) (map first)
-       (map drop-constraint) (map cypher-query) dorun))
+       (map drop-constraint) (run! cypher-query)))

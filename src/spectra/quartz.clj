@@ -65,7 +65,7 @@
        ") WHERE ID(u) = " (.id user)
        " SET root.val = "
        (-> user email/fetch-imap-folder email/last-uid str)]
-      str/join neo4j/cypher-query dorun))
+      str/join neo4j/cypher-query))
 
 (defn run-insertion! [queue-user]
   (println "inserting emails")
@@ -123,8 +123,7 @@
   (->> (queries/users-reset-tokens)
        (filter #(-> % (.get (name s/modified))
                     (- 3600000) (< (dt/to-ms (dt/now)))))
-       (map #(neo4j/delete-property! % s/pwd-reset-token))
-       dorun))
+       (run! #(neo4j/delete-property! % s/pwd-reset-token))))
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
