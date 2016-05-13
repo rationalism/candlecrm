@@ -509,7 +509,7 @@
                           (groups-to-recon class))
         ids-to-delete (doall (map body-ids recon-groups))]
     (->> (recon-finished user class)
-         (concat (mapcat merge-all recon-groups))
+         (concat (doall (mapcat merge-all recon-groups)))
          (concat (mapcat delete-bodies ids-to-delete))
          (neo4j/cypher-combined-tx nil))))
 
