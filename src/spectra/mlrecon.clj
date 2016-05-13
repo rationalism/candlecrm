@@ -41,7 +41,8 @@
 
 (defn load-models! []
   (reset! recon-models {})
-  (new-model! s/person models-dir))
+  (new-model! s/person models-dir)
+  (new-model! s/email models-dir))
 
 (defn load-curve! [class]
   (weka/deserialize
@@ -135,7 +136,8 @@
                  (.add % (-> coll (nth i))))))
            (.getLongestCommonSubstring)
            (.toString)
-           (max-lcs coll1 coll2)))))
+           (max-lcs (map str-compare-truncate coll1)
+                    (map str-compare-truncate coll2))))))
 
 (defn shortest [coll1 coll2]
   (->> [coll1 coll2] flatten
