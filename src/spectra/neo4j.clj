@@ -116,6 +116,7 @@
         (println "Deadlock detected, not retrying")
         :else
         (do (println "Deadlock detected, retrying")
+            (Thread/sleep 20)
             (cypher-combined-tx true queries))))
 
 (defnp start-tx []
