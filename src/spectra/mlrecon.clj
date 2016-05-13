@@ -489,7 +489,7 @@
 (defn body-ids [id-group]
   (->> id-group (map body-id)
        neo4j/cypher-combined-tx
-       (map (comp second first vals first))))
+       (map (comp vals first))))
 
 (defn delete-body [id]
   [(str "MATCH (a) WHERE ID(a) = {id}"
