@@ -24,7 +24,7 @@
 (def recon-logs "/home/alyssa/recon_log.txt")
 
 (defonce recon-models (atom {}))
-(defonce min-match-score (atom {}))
+(defonce recon-logit (atom {}))
 
 (defn dump-recon-log [items]
   (spit recon-logs "BEGIN RECON LOG DUMP\n\n" :append true)
@@ -51,7 +51,7 @@
   (let [classes (keys @recon-models)]
     (->> (map load-curve! classes)
          (zipmap classes)
-         (reset! min-match-score))))
+         (reset! recon-logit))))
 
 (defn str-compare-truncate [s]
   (let [cs (count s)]
@@ -347,10 +347,16 @@
    #(update %1 %2 (partial weka/classify forest))
    mo (keys mo)))
 
+(defn adjust-scores [logit mo]
+  (reduce
+   #(update %1 %2 (partial weka/classify-logit logit))
+   mo (keys mo)))
+
 (defn score-all [user class]
   (->> (find-candidates user class)
        (get-diffs user class)
        (score-map (get @recon-models class))
+       (adjust-scores (get @recon-logit class))
        (into [])))
 
 (defn log2 [x]

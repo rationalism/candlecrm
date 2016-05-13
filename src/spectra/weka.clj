@@ -192,12 +192,13 @@
        (.distributionForInstance bayes)
        (into [])))
 
-(defnp classify-logit [model point]
-  (->> (map-indexed vector point)
-       (reduce #(doto %1 (.setValue (first %2) (second %2)))
-               (DenseInstance. (count point)))
-       (.distributionForInstance model)
-       (into []) second))
+(defnp classify-logit [model scores]
+  (let [point (if (coll? scores) scores [scores])]
+    (->> (map-indexed vector point)
+         (reduce #(doto %1 (.setValue (first %2) (second %2)))
+                 (DenseInstance. (count point)))
+         (.distributionForInstance model)
+         (into []) second)))
 
 (defn is-header? [sep-model l]
   (->> (classify-bayes sep-model l)
