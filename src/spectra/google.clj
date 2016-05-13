@@ -104,6 +104,7 @@
             (.put "mail.imap.sasl.enable" "true")
             (.put "mail.imap.sasl.mechanisms" "XOAUTH2")
             (.put "mail.imap.auth.login.disable" "true")
-            (.put "mail.imap.auth.plain.disable" "true")))
+            (.put "mail.imap.auth.plain.disable" "true")
+            (.put "mail.mime.address.strict" "false")))
          "imap")
     (.connect "imap.gmail.com" email access-token)))
