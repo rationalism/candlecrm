@@ -16,8 +16,8 @@
        (user-label user) "`"))
 
 (defn deadlock-throw? [e]
-  (.contains (.getMessage e)
-             "org.neo4j.driver.v1.exceptions.TransientException"))
+  (= (type e)
+     org.neo4j.driver.v1.exceptions.TransientException))
 
 (defn get-graph []
   (->> (AuthTokens/basic (env :database-username)
