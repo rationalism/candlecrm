@@ -178,7 +178,7 @@
   (->> [(str "MATCH (a)-[b]-(c) WHERE ID(a) = {id}" 
              " RETURN ID(STARTNODE(b)), TYPE(b), ID(a), ID(c)")
         {:id id}]
-       cypher-query (map format-link)))
+       cypher-query (map format-link) doall))
 
 (defn delete-property! [vertex property]
   (-> [(str "MATCH (a) WHERE ID(a) = {id}"
