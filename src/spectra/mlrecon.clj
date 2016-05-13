@@ -19,8 +19,8 @@
 
 (def default-score 0.5)
 (def min-match-prob 0.99)
-(def model-rollover 40)
-(def str-compare-max 500)
+(def model-rollover 0)
+(def str-compare-max 300)
 (def models-dir "/home/alyssa/clojure/spectra/resources/models")
 (def recon-logs "/home/alyssa/recon_log.txt")
 
@@ -143,8 +143,8 @@
 
 (def scoring
   {s/email
-   [[[s/email-body] [is-eq min-len]]
-    [[s/email-subject] [is-eq lcs]]
+   [[[s/email-body] [is-eq min-len lcs lev]]
+    [[s/email-subject] [is-eq lcs lev]]
     [[s/email-received] [abs]]
     [[s/email-sent] [abs]]
     [[s/email-from s/email-addr] [is-eq]]
@@ -389,8 +389,8 @@
          sample-display)))
 
 (defn split-neg-pos [freqs]
-  [(remove #(<= (second (first %)) 0.4) freqs)
-   (remove #(<= 0.2 (second (first %))) freqs)])
+  [(remove #(<= (second (first %)) 0.95) freqs)
+   (remove #(<= 0.05 (second (first %))) freqs)])
 
 (defn adjust-weight [n]
   (fn [point]
@@ -414,14 +414,16 @@
   (first (reduce select-candidate [[] 0.0] freqs)))
 
 (defn old-model-points [user class n]
-  (->> (find-candidates user class)
-       (get-diffs user class) (into [])
-       (mapv #(conj % (weka/classify (get @recon-models class)
-                                     (second %))))
-       (mapv rest) frequencies (into [])
-       (mapv update-sqrt) split-neg-pos
-       (mapv #(adjust-weights n %))
-       (map select-candidates)))
+  (if (pos? n)
+    (->> (find-candidates user class)
+         (get-diffs user class) (into [])
+         (mapv #(conj % (weka/classify (get @recon-models class)
+                                       (second %))))
+         (mapv rest) frequencies (into [])
+         (mapv update-sqrt) split-neg-pos
+         (mapv #(adjust-weights n %))
+         (map select-candidates))
+    [[] []]))
 
 (defn old-model-candidates [user class n]
   (let [candidate-map
