@@ -1,5 +1,6 @@
 (ns spectra.mlrecon
-  (:require [clojure.string :as str]
+  (:require [clojure.set :as set]
+            [clojure.string :as str]
             [clojure.java.io :as io]
             [spectra.common :as com]
             [spectra.auth :as auth]
@@ -19,6 +20,7 @@
 (def default-score 0.5)
 (def min-match-prob 0.99)
 (def model-rollover 40)
+(def str-compare-max 500)
 (def models-dir "/home/alyssa/clojure/spectra/resources/models")
 (def recon-logs "/home/alyssa/recon_log.txt")
 
@@ -52,7 +54,15 @@
          (zipmap classes)
          (reset! min-match-score))))
 
-(defn lev-distance [a b]
+(defn str-compare-truncate [s]
+  (let [cs (count s)]
+    (if (<= cs (* 3 str-compare-max))
+      s (str (subs s 0 str-compare-max)
+             (subs s (- (/ cs 2) (/ str-compare-max 2))
+                   (+ (/ cs 2) (/ str-compare-max 2)))
+             (subs s (- cs str-compare-max) cs)))))
+
+(defnp lev-distance [a b]
   (/ (StringUtils/getLevenshteinDistance a b)
      (float (max (count a) (count b)))))
 
@@ -60,7 +70,9 @@
   (if (or (empty? coll1) (empty? coll2)
           (every? empty? coll1) (every? empty? coll2))
     default-score
-    (->> (for [x coll1 y coll2] (vector x y))
+    (->> (for [x (map str-compare-truncate coll1)
+               y (map str-compare-truncate coll2)]
+           (vector x y))
          (map #(lev-distance (first %) (second %)))
          (apply min))))
 
@@ -117,7 +129,7 @@
   (if (or (empty? coll1) (empty? coll2)
           (every? empty? coll1) (every? empty? coll2))
     default-score
-    (let [coll (concat coll1 coll2)]
+    (let [coll (map str-compare-truncate (concat coll1 coll2))]
       (->> (doto (lcs-solver)
              (#(dotimes [i (count coll)]
                  (.add % (-> coll (nth i))))))
@@ -410,6 +422,14 @@
        (mapv update-sqrt) split-neg-pos
        (mapv #(adjust-weights n %))
        (map select-candidates)))
+
+(defn old-model-candidates [user class n]
+  (let [candidate-map
+        (->> (find-candidates user class)
+             (get-diffs user class)
+             set/map-invert)]
+    (->> (old-model-points user class n)
+         (map #(map candidate-map %)))))
 
 (defn append-scores [pos-and-neg]
   [(->> pos-and-neg first
