@@ -289,7 +289,7 @@
              "]->(b) RETURN ID(root), labels(root) LIMIT {limit}")
         {:limit limit}]
        neo4j/cypher-query
-       (pmap #(update % "labels(root)" find-user-labels))
+       (map #(update % "labels(root)" find-user-labels))
        (map #(set/rename-keys % {"ID(root)" :id
                                  "labels(root)" s/user}))))
 
