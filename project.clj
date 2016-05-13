@@ -8,7 +8,7 @@
                  [ns-tracker "0.3.0"]
                  [clj-time "0.11.0"
                   :exclusions [joda-time]]
-                 [clj-http "3.0.1"]
+                 [clj-http "3.1.0"]
                  [http-kit "2.1.19"]
                  [ring/ring-core "1.4.0"]
                  [ring/ring-devel "1.4.0"]
