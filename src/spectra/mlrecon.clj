@@ -18,7 +18,6 @@
            [org.apache.commons.lang3 StringUtils]))
 
 (def default-score 0.5)
-(def min-match-prob 0.99)
 (def model-rollover 0)
 (def str-compare-max 300)
 (def models-dir "/home/alyssa/clojure/spectra/resources/models")
@@ -51,7 +50,6 @@
 (defn load-thresholds! []
   (let [classes (keys @recon-models)]
     (->> (map load-curve! classes)
-         (map #(weka/reverse-logit % min-match-prob))
          (zipmap classes)
          (reset! min-match-score))))
 
