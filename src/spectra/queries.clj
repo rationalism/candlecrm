@@ -288,7 +288,7 @@
              ")-[:" (neo4j/esc-token s/email-body)
              "]->(b) RETURN ID(root), labels(root) LIMIT {limit}")
         {:limit limit}]
-       neo4j/cypher-query
+       neo4j/cypher-query (map clojure-map)
        (map #(update % "labels(root)" find-user-labels))
        (map #(set/rename-keys % {"ID(root)" :id
                                  "labels(root)" s/user}))))
