@@ -401,7 +401,7 @@
 (defn select-candidates [freqs]
   (first (reduce select-candidate [[] 0.0] freqs)))
 
-(defn old-model-candidates [user class n]
+(defn old-model-points [user class n]
   (->> (find-candidates user class)
        (get-diffs user class) (into [])
        (mapv #(conj % (weka/classify (get @recon-models class)
@@ -420,7 +420,7 @@
 (defn train-forest [user class pos-cs neg-cs]
   (->> [pos-cs neg-cs]
        (map #(get-diffs user class %)) (map vals)
-       (vector (old-model-candidates user class model-rollover))
+       (vector (old-model-points user class model-rollover))
        (apply map vector) (map #(apply concat %))
        append-scores (apply concat)
        weka/save-traindat weka/make-forest))
