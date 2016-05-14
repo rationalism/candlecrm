@@ -62,7 +62,8 @@
                  [org.apache.commons/commons-lang3 "3.4"]
                  [com.sendgrid/sendgrid-java "2.2.2"]
                  [reagent-forms "0.5.23"
-                  :exclusions [com.google.guava/guava]]]
+                  :exclusions [com.google.guava/guava]]
+                 [org.apache.commons/commons-math3 "3.6.1"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.3"]
             [lein-kibit "0.1.2"
