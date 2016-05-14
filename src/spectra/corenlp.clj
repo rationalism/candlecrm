@@ -109,7 +109,12 @@
   annotation)
 
 (defn get-tokens [words]
-  (.get words CoreAnnotations$TokensAnnotation))
+  (try
+    (.get words CoreAnnotations$TokensAnnotation)
+    (catch Exception e
+      (println "Error: Could not get tokens")
+      (println e)
+      (pr-str words))))
 
 (defn get-sentences [parsed-text]
   (try
