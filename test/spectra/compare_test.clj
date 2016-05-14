@@ -2,5 +2,7 @@
   (:require [clojure.test :refer :all]
             [spectra.compare :refer :all]))
 
-(deftest first-test
-  (is "Tests should be written"))
+(deftest estimation-test
+  (testing "Do estimation on test data"
+    (is (-> 20 test-candidates
+            (estimate-scores test-score)))))
