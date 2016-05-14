@@ -41,7 +41,9 @@
 (defn load-models! []
   (reset! recon-models {})
   (new-model! s/person models-dir)
-  (new-model! s/email models-dir))
+  (new-model! s/email models-dir)
+  (new-model! s/event models-dir)
+  (new-model! s/location models-dir))
 
 (defn load-curve! [class]
   (weka/deserialize
