@@ -259,10 +259,6 @@
         (maybe-add s/s-name (:email-from-name header))
         (maybe-add s/email-addr (:email-from-addr header)))))
 
-(defn assoc-if-found [marks map-key coll]
-  (if (or (nil? coll) (empty? coll)) marks
-      (assoc marks map-key (first coll))))
-
 (defn first-header [sep-model lines]
   (if (or (nil? lines) (empty? lines))
     0 (loop [cnt 0]
@@ -290,15 +286,44 @@
           (str/join "" lines)
           email-domains))
 
+(defn name-locations [header name]
+  (loop [locations nil remainder header]
+    (if-let [loc (str/index-of remainder name)]
+      (recur (if locations
+               (conj locations (+ loc (last locations) (count name)))
+               [loc])
+             (subs remainder (+ loc (count name))))
+      (->> name (repeat (count locations))
+           (interleave locations) (partition 2)))))
+
+(defn loc-distance [header email]
+  (let [pos (str/last-index-of header email)]
+    (fn [pair]
+      (update (vec pair) 0
+              #(-> % (- pos) Math/abs)))))
+
+(defn pick-name [header models email]
+  (when email
+    (let [names (->> header (nlp/run-nlp-default models)
+                     nlp/nlp-names (map first))]
+      (->> (mapcat #(name-locations header %) names)
+           (map (loc-distance header email))
+           (sort-by first) first second))))
+
+(defn header-parse [header models]
+  (let [date (-> header sent-date last)
+        email (-> header regex/find-email-addrs last)
+        name (pick-name header models email)]
+    (merge (if date {s/email-sent date} {})
+           (if email {:email-from-addr email} {})
+           (if name {:email-from-name name} {}))))
+
 (defn find-header-vals [marks models lines]
   (let [header-lines (->> [0 (:end-header marks) lines]
                           (apply com/slice)
                           join-lines)]
     (if (empty? header-lines) marks
-        (-> (assoc-if-found marks s/email-sent (sent-date header-lines))
-            (assoc-if-found :email-from-addr (regex/find-email-addrs header-lines))
-            (assoc-if-found :email-from-name (->> header-lines (nlp/run-nlp-default models)
-                                                  nlp/nlp-names (map first)))))))
+        (merge marks (header-parse header-lines models)))))
 
 (defn find-end-header [marks sep-model lines]
   (->> lines (first-body sep-model)
