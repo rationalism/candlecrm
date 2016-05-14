@@ -114,7 +114,8 @@
     (catch Exception e
       (println "Error: Could not get tokens")
       (println e)
-      (pr-str words))))
+      (pr-str words)
+      [])))
 
 (defn get-sentences [parsed-text]
   (try
