@@ -166,7 +166,10 @@
     [[s/desc2] [is-eq lcs lev]]
     [[s/item-cost] [is-eq abs]]]
    s/location
-   [[[s/s-name] [is-eq lcs lev shortest]]]})
+   [[[s/s-name] [is-eq lcs lev shortest]]]
+   s/event
+   [[[s/start-time] [is-eq abs]]
+    [[s/stop-time] [is-eq abs]]]})
 
 (def candidates
   {s/email
@@ -178,7 +181,9 @@
    [s/part-name s/catalog-name s/desc1
     s/desc2 s/item-cost]
    s/location
-   [s/s-name]})
+   [s/s-name]
+   s/event
+   [s/start-time s/stop-time]})
 
 (defn merge-link [link]
   [(str "MATCH (a) WHERE ID(a) = {id1}"
