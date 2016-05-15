@@ -6,6 +6,9 @@
 (defn fmap [m fn]
   (reduce #(update %1 %2 fn) m (keys m)))
 
+(defn zipvec [a b]
+  (map vector a b))
+
 (defn reset-if-found! [list header index]
   (if (and (not (nil? list)) (pos? (count list)))
     (reset! (index header) (first list))))

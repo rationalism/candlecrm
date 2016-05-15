@@ -9,6 +9,11 @@
     (is (= {:a 2 :b 3 :c 4}
            (fmap {:a 1 :b 2 :c 3} inc)))))
 
+(deftest zipvec-test
+  (testing "Zip two vectors into a single vector"
+    (is (= [[1 6] [2 7] [3 8] [4 9] [5 10]]
+           (zipvec [1 2 3 4 5] [6 7 8 9 10])))))
+
 (deftest slice-test
   (testing "Slice function"
     (is (= [4 5 6 7]
