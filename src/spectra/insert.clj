@@ -104,15 +104,12 @@
        " AND v." (neo4j/esc-token s/value)
        " IS NOT NULL"))
 
-(defn vals-map [m]
-  (reduce #(update %1 %2 vals) m (keys m)))
-
 (defn edit-entity! [user query-map]
   (let [fields (:fields query-map)
         attrs (->> (dissoc fields :id :type :label) keys
                    (map neo4j/esc-token) (str/join "|"))]
     (->> (-> fields (dissoc :id :type :label)
-             vals-map (hash-map (:id fields)) first
+             (fmap vals) (hash-map (:id fields)) first
              (id-pair-cypher user))
          (concat
           [[(str "MATCH (root) WHERE ID(root) = {id}"

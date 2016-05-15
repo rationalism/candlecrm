@@ -253,9 +253,6 @@
             (map #(str "b" %))
             (str/join ", "))))
 
-(defn vectorize [m]
-  (reduce #(update %1 %2 vector) m (keys m)))
-
 (defn fetch-paths-query [id paths]
   [(str "MATCH (root) WHERE ID(root) = {id}"
         " WITH root " (all-paths paths)
@@ -336,10 +333,8 @@
        (first fp)))
 
 (defn score-diff [rules diff]
-  (->> (apply interleave diff)
-       (partition 2)
-       (interleave (map second rules))
-       (partition 2)
+  (->> (apply zipvec diff)
+       (zipvec (map second rules))
        (map diff-pair) flatten))
 
 (defnp get-diffs [user class cs]
@@ -352,14 +347,10 @@
          (zipmap cs) dump-recon-log)))
 
 (defnp score-map [forest mo]
-  (reduce
-   #(update %1 %2 (partial weka/classify forest))
-   mo (keys mo)))
+  (fmap mo (partial weka/classify forest)))
 
 (defn adjust-scores [logit mo]
-  (reduce
-   #(update %1 %2 (partial weka/classify-logit logit))
-   mo (keys mo)))
+  (fmap mo (partial weka/classify-logit logit)))
 
 (defn score-all [user class]
   (->> (find-candidates user class)
@@ -484,11 +475,11 @@
           (->> b (map #(re-seq #">" %))
                (map count) all-eq not)
           (->> b (map #(re-seq #">" %))
-               (map count) (interleave b)
-               (partition 2) (sort-by second) ffirst)
+               (map count) (zipvec b)
+               (sort-by second) ffirst)
           (->> b (map count) all-eq not)
-          (->> b (map count) (interleave b)
-               (partition 2) (sort-by second) ffirst)
+          (->> b (map count) (zipvec b)
+               (sort-by second) ffirst)
           :else (first b)))))
 
 (defn body-id [email-id]

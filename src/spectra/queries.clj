@@ -271,8 +271,7 @@
     (->> s/search-preds
          (map #(partial-val-query user query %))
          neo4j/cypher-combined-tx
-         (interleave s/search-preds)
-         (partition 2) (map vec) vec
+         (zipvec s/search-preds) vec
          (remove #(-> % second empty?))
          (map (comp include-pred search-row id-row))
          flatten)))

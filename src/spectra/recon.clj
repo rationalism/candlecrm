@@ -26,9 +26,7 @@
        (map #(map second %))))
 
 (defn vectorize [node]
-  (reduce
-   (fn [m k] (update m k #(if (coll? %) % (vector %))))
-   node (keys node)))
+  (fmap node #(if (coll? %) % (vector %))))
 
 (defn devectorize [node]
   (reduce
@@ -36,7 +34,7 @@
    node (keys node)))
 
 (defn distinct-all [m]
-  (reduce #(update %1 %2 distinct) m (keys m)))
+  (fmap m distinct))
 
 (defn merge-nodes [nodes]
   (->> (map vectorize nodes)

@@ -28,13 +28,11 @@
 (defn estimate-init [candidates]
   (->> (/ (- random-limit 1) 2)
        (* pretty-mult) (repeat (count candidates))
-       (interleave candidates)
-       (partition 2) (map vec) vec))
+       (zipvec candidates) vec))
 
 (defn test-candidates [n]
   (->> #(* pretty-mult (rand-int random-limit))
-       (repeatedly n) (interleave (range n))
-       (partition 2)))
+       (repeatedly n) (zipvec (range n))))
 
 (defn test-score [c1 c2]
   (-> (second c2) (- (second c1))

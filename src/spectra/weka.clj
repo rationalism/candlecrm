@@ -104,8 +104,7 @@
   (reduce #(set-value %1 %2)
           (doto (DenseInstance. (count point))
             (.setDataset dataset))
-          (->> point (interleave (range (count point)))
-               (partition 2))))
+          (zipvec (range (count point)) point)))
 
 (defn add-point [instances point]
   (doto instances

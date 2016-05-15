@@ -167,12 +167,8 @@
         (maybe-add s/email-addr email-addr)
         (blacklist-check email-addr addr))))
 
-(defn decode-addresses [addresses]
-  (map addr-person addresses))
-
 (defn decode-addr-map [addr-map]
-  (reduce #(update %1 %2 decode-addresses)
-          addr-map (keys addr-map)))
+  (fmap addr-map #(map addr-person %)))
 
 (defn decode-header [header]
   {(.getName header) (.getValue header)})
@@ -294,7 +290,7 @@
                [loc])
              (subs remainder (+ loc (count name))))
       (->> name (repeat (count locations))
-           (interleave locations) (partition 2)))))
+           (zipvec locations)))))
 
 (defn loc-distance [header email]
   (let [pos (str/last-index-of header email)]
