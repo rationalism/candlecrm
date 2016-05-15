@@ -2,7 +2,7 @@
   (:require [clojure.set :as set]
             [clojure.string :as str]
             [clojure.java.io :as io]
-            [spectra.common :as com]
+            [spectra.common :refer :all]
             [spectra.auth :as auth]
             [spectra.cluster :as cluster]
             [spectra.compare :as compare]

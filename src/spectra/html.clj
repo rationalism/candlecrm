@@ -2,6 +2,7 @@
   (:require [environ.core :refer [env]]
             [hiccup.core :refer :all]
             [hiccup.page :refer :all]
+            [spectra.common :refer :all]
             [spectra_cljc.schema :as s]
             [ring.util.anti-forgery :refer :all]))
 

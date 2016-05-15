@@ -2,7 +2,8 @@
   (:require [loom.alg :as galg]
             [loom.attr :as attr]
             [loom.graph :as graph]
-            [loom.io :as gviz]))
+            [loom.io :as gviz]
+            [spectra.common :refer :all]))
 
 (defn has-edge? [g edge]
   (graph/has-edge? g (first edge) (second edge)))

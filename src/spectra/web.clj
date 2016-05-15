@@ -6,6 +6,7 @@
             [ring.middleware.defaults :refer :all]
             [clojure.java.io :as io]
             [spectra_cljc.schema :as s]
+            [spectra.common :refer :all]
             [spectra.ajax :as ajax]
             [spectra.auth :as auth]
             [spectra.email :as email]

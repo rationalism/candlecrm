@@ -1,7 +1,7 @@
 (ns spectra.insert
   (:require [clojure.string :as str]
             [clojure-csv.core :as csv]
-            [spectra.common :as com]
+            [spectra.common :refer :all]
             [spectra.datetime :as dt]
             [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]

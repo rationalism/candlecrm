@@ -1,5 +1,6 @@
 (ns spectra.nlptrain
   (:require [clojure.string :as str]
+            [spectra.common :refer :all]
             [spectra.corenlp :as nlp])
   (:import [edu.stanford.nlp.ie.crf CRFClassifier]))
 

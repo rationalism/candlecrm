@@ -1,5 +1,6 @@
 (ns spectra.pages
-  (:require [spectra.auth :as auth]
+  (:require [spectra.common :refer :all]
+            [spectra.auth :as auth]
             [spectra.email :as email]
             [spectra.google :as google]
             [spectra.html :as html]

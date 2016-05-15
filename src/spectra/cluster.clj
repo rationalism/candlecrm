@@ -1,6 +1,6 @@
 (ns spectra.cluster
   (:require [clojure.string :as str]
-            [spectra.common :as com]
+            [spectra.common :refer :all]
             [spectra.loom :as loom]))
 
 (defn random-graph [n]

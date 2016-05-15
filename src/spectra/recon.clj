@@ -1,6 +1,6 @@
 (ns spectra.recon
   (:require [clojure.string :as str]
-            [spectra.common :as com]
+            [spectra.common :refer :all]
             [spectra.corenlp :as nlp]
             [spectra.datetime :as dt]
             [spectra.loom :as loom]

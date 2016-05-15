@@ -1,6 +1,6 @@
 (ns spectra.corenlp
   (:require [clojure.string :as str]
-            [spectra.common :as com]
+            [spectra.common :refer :all]
             [spectra.datetime :as dt]
             [spectra.loom :as loom]
             [spectra_cljc.schema :as s]
@@ -170,7 +170,7 @@
   (vector start (+ start (count word))))
 
 (defn last-boundaries [boundaries sentence]
-  (if (com/nil-or-empty? boundaries)
+  (if (nil-or-empty? boundaries)
     (.get sentence CoreAnnotations$CharacterOffsetBeginAnnotation)
     (-> boundaries last second)))
 
@@ -227,7 +227,7 @@
   (->> pos-list
        (map #(mapv str %))
        (map #(str/join " " %))
-       (str/join " ") com/sha1))
+       (str/join " ") sha1))
 
 (defn tokens-pos [sent-num tokens]
   (map #(vector sent-num (.index %)) tokens))
@@ -246,7 +246,7 @@
               (.endIndex mention))
        (map str)
        (map #(str (.sentNum mention) " " %))
-       (str/join " ") com/sha1))
+       (str/join " ") sha1))
 
 (defn mention-nodes [nodes]
   (map #(.mentionSpan %) nodes))
@@ -381,7 +381,7 @@
 (defn pos-map-edit [g pos-map]
   (loom/replace-node
    g (pos-map-only g)
-   (com/compose-maps (pos-map-only g) pos-map)))
+   (compose-maps (pos-map-only g) pos-map)))
 
 (declare edit-graph breakup-node)
 
@@ -444,7 +444,7 @@
 
 (defn pronoun-node []
   (as-> "!PRONOUN!" $
-    (hash-map (com/sha1 $) $)))
+    (hash-map (sha1 $) $)))
 
 (defn pronoun-edge [node]
   [node (pronoun-node) s/has-type])
@@ -618,7 +618,7 @@
   (->> (loom/out-edges g pronoun)
        (remove #(= s/coref-is (nth % 2)))
        (remove #(= s/has-type (nth % 2)))
-       (map #(com/slice 1 3 %))
+       (map #(slice 1 3 %))
        (map #(into (vector (find-referent g pronoun)) %))))
 
 (defn rewrite-pronouns [g]

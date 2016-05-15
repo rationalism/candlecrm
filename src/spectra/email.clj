@@ -3,7 +3,7 @@
             [crypto.random :as rnd]
             [spectra.async :as async]
             [spectra.auth :as auth]
-            [spectra.common :as com]
+            [spectra.common :refer :all]
             [spectra.datetime :as dt]
             [spectra.google :as google]
             [spectra.insert :as insert]
@@ -87,7 +87,7 @@
 
 (defn subject [message]
   (let [subject (.getSubject message)]
-    (if (com/nil-or-empty? subject)
+    (if (nil-or-empty? subject)
       "(no subject)" subject)))
 
 (defn received-time [message]
@@ -320,8 +320,7 @@
 
 (defn find-header-vals [marks models lines]
   (let [header-lines (->> [0 (:end-header marks) lines]
-                          (apply com/slice)
-                          join-lines)]
+                          (apply slice) join-lines)]
     (if (empty? header-lines) marks
         (merge marks (header-parse header-lines models)))))
 
@@ -364,8 +363,8 @@
   (remove-arrows (count-min-depth lines) lines))
 
 (defn new-top [marks chain]
-  (let [new-slice (com/slice (:end-body marks) (:start-tail marks)
-                             (chain-lines chain))]
+  (let [new-slice (slice (:end-body marks) (:start-tail marks)
+                         (chain-lines chain))]
     {s/email-body (remove-arrows-if new-slice)}))
 
 (defn end-bottom [chain]
@@ -379,8 +378,8 @@
 
 (defn make-new-node [marks chain]
   (let [lines (chain-lines chain)]
-    (->> (com/slice (:start-tail marks) (count lines) lines)
-         (concat (com/slice (:end-header marks) (:end-body marks) lines))
+    (->> (slice (:start-tail marks) (count lines) lines)
+         (concat (slice (:end-header marks) (:end-body marks) lines))
          (sub-email marks))))
 
 (defn maybe-add-edges [chain new-node email-from]
@@ -515,7 +514,7 @@
   (str "<node " (get m text) ">" text "</node>"))
 
 (defn hyperlink-text [text mentions]
-  (if (com/nil-or-empty? mentions) text
+  (if (nil-or-empty? mentions) text
       (str/replace text (-> mentions keys regex/regex-or)
                    (partial hash-brackets mentions))))
 
@@ -567,7 +566,7 @@
        (map link-pair) (apply merge)))
 
 (defn make-nlp-chain [models message chain]
-  (when (-> message s/email-body com/nil-or-empty? not)
+  (when (-> message s/email-body nil-or-empty? not)
     (let [nlp-result
           (->> message s/email-body
                (nlp/run-nlp-full models (author-name chain message)))]

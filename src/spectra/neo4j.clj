@@ -1,6 +1,6 @@
 (ns spectra.neo4j
   (:require [clojure.string :as str]
-            [spectra.common :as com]
+            [spectra.common :refer :all]
             [spectra.datetime :as dt]
             [spectra_cljc.schema :as s]
             [environ.core :refer [env]]
@@ -41,7 +41,7 @@
 
 (defn filter-props [props]
   (->> props
-       (filter #(com/not-nil-ext? (val %)))
+       (filter #(not-nil-ext? (val %)))
        (map dt/catch-dates-map)
        (map catch-keywords)
        (into {})))
@@ -88,7 +88,7 @@
 (defn cypher-properties [props]
   (str "{ "
        (->> props
-            (filter com/val-not-nil?)
+            (filter val-not-nil?)
             (map cypher-property)
             (str/join ", "))
        " }"))
@@ -221,7 +221,7 @@
        cypher-list first))
 
 (defn get-vertices [user class props]
-  (->> props (filter com/val-not-nil?) (map val-query)
+  (->> props (filter val-not-nil?) (map val-query)
        (concat [(str "MATCH (root:" (prop-label user class) ")")])
        (str/join " WITH root ")
        (add-return props) cypher-list))

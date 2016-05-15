@@ -9,7 +9,7 @@
             [clojure.set :as cset]
             [clojure.string :as str]
             [spectra.auth :as auth]
-            [spectra.common :as com]
+            [spectra.common :refer :all]
             [spectra.contacts :as contacts]
             [spectra.datetime :as dt]
             [spectra.email :as email]

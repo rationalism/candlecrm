@@ -1,6 +1,6 @@
 (ns spectra.compare
   (:require [clojure.string :as str]
-            [spectra.common :as com]
+            [spectra.common :refer :all]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [org.apache.commons.math3.distribution NormalDistribution]))

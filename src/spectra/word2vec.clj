@@ -1,5 +1,6 @@
 (ns spectra.word2vec
-  (:require [spectra.corenlp :as nlp]
+  (:require [spectra.common :refer :all]
+            [spectra.corenlp :as nlp]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [org.deeplearning4j.text.sentenceiterator

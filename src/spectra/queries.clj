@@ -1,8 +1,8 @@
 (ns spectra.queries
   (:require [clojure.set :as set]
             [clojure.string :as str]
+            [spectra.common :refer :all]
             [spectra.auth :as auth]
-            [spectra.common :as com]
             [spectra.mlrecon :as mlrecon] 
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]

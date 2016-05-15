@@ -1,7 +1,7 @@
 (ns spectra.deepnet
   (:require [clojure.java.io :as io]
             [environ.core :refer [env]]
-            [spectra.common :as com]
+            [spectra.common :refer :all]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [org.deeplearning4j.datasets.iterator DataSetIterator]

@@ -1,6 +1,6 @@
 (ns spectra.contacts
   (:require [spectra.auth :as auth]
-            [spectra.common :as com]
+            [spectra.common :refer :all]
             [spectra.datetime :as dt]
             [spectra.google :as google]
             [spectra.insert :as insert]
@@ -70,7 +70,7 @@
 
 (defn filter-map [contact-map]
   (->> contact-map
-       (filter #(-> % val com/not-nil-ext?))
+       (filter #(-> % val not-nil-ext?))
        (into {})))
 
 (defn maybe-add [m k v]

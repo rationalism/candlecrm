@@ -1,6 +1,7 @@
 (ns spectra.async
   (:require [clojure.core.async :as async]
             [clojure.set :as set]
+            [spectra.common :refer :all]
             [spectra.neo4j :as neo4j]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))

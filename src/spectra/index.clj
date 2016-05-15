@@ -1,5 +1,6 @@
 (ns spectra.index
-  (:require [spectra.neo4j :as neo4j]
+  (:require [spectra.common :refer :all]
+            [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]))
 
 (def unique-exists-vals
