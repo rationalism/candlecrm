@@ -31,11 +31,11 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.0"
                   :classifier "models"]
                  [com.googlecode.libphonenumber/libphonenumber "7.4.0"]
-                 [org.deeplearning4j/deeplearning4j-core "0.4-rc3.8"
+                 [org.deeplearning4j/deeplearning4j-core "0.4-rc3.9"
                   :exclusions [com.google.guava/guava junit
                                com.fasterxml.jackson.core/jackson-core
                                org.json/json]]
-                 [org.deeplearning4j/deeplearning4j-nlp "0.4-rc3.8"
+                 [org.deeplearning4j/deeplearning4j-nlp "0.4-rc3.9"
                   :uberjar-merge-with {#"\.properties$" [slurp str spit]
                                        "reference.conf" [slurp str spit]}
                   :exclusions [com.google.guava/guava args4j
@@ -46,7 +46,7 @@
                   :exclusions [com.google.guava/guava]]
                  [com.joestelmach/natty "0.12"]
                  [org.neo4j.driver/neo4j-java-driver "1.0.1"]
-                 [pandect "0.5.4"
+                 [pandect "0.6.0"
                   :exclusions [org.bouncycastle/bcprov-jdk15on]]
                  [aysylu/loom "0.6.0"]
                  [com.taoensso/sente "1.8.1"]
