@@ -16,7 +16,8 @@
   (:import [com.googlecode.concurrenttrees.solver LCSubstringSolver]
            [com.googlecode.concurrenttrees.radix.node.concrete
             SmartArrayBasedNodeFactory]
-           [org.apache.commons.lang3 StringUtils]))
+           [org.apache.commons.lang3 StringUtils]
+           [org.bitbucket.cowwoc.diffmatchpatch DiffMatchPatch]))
 
 (def default-score 0.5)
 (def model-rollover 0)
@@ -55,6 +56,11 @@
     (->> (map load-curve! classes)
          (zipmap classes)
          (reset! recon-logit))))
+
+(defn run-diff [s1 s2]
+  (let [dmp (DiffMatchPatch. )
+        d (.diffMain dmp s1 s2 true)]
+    (.diffCleanupSemantic dmp d) d))
 
 (defn str-compare-truncate [s]
   (let [cs (count s)]

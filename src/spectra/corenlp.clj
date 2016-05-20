@@ -94,10 +94,9 @@
 (defnp run-nlp [pipeline text]
   (try
     (swap! letter-count #(+ % (count text)))
-    ;; Global var needed for mutating Java method
-    (def parsed-text (Annotation. text))
-    (.annotate pipeline parsed-text)
-    parsed-text
+    (let [parsed-text (Annotation. text)]
+      (.annotate pipeline parsed-text)
+      parsed-text)
     (catch Exception e
       (do (println "NLP parsing error on text:")
           (println text)
