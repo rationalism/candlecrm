@@ -17,7 +17,8 @@
            [com.googlecode.concurrenttrees.radix.node.concrete
             SmartArrayBasedNodeFactory]
            [org.apache.commons.lang3 StringUtils]
-           [org.bitbucket.cowwoc.diffmatchpatch DiffMatchPatch]))
+           [org.bitbucket.cowwoc.diffmatchpatch DiffMatchPatch
+            DiffMatchPatch$Operation]))
 
 (def default-score 0.5)
 (def model-rollover 0)
@@ -272,6 +273,12 @@
   (-> (fetch-paths-query id paths)
       vector neo4j/cypher-combined-tx
       parse-paths first))
+
+(defn prop-diff [id1 id2 prop]
+  (->> (map #(fetch-paths % [[prop]]) [id1 id2])
+       (map ffirst) (apply run-diff)
+       (remove #(= (.-operation %)
+                   DiffMatchPatch$Operation/EQUAL))))
 
 (defn fetch-all-paths [paths ids]
   (->> (map #(fetch-paths-query % paths) ids)
