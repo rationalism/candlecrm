@@ -342,9 +342,8 @@
         vs (->> cs flatten distinct
                 (fetch-all-paths (map first rules)))]
     (->> (map #(pair-map % vs) cs)
-         dump-recon-log
          (map #(score-diff rules %))
-         (zipmap cs) dump-recon-log)))
+         (zipmap cs))))
 
 (defnp score-map [forest mo]
   (fmap mo (partial weka/classify forest)))
@@ -357,7 +356,6 @@
        (get-diffs user class)
        (score-map (get @recon-models class))
        (adjust-scores (get @recon-logit class))
-       dump-recon-log
        (into [])))
 
 (defn log2 [x]
