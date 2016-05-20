@@ -81,9 +81,9 @@
   (.getMessagesByUID folder begin end))
 
 (defnp fetch-messages [folder begin end]
-  (def q (messages-in-range folder begin end))
-  (.fetch folder q (fetch-profile-all))
-  (into [] q))
+  (let [messages (messages-in-range folder begin end)]
+    (.fetch folder messages (fetch-profile-all))
+    (into [] messages)))
 
 (defn subject [message]
   (let [subject (.getSubject message)]
