@@ -13,10 +13,7 @@
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
-  (:import [com.googlecode.concurrenttrees.solver LCSubstringSolver]
-           [com.googlecode.concurrenttrees.radix.node.concrete
-            SmartArrayBasedNodeFactory]
-           [org.apache.commons.lang3 StringUtils]
+  (:import [org.apache.commons.lang3 StringUtils]
            [org.bitbucket.cowwoc.diffmatchpatch DiffMatchPatch
             DiffMatchPatch$Operation]))
 
@@ -130,22 +127,21 @@
        (apply max)
        (/ (count s))))
 
-(defn lcs-solver []
-  (LCSubstringSolver.
-   (SmartArrayBasedNodeFactory. )))
+(defn lcs-pair [a b]
+  (->> (run-diff a b)
+       (filter #(= (.-operation %)
+                   DiffMatchPatch$Operation/EQUAL))
+       (map #(.-text %)) (apply str)))
+
+(defn lcs-coll [coll]
+  (reduce lcs-pair coll))
 
 (defn lcs [coll1 coll2]
   (if (or (empty? coll1) (empty? coll2)
           (every? empty? coll1) (every? empty? coll2))
     default-score
-    (let [coll (map str-compare-truncate (concat coll1 coll2))]
-      (->> (doto (lcs-solver)
-             (#(dotimes [i (count coll)]
-                 (.add % (-> coll (nth i))))))
-           (.getLongestCommonSubstring)
-           (.toString)
-           (max-lcs (map str-compare-truncate coll1)
-                    (map str-compare-truncate coll2))))))
+    (->> (concat coll1 coll2) lcs-coll
+         (max-lcs coll1 coll2))))
 
 (defn shortest [coll1 coll2]
   (->> [coll1 coll2] flatten
@@ -276,7 +272,7 @@
 
 (defn prop-diff [id1 id2 prop]
   (->> (map #(fetch-paths % [[prop]]) [id1 id2])
-       (map ffirst) (apply run-diff)
+       (map ffirst) debug (apply run-diff)
        (remove #(= (.-operation %)
                    DiffMatchPatch$Operation/EQUAL))))
 
