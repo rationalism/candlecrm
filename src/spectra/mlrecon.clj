@@ -53,7 +53,8 @@
    (str models-dir "/" (name class) "-curve.dat")))
 
 (defn load-thresholds! []
-  (let [classes (keys @recon-models)]
+  (let [classes (->> [@recon-models @conflict-models]
+                     (map keys) (apply concat))]
     (->> (map load-curve! classes)
          (zipmap classes)
          (reset! recon-logit))))
@@ -404,6 +405,12 @@
   (fetch-all-paths
    (map first (get scoring class))
    ids))
+
+(defnp conflict-prob [class]
+  (fn [d1 d2]
+    (->> (score-diff (get scoring class) [d1 d2])
+         (weka/classify (get @conflict-models class))
+         (weka/classify-logit (get @recon-logit class)))))
 
 (defnp score-map [forest mo]
   (fmap mo (partial weka/classify forest)))
