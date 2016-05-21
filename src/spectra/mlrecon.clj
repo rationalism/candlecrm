@@ -516,10 +516,6 @@
        (loom/build-graph [])
        cluster/vote-clustering))
 
-(defn make-pairs [coll]
-  (->> coll (mapcat #(repeat 2 %))
-       rest butlast (partition 2)))
-
 (defn all-eq [coll]
   (if (empty? coll) true
       (let [s (sort coll)]
