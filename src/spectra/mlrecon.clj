@@ -414,7 +414,8 @@
 
 (defnp conflict-prob [class]
   (fn [d1 d2]
-    (->> (score-diff (get scoring class) [d1 d2])
+    (->> (map second [d1 d2])
+         (score-diff (get scoring class))
          (weka/classify (get @conflict-models class))
          (weka/classify-logit (get @recon-logit class)))))
 
@@ -534,55 +535,30 @@
        (loom/build-graph [])
        cluster/vote-clustering))
 
-(defn all-eq [coll]
-  (if (empty? coll) true
-      (let [s (sort coll)]
-        (= (first s) (last s)))))
-
-(defn choose-body [bodies]
-  (let [b (->> bodies (remove nil?) (remove empty?))]
-    (if (empty? b) ""
-        (cond
-          (->> b (map #(re-seq #">" %))
-               (map count) all-eq not)
-          (->> b (map #(re-seq #">" %))
-               (map count) (zipvec b)
-               (sort-by second) ffirst)
-          (->> b (map count) all-eq not)
-          (->> b (map count) (zipvec b)
-               (sort-by second) ffirst)
-          :else (first b)))))
-
-(defn body-id [email-id]
-  [(str "MATCH (a)-[:" (neo4j/esc-token s/email-body)
-        "]->(b) WHERE ID(a) = {id} RETURN ID(b), b.val")
-   {:id email-id}])
-
-(defn body-ids [id-group]
-  (->> id-group (map body-id)
-       neo4j/cypher-combined-tx
-       (map (comp vals first))))
-
-(defn delete-body [id]
-  [(str "MATCH (a) WHERE ID(a) = {id}"
-        " DETACH DELETE a")
+(defn delete-prop [id class]
+  [(str "MATCH (a)-[:" (neo4j/esc-token class)
+        "]->(b) WHERE ID(a) = {id} DETACH DELETE b")
    {:id id}])
 
-(defn delete-bodies [body-map]
-  (->> (remove #(= (second %)
-                   (->> body-map (map second)
-                        choose-body))
-               body-map)
-       (map first) (remove nil?)
-       (map delete-body)))
+(defn delete-queries [user class groups]
+  (let [values (->> (apply concat groups)
+                    (conflict-data user class))]
+    (->> (map (fn [g] (map #(vector % (values %))
+                           g)) groups)
+         (map #(compare/estimate-scores
+                % (conflict-prob class)))
+         (map rest) (map #(map ffirst %))
+         (apply concat)
+         (map #(delete-prop % class)))))
 
 (defn run-recon! [user class]
   (let [recon-groups (->> class (score-all user)
-                          (groups-to-recon class))
-        ids-to-delete (doall (map body-ids recon-groups))]
+                          (groups-to-recon class))]
     (->> (recon-finished user class)
          (concat (doall (mapcat merge-all recon-groups)))
-         (concat (mapcat delete-bodies ids-to-delete))
+         (concat (->> class conflicts
+                      (mapcat #(delete-queries user % recon-groups))
+                      doall))
          (neo4j/cypher-combined-tx nil))))
 
 (defn prop-and-id [user class prop]

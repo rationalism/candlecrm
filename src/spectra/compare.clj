@@ -71,7 +71,7 @@
         n (-> c Math/log Math/ceil int (* (dec c)))]
     (loop [scores (estimate-init candidates)
            i 0 cnt 0]
-      (if (= cnt n) scores
+      (if (= cnt n) (reverse scores)
           (if (pair-selected? (nth scores i)
                               (nth scores (inc i)))
             (recur (adjust-scores scores i cmp)
