@@ -24,6 +24,7 @@
 (def recon-logs "/home/alyssa/recon_log.txt")
 
 (defonce recon-models (atom {}))
+(defonce conflict-models (atom {}))
 (defonce recon-logit (atom {}))
 
 (defn dump-recon-log [items]
@@ -33,17 +34,19 @@
         items)
   items)
 
-(defn new-model! [class dir]
-  (->> (str dir "/" (name class) ".dat")
+(defn new-model! [class place]
+  (->> (str models-dir "/" (name class) ".dat")
        weka/deserialize
-       (swap! recon-models assoc class)))
+       (swap! place assoc class)))
 
 (defn load-models! []
   (reset! recon-models {})
-  (new-model! s/person models-dir)
-  (new-model! s/email models-dir)
-  (new-model! s/event models-dir)
-  (new-model! s/location models-dir))
+  (reset! conflict-models {})
+  (new-model! s/person recon-models)
+  (new-model! s/email recon-models)
+  (new-model! s/event recon-models)
+  (new-model! s/location recon-models)
+  (new-model! s/email-body conflict-models))
 
 (defn load-curve! [class]
   (weka/deserialize
@@ -56,9 +59,10 @@
          (reset! recon-logit))))
 
 (defn run-diff [s1 s2]
-  (let [dmp (DiffMatchPatch. )
-        d (.diffMain dmp s1 s2 true)]
-    (.diffCleanupSemantic dmp d) d))
+  (if (and s1 s2)
+    (let [dmp (DiffMatchPatch. )
+          d (.diffMain dmp s1 s2 true)]
+      (.diffCleanupSemantic dmp d) d) []))
 
 (defn str-compare-truncate [s]
   (let [cs (count s)]
@@ -100,14 +104,29 @@
   (diff-first
    a b #(Math/abs (- %1 %2))))
 
+(defn sub [a b]
+  (diff-first
+   a b #(- %1 %2)))
+
 (defn is-eq [a b]
   (diff-first
    a b #(if (= %1 %2) 1.0 0.0)))
 
-(defn count-arrows [a b]
-  (diff-first
-   a b #(->> (map (fn [x] (re-seq #">" x)) [%1 %2])
-             (mapv count))))
+(defn nil-test [x]
+  (if (or (empty? x) (every? nil? x))
+    1.0 0.0))
+
+(defn which-nil [a b]
+  (- (nil-test a) (nil-test b)))
+
+(defn diff-second [a b]
+  [a (- a b)])
+
+(defn count-regex [regex]
+  (fn [a b]
+    (diff-first
+     a b #(->> (map (fn [x] (re-seq regex x)) [%1 %2])
+               (mapv count) (apply -)))))
 
 (defn len-and-diff [a b]
   (diff-first
@@ -115,13 +134,17 @@
                 (- (count %2) (count %1)))))
 
 (defn diff-len-adj [s1 s2]
-  (let [diff (->> (run-diff s1 s2)
-                  (remove #(= (.-operation %)
-                              DiffMatchPatch$Operation/EQUAL))
-                  (map #(.-text %)) (apply str))]
-    (/ (->> (re-seq #"\s+" diff)
-            (apply str) count (- (count diff)))
-       (min (count s1) (count s2)) 2)))
+  (diff-first
+   s1 s2
+   (fn [a b]
+     (let [diff (->> (run-diff a b)
+                     (remove #(= (.-operation %)
+                                 DiffMatchPatch$Operation/EQUAL))
+                     (map #(.-text %)) (apply str))]
+       [(min (count a) (count b))
+        (/ (->> (re-seq #"\s+" diff)
+                (apply str) count (- (count diff)))
+           (min (count a) (count b)) 2)]))))
 
 (defn min-len [a b]
   (diff-empty
@@ -157,18 +180,22 @@
                      (max-lcs %1 %2))))
 
 (defn shortest [coll1 coll2]
-  (->> [coll1 coll2] flatten
+  (->> [coll1 coll2] flatten (map first)
        (map count) (apply min)))
+
+(defn longest [coll1 coll2]
+  (->> [coll1 coll2] flatten (map first)
+       (map count) (apply max)))
 
 (def scoring
   {s/email
-   [[[s/email-body] [is-eq min-len lcs lev]]
-    [[s/email-subject] [is-eq lcs lev]]
+   [[[s/email-body] [is-eq min-len lcs lev diff-len-adj]]
+    [[s/email-subject] [is-eq lev]]
     [[s/email-received] [abs]]
     [[s/email-sent] [abs]]
     [[s/email-from s/email-addr] [is-eq]]
     [[s/email-to s/email-addr] [is-eq]]
-    [[s/email-uid] [is-eq]]]
+    [[s/email-uid] [is-eq which-nil]]]
    s/person
    [[[s/s-name] [overlap lcs lev]]
     [[s/email-addr] [overlap is-eq]]
@@ -188,7 +215,13 @@
    [[[s/s-name] [is-eq lcs lev shortest]]]
    s/event
    [[[s/start-time] [is-eq abs]]
-    [[s/stop-time] [is-eq abs]]]})
+    [[s/stop-time] [is-eq abs]]]
+   s/email-body
+   [[[s/email-body] [(count-regex #"\s+") (count-regex #">")
+                     (count-regex #"\n|\r")
+                     len-and-diff diff-len-adj]]
+    [[s/email-uid] [which-nil]]
+    [[s/email-sent] [sub]]]})
 
 (def candidates
   {s/email
@@ -470,8 +503,12 @@
        (map #(get-diffs user class %)) (map vals)
        (vector (old-model-points user class model-rollover))
        (apply map vector) (map #(apply concat %))
-       append-scores (apply concat)
+       append-scores (apply concat) debug
        weka/save-traindat weka/make-forest))
+
+(defn train-full [user class pos-cs neg-cs]
+  (let [f (train-forest user class pos-cs neg-cs)]
+    [f (-> (weka/load-traindat) weka/forest-curve)]))
 
 (defn groups-to-recon [class score-map]
   (->> score-map (map #(update % 0 vec))

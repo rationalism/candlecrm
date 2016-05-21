@@ -51,8 +51,8 @@
   (spit traindat-temp (vec traindat))
   traindat)
 
-(defn load-traindat [filename]
-  (edn/read-string (slurp filename)))
+(defn load-traindat []
+  (edn/read-string (slurp traindat-temp)))
 
 (defn get-copy-fn [class dir]
   (let [model (deserialize (str dir "/" class ".dat"))]
