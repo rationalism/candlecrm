@@ -400,6 +400,11 @@
          (map #(score-diff rules %))
          (zipmap cs))))
 
+(defnp conflict-data [user class ids]
+  (fetch-all-paths
+   (map first (get scoring class))
+   ids))
+
 (defnp score-map [forest mo]
   (fmap mo (partial weka/classify forest)))
 
