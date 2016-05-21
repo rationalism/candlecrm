@@ -68,49 +68,60 @@
                    (+ (/ cs 2) (/ str-compare-max 2)))
              (subs s (- cs str-compare-max) cs)))))
 
+(defn diff-first [a b f]
+  (if (or (not (first a))
+          (not (first b)))
+    default-score
+    (f (first a) (first b))))
+
+(defn diff-empty [a b f]
+  (if (or (empty? a) (empty? b))
+    default-score (f a b)))
+
+(defn diff-empty-all [a b f]
+  (if (or (empty? a) (empty? b)
+          (every? empty? a) (every? empty? b))
+    default-score
+    (f a b)))
+
 (defnp lev-distance [a b]
   (/ (StringUtils/getLevenshteinDistance a b)
      (float (max (count a) (count b)))))
 
 (defn lev [coll1 coll2]
-  (if (or (empty? coll1) (empty? coll2)
-          (every? empty? coll1) (every? empty? coll2))
-    default-score
-    (->> (for [x (map str-compare-truncate coll1)
-               y (map str-compare-truncate coll2)]
-           (vector x y))
-         (map #(lev-distance (first %) (second %)))
-         (apply min))))
+  (diff-empty-all
+   coll1 coll2 #(->> (for [x (map str-compare-truncate %1)
+                           y (map str-compare-truncate %2)]
+                       (vector x y))
+                     (map (fn [x] (apply lev-distance x)))
+                     (apply min))))
 
 (defn abs [a b]
-  (if (or (not (first a))
-          (not (first b)))
-    default-score
-    (->> [a b] (map first)
-         (apply -) Math/abs)))
+  (diff-first
+   a b #(Math/abs (- %1 %2))))
 
 (defn is-eq [a b]
-  (if (or (not (first a))
-          (not (first b)))
-    default-score
-    (if (= (first a) (first b))
-      1.0 0.0)))
+  (diff-first
+   a b #(if (= %1 %2) 1.0 0.0)))
+
+(defn count-arrows [a b]
+  (diff-first
+   a b #(->> (map (fn [x] (re-seq #">" x)) [%1 %2])
+             (mapv count))))
 
 (defn min-len [a b]
-  (if (or (empty? a) (empty? b))
-    default-score
-    (->> [a b] (apply concat)
-         (map count)
-         (apply min))))
+  (diff-empty
+   a b #(->> [%1 %2] (apply concat)
+             (map count)
+             (apply min))))
 
 (defn overlap [a b]
-  (if (or (empty? a) (empty? b))
-    default-score
-    (/ (->> (concat a b) distinct count
-            (- (+ (count a) (count b)))
-            double)
-       (->> [a b] (map count)
-            (apply min) double))))
+  (diff-empty
+   a b #(/ (->> (concat %1 %2) distinct count
+                (- (+ (count %1) (count %2)))
+                double)
+           (->> [%1 %2] (map count)
+                (apply min) double))))
 
 (defn max-lcs [coll1 coll2 s]
   (->> (concat coll1 coll2)
@@ -127,11 +138,9 @@
   (reduce lcs-pair coll))
 
 (defn lcs [coll1 coll2]
-  (if (or (empty? coll1) (empty? coll2)
-          (every? empty? coll1) (every? empty? coll2))
-    default-score
-    (->> (concat coll1 coll2) lcs-coll
-         (max-lcs coll1 coll2))))
+  (diff-empty-all
+   coll1 coll2 #(->> (concat %1 %2) lcs-coll
+                     (max-lcs %1 %2))))
 
 (defn shortest [coll1 coll2]
   (->> [coll1 coll2] flatten
