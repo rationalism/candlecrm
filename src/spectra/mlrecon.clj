@@ -109,6 +109,20 @@
    a b #(->> (map (fn [x] (re-seq #">" x)) [%1 %2])
              (mapv count))))
 
+(defn len-and-diff [a b]
+  (diff-first
+   a b #(vector (count %1)
+                (- (count %2) (count %1)))))
+
+(defn diff-len-adj [s1 s2]
+  (let [diff (->> (run-diff s1 s2)
+                  (remove #(= (.-operation %)
+                              DiffMatchPatch$Operation/EQUAL))
+                  (map #(.-text %)) (apply str))]
+    (/ (->> (re-seq #"\s+" diff)
+            (apply str) count (- (count diff)))
+       (min (count s1) (count s2)) 2)))
+
 (defn min-len [a b]
   (diff-empty
    a b #(->> [%1 %2] (apply concat)
