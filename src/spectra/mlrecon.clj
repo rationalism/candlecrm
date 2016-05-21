@@ -238,6 +238,12 @@
    s/event
    [s/start-time s/stop-time]})
 
+(def conflicts
+  {s/email [s/email-body]
+   s/person []
+   s/location []
+   s/tool []})
+
 (defn merge-link [link]
   [(str "MATCH (a) WHERE ID(a) = {id1}"
         " WITH a MATCH (b) WHERE ID(b) = {id2}"
