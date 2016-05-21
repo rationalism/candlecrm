@@ -112,19 +112,9 @@
        (->> [a b] (map count)
             (apply min) double))))
 
-(defn contains-s [s]
-  (fn [l]
-    (.contains l s)))
-
-(defn filter-s [coll1 coll2 s]
-  [(filter (contains-s s) coll1)
-   (filter (contains-s s) coll2)])
-
 (defn max-lcs [coll1 coll2 s]
-  (->> (filter-s coll1 coll2 s)
-       (map #(map count %))
-       (map #(apply min %))
-       (apply max)
+  (->> (concat coll1 coll2)
+       (map count) (apply min)
        (/ (count s))))
 
 (defn lcs-pair [a b]
