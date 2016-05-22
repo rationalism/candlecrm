@@ -91,7 +91,7 @@
 
 (defn batch-insert! [user contacts]
   (-> (map contact->person contacts)
-      (insert/push-entities! user)))
+      (insert/push-entities! user s/contact-src)))
 
 (defn load-all-contacts! [user]
   (->> user all-contacts

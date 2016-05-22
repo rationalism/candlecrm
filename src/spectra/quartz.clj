@@ -94,7 +94,7 @@
   (-> user email/fetch-imap-folder
       email/last-uid
       new-queue-map vector
-      (insert/push-entities! user)
+      (insert/push-entities! user s/meta-src)
       first neo4j/find-by-id
       (neo4j/create-edge! user s/user-queue)))
 

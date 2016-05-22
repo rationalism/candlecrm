@@ -29,8 +29,8 @@
   (def user (auth/create-user! {:username test-username
                                 :password test-password}))
   
-  (insert/push-graph! g1 user)
-  (insert/push-graph! g2 user)
+  (insert/push-graph! g1 user s/test-src)
+  (insert/push-graph! g2 user s/test-src)
   
   (get-fish! user))
 
@@ -70,7 +70,7 @@
     (def user (auth/create-user! {:username test-username
                                   :password test-password}))
     
-    (insert/push-graph! g1 user)
+    (insert/push-graph! g1 user s/test-src)
     (get-fish! user)
 
     (is (= [["tuna"] ["Vertebrates"] []]

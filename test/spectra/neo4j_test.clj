@@ -44,7 +44,7 @@
            s/phone-num test-phones
            fake-prop test-fake-prop}
           vector
-          (insert/push-entities! user)))
+          (insert/push-entities! user s/test-src)))
     
     (is (= 1 (count (get-people test-name))))
     (is (= 1 (count (get-people test-email))))

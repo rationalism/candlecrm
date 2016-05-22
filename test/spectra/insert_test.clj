@@ -24,7 +24,7 @@
     (def user (auth/create-user! {:username test-username
                                   :password test-password}))
 
-    (push-graph! g user)
+    (push-graph! g user s/test-src)
     (is (= 1 (count (neo4j/get-vertices user :fish {:species "tuna"}))))
     (is (= 1 (count (neo4j/get-vertices user :phylum {:phy-name "Vertebrates"}))))
     (is (= 1 (count (neo4j/cypher-query query))))

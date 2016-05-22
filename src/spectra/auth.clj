@@ -73,7 +73,7 @@
   [{:keys [username password] :as user-data}]
   (let [user (user-vertex! username (hashers/encrypt password hash-alg))]
     (-> username user-person
-        (insert/push-entities! user)
+        (insert/push-entities! user s/edit-src)
         first neo4j/find-by-id
         (user-person-edge! user))
     user))

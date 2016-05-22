@@ -86,6 +86,13 @@
 (def index-run :index-run)
 (def nonlp :nonlp)
 
+(def test-src 0)
+(def edit-src 1)
+(def nlp-src 2)
+(def email-src 3)
+(def contact-src 4)
+(def meta-src 5)
+
 (def repeated-attr [s-name person-name org-name email-addr phone-num
                     mail-address website org-member])
 

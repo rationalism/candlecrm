@@ -616,7 +616,7 @@
      (loom/remove-nodes
       graph (->> (loom/select-edges graph s/email-from)
                  (map second)))
-     (s/user email)
+     (s/user email) s/nlp-src
      (conj (-> email :id delete-email-body)
            (-> email :id remove-nonlp)))
     (-> email :id remove-nonlp
@@ -643,7 +643,7 @@
 (defn parse! [models message-and-user]
   [(-> message-and-user :message
        (full-parse models))
-   (:user message-and-user)])
+   (:user message-and-user) s/email-src])
 
 (defn parse-models-fn []
   {:sep ((weka/email-sep-model-fn))

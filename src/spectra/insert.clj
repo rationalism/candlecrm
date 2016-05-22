@@ -28,20 +28,20 @@
          (apply concat) (zipmap fulls)
          (merge (zipmap emptys (map :id emptys))))))
 
-(defn prop-cypher [user id prop val]
+(defn prop-cypher [user source id prop val]
   (if (coll? val)
-    (mapcat #(prop-cypher user id prop %) val)
+    (mapcat #(prop-cypher user source id prop %) val)
     (when (and val (not= val ""))
       [[(str "MATCH (a) WHERE ID(a) = {id}"
              " MERGE (b:" (neo4j/prop-label user prop)
              " {" (neo4j/esc-token s/value) ": {v}"
              "}) CREATE (a)-[r:" (neo4j/esc-token prop)
-             "]->(b)")
-        {:id id :v (dt/catch-dates val)}]])))
+             " {src" source ": {cnt}}]->(b)")
+        {:id id :v (dt/catch-dates val) :cnt 1}]])))
 
-(defn id-pair-cypher [id-pair user]
+(defn id-pair-cypher [id-pair user source]
   (->> (apply dissoc (key id-pair) s/exclude-upload)
-       (mapcat #(prop-cypher user (val id-pair)
+       (mapcat #(prop-cypher user source (val id-pair)
                              (key %) (val %)))))
 
 (defn link-cypher [id1 id2 prop]
@@ -76,19 +76,19 @@
        (map second) seq add-label-query))
 
 (defnp push-graph!
-  ([g user]
-   (push-graph! g user []))
-  ([g user pre-queries]
+  ([g user source]
+   (push-graph! g user source []))
+  ([g user source pre-queries]
    (let [id-map (insert-nodes! g user)]
      (->> [pre-queries (add-nlp-labels id-map)
-           (mapcat #(id-pair-cypher % user) id-map)
+           (mapcat #(id-pair-cypher % user source) id-map)
            (map #(edge-cypher % id-map) (loom/edges g))]
           (apply concat) neo4j/cypher-combined-tx)
      (vals id-map))))
 
-(defn push-entities! [coll user]
+(defn push-entities! [coll user source]
   (push-graph! (loom/build-graph coll [])
-               user))
+               user source))
 
 (defn new-resp [id type]
   {:id id s/type-label type})
@@ -110,7 +110,7 @@
                    (map neo4j/esc-token) (str/join "|"))]
     (->> (-> fields (dissoc :id :type :label)
              (fmap vals) (hash-map (:id fields)) first
-             (id-pair-cypher user))
+             (id-pair-cypher user s/edit-src))
          (concat
           [[(str "MATCH (root) WHERE ID(root) = {id}"
                  " SET root:" (neo4j/esc-token s/norecon))
