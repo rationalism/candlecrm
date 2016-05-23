@@ -136,17 +136,17 @@
                 (- (count %2) (count %1)))))
 
 (defn diff-len-adj [s1 s2]
-  (if (or (not (first s1))
-          (not (first s2)))
-    [0.0 default-score]
-    (let [diff (->> (run-diff s1 s2)
-                    (remove #(= (.-operation %)
-                                DiffMatchPatch$Operation/EQUAL))
-                    (map #(.-text %)) (apply str))]
-      [(min (count s1) (count s2))
-       (/ (->> (re-seq #"\s+" diff)
-               (apply str) count (- (count diff)))
-          (min (count s1) (count s2)) 2)])))
+  (let [a (first s1) b (first s2)]
+    (if (or (not a) (not b))
+      [0.0 default-score]
+      (let [diff (->> (run-diff a b)
+                      (remove #(= (.-operation %)
+                                  DiffMatchPatch$Operation/EQUAL))
+                      (map #(.-text %)) (apply str))]
+        [(min (count a) (count b))
+         (/ (->> (re-seq #"\s+" diff)
+                 (apply str) count (- (count diff)))
+            (min (count a) (count b)) 2)]))))
 
 (defn min-len [a b]
   (diff-empty
