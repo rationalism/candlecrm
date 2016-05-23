@@ -167,10 +167,10 @@
     {:id (.id vertex) :val (dt/catch-dates value)}]))
 
 (defn format-link [l]
-  [(.startNodeId l)
+  [(.asMap l)
+   (.startNodeId l)
    (.endNodeId l)
-   (keyword (.type l))
-   (.asMap l)])
+   (keyword (.type l))])
 
 (defn all-links [id]
   (->> [(str "MATCH (a)-[b]-(c) WHERE ID(a) = {id}" 

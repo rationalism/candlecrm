@@ -244,6 +244,16 @@
    s/location []
    s/tool []})
 
+(defn strip-link-map [m]
+  (fmap m (fn [k]
+            (->> (map first k) (map #(into {} %))
+                 (apply merge-with +)))))
+
+(defn combined-links [id]
+  (->> id neo4j/all-links
+       (group-by rest) strip-link-map
+       (map #(conj (vec (key %)) (val %)))))
+
 (defn merge-link [link]
   [(str "MATCH (a) WHERE ID(a) = {id1}"
         " WITH a MATCH (b) WHERE ID(b) = {id2}"
@@ -265,7 +275,7 @@
          {:id old-id}]))
 
 (defn merge-into [old-id new-id]
-  (->> old-id neo4j/all-links
+  (->> old-id combined-links
        (map #(swap-ids old-id new-id %))
        (map merge-link)
        (append-delete old-id)))
