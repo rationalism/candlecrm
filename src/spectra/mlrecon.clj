@@ -131,9 +131,9 @@
                (mapv count) (apply -)))))
 
 (defn len-and-diff [a b]
-  (diff-first
-   a b #(vector (count %1)
-                (- (count %2) (count %1)))))
+  (let [f1 (first a) f2 (first b)]
+    (vector (count f1)
+            (- (count f2) (count f1)))))
 
 (defn diff-len-adj [s1 s2]
   (let [a (first s1) b (first s2)]
