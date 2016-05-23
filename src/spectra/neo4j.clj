@@ -69,6 +69,7 @@
               (map #(.asMap %) records)))))
 
 (defn cypher-query [query]
+  (dump-queries [query])
   (try
     (first
      (resp-clojure
@@ -122,6 +123,7 @@
   (.beginTransaction *session*))
 
 (defnp cypher-combined-tx-recur [retry queries]
+  (dump-queries queries)
   (let [tx (start-tx)]
     (try (let [resp (->> (map cypher-statement queries)
                          (map #(.run tx (first %) (second %)))
