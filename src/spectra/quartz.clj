@@ -24,7 +24,7 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
-(def nonlp-insert-limit 600000)
+(def nonlp-insert-limit 60)
 
 (defn message-count [user]
   (-> user email/fetch-imap-folder email/message-count))
@@ -40,7 +40,7 @@
     (-> queue s/loaded-bottom)))
 
 (defn range-bottom [queue]
-  (max (if (queue-new? queue) (s/loaded-top queue) 270000)
+  (max (if (queue-new? queue) (s/loaded-top queue) 275000)
        (-> queue range-top (- email/batch-size) inc)))
 
 (defn queue-time-reset! [queue]
@@ -127,7 +127,7 @@
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (when nil (queue-pop!)))
+  (when :nil (queue-pop!)))
 
 (jobs/defjob NewGeocodes [ctx]
   (neo4j/thread-wrap #(geocode/geocode-batch 10)))
@@ -136,10 +136,10 @@
   (neo4j/thread-wrap #(geocode/geocode-cached 20)))
 
 (jobs/defjob ProcessRecon [ctx]
-  (when nil (run-recon!)))
+  (when :nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
-  (neo4j/thread-wrap #(when nil (email/push-email-nlp!))))
+  (neo4j/thread-wrap #(when :nil (email/push-email-nlp!))))
 
 (jobs/defjob EmailRefresh [ctx]
   (neo4j/thread-wrap
