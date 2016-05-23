@@ -167,18 +167,17 @@
     {:id (.id vertex) :val (dt/catch-dates value)}]))
 
 (defn format-link [l]
-  (vector (get l "ID(STARTNODE(b))")
-          (if (= (get l "ID(STARTNODE(b))")
-                 (get l "ID(a)"))
-            (get l "ID(c)")
-            (get l "ID(a)"))
-          (keyword (get l "TYPE(b)"))))
+  [(.startNodeId l)
+   (.endNodeId l)
+   (keyword (.type l))
+   (.asMap l)])
 
 (defn all-links [id]
   (->> [(str "MATCH (a)-[b]-(c) WHERE ID(a) = {id}" 
-             " RETURN ID(STARTNODE(b)), TYPE(b), ID(a), ID(c)")
+             " RETURN b")
         {:id id}]
-       cypher-query (map format-link)))
+       cypher-query (map #(get % "b"))
+       (map format-link)))
 
 (defn delete-property! [vertex property]
   (-> [(str "MATCH (a) WHERE ID(a) = {id}"
