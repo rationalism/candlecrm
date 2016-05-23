@@ -199,8 +199,8 @@
     [[s/email-to s/email-addr] [is-eq]]
     [[s/email-uid] [is-eq which-nil]]]
    s/person
-   [[[s/s-name] [overlap lcs lev]]
-    [[s/email-addr] [overlap is-eq]]
+   [[[s/s-name] [overlap lcs lev len-and-diff]]
+    [[s/email-addr] [overlap is-eq shortest]]
     [[s/phone-num] [overlap is-eq]]
     [[s/email-from s/email-sent] [overlap is-eq]]
     [[s/email-to s/email-sent] [overlap is-eq]]
@@ -360,11 +360,11 @@
 
 (defn recon-finished [user class]
   [(str "MATCH (root:" (neo4j/prop-label user class)
-        ":" (neo4j/esc-token s/norecon)
-        ") SET root:" (neo4j/esc-token s/recon))
+        ":" (neo4j/esc-token s/recon)
+        ") SET root:" (neo4j/esc-token s/norecon))
    (str "MATCH (root:" (neo4j/prop-label user class)
-        ":" (neo4j/esc-token s/norecon)
-        ") REMOVE root:" (neo4j/esc-token s/norecon))])
+        ":" (neo4j/esc-token s/recon)
+        ") REMOVE root:" (neo4j/esc-token s/recon))])
 
 (defn candidate-query [label preds]
   (str "MATCH (root:" label
