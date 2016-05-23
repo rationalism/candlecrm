@@ -44,9 +44,9 @@
     (is (= 2 (count phyla)))
 
     (->> [(first phyla) (second phyla)] (map #(.id %))
-         (apply merge-into) neo4j/cypher-combined-tx)
+         merge-all neo4j/cypher-combined-tx)
     (->> [(first tuna) (first salmon)] (map #(.id %))
-         (apply merge-into) neo4j/cypher-combined-tx)
+         merge-all neo4j/cypher-combined-tx)
 
     (get-fish! user)
     (is (= 1 (count tuna)))

@@ -172,12 +172,12 @@
    (.endNodeId l)
    (keyword (.type l))])
 
-(defn all-links [id]
-  (->> [(str "MATCH (a)-[b]-(c) WHERE ID(a) = {id}" 
-             " RETURN b")
-        {:id id}]
-       cypher-query (map #(get % "b"))
-       (map format-link)))
+(defn all-links [ids]
+  (->> (map #(vector (str "MATCH (a)-[b]-(c) WHERE " 
+                          "ID(a) = {id} RETURN b")
+                     {:id %}) ids)
+       cypher-combined-tx (apply concat)
+       (map #(get % "b")) (map format-link)))
 
 (defn delete-property! [vertex property]
   (-> [(str "MATCH (a) WHERE ID(a) = {id}"

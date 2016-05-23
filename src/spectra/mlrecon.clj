@@ -249,40 +249,52 @@
             (->> (map first k) (map #(into {} %))
                  (apply merge-with +)))))
 
-(defn combined-links [id]
-  (->> id neo4j/all-links
+(defn combined-links [ids]
+  (->> ids neo4j/all-links
        (group-by rest) strip-link-map
        (map #(conj (vec (key %)) (val %)))))
 
 (defn merge-link [link]
   [(str "MATCH (a) WHERE ID(a) = {id1}"
         " WITH a MATCH (b) WHERE ID(b) = {id2}"
-        " MERGE (a)-[:" (-> link (nth 2) neo4j/esc-token)
-        "]->(b)")
-   {:id1 (first link) :id2 (second link)}])
+        " CREATE (a)-[:" (-> link (nth 2) neo4j/esc-token)
+        " " (-> link (nth 3) neo4j/cypher-properties) " ]->(b)")
+   (merge {:id1 (first link) :id2 (second link)}
+          (nth link 3))])
 
-(defn swap-ids [old-id new-id l]
-  (cond (= (first l) old-id)
-        (assoc l 0 new-id)
-        (= (second l) old-id)
-        (assoc l 1 new-id)
-        :else l))
+(defn update-id [id-map id]
+  (if (contains? id-map id)
+    (id-map id) id))
 
-(defn append-delete [old-id coll]
-  (conj coll 
-        [(str "MATCH (root) WHERE ID(root) = {id}"
-              " DETACH DELETE root")
-         {:id old-id}]))
+(defn id-map [id-set]
+  (zipmap id-set
+          (repeat (count id-set) (last id-set))))
 
-(defn merge-into [old-id new-id]
-  (->> old-id combined-links
-       (map #(swap-ids old-id new-id %))
-       (map merge-link)
-       (append-delete old-id)))
+(defn swap-ids [id-map l]
+  (let [update-f (partial update-id id-map)]
+    (-> (update l 0 update-f)
+        (update 1 update-f))))
+
+(defn delete-all [old-id]
+  [(str "MATCH (root) WHERE ID(root) = {id}"
+        " DETACH DELETE root")
+   {:id old-id}])
+
+(defn delete-links [id]
+  [(str "MATCH (root)-[r]-(a)"
+        " WHERE ID(root) = {id} DELETE r")
+   {:id id}])
+
+(defn merge-statements [id-set links]
+  (concat (->> id-set drop-last (map delete-all))
+          (->> id-set last delete-links vector)
+          (map merge-link links)))
 
 (defn merge-all [id-set]
-  (->> id-set rest
-       (mapcat #(merge-into % (first id-set)))))
+  (->> id-set combined-links
+       (map #(swap-ids (id-map id-set) %))
+       (remove #(= (first %) (second %)))
+       (merge-statements id-set)))
 
 (defn one-link [n1 n2 pred]
   (str "[:" (neo4j/esc-token pred)
