@@ -6,6 +6,7 @@
             [spectra.auth :as auth]
             [spectra.cluster :as cluster]
             [spectra.compare :as compare]
+            [spectra.insert :as insert]
             [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra.weka :as weka]
@@ -249,11 +250,6 @@
             (->> (map first k) (map #(into {} %))
                  (apply merge-with +)))))
 
-(defn combined-links [ids]
-  (->> ids neo4j/all-links
-       (group-by rest) strip-link-map
-       (map #(conj (vec (key %)) (val %)))))
-
 (defn merge-link [link]
   [(str "MATCH (a) WHERE ID(a) = {id1}"
         " WITH a MATCH (b) WHERE ID(b) = {id2}"
@@ -272,8 +268,14 @@
 
 (defn swap-ids [id-map l]
   (let [update-f (partial update-id id-map)]
-    (-> (update l 0 update-f)
-        (update 1 update-f))))
+    (-> (update l 1 update-f)
+        (update 2 update-f))))
+
+(defn combined-links [ids]
+  (->> ids neo4j/all-links
+       (map #(swap-ids (id-map ids) %))
+       (group-by rest) strip-link-map
+       (map #(conj (vec (key %)) (val %)))))
 
 (defn delete-all [old-id]
   [(str "MATCH (root) WHERE ID(root) = {id}"
@@ -292,7 +294,6 @@
 
 (defn merge-all [id-set]
   (->> id-set combined-links
-       (map #(swap-ids (id-map id-set) %))
        (remove #(= (first %) (second %)))
        (merge-statements id-set)))
 
