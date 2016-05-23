@@ -360,11 +360,11 @@
 
 (defn recon-finished [user class]
   [(str "MATCH (root:" (neo4j/prop-label user class)
-        ":" (neo4j/esc-token s/recon)
-        ") SET root:" (neo4j/esc-token s/norecon))
+        ":" (neo4j/esc-token s/norecon)
+        ") SET root:" (neo4j/esc-token s/recon))
    (str "MATCH (root:" (neo4j/prop-label user class)
-        ":" (neo4j/esc-token s/recon)
-        ") REMOVE root:" (neo4j/esc-token s/recon))])
+        ":" (neo4j/esc-token s/norecon)
+        ") REMOVE root:" (neo4j/esc-token s/norecon))])
 
 (defn candidate-query [label preds]
   (str "MATCH (root:" label
@@ -556,6 +556,7 @@
   (->> score-map (map #(update % 0 vec))
        (mapv #(apply conj %)) (map vec)
        (loom/build-graph [])
+       cluster/prob-weights
        cluster/vote-clustering))
 
 (defn delete-prop [id class]
