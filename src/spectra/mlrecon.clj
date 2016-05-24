@@ -297,12 +297,21 @@
        (remove #(= (first %) (second %)))
        (merge-statements id-set)))
 
-(defn match-link-graph [id1 id2 class match?]
+(defn train-pair-graph [class id1 id2 match?]
   (let [match-node {s/type-label s/trainpair
                     s/class class}]
     (loom/build-graph
      [] [[{:id id1} match-node (if match? s/match s/notmatch)]
          [{:id id2} match-node (if match? s/match s/notmatch)]])))
+
+(defn load-traindat [class pos-cs neg-cs]
+  (let [all-cs (concat (mapv #(conj % true) pos-cs)
+                       (mapv #(conj % false) neg-cs))
+        user (-> :train-user env auth/lookup-user)
+        all-ids (distinct (mapcat drop-last all-cs))]
+    (-> (map #(apply (partial train-pair-graph class) %) all-cs)
+        loom/merge-graphs (insert/push-graph! user s/edit-src))
+    (neo4j/switch-user! user all-ids)))
 
 (defn one-link [n1 n2 pred]
   (str "[:" (neo4j/esc-token pred)
