@@ -1,11 +1,30 @@
 (ns spectra.common
-  (:require [pandect.algo.sha1 :as sha1]))
+  (:require [pandect.algo.sha1 :as sha1]
+            [taoensso.encore :as enc]))
 
 ;; Common library functions. Shouldn't depend on anything else.
 
+(defn fn-params [[params & others]]
+  (let [has-prepost-map?
+        (and (map? (first others)) (next others))
+        [?prepost-map & body]
+        (if has-prepost-map?
+          others (cons nil others))]
+    (if ?prepost-map
+      `(~params ~?prepost-map ~@body)
+      `(~params ~@body))))
+
+(defn fn-sigs 
+  [fn-name sigs]
+  (let [single-arity? (vector? (first sigs))
+        sigs (if single-arity? (list sigs) sigs)]
+    (map fn-params sigs)))
+
 (defmacro defnc
-  [name & decls]
-  (list* `defn name decls))
+  [& sigs]
+  (let [[fn-name sigs] (enc/name-with-attrs (first sigs) (next sigs))
+        new-sigs       (fn-sigs fn-name sigs)]
+    `(defn ~fn-name ~@new-sigs)))
 
 (defn fmap [m fn]
   (reduce #(update %1 %2 fn) m (keys m)))
