@@ -306,20 +306,35 @@
        (map #(one-link n1 % (nth preds %)))
        str/join))
 
-(defn with-clause [n1]
+(defn val-clause [n1]
+  (str "collect(a" n1 "." (neo4j/esc-token s/value)
+       ") AS b" n1))
+
+(defn id-clause [n1]
+  (str "collect(ID(a" n1 ")) AS b" n1))
+
+(def special-paths {:id id-clause})
+
+(defn with-clause [n1 pred]
   (->> [["WITH root"]
         (->> n1 range
              (map #(str "b" %)))
-        [(str "collect(a" n1 "." (neo4j/esc-token s/value)
-              ") AS b" n1)]]
+        [(if-let [special-fn (special-paths pred)]
+           (special-fn n1)
+           (val-clause n1))]]
        flatten (str/join ", ")))
 
 (defn match-chain [n1 preds]
-  (str "OPTIONAL MATCH (root)" 
-       "-" (->> preds drop-last (link-chain n1))
-       "[:" (-> preds last neo4j/esc-token)
+  (str "OPTIONAL MATCH (root)-"
+       (if (contains? special-paths (last preds))
+         (str (->> preds drop-last drop-last
+                   (link-chain n1))
+              "[:" (-> preds drop-last last
+                       neo4j/esc-token))
+         (str (->> preds drop-last (link-chain n1))
+              "[:" (-> preds last neo4j/esc-token)))
        "]-(a" n1 ") "
-       (with-clause n1)))
+       (with-clause n1 (last preds))))
 
 (defn all-paths [paths]
   (->> paths count range
