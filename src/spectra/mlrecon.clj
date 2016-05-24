@@ -348,7 +348,7 @@
 
 (defn prop-diff [id1 id2 prop]
   (->> (map #(fetch-paths % [[prop]]) [id1 id2])
-       (map ffirst) debug (apply run-diff)
+       (map ffirst) (apply run-diff)
        (remove #(= (.-operation %)
                    DiffMatchPatch$Operation/EQUAL))))
 
