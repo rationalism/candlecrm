@@ -297,6 +297,13 @@
        (remove #(= (first %) (second %)))
        (merge-statements id-set)))
 
+(defn match-link-graph [id1 id2 class match?]
+  (let [match-node {s/type-label s/trainpair
+                    s/class class}]
+    (loom/build-graph
+     [] [[{:id id1} match-node (if match? s/match s/notmatch)]
+         [{:id id2} match-node (if match? s/match s/notmatch)]])))
+
 (defn one-link [n1 n2 pred]
   (str "[:" (neo4j/esc-token pred)
        "]-(b" n2 "a" n1 ")-"))

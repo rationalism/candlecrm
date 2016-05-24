@@ -86,6 +86,11 @@
 (def index-run :index-run)
 (def nonlp :nonlp)
 
+(def match :match)
+(def notmatch :notmatch)
+(def class :class)
+(def trainpair :trainpair)
+
 (def test-src 0)
 (def edit-src 1)
 (def nlp-src 2)
