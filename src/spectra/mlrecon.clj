@@ -356,10 +356,22 @@
 (defn parse-paths [rs]
   (map (comp vals first) rs))
 
+(defn get-ids-path [path]
+  (->> path count inc (range 1)
+       (map #(subvec path 0 %))
+       (map #(conj % :id))))
+
 (defn fetch-paths [id paths]
   (-> (fetch-paths-query id paths)
       vector neo4j/cypher-combined-tx
       parse-paths first))
+
+(defn fetch-train-ids [id paths]
+  (->> (mapcat get-ids-path paths)
+       (fetch-paths-query id) vector
+       neo4j/cypher-combined-tx
+       parse-paths (mapcat #(apply concat %))
+       (concat [id])))
 
 (defn prop-diff [id1 id2 prop]
   (->> (map #(fetch-paths % [[prop]]) [id1 id2])
