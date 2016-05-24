@@ -75,13 +75,13 @@
 
 (defn queue-pop! []
   (neo4j/thread-wrap
-   #(let [queue-user (queries/next-email-queue)]
-      (when (:queue queue-user)
-        (if (-> queue-user :user (queries/nonlp-count)
-                (< nonlp-insert-limit))
-          (do (queue-reset! (:queue queue-user))
-              (run-insertion! queue-user))
-          (queue-time-reset! (:queue queue-user)))))))
+   (let [queue-user (queries/next-email-queue)]
+     (when (:queue queue-user)
+       (if (-> queue-user :user (queries/nonlp-count)
+               (< nonlp-insert-limit))
+         (do (queue-reset! (:queue queue-user))
+             (run-insertion! queue-user))
+         (queue-time-reset! (:queue queue-user)))))))
 
 (defn new-queue-map [top-uid]
   {s/top-uid top-uid
@@ -111,13 +111,13 @@
 
 (defn run-recon! []
   (neo4j/thread-wrap
-   #(->> (queries/norecon-count-all) (map second)
-         (filter (fn [x] (some #{(second x)}
-                               (keys @mlrecon/recon-models))))
-         remove-running
-         (map (fn [x] (vector (neo4j/find-by-id
-                               (first x)) (second x))))
-         first maybe-run-recon!)))
+   (->> (queries/norecon-count-all) (map second)
+        (filter #(some #{(second %)}
+                       (keys @mlrecon/recon-models)))
+        remove-running
+        (map #(vector (neo4j/find-by-id
+                       (first %)) (second %)))
+        first maybe-run-recon!)))
 
 (defn delete-reset-tokens! []
   (->> (queries/users-reset-tokens)
@@ -130,24 +130,24 @@
   (when nil (queue-pop!)))
 
 (jobs/defjob NewGeocodes [ctx]
-  (neo4j/thread-wrap #(geocode/geocode-batch 10)))
+  (neo4j/thread-wrap (geocode/geocode-batch 10)))
 
 (jobs/defjob CachedGeocodes [ctx]
-  (neo4j/thread-wrap #(geocode/geocode-cached 20)))
+  (neo4j/thread-wrap (geocode/geocode-cached 20)))
 
 (jobs/defjob ProcessRecon [ctx]
   (when nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
-  (neo4j/thread-wrap #(when nil (email/push-email-nlp!))))
+  (neo4j/thread-wrap (when nil (email/push-email-nlp!))))
 
 (jobs/defjob EmailRefresh [ctx]
   (neo4j/thread-wrap
-   #(doseq [user (auth/list-users)]
-      (refresh-queue! user))))
+   (doseq [user (auth/list-users)]
+     (refresh-queue! user))))
 
 (jobs/defjob DeleteResetTokens [ctx]
-  (neo4j/thread-wrap #(delete-reset-tokens!)))
+  (neo4j/thread-wrap (delete-reset-tokens!)))
 
 (defn user-job [ctx]
   (-> ctx qc/from-job-data
@@ -156,13 +156,13 @@
 (jobs/defjob LoadContacts [ctx]
   (let [user (user-job ctx)]
     (neo4j/thread-wrap
-     #(contacts/load-all-contacts! user))))
+     (contacts/load-all-contacts! user))))
 
 (jobs/defjob MakeIndexes [ctx]
   (let [user (user-job ctx)]
     (neo4j/thread-wrap
-     #(do (index/make-constraints! user)
-          (neo4j/set-property! user s/index-run true)))))
+     (index/make-constraints! user)
+     (neo4j/set-property! user s/index-run true))))
 
 (defn make-job
   ([job-type job-name]
