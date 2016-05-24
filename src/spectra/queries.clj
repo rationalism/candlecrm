@@ -226,7 +226,8 @@
 (defn nonlp-count [user]
   (->> ["MATCH (root:" (neo4j/prop-label user s/email)
         ":" (neo4j/esc-token s/nonlp)
-        ") RETURN count(root)"]
+        ")-[:" (neo4j/esc-token s/email-body)
+        "]->(b) RETURN count(root)"]
        (apply str) neo4j/cypher-query
        first vals first))
 
