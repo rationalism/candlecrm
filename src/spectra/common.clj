@@ -12,19 +12,35 @@
           others (cons nil others))]
     (if ?prepost-map
       `(~params ~?prepost-map ~@body)
-      `(~params ~@body))))
+      `(~params {} ~@body))))
 
-(defn fn-sigs 
-  [fn-name sigs]
-  (let [single-arity? (vector? (first sigs))
-        sigs (if single-arity? (list sigs) sigs)]
-    (map fn-params sigs)))
+(defn fn-sigs [fn-name sigs]
+  (if (vector? (first sigs))
+    (fn-params sigs)
+    (-> "Error: Can't handle multi-arity functions"
+        (Exception. ) throw)))
+
+(defn print-params [params]
+  (map (fn [p] `(println
+                 (str "Value of " (name '~p) ": " ~p)))
+       params))
+
+(defn add-try-catch [fn-name params body]
+  `(try ~body
+        (catch Exception e#
+          (println (str "Error thrown in function: "
+                        (name '~fn-name)))
+          (println (str "Error message: " e#))
+          ~@(print-params params)
+          nil)))
 
 (defmacro defnc
   [& sigs]
-  (let [[fn-name sigs] (enc/name-with-attrs (first sigs) (next sigs))
-        new-sigs       (fn-sigs fn-name sigs)]
-    `(defn ~fn-name ~@new-sigs)))
+  (let [[fn-name sigs] (enc/name-with-attrs
+                        (first sigs) (next sigs))
+        [params prepost body] (fn-sigs fn-name sigs)
+        new-body (add-try-catch fn-name params body)]
+    `(defn ~fn-name ~params ~prepost ~new-body)))
 
 (defn fmap [m fn]
   (reduce #(update %1 %2 fn) m (keys m)))
