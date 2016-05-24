@@ -143,8 +143,9 @@
 
 (jobs/defjob EmailRefresh [ctx]
   (neo4j/thread-wrap
-   (doseq [user (auth/list-users)]
-     (refresh-queue! user))))
+   (->> (auth/list-users)
+        (filter google/lookup-token)
+        (mapv refresh-queue!))))
 
 (jobs/defjob DeleteResetTokens [ctx]
   (neo4j/thread-wrap (delete-reset-tokens!)))
