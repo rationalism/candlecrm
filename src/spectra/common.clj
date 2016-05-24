@@ -3,6 +3,10 @@
 
 ;; Common library functions. Shouldn't depend on anything else.
 
+(defmacro defnc
+  [name & decls]
+  (list* `defn name decls))
+
 (defn fmap [m fn]
   (reduce #(update %1 %2 fn) m (keys m)))
 
