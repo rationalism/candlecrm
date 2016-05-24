@@ -612,11 +612,5 @@
                       doall))
          (neo4j/cypher-combined-tx nil))))
 
-(defn prop-and-id [user class prop]
-  (str "MATCH (root:" (neo4j/prop-label user class)
-       ")-[r]->(v:" (neo4j/prop-label user prop)
-       ") RETURN ID(root), v.val"))
 
-(defn idrow-to-str [r]
-  (str (get r "v.val") ","
-       (get r "ID(root)")))
+
