@@ -65,8 +65,8 @@
 (defn resp-clojure [resp]
   (->> (if (coll? resp) resp (vector resp))
        (map #(.list %))
-       (map (fn [records]
-              (map #(.asMap %) records)))))
+       (mapv (fn [records]
+               (map #(.asMap %) records)))))
 
 (defnc cypher-query [query]
   (dump-queries [query])
@@ -120,7 +120,7 @@
   (let [tx (start-tx)]
     (try (let [resp (->> (map cypher-statement queries)
                          (map #(.run tx (first %) (second %)))
-                         resp-clojure doall)]
+                         resp-clojure)]
            (.success tx) (.close tx) resp)
          (catch Exception e
            (.failure tx) (.close tx)
