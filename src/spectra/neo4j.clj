@@ -262,6 +262,19 @@
         {:id id}]
        cypher-query first vals first))
 
+(defn replace-id [user label]
+  (str/replace label (-> label decode-label first str)
+               (-> user (.id) str)))
+
+(defn switch-user! [user ids]
+  (let [id-labels
+        (->> (mapv get-labels ids)
+             (filter #(.contains % "user_"))
+             (map first) (zipmap ids))]
+    (mapv #(apply remove-label! %) id-labels)
+    (->> (fmap id-labels replace-id)
+         (mapv #(apply add-label! %)))))
+
 (defn all-constraints []
   (cypher-query "CALL db.constraints()"))
 
