@@ -11,8 +11,8 @@
         (if has-prepost-map?
           others (cons nil others))]
     (if ?prepost-map
-      `(~params ~?prepost-map ~@body)
-      `(~params {} ~@body))))
+      `(~params ~?prepost-map ~body)
+      `(~params {} ~body))))
 
 (defn fn-sigs [fn-name sigs]
   (if (vector? (first sigs))
@@ -26,7 +26,7 @@
        params))
 
 (defn add-try-catch [fn-name params body]
-  `(try ~body
+  `(try ~@body
         (catch Exception e#
           (println (str "Error thrown in function: "
                         (name '~fn-name)))
