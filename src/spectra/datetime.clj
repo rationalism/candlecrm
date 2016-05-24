@@ -25,8 +25,8 @@
        (remove #(no-info? % reference))))
 
 (defn unix-dates [text reference]
-   (->> reference (parse-dates text)
-        (mapv #(.getDates %)) (map vec)))
+  (->> reference (parse-dates text)
+       (mapv #(.getDates %)) (map vec)))
 
 (defn now []
   (Date. ))
