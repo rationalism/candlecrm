@@ -68,19 +68,13 @@
        (map (fn [records]
               (map #(.asMap %) records)))))
 
-(defn cypher-query [query]
+(defnc cypher-query [query]
   (dump-queries [query])
-  (try
-    (first
-     (resp-clojure
-      (if (coll? query)
-        (apply tquery query)
-        (tquery query))))
-    (catch Exception e
-      (do (println "ERROR: Cypher query invalid")
-          (println "Query:" query)
-          (println "Error message:" e)
-          {}))))
+  (first
+   (resp-clojure
+    (if (coll? query)
+      (apply tquery query)
+      (tquery query)))))
 
 (defn cypher-property [prop]
   (str (esc-token (key prop)) ": {"

@@ -173,13 +173,8 @@
 (defn decode-header [header]
   {(.getName header) (.getValue header)})
 
-(defn get-recipients [message field]
-  (try
-    (.getRecipients message field)
-    (catch Exception e
-      (do (println "Error: Exception in get-recipients"))
-      (do (println e))
-      [])))
+(defnc get-recipients [message field]
+  (.getRecipients message field))
 
 (defn decode-recipients [message]
   {s/email-to (get-recipients message Message$RecipientType/TO)
@@ -496,15 +491,12 @@
               "(No body)" message-text)
             (headers-fetch message folder))))
 
-(defnp full-parse [message models]
-  (try (-> message first
-           regex/strip-javascript
-           (raw-msg-chain models)
-           (merge-bottom-headers (headers-parse (second message)))
-           infer-email-chain infer-subject)
-       (catch Exception e
-         (do (println "Email parse error")
-             (print e) {}))))
+(defnc full-parse [message models]
+  (-> message first
+      regex/strip-javascript
+      (raw-msg-chain models)
+      (merge-bottom-headers (headers-parse (second message)))
+      infer-email-chain infer-subject))
 
 (defn hash-brackets [m text]
   (str "<node " (get m text) ">" text "</node>"))

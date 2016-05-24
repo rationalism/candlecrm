@@ -19,12 +19,10 @@
        (= (first (.getDates natty-date))
           reference)))
 
-(defnp parse-dates [text reference]
+(defnc parse-dates [text reference]
   (CalendarSource/setBaseDate reference)
-  ;; This try-catch block needed in case of parse errors
-  (try (->> text (.parse (Parser. ))
-            (remove #(no-info? % reference)))
-       (catch Exception e [])))
+  (->> text (.parse (Parser. ))
+       (remove #(no-info? % reference))))
 
 (defn unix-dates [text reference]
    (->> reference (parse-dates text)

@@ -91,39 +91,21 @@
 
 (defonce letter-count (atom 0))
 
-(defnp run-nlp [pipeline text]
-  (try
-    (swap! letter-count #(+ % (count text)))
-    (let [parsed-text (Annotation. text)]
-      (.annotate pipeline parsed-text)
-      parsed-text)
-    (catch Exception e
-      (do (println "NLP parsing error on text:")
-          (println text)
-          (println "Error message:")
-          (print e)))))
+(defnc run-nlp [pipeline text]
+  (swap! letter-count #(+ % (count text)))
+  (let [parsed-text (Annotation. text)]
+    (.annotate pipeline parsed-text)
+    parsed-text))
 
 (defnp run-annotate [pipeline annotation]
   (.annotate pipeline annotation)
   annotation)
 
-(defn get-tokens [words]
-  (try
-    (.get words CoreAnnotations$TokensAnnotation)
-    (catch Exception e
-      (println "Error: Could not get tokens")
-      (println e)
-      (pr-str words)
-      [])))
+(defnc get-tokens [words]
+  (.get words CoreAnnotations$TokensAnnotation))
 
-(defn get-sentences [parsed-text]
-  (try
-    (.get parsed-text CoreAnnotations$SentencesAnnotation)
-    (catch Exception e
-      (println "Error: Exception in get-sentences")
-      (println e)
-      (println (str "Parsed text: " parsed-text))
-      [])))
+(defnc get-sentences [parsed-text]
+  (.get parsed-text CoreAnnotations$SentencesAnnotation))
 
 (defn get-lemma [token]
   (.get token CoreAnnotations$LemmaAnnotation))
@@ -519,20 +501,13 @@
   (interleave pieces
               (conj (mapv #(swap-fpp author %) fpps) "")))
 
-(defn fpp-replace [models text author]
-  (try
-    (let [fpps (->> text (run-nlp (:token models))
-                    get-tokens (filter is-fpp?))]
-      (->> (mapcat char-pos fpps)
-           (char-ends text) (partition 2)
-           (map #(subs-vec text %))
-           (mesh-fpps author fpps) (str/join "")))
-    (catch Exception e
-      (println "fpp-replace error")
-      (println "text: " text)
-      (println "author: " author)
-      (println e)
-      text)))
+(defnc fpp-replace [models text author]
+  (let [fpps (->> text (run-nlp (:token models))
+                  get-tokens (filter is-fpp?))]
+    (->> (mapcat char-pos fpps)
+         (char-ends text) (partition 2)
+         (map #(subs-vec text %))
+         (mesh-fpps author fpps) (str/join ""))))
 
 (defn library-map [text]
   (loop [rem-text text lib-map {}
@@ -647,31 +622,19 @@
        (map str/capitalize)
        (str/join " ")))
 
-(defn nlp-display-error [e text]
-  (do (println "NLP parsing error on text:")
-      (println text)
-      (println "Error message:")
-      (print e)))
+(defnc run-nlp-default [models text]
+  (->> text (run-nlp (:ner models))
+       library-annotate-all
+       (run-annotate (:mention models))
+       nlp-graph))
 
-(defn run-nlp-default [models text]
-  (try
-    (->> text (run-nlp (:ner models))
-         library-annotate-all
-         (run-annotate (:mention models))
-         nlp-graph)
-    (catch Exception e
-      (nlp-display-error e text))))
-
-(defn run-nlp-full [models author text]
-  (try
-    (cond-> (->> (fpp-replace models (strip-parens text) author)
-                 (run-nlp (:ner models))
-                 library-annotate-all
-                 (run-annotate (:mention models))
-                 nlp-graph)
-      (env :coreference) rewrite-pronouns)
-    (catch Exception e
-      (nlp-display-error e text))))
+(defnc run-nlp-full [models author text]
+  (cond-> (->> (fpp-replace models (strip-parens text) author)
+               (run-nlp (:ner models))
+               library-annotate-all
+               (run-annotate (:mention models))
+               nlp-graph)
+    (env :coreference) rewrite-pronouns))
 
 (defn run-nlp-openie [models text]
   (-> text strip-parens ;; (fpp-replace models author)

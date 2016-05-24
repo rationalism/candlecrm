@@ -52,22 +52,17 @@
 (defn response-from-req [req]
   (auth-response (make-response-url req)))
 
-(defn get-token! [code]
-  (try (let [token-response
-             (.execute
-              (GoogleAuthorizationCodeTokenRequest.
-               (NetHttpTransport. )
-               (JacksonFactory. )
-               (env :google-client-id)
-               (env :google-client-secret)
-               code
-               (full-callback-url)))]
-         (.getRefreshToken token-response))
-       (catch TokenResponseException e
-         (do (println "Exception caught when requesting a token")
-             (println "Type of exception is: ")
-             (print (.getMessage e))
-             nil))))
+(defnc get-token! [code]
+  (let [token-response
+        (.execute
+         (GoogleAuthorizationCodeTokenRequest.
+          (NetHttpTransport. )
+          (JacksonFactory. )
+          (env :google-client-id)
+          (env :google-client-secret)
+          code
+          (full-callback-url)))]
+    (.getRefreshToken token-response)))
 
 (defn lookup-token [user]
   (neo4j/get-property user s/google-token))

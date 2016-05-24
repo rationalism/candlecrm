@@ -132,18 +132,11 @@
   (doto (Logistic. )
     (.buildClassifier (instances points))))
 
-(defn classify [model point]
-  (try
-    (if (empty? point) 0.0
-        (.classifyInstance
-         model (-> point vector make-instances
-                   (make-instance point))))
-    (catch Exception e
-      (println "Error: Weka classification exception")
-      (println e)
-      (println model)
-      (println point)
-      0.0)))
+(defnc classify [model point]
+  (if (empty? point) 0.0
+      (.classifyInstance
+       model (-> point vector make-instances
+                 (make-instance point)))))
 
 ;; Texts must be in "Instances" format
 (defn word-vec [texts]

@@ -38,13 +38,10 @@
                (hashers/check password))
       user)))
 
-(defn user-from-token [token]
+(defnc user-from-token [token]
   (when token
-    (try (-> token (jwe/decrypt privkey encryption)
-             :user :id neo4j/find-by-id)
-         (catch clojure.lang.ExceptionInfo e
-           (prn (str "Error: Bad token - " token " - " e))
-           nil))))
+    (-> token (jwe/decrypt privkey encryption)
+        :user :id neo4j/find-by-id)))
 
 (defn make-token [user]
   {:token
