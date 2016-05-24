@@ -256,6 +256,12 @@
          " REMOVE root:" (esc-token label))
     {:id id}]))
 
+(defn get-labels [id]
+  (->> [(str "MATCH (root) WHERE ID(root) = {id}"
+             " RETURN labels(root)")
+        {:id id}]
+       cypher-query first vals first))
+
 (defn all-constraints []
   (cypher-query "CALL db.constraints()"))
 
