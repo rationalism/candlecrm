@@ -268,7 +268,7 @@
 
 (defn switch-user! [user ids]
   (let [id-labels
-        (->> (mapv get-labels ids)
+        (->> (mapv get-labels ids) debug
              (filter #(.contains % "user_"))
              (map first) (zipmap ids))]
     (mapv #(apply remove-label! %) id-labels)
