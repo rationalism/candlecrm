@@ -73,7 +73,17 @@
        ((fnil inc 0))))
 
 (defn write-forest [class forest]
-  )
+  (let [version (version-count class)
+        stem (->> class name (str models-dir "/") (repeat 2))]
+    (->> (zipvec stem [".dat" (str "-" version ".dat")])
+         (map #(apply str %)) (map io/file) (apply io/copy))
+    (->> (zipvec stem ["-curve.dat" (str "-curve-" version ".dat")])
+         (map #(apply str %)) (map io/file) (apply io/copy))
+    (->> (zipvec stem [".dat" "-curve.dat"])
+         (map #(apply str %)) (mapv io/delete-file))
+    (->> (zipvec stem [".dat" "-curve.dat"])
+         (map #(apply str %)) (zipvec forest)
+         (mapv #(apply weka/serialize %)))))
 
 (defn run-diff [s1 s2]
   (if (and s1 s2)
