@@ -60,6 +60,18 @@
          (zipmap classes)
          (reset! recon-logit))))
 
+(defn version-count [class]
+  (->> models-dir io/file file-seq
+       rest (map #(.getCanonicalPath %))
+       (map #(str/split % #"/")) (map last)
+       (filter #(.contains % ".dat"))
+       (remove #(.contains % "-curve"))
+       (map #(str/split % #"\.")) (map first)
+       (filter #(.contains % (str (name class) "-")))
+       (map #(str/split % #"-")) (map second)
+       (map #(Integer. %)) (sort >) first
+       ((fnil inc 0))))
+
 (defn run-diff [s1 s2]
   (if (and s1 s2)
     (let [dmp (DiffMatchPatch. )
