@@ -414,6 +414,20 @@
        parse-paths (mapcat #(apply concat %))
        (concat [id])))
 
+(defn fetch-train-pairs [class]
+  (let [user (-> :train-user env auth/lookup-user)]
+    (->> ["MATCH (c:" (neo4j/prop-label user s/class)
+          ")<-[:" (neo4j/esc-token s/class)
+          "]-(p:" (neo4j/prop-label user s/trainpair)
+          ") WITH p MATCH (p)<-[r]-(a) WITH collect(["
+          "ID(p), ID(a), type(r)]) AS vs RETURN vs"]
+         (apply str) neo4j/cypher-query
+         first vals first (group-by first) vals
+         (mapv (comp #(update % 2 keyword) vec flatten
+                     #(update % 0 first) #(mapv rest %)))
+         (group-by #(nth % 2)) ((juxt s/match s/notmatch))
+         (mapv #(mapv (comp vec drop-last) %)))))
+
 (defn prop-diff [id1 id2 prop]
   (->> (map #(fetch-paths % [[prop]]) [id1 id2])
        (map ffirst) (apply run-diff)
