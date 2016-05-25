@@ -72,6 +72,9 @@
        (map #(Integer. %)) (sort >) first
        ((fnil inc 0))))
 
+(defn write-forest [class forest]
+  )
+
 (defn run-diff [s1 s2]
   (if (and s1 s2)
     (let [dmp (DiffMatchPatch. )
