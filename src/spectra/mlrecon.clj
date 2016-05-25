@@ -68,7 +68,7 @@
        (remove #(.contains % "-curve"))
        (map #(str/split % #"\.")) (map first)
        (filter #(.contains % (str (name class) "-")))
-       (map #(str/split % #"-")) (map second)
+       (map #(str/split % #"-")) (map last)
        (map #(Integer. %)) (sort >) first
        ((fnil inc 0))))
 
