@@ -485,18 +485,25 @@
          (weka/classify (get @conflict-models class))
          (weka/classify-logit (get @recon-logit class)))))
 
-(defnp score-map [forest mo]
-  (fmap mo (partial weka/classify forest)))
-
-(defn adjust-scores [logit mo]
-  (fmap mo (partial weka/classify-logit logit)))
+(defnp score-map [class mo]
+  (-> (fmap mo (->> class (get @recon-models)
+                    (partial weka/classify)))
+      (fmap (->> class (get @recon-logit)
+                 (partial weka/classify-logit)))))
 
 (defn score-all [user class]
   (->> (find-candidates user class)
        (get-diffs user class)
-       (score-map (get @recon-models class))
-       (adjust-scores (get @recon-logit class))
+       (score-map class)
        (into [])))
+
+(defn find-conflicts [user class feature expected]
+  (->> (find-candidates user class)
+       (get-diffs user class)
+       (remove #(-> % second (nth feature)
+                    (= expected)))
+       (score-map class)
+       (into []) (sort-by second >)))
 
 (defn log2 [x]
   (/ (Math/log x) (Math/log 2)))
