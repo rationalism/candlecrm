@@ -244,6 +244,21 @@
      s/match :true s/notmatch :false
      s/strong :true s/weak :false nil)])
 
+(defn even-conflict [class pairs]
+  (if (contains? model/conflicts class)
+    (let [size-diff (quot (->> pairs (mapv count)
+                               (apply -)) 2)]
+      (cond (pos? size-diff)
+            [(->> pairs first (drop size-diff) vec)
+             (->> pairs first (take size-diff)
+                  (concat (second pairs)) vec)]
+            (neg? size-diff)
+            [(->> pairs second (take (* -1 size-diff))
+                  (concat (first pairs)) vec)
+             (->> pairs second (drop (* -1 size-diff)) vec)]
+            :else pairs))
+    pairs))
+
 (defn fetch-train-pairs [class]
   (let [user (-> :train-user env auth/lookup-user)]
     (->> ["MATCH (c:" (neo4j/prop-label user s/class)
@@ -255,7 +270,8 @@
          first vals first (group-by first) vals
          (mapv (comp normalize-pair #(mapv rest %)))
          (group-by #(nth % 2)) ((juxt :true :false))
-         (mapv #(mapv (comp vec drop-last) %)))))
+         (mapv #(mapv (comp vec drop-last) %))
+         (even-conflict class))))
 
 (defn fetch-all-paths [paths ids]
   (->> (map #(fetch-paths-query % paths) ids)
