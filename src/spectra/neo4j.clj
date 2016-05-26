@@ -31,6 +31,10 @@
   `(binding [*session* (.session conn)]
      ~@body (.close *session*)))
 
+(defn reset-session![]
+  (.close *session*)
+  (def ^:dynamic *session* (.session conn)))
+
 (defn esc-token [token]
   (str "`" (name token) "`"))
 
