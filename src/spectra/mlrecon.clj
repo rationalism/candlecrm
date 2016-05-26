@@ -147,6 +147,21 @@
        [[{:id id1} match-node (if match? s/weak s/strong)]
         [{:id id2} match-node (if match? s/strong s/weak)]]))))
 
+(defn even-conflict [class pairs]
+  (if (contains? model/conflicts class)
+    (let [size-diff (quot (->> pairs (mapv count)
+                               (apply -)) 2)]
+      (cond (pos? size-diff)
+            [(->> pairs first (drop size-diff) vec)
+             (->> pairs first (take size-diff) (mapv reverse)
+                  (concat (second pairs)) vec)]
+            (neg? size-diff)
+            [(->> pairs second (take (* -1 size-diff)) (mapv reverse)
+                  (concat (first pairs)) vec)
+             (->> pairs second (drop (* -1 size-diff)) vec)]
+            :else pairs))
+    pairs))
+
 (defn push-traindat! [class cs]
   (let [[pos-cs neg-cs] (even-conflict class cs)
         all-cs (concat (mapv #(conj % true) pos-cs)
@@ -244,21 +259,6 @@
    (condp = (-> pair second second keyword)
      s/match :true s/notmatch :false
      s/strong :true s/weak :false nil)])
-
-(defn even-conflict [class pairs]
-  (if (contains? model/conflicts class)
-    (let [size-diff (quot (->> pairs (mapv count)
-                               (apply -)) 2)]
-      (cond (pos? size-diff)
-            [(->> pairs first (drop size-diff) vec)
-             (->> pairs first (take size-diff) (mapv reverse)
-                  (concat (second pairs)) vec)]
-            (neg? size-diff)
-            [(->> pairs second (take (* -1 size-diff)) (mapv reverse)
-                  (concat (first pairs)) vec)
-             (->> pairs second (drop (* -1 size-diff)) vec)]
-            :else pairs))
-    pairs))
 
 (defn fetch-train-pairs [class]
   (let [user (-> :train-user env auth/lookup-user)]
