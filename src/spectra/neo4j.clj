@@ -31,7 +31,7 @@
   `(binding [*session* (.session conn)]
      ~@body (.close *session*)))
 
-(defn reset-session![]
+(defn reset-session! []
   (.close *session*)
   (def ^:dynamic *session* (.session conn)))
 
