@@ -147,7 +147,7 @@
        [[{:id id1} match-node (if match? s/weak s/strong)]
         [{:id id2} match-node (if match? s/strong s/weak)]]))))
 
-(defn load-traindat [class pos-cs neg-cs]
+(defn push-traindat! [class pos-cs neg-cs]
   (let [all-cs (concat (mapv #(conj % true) pos-cs)
                        (mapv #(conj % false) neg-cs))
         user (-> :train-user env auth/lookup-user)
