@@ -118,7 +118,7 @@
        (map shut-folder!))
   (reset! imap-lookup {}))
 
-(defn refresh-inbox [user]
+(defnc refresh-inbox [user]
   (-> user google/lookup-token
       google/get-access-token!
       (google/get-imap-store! (auth/get-username user))

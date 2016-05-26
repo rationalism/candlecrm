@@ -106,8 +106,7 @@
     (home-with-message "Error: Could not login.")))
 
 (defn init-account [req]
-  (let [user (-> req :identity :data s/email-addr
-                 auth/lookup-user)]
+  (let [user (:identity req)]
     (quartz/add-new-queue! user)
     (quartz/schedule-contacts! user)
     (home-with-message "Congrats! Authentication successful")))
