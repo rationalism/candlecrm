@@ -42,8 +42,11 @@
         new-body (add-try-catch fn-name params body)]
     `(defn ~fn-name ~params ~prepost ~new-body)))
 
+(defn special-update [a b c]
+  (update a b c))
+
 (defn fmap [m fn]
-  (reduce #(update %1 %2 fn) m (keys m)))
+  (reduce #(special-update %1 %2 fn) m (keys m)))
 
 (defn zipvec [a b]
   (map vector a b))

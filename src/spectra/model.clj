@@ -140,7 +140,7 @@
        (map count) (apply max)))
 
 (def conflicts
-  {#_ s/email #_ [s/email-body]
+  {s/email [s/email-body]
    s/person []
    s/location []
    s/event []})

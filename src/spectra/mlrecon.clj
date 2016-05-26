@@ -379,7 +379,7 @@
        (get-diffs user class)
        (remove #(-> % second (nth feature)
                     (= expected)))
-       (score-map class)
+       (into {}) (score-map class)
        (into []) (sort-by second >)))
 
 (defn log2 [x]
