@@ -129,13 +129,17 @@
 
 (deftest infer-test
   (testing "Inference on email graphs"
-    (def before-1 {:id 1 s/email-body "some body"})
-    (def before-2 {:id 2 s/email-body "some body"})
-    (def before-3 {:id 3 :subject "some subject" s/email-body "some body"})
+    (def before-1 {:id 1 :label s/email s/email-body "some body"})
+    (def before-2 {:id 2 :label s/email s/email-body "some body"})
+    (def before-3 {:id 3 :label s/email :subject "some subject"
+                   s/email-body "some body"})
 
-    (def after-1 {:id 1 s/email-body "some body" :subject "some subject"})
-    (def after-2 {:id 2 s/email-body "some body" :subject "some subject"})
-    (def after-3 {:id 3 :subject "some subject" s/email-body "some body"})    
+    (def after-1 {:id 1 :label s/email s/email-body "some body"
+                  :subject "some subject"})
+    (def after-2 {:id 2 :label s/email s/email-body "some body"
+                  :subject "some subject"})
+    (def after-3 {:id 3 :label s/email  :subject "some subject"
+                  s/email-body "some body"})    
 
     (def alice {:name "Alice"})
     (def bob {:name "Bob"})
