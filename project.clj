@@ -57,7 +57,7 @@
                  [clojure-csv/clojure-csv "2.0.2"]
                  [org.apache.commons/commons-lang3 "3.4"]
                  [com.sendgrid/sendgrid-java "2.2.2"]
-                 [reagent-forms "0.5.23"]
+                 [reagent-forms "0.5.24"]
                  [org.apache.commons/commons-math3 "3.6.1"]
                  [org.bitbucket.cowwoc/diff-match-patch "1.1"]]
   :min-lein-version "2.0.0"
