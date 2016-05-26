@@ -143,7 +143,7 @@
   {s/email [s/email-body]
    s/person []
    s/location []
-   s/tool []})
+   s/event []})
 
 (def candidates
   {s/email
