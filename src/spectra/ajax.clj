@@ -3,6 +3,7 @@
    [spectra.auth       :as auth]
    [spectra.common    :refer :all]
    [spectra.insert    :as insert]
+   [spectra.neo4j     :as neo4j]
    [spectra.quartz    :as quartz]
    [spectra.queries    :as queries]
    [clojure.core.async :as async  :refer (<! <!! >! >!! put! chan go go-loop)]
@@ -93,7 +94,8 @@
   [{:as ev-msg :keys [event id identity ?data ring-req ?reply-fn send-fn]}]
   (when-let [user (:identity ring-req)]
     (if-let [fetch-spec (get reply-map id)]
-      (?reply-fn ((make-fetch-fn fetch-spec) user ?data))
+      (?reply-fn (neo4j/thread-wrap
+                  ((make-fetch-fn fetch-spec) user ?data)))
       (when ?reply-fn (?reply-fn (no-reply event))))))
 
 ;;;; Example: broadcast server>user
