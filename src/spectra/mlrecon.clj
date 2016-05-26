@@ -139,8 +139,12 @@
   (let [match-node {s/type-label s/trainpair
                     s/class class}]
     (loom/build-graph
-     [] [[{:id id1} match-node (if match? s/match s/notmatch)]
-         [{:id id2} match-node (if match? s/match s/notmatch)]])))
+     []
+     (if (contains? model/conflicts class)
+       [[{:id id1} match-node (if match? s/match s/notmatch)]
+        [{:id id2} match-node (if match? s/match s/notmatch)]]
+       [[{:id id1} match-node (if match? s/weak s/strong)]
+        [{:id id2} match-node (if match? s/strong s/weak)]]))))
 
 (defn load-traindat [class pos-cs neg-cs]
   (let [all-cs (concat (mapv #(conj % true) pos-cs)
@@ -233,6 +237,12 @@
        parse-paths (mapcat #(apply concat %))
        (concat [id])))
 
+(defn normalize-pair [pair]
+  [(ffirst pair) (first (second pair))
+   (condp = (-> pair second second keyword)
+     s/match :true s/notmatch :false
+     s/strong :true s/weak :false nil)])
+
 (defn fetch-train-pairs [class]
   (let [user (-> :train-user env auth/lookup-user)]
     (->> ["MATCH (c:" (neo4j/prop-label user s/class)
@@ -242,9 +252,8 @@
           "ID(p), ID(a), type(r)]) AS vs RETURN vs"]
          (apply str) neo4j/cypher-query
          first vals first (group-by first) vals
-         (mapv (comp #(update % 2 keyword) vec flatten
-                     #(update % 0 first) #(mapv rest %)))
-         (group-by #(nth % 2)) ((juxt s/match s/notmatch))
+         (mapv (comp normalize-pair #(mapv rest %)))
+         (group-by #(nth % 2)) ((juxt :true :false))
          (mapv #(mapv (comp vec drop-last) %)))))
 
 (defn fetch-all-paths [paths ids]
@@ -452,6 +461,11 @@
 (defn train-full [user class pos-cs neg-cs]
   (let [f (train-forest user class pos-cs neg-cs)]
     [f (-> (weka/load-traindat) weka/forest-curve)]))
+
+(defn train-database [class]
+  (let [user (-> :train-user env auth/lookup-user)]
+    (apply (partial train-full user class)
+           (fetch-train-pairs class))))
 
 (defn groups-to-recon [class score-map]
   (->> score-map (map #(update % 0 vec))

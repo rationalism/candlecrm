@@ -88,6 +88,8 @@
 
 (def match :match)
 (def notmatch :notmatch)
+(def strong :strong)
+(def weak :weak)
 (def class :class)
 (def trainpair :trainpair)
 
