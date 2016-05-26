@@ -92,11 +92,11 @@
 ;; Wrap for logging, catching, etc.:
 (defn event-msg-handler*
   [{:as ev-msg :keys [event id identity ?data ring-req ?reply-fn send-fn]}]
-  (when-let [user (:identity ring-req)]
-    (if-let [fetch-spec (get reply-map id)]
-      (?reply-fn (neo4j/thread-wrap
-                  ((make-fetch-fn fetch-spec) user ?data)))
-      (when ?reply-fn (?reply-fn (no-reply event))))))
+  (neo4j/thread-wrap
+   (when-let [user (:identity ring-req)]
+     (if-let [fetch-spec (get reply-map id)]
+       (?reply-fn ((make-fetch-fn fetch-spec) user ?data))
+       (when ?reply-fn (?reply-fn (no-reply event)))))))
 
 ;;;; Example: broadcast server>user
 
@@ -105,7 +105,7 @@
 (defn start-broadcaster! []
   (go-loop [i 0]
     (<! (async/timeout 10000))
-    ; (println (format "Broadcasting server>user: %s" @connected-uids))
+                                        ; (println (format "Broadcasting server>user: %s" @connected-uids))
     (doseq [uid (:any @connected-uids)]
       (chsk-send! uid
                   [:some/broadcast
@@ -115,7 +115,7 @@
                     :i i}]))
     (recur (inc i))))
 
-; Note that this'll be fast+reliable even over Ajax!:
+                                        ; Note that this'll be fast+reliable even over Ajax!:
 (defn test-fast-server>user-pushes []
   (doseq [uid (:any @connected-uids)]
     (doseq [i (range 100)]
