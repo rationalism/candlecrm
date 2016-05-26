@@ -8,19 +8,18 @@
             [spectra.compare :as compare]
             [spectra.insert :as insert]
             [spectra.loom :as loom]
+            [spectra.model :as model]
             [spectra.neo4j :as neo4j]
             [spectra.weka :as weka]
             [spectra_cljc.schema :as s]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
-  (:import [org.apache.commons.lang3 StringUtils]
-           [org.bitbucket.cowwoc.diffmatchpatch DiffMatchPatch
+  (:import [org.bitbucket.cowwoc.diffmatchpatch DiffMatchPatch
             DiffMatchPatch$Operation]))
 
-(def default-score 0.5)
 (def model-rollover 0)
-(def str-compare-max 300)
+
 (def models-dir "/home/alyssa/clojure/spectra/resources/models")
 (def recon-logs "/home/alyssa/recon_log.txt")
 
@@ -43,11 +42,10 @@
 (defn load-models! []
   (reset! recon-models {})
   (reset! conflict-models {})
-  (new-model! s/person recon-models)
-  (new-model! s/email recon-models)
-  (new-model! s/event recon-models)
-  (new-model! s/location recon-models)
-  (new-model! s/email-body conflict-models))
+  (->> model/conflicts keys
+       (mapv #(new-model! % recon-models)))
+  (->> model/conflicts vals flatten
+       (mapv #(new-model! % conflict-models))))
 
 (defn load-curve! [class]
   (weka/deserialize
@@ -84,191 +82,6 @@
     (->> (zipvec stem [".dat" "-curve.dat"])
          (map #(apply str %)) (zipvec forest)
          (mapv #(apply weka/serialize %)))))
-
-(defn run-diff [s1 s2]
-  (if (and s1 s2)
-    (let [dmp (DiffMatchPatch. )
-          d (.diffMain dmp s1 s2 true)]
-      (.diffCleanupSemantic dmp d) d) []))
-
-(defn str-compare-truncate [s]
-  (let [cs (count s)]
-    (if (<= cs (* 3 str-compare-max))
-      s (str (subs s 0 str-compare-max)
-             (subs s (- (/ cs 2) (/ str-compare-max 2))
-                   (+ (/ cs 2) (/ str-compare-max 2)))
-             (subs s (- cs str-compare-max) cs)))))
-
-(defn diff-first [a b f]
-  (if (or (not (first a))
-          (not (first b)))
-    default-score
-    (f (first a) (first b))))
-
-(defn diff-empty [a b f]
-  (if (or (empty? a) (empty? b))
-    default-score (f a b)))
-
-(defn diff-empty-all [a b f]
-  (if (or (empty? a) (empty? b)
-          (every? empty? a) (every? empty? b))
-    default-score
-    (f a b)))
-
-(defnp lev-distance [a b]
-  (/ (StringUtils/getLevenshteinDistance a b)
-     (float (max (count a) (count b)))))
-
-(defn lev [coll1 coll2]
-  (diff-empty-all
-   coll1 coll2 #(->> (for [x (map str-compare-truncate %1)
-                           y (map str-compare-truncate %2)]
-                       (vector x y))
-                     (map (fn [x] (apply lev-distance x)))
-                     (apply min))))
-
-(defn abs [a b]
-  (diff-first
-   a b #(Math/abs (- %1 %2))))
-
-(defn sub [a b]
-  (diff-first
-   a b #(- %1 %2)))
-
-(defn is-eq [a b]
-  (diff-first
-   a b #(if (= %1 %2) 1.0 0.0)))
-
-(defn nil-test [x]
-  (if (or (empty? x) (every? nil? x))
-    1.0 0.0))
-
-(defn which-nil [a b]
-  (- (nil-test a) (nil-test b)))
-
-(defn diff-second [a b]
-  [a (- a b)])
-
-(defn count-regex [regex]
-  (fn [a b]
-    (diff-first
-     a b #(->> (map (fn [x] (re-seq regex x)) [%1 %2])
-               (mapv count) (apply -)))))
-
-(defn len-and-diff [a b]
-  (let [f1 (first a) f2 (first b)]
-    (vector (count f1)
-            (- (count f2) (count f1)))))
-
-(defn diff-len-adj [s1 s2]
-  (let [a (first s1) b (first s2)]
-    (if (or (not a) (not b))
-      [0.0 default-score]
-      (let [diff (->> (run-diff a b)
-                      (remove #(= (.-operation %)
-                                  DiffMatchPatch$Operation/EQUAL))
-                      (map #(.-text %)) (apply str))]
-        [(min (count a) (count b))
-         (/ (->> (re-seq #"\s+" diff)
-                 (apply str) count (- (count diff)))
-            (min (count a) (count b)) 2)]))))
-
-(defn min-len [a b]
-  (diff-empty
-   a b #(->> [%1 %2] (apply concat)
-             (map count)
-             (apply min))))
-
-(defn overlap [a b]
-  (diff-empty
-   a b #(/ (->> (concat %1 %2) distinct count
-                (- (+ (count %1) (count %2)))
-                double)
-           (->> [%1 %2] (map count)
-                (apply min) double))))
-
-(defn max-lcs [coll1 coll2 s]
-  (->> (concat coll1 coll2)
-       (map count) (apply min)
-       (/ (count s))))
-
-(defn lcs-pair [a b]
-  (->> (run-diff a b)
-       (filter #(= (.-operation %)
-                   DiffMatchPatch$Operation/EQUAL))
-       (map #(.-text %)) (apply str)))
-
-(defn lcs-coll [coll]
-  (reduce lcs-pair coll))
-
-(defn lcs [coll1 coll2]
-  (diff-empty-all
-   coll1 coll2 #(->> (concat %1 %2) lcs-coll
-                     (max-lcs %1 %2))))
-
-(defn shortest [coll1 coll2]
-  (->> [coll1 coll2] flatten (map first)
-       (map count) (apply min)))
-
-(defn longest [coll1 coll2]
-  (->> [coll1 coll2] flatten (map first)
-       (map count) (apply max)))
-
-(def scoring
-  {s/email
-   [[[s/email-body] [is-eq min-len lcs lev diff-len-adj]]
-    [[s/email-subject] [is-eq lev]]
-    [[s/email-received] [abs]]
-    [[s/email-sent] [abs]]
-    [[s/email-from s/email-addr] [is-eq]]
-    [[s/email-to s/email-addr] [is-eq]]
-    [[s/email-uid] [is-eq which-nil]]]
-   s/person
-   [[[s/s-name] [overlap lcs lev len-and-diff]]
-    [[s/email-addr] [overlap is-eq shortest]]
-    [[s/phone-num] [overlap is-eq]]
-    [[s/email-from s/email-sent] [overlap is-eq]]
-    [[s/email-to s/email-sent] [overlap is-eq]]
-    [[s/link-to s/has-link s/email-sent] [is-eq]]]
-   s/tool
-   [[[s/tool-category] [is-eq]]
-    [[s/vendor-name] [is-eq]]
-    [[s/part-name] [is-eq lcs lev]]
-    [[s/catalog-name] [is-eq lcs lev]]
-    [[s/desc1] [is-eq lcs lev]]
-    [[s/desc2] [is-eq lcs lev]]
-    [[s/item-cost] [is-eq abs]]]
-   s/location
-   [[[s/s-name] [is-eq lcs lev shortest]]]
-   s/event
-   [[[s/start-time] [is-eq abs]]
-    [[s/stop-time] [is-eq abs]]]
-   s/email-body
-   [[[s/email-body] [(count-regex #"\s+") (count-regex #">")
-                     (count-regex #"\n|\r")
-                     len-and-diff diff-len-adj]]
-    [[s/email-uid] [which-nil]]
-    [[s/email-sent] [sub]]]})
-
-(def candidates
-  {s/email
-   [s/email-subject s/email-body
-    s/email-received s/email-sent]
-   s/person
-   [s/s-name s/email-addr s/phone-num]
-   s/tool
-   [s/part-name s/catalog-name s/desc1
-    s/desc2 s/item-cost]
-   s/location
-   [s/s-name]
-   s/event
-   [s/start-time s/stop-time]})
-
-(def conflicts
-  {s/email [s/email-body]
-   s/person []
-   s/location []
-   s/tool []})
 
 (defn strip-link-map [m]
   (fmap m (fn [k]
@@ -407,6 +220,12 @@
       vector neo4j/cypher-combined-tx
       parse-paths first))
 
+(defn prop-diff [id1 id2 prop]
+  (->> (map #(fetch-paths % [[prop]]) [id1 id2])
+       (map ffirst) (apply model/run-diff)
+       (remove #(= (.-operation %)
+                   DiffMatchPatch$Operation/EQUAL))))
+
 (defn fetch-train-ids [id paths]
   (->> (mapcat get-ids-path paths)
        (fetch-paths-query id) vector
@@ -428,17 +247,10 @@
          (group-by #(nth % 2)) ((juxt s/match s/notmatch))
          (mapv #(mapv (comp vec drop-last) %)))))
 
-(defn prop-diff [id1 id2 prop]
-  (->> (map #(fetch-paths % [[prop]]) [id1 id2])
-       (map ffirst) (apply run-diff)
-       (remove #(= (.-operation %)
-                   DiffMatchPatch$Operation/EQUAL))))
-
 (defn fetch-all-paths [paths ids]
   (->> (map #(fetch-paths-query % paths) ids)
        neo4j/cypher-combined-tx
-       parse-paths
-       (zipmap ids)))
+       parse-paths (zipmap ids)))
 
 (defn recon-finished [user class]
   [(str "MATCH (root:" (neo4j/prop-label user class)
@@ -483,7 +295,7 @@
     query))
 
 (defnp find-candidates [user class]
-  (->> class (get candidates) (map name)
+  (->> class (get model/candidates) (map name)
        (map #(str "'" % "'"))
        (str/join ", ")
        (candidate-query (neo4j/prop-label user class))
@@ -505,7 +317,7 @@
        (map diff-pair) flatten))
 
 (defnp get-diffs [user class cs]
-  (let [rules (get scoring class)
+  (let [rules (get model/scoring class)
         vs (->> cs flatten distinct
                 (fetch-all-paths (map first rules)))]
     (->> (map #(pair-map % vs) cs)
@@ -514,13 +326,13 @@
 
 (defnp conflict-data [user class ids]
   (fetch-all-paths
-   (map first (get scoring class))
+   (map first (get model/scoring class))
    ids))
 
 (defnp conflict-prob [class]
   (fn [d1 d2]
     (->> (map second [d1 d2])
-         (score-diff (get scoring class))
+         (score-diff (get model/scoring class))
          (weka/classify (get @conflict-models class))
          (weka/classify-logit (get @recon-logit class)))))
 
@@ -669,10 +481,7 @@
                           (groups-to-recon class))]
     (->> (recon-finished user class)
          (concat (doall (mapcat merge-all recon-groups)))
-         (concat (->> class conflicts
+         (concat (->> class model/conflicts
                       (mapcat #(delete-queries user % recon-groups))
                       doall))
          (neo4j/cypher-combined-tx nil))))
-
-
-
