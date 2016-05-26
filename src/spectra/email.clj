@@ -474,7 +474,7 @@
   (reduce (partial replace-subject
                    (-> chain find-bottom s/email-subject))
           chain (->> chain loom/nodes
-                     (filter #(loom/out-edge-label chain % s/email-from)))))
+                     (filter #(-> % s/type-label (= s/email))))))
 
 (defn merge-bottom-headers [chain headers]
   (as-> chain $
@@ -492,8 +492,7 @@
             (headers-fetch message folder))))
 
 (defnc full-parse [message models]
-  (-> message first
-      regex/strip-javascript
+  (-> message first regex/strip-javascript
       (raw-msg-chain models)
       (merge-bottom-headers (headers-parse (second message)))
       infer-email-chain infer-subject))
