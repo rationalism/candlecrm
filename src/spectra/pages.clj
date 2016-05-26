@@ -31,9 +31,10 @@
     (html/login-form))))
 
 (defn homepage [req]
-  (if (:identity req)
-    (resp/redirect "/app")
-    (login-form req)))
+  (cond (not (:identity req)) (login-form req)
+        (-> req :identity google/lookup-token)
+        (resp/redirect "/app")
+        :else (resp/redirect "/gmail")))
 
 (defn app-page [req]
   (html-wrapper
