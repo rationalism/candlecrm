@@ -268,7 +268,7 @@
           ") WITH p MATCH (p)<-[r]-(a) WITH collect(["
           "ID(p), ID(a), type(r)]) AS vs RETURN vs"]
          (apply str) neo4j/cypher-query
-         first vals first debug (group-by first) vals
+         first vals first (group-by first) vals
          (mapv (comp normalize-pair #(mapv rest %)))
          (group-by #(nth % 2)) ((juxt :true :false))
          (mapv #(mapv (comp vec drop-last) %))
@@ -473,7 +473,7 @@
        (map #(get-diffs user class %)) (map vals)
        (vector (old-model-points user class model-rollover))
        (apply map vector) (map #(apply concat %))
-       append-scores (apply concat) debug
+       append-scores (apply concat) 
        weka/save-traindat weka/make-forest))
 
 (defn train-full [user class pos-cs neg-cs]
