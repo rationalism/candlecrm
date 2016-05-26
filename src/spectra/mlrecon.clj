@@ -147,13 +147,14 @@
        [[{:id id1} match-node (if match? s/weak s/strong)]
         [{:id id2} match-node (if match? s/strong s/weak)]]))))
 
-(defn push-traindat! [class pos-cs neg-cs]
-  (let [all-cs (concat (mapv #(conj % true) pos-cs)
+(defn push-traindat! [class cs]
+  (let [[pos-cs neg-cs] (even-conflict class cs)
+        all-cs (concat (mapv #(conj % true) pos-cs)
                        (mapv #(conj % false) neg-cs))
         user (-> :train-user env auth/lookup-user)
         all-ids (distinct (mapcat drop-last all-cs))]
-    (-> (map #(apply (partial train-pair-graph class) %) all-cs)
-        loom/merge-graphs (insert/push-graph! user s/edit-src))
+    (->> (map #(apply (partial train-pair-graph class) %) all-cs)
+         (mapv #(insert/push-graph! % user s/edit-src)))
     (neo4j/switch-user! user all-ids)))
 
 (defn one-link [n1 n2 pred]
@@ -250,10 +251,10 @@
                                (apply -)) 2)]
       (cond (pos? size-diff)
             [(->> pairs first (drop size-diff) vec)
-             (->> pairs first (take size-diff)
+             (->> pairs first (take size-diff) (mapv reverse)
                   (concat (second pairs)) vec)]
             (neg? size-diff)
-            [(->> pairs second (take (* -1 size-diff))
+            [(->> pairs second (take (* -1 size-diff)) (mapv reverse)
                   (concat (first pairs)) vec)
              (->> pairs second (drop (* -1 size-diff)) vec)]
             :else pairs))
@@ -267,7 +268,7 @@
           ") WITH p MATCH (p)<-[r]-(a) WITH collect(["
           "ID(p), ID(a), type(r)]) AS vs RETURN vs"]
          (apply str) neo4j/cypher-query
-         first vals first (group-by first) vals
+         first vals first debug (group-by first) vals
          (mapv (comp normalize-pair #(mapv rest %)))
          (group-by #(nth % 2)) ((juxt :true :false))
          (mapv #(mapv (comp vec drop-last) %))
@@ -322,8 +323,7 @@
 
 (defnp find-candidates [user class]
   (->> class (get model/candidates) (map name)
-       (map #(str "'" % "'"))
-       (str/join ", ")
+       (map #(str "'" % "'")) (str/join ", ")
        (candidate-query (neo4j/prop-label user class))
        vector (optional-search user class)
        (mapcat neo4j/cypher-query)
@@ -374,13 +374,19 @@
        (score-map class)
        (into [])))
 
+(defn training-query [ids]
+  (str "MATCH (a)--(b) WHERE ID(a) IN ["
+       (first ids) ", " (second ids)
+       "] RETURN a, b"))
+
 (defn find-conflicts [user class feature expected]
   (->> (find-candidates user class)
        (get-diffs user class)
        (remove #(-> % second (nth feature)
                     (= expected)))
        (into {}) (score-map class)
-       (into []) (sort-by second >)))
+       (into []) (map #(update % 0 training-query))
+       (sort-by second >)))
 
 (defn log2 [x]
   (/ (Math/log x) (Math/log 2)))
@@ -396,11 +402,6 @@
             (* total) (/ n) (< i))
       [i (conj (second accum) sample)]
       [i (second accum)])))
-
-(defn training-query [ids]
-  (str "MATCH (a)--(b) WHERE ID(a) IN ["
-       (first ids) ", " (second ids)
-       "] RETURN a, b"))
 
 (defn sample-display [candidates]
   (->> (map training-query candidates)

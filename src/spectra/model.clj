@@ -140,7 +140,7 @@
        (map count) (apply max)))
 
 (def conflicts
-  {s/email [s/email-body]
+  {s/email [s/email-body s/email-subject]
    s/person []
    s/location []
    s/event []})
@@ -192,6 +192,11 @@
    [[[s/email-body] [(count-regex #"\s+") (count-regex #">")
                      (count-regex #"\n|\r")
                      len-and-diff diff-len-adj]]
+    [[s/email-uid] [which-nil]]
+    [[s/email-sent] [sub]]]
+   s/email-subject
+   [[[s/email-subject] [(count-regex #"\n|\r")
+                        len-and-diff diff-len-adj]]
     [[s/email-uid] [which-nil]]
     [[s/email-sent] [sub]]]})
 
