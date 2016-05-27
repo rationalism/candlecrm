@@ -15,7 +15,7 @@
             [spectra.email :as email]
             [spectra.geocode :as geocode]
             [spectra.google :as google]
-            [spectra.index x:as index]
+            [spectra.index :as index]
             [spectra.insert :as insert]
             [spectra.mlrecon :as mlrecon]
             [spectra.neo4j :as neo4j]

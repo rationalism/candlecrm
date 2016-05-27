@@ -22,7 +22,8 @@
 
 (defn print-params [params]
   (map (fn [p] `(println
-                 (str "Value of " (name '~p) ": " ~p)))
+                 (str "Value of " (name '~p) ": "))
+         `(prn ~p))
        params))
 
 (defn add-try-catch [fn-name params body]
