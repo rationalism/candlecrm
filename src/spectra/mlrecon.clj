@@ -138,18 +138,31 @@
 
 (defn get-link-data [user query-map]
   (->> [(str "MATCH (root:" (neo4j/prop-label user (s/type-label query-map))
-             ")-[r]->(v) WHERE v." (neo4j/esc-token s/value)
+             ")-[r:" (neo4j/esc-token (:prop query-map))
+             "]->(v) WHERE v." (neo4j/esc-token s/value)
              " IS NOT NULL WITH root, count(r) as o ORDER BY o DESC"
-             " SKIP {start} LIMIT {limit} MATCH (root)-[r]->(v)"
-             " WITH o, ID(root) as idr, collect([ID(root), labels(root),"
+             " SKIP {start} LIMIT {limit} MATCH (root)-[r:"
+             (neo4j/esc-token (:prop query-map))
+             "]->(v) WITH o, ID(root) as idr, collect(["
              " type(r), v." (neo4j/esc-token s/value)
              ", r]) as vs RETURN vs ORDER BY o DESC")
         query-map]
        neo4j/cypher-query))
 
+(defn clean-link [link]
+  (update link 2 #(->> % (.asMap) (into {}))))
+
+(defn parse-node-links [links]
+  (let [clean-links (map (comp clean-link vec) links)]
+    (->> (map #(nth % 2) clean-links)
+         (apply merge-with +)
+         (repeat (count links))
+         (zipvec clean-links)
+         (mapv flatten))))
+
 (defn parse-link-data [user query-map]
   (->> (get-link-data user query-map)
-       (map #(get % "o"))))
+       (map (comp parse-node-links first vals))))
 
 (defn train-pair-graph [class id1 id2 match?]
   (let [match-node {s/type-label s/trainpair
