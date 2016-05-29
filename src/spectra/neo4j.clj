@@ -73,7 +73,6 @@
                (map #(.asMap %) records)))))
 
 (defnc cypher-query [query]
-  (dump-queries [query])
   (first
    (resp-clojure
     (if (coll? query)

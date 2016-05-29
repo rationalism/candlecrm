@@ -60,20 +60,12 @@
         (update (inc i) (adjust-score adj))
         sort-second vec)))
 
-(defn pair-selected? [c1 c2]
-  (-> (second c2) (- (second c1)) Math/abs
-      (- pretty-mult) Math/abs (* -1)
-      (gaussian-sample pretty-mult 1)
-      first pos?))
-
 (defn estimate-scores [candidates cmp]
   (let [c (count candidates)
         n (-> c Math/log Math/ceil int (* (dec c)))]
     (loop [scores (estimate-init candidates)
            i 0 cnt 0]
-      (if (= cnt n) (reverse scores)
-          (if (pair-selected? (nth scores i)
-                              (nth scores (inc i)))
-            (recur (adjust-scores scores i cmp)
-                   (mod (inc i) (dec c)) (inc cnt))
-            (recur scores (mod (inc i) (dec c)) cnt))))))
+      (if (= cnt n)
+        (reverse scores)
+        (recur (adjust-scores scores i cmp)
+               (mod (inc i) (dec c)) (inc cnt))))))

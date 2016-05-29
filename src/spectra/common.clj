@@ -49,6 +49,9 @@
 (defn zipvec [a b]
   (map vector a b))
 
+(defn echo [x]
+  (println "Echo!") x)
+
 (defn reset-if-found! [list header index]
   (if (and (not (nil? list)) (pos? (count list)))
     (reset! (index header) (first list))))
