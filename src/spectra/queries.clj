@@ -34,8 +34,8 @@
                                         second)})))))
 
 (defn vals-collect []
-  (str " MATCH (root)-[r]->(v)"
-       " WITH o, collect([ID(root), labels(root),"
+  (str " MATCH (root)-[r]->(v) WITH o, ID(root) as idr,"
+       " collect([ID(root), labels(root),"
        " type(r), v." (neo4j/esc-token s/value)
        ", r]) as vs RETURN vs ORDER BY o DESC"))
 

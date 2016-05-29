@@ -136,6 +136,21 @@
        (remove #(= (first %) (second %)))
        (merge-statements id-set)))
 
+(defn get-link-data [user query-map]
+  (->> [(str "MATCH (root:" (neo4j/prop-label user (s/type-label query-map))
+             ")-[r]->(v) WHERE v." (neo4j/esc-token s/value)
+             " IS NOT NULL WITH root, count(r) as o ORDER BY o DESC"
+             " SKIP {start} LIMIT {limit} MATCH (root)-[r]->(v)"
+             " WITH o, ID(root) as idr, collect([ID(root), labels(root),"
+             " type(r), v." (neo4j/esc-token s/value)
+             ", r]) as vs RETURN vs ORDER BY o DESC")
+        query-map]
+       neo4j/cypher-query))
+
+(defn parse-link-data [user query-map]
+  (->> (get-link-data user query-map)
+       (map #(get % "o"))))
+
 (defn train-pair-graph [class id1 id2 match?]
   (let [match-node {s/type-label s/trainpair
                     s/class class}]
