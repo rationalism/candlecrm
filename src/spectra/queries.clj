@@ -37,7 +37,7 @@
   (str " MATCH (root)-[r]->(v)"
        " WITH o, collect([ID(root), labels(root),"
        " type(r), v." (neo4j/esc-token s/value)
-       "]) as vs RETURN vs ORDER BY o DESC"))
+       ", r]) as vs RETURN vs ORDER BY o DESC"))
 
 (defn person-from-user [user query-map]
   (->> [(str "MATCH (root:" (neo4j/prop-label user s/person)
