@@ -33,12 +33,6 @@
                                         filter-decode-labels
                                         second)})))))
 
-(defn mapify-hits [hits]
-  (->> (map #(into {} %) hits)
-       (apply merge-with concat)
-       vals first (group-by first) vals
-       (map mapify-params)))
-
 (defn vals-collect []
   (str " MATCH (root)-[r]->(v)"
        " WITH o, collect([ID(root), labels(root),"
