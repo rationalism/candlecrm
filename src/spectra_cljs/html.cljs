@@ -234,7 +234,8 @@
           :id "add-new-person" :class "pure-button"} "Add new person"]])
 
 (def email-attrs {s/email-sent "Date"
-                  s/email-subject "Subject"})
+                  s/email-subject "Subject"
+                  :id "ID"})
 
 (defn email-link [email attr]
   [node-link (-> email attr first) (email :id) s/email])

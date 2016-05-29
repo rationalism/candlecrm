@@ -497,8 +497,6 @@
         "]->(b) WHERE ID(a) = {id} DETACH DELETE b")
    {:id id}])
 
-(def delete-queries-count (atom 1))
-
 (defn delete-queries [user class groups]
   (let [values (->> (apply concat groups)
                     (conflict-data user class))]
@@ -511,7 +509,6 @@
          (map #(delete-prop % class)))))
 
 (defn run-recon! [user class]
-  (reset! delete-queries-count 1)
   (let [recon-groups (->> class (score-all user)
                           (groups-to-recon class))]
     (->> (recon-finished user class)

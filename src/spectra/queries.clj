@@ -21,66 +21,71 @@
   (->> labels (filter #(.contains % "_user_"))
        first neo4j/decode-label))
 
-(defn mapify-params [params]
-  (if (or (nil? params) (empty? params))
-    nil (->> (map #(drop 2 %) params)
-             (map #(hash-map (keyword (first %))
-                             (vector (second %))))
-             (apply merge-with concat)
-             (merge {:id (ffirst params)
-                     s/type-label (-> params first second
-                                      filter-decode-labels
-                                      second)}))))
+(defn mapify-params [m]
+  (let [params (-> m vals first)]
+    (if (or (nil? params) (empty? params))
+      nil (->> (map #(drop 2 %) params)
+               (map #(hash-map (keyword (first %))
+                               (vector (second %))))
+               (apply merge-with concat)
+               (merge {:id (ffirst params)
+                       s/type-label (-> params first second
+                                        filter-decode-labels
+                                        second)})))))
 
 (defn mapify-hits [hits]
-  (->> hits first vals first
-       (group-by first) vals
+  (->> (map #(into {} %) hits)
+       (apply merge-with concat)
+       vals first (group-by first) vals
        (map mapify-params)))
 
 (defn vals-collect []
   (str " MATCH (root)-[r]->(v)"
-       " WITH collect([ID(root), labels(root),"
+       " WITH o, collect([ID(root), labels(root),"
        " type(r), v." (neo4j/esc-token s/value)
-       "]) as vs RETURN vs"))
+       "]) as vs RETURN vs ORDER BY o DESC"))
 
 (defn person-from-user [user query-map]
-  (-> [(str "MATCH (root:" (neo4j/prop-label user s/person)
-            ") OPTIONAL MATCH (root)<-[:" (neo4j/esc-token s/email-to)
-            "]-(em:" (neo4j/prop-label user s/email)
-            ") WITH root, count(em) as cem ORDER BY cem"
-            " SKIP {start} LIMIT {limit}" (vals-collect))
-       query-map]
-      neo4j/cypher-query mapify-hits))
+  (->> [(str "MATCH (root:" (neo4j/prop-label user s/person)
+             ") OPTIONAL MATCH (root)<-[:" (neo4j/esc-token s/email-to)
+             "]-(em:" (neo4j/prop-label user s/email)
+             ") WITH root, count(em) as o ORDER BY o DESC"
+             " SKIP {start} LIMIT {limit}" (vals-collect))
+        query-map]
+       neo4j/cypher-query (mapv mapify-params)))
 
 (defn emails-from-user [user query-map]
-  (-> [(str "MATCH (root:" (neo4j/prop-label user s/email)
-            ")-[:" (neo4j/esc-token s/email-sent)
-            "]-(sd:" (neo4j/prop-label user s/email-sent)
-            ") WITH root, sd ORDER BY sd." (neo4j/esc-token s/value)
-            " DESC SKIP {start} LIMIT {limit}" (vals-collect))
-       query-map]
-      neo4j/cypher-query mapify-hits))
+  (->> [(str "MATCH (root:" (neo4j/prop-label user s/email)
+             ")-[:" (neo4j/esc-token s/email-sent)
+             "]-(sd:" (neo4j/prop-label user s/email-sent)
+             ") WITH root, sd." (neo4j/esc-token s/value) " as o"
+             " ORDER BY o DESC SKIP {start} LIMIT {limit}"
+             (vals-collect))
+        query-map]
+       neo4j/cypher-query (mapv mapify-params)))
 
 (defn emails-linked [user query-map]
-  (-> [(str "MATCH (root:" (neo4j/prop-label user s/email)
-            ")-[:" (neo4j/esc-token (:link query-map))
-            "]->(p:" (neo4j/prop-label user s/person)
-            ") WHERE ID(p) = {`person-id`}"
-            " WITH root ORDER BY root." (neo4j/esc-token s/email-sent)
-            " DESC SKIP {start} LIMIT {limit}" (vals-collect))
-       (dissoc query-map :link)]
-      neo4j/cypher-query mapify-hits))
+  (->> [(str "MATCH (root:" (neo4j/prop-label user s/email)
+             ")-[:" (neo4j/esc-token (:link query-map))
+             "]->(p:" (neo4j/prop-label user s/person)
+             ") WHERE ID(p) = {`person-id`}"
+             " WITH root, root." (neo4j/esc-token s/email-sent)
+             " as o ORDER BY o DESC SKIP {start} LIMIT {limit}"
+             (vals-collect))
+        (dissoc query-map :link)]
+       neo4j/cypher-query (mapv mapify-params)))
 
 (defn emails-with-dates [user start limit]
-  (-> [(str "MATCH (sd:" (neo4j/prop-label user s/email-sent)
-            ")<-[:" (neo4j/esc-token s/email-sent)
-            "]-(root:" (neo4j/prop-label user s/email)
-            ")-[:" (neo4j/esc-token s/email-mentions)
-            "]->(d:" (neo4j/prop-label user s/event)
-            ") WITH root, sd ORDER BY sd." (neo4j/esc-token s/value)
-            " DESC SKIP {start} LIMIT {limit}" (vals-collect))
-       {:start start :limit limit}]
-      neo4j/cypher-query mapify-hits))
+  (->> [(str "MATCH (sd:" (neo4j/prop-label user s/email-sent)
+             ")<-[:" (neo4j/esc-token s/email-sent)
+             "]-(root:" (neo4j/prop-label user s/email)
+             ")-[:" (neo4j/esc-token s/email-mentions)
+             "]->(d:" (neo4j/prop-label user s/event)
+             ") WITH root, sd." (neo4j/esc-token s/value)
+             " as o ORDER BY o DESC SKIP {start} LIMIT {limit}"
+             (vals-collect))
+        {:start start :limit limit}]
+       neo4j/cypher-query (mapv mapify-params)))
 
 (defn token-keys [m]
   (->> (map #(update % 0 keyword) m)
@@ -91,10 +96,11 @@
       (dissoc s/pwd-hash) (dissoc s/google-token)))
 
 (defn node-from-id [user id node-type]
-  (-> [(str "MATCH (root:" (neo4j/prop-label user node-type)
-            ") WHERE ID(root) = {id} WITH root" (vals-collect))
-       {:id id}]
-      neo4j/cypher-query mapify-hits))
+  (->> [(str "MATCH (root:" (neo4j/prop-label user node-type)
+             ") WHERE ID(root) = {id} WITH root, 0 as o"
+             (vals-collect))
+        {:id id}]
+       neo4j/cypher-query (mapv mapify-params)))
 
 (defn merge-if-exists [node query-map]
   (when node (merge node {:type (:type query-map)})))
@@ -104,13 +110,13 @@
       first (merge-if-exists query-map)))
 
 (defn key-link [user query-map]
-  (-> [(str "MATCH (k:" (neo4j/prop-label user s/link-id)
-            ")<-[:" (neo4j/esc-token s/link-id)
-            "]-(l)-[:" (neo4j/esc-token s/link-to)
-            "]->(root) WHERE k." (neo4j/esc-token s/value)
-            " = {key} WITH root" (vals-collect))
-       query-map]
-      neo4j/cypher-query mapify-hits first))
+  (->> [(str "MATCH (k:" (neo4j/prop-label user s/link-id)
+             ")<-[:" (neo4j/esc-token s/link-id)
+             "]-(l)-[:" (neo4j/esc-token s/link-to)
+             "]->(root) WHERE k." (neo4j/esc-token s/value)
+             " = {key} WITH root, 0 as o" (vals-collect))
+        query-map]
+       neo4j/cypher-query (mapv mapify-params) first))
 
 (defn email-queue []
   (-> [(str "MATCH (root:" s/email-queue
@@ -178,22 +184,23 @@
        "]->(ev:"))
 
 (defn people-by-reltype [user query-map]
-  (-> [(str (rel-query user)
-            (neo4j/prop-label user (:reltype query-map))
-            ") WITH root, count(ev) as cev ORDER BY cev "
-            " DESC SKIP {start} LIMIT {limit}"
-            (vals-collect))
-       query-map]
-      neo4j/cypher-query mapify-hits))
+  (->> [(str (rel-query user)
+             (neo4j/prop-label user (:reltype query-map))
+             ") WITH root, count(ev) as o ORDER BY o "
+             " DESC SKIP {start} LIMIT {limit}"
+             (vals-collect))
+        query-map]
+       neo4j/cypher-query (mapv mapify-params)))
 
 (defn event-related [user query-map]
-  (-> [(str (rel-query user)
-            (neo4j/prop-label user s/event)
-            ") WHERE ID(root) = {`person-id`}"
-            " WITH ev as root SKIP {start} LIMIT {limit}"
-            (vals-collect))
-       query-map]
-      neo4j/cypher-query mapify-hits))
+  (->> [(str (rel-query user)
+             (neo4j/prop-label user s/event)
+             ") WHERE ID(root) = {`person-id`}"
+             " WITH ev as root, 0 as o"
+             " SKIP {start} LIMIT {limit}"
+             (vals-collect))
+        query-map]
+       neo4j/cypher-query (mapv mapify-params)))
 
 (defn loc-related [user query-map]
   (->> [(str (rel-query user)
@@ -253,12 +260,12 @@
 
 (defn search-query [id]
   [(str "MATCH (root) WHERE ID(root) = {id}"
-        " WITH root" (vals-collect))
+        " WITH root, 0 as o" (vals-collect))
    {:id id}])
 
 (defn search-row [row]
   (update row 1
-          #(vec (map (comp first mapify-hits
+          #(vec (map (comp first (mapv mapify-params)
                            neo4j/cypher-query
                            search-query)
                      %))))
