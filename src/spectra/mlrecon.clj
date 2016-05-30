@@ -1,5 +1,6 @@
 (ns spectra.mlrecon
   (:require [clojure.set :as set]
+            [clojure.edn :as edn]
             [clojure.string :as str]
             [clojure.java.io :as io]
             [spectra.common :refer :all]
@@ -153,6 +154,23 @@
    (-> link second src-features)
    (-> link last src-features)))
 
+(defn node-link-features [links]
+  (->> (map drop-last links)
+       (map #(link-features
+              % (strongest-link links))) 
+       (zipvec (map last links))
+       (map flatten) (map reverse)))
+
+(defn train-link-model [data-file]
+  (->> data-file slurp edn/read-string 
+       (mapcat node-link-features)
+       weka/make-forest))
+
+(defn classify-links [model links]
+  (->> links (map #(conj % 0))
+       node-link-features (map drop-last)
+       (map #(weka/classify model %))))
+
 (defn get-link-data [user query-map]
   (->> [(str "MATCH (root:" (neo4j/prop-label user (s/type-label query-map))
              ")-[r:" (neo4j/esc-token (:prop query-map))
@@ -179,7 +197,8 @@
 
 (defn parse-link-data [user query-map]
   (->> (get-link-data user query-map)
-       (map (comp parse-node-links first vals))))
+       (map (comp parse-node-links first vals))
+       first (map vec) (mapv prn)))
 
 (defn train-pair-graph [class id1 id2 match?]
   (let [match-node {s/type-label s/trainpair
