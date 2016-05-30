@@ -145,6 +145,14 @@
   (->> (group-by #(->> % drop-last last vals (apply +)) links)
        (map vec) (sort-by first >) first second first))
 
+(defn link-features [link best-link]
+  (concat
+   (-> link first model/bag-of-chars)
+   (->> [link best-link] (map first) (map vector)
+        (apply model/diff-len-adj))
+   (-> link second src-features)
+   (-> link last src-features)))
+
 (defn get-link-data [user query-map]
   (->> [(str "MATCH (root:" (neo4j/prop-label user (s/type-label query-map))
              ")-[r:" (neo4j/esc-token (:prop query-map))
@@ -153,17 +161,17 @@
              " SKIP {start} LIMIT {limit} MATCH (root)-[r:"
              (neo4j/esc-token (:prop query-map))
              "]->(v) WITH o, ID(root) as idr, collect(["
-             " type(r), v." (neo4j/esc-token s/value)
+             " v." (neo4j/esc-token s/value)
              ", r]) as vs RETURN vs ORDER BY o DESC")
         query-map]
        neo4j/cypher-query))
 
 (defn clean-link [link]
-  (update link 2 #(->> % (.asMap) (into {}))))
+  (update link 1 #(->> % (.asMap) (into {}))))
 
 (defn parse-node-links [links]
   (let [clean-links (map (comp clean-link vec) links)]
-    (->> (map #(nth % 2) clean-links)
+    (->> (map #(nth % 1) clean-links)
          (apply merge-with +)
          (repeat (count links))
          (zipvec clean-links)
