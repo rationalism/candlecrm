@@ -174,7 +174,7 @@
        weka/make-forest))
 
 (defn classify-links [model links]
-  (->> links (map #(conj % 0))
+  (->> links (map vec) (map #(conj % 0))
        node-link-features (map drop-last)
        (map #(weka/classify model %))))
 
@@ -194,13 +194,16 @@
 (defn clean-link [link]
   (update link 1 #(->> % (.asMap) (into {}))))
 
+(defn accumulate-links [links]
+  (->> (map second links)
+       (apply merge-with +)
+       (repeat (count links))
+       (zipvec links)
+       (mapv flatten)))
+
 (defn parse-node-links [links]
-  (let [clean-links (map (comp clean-link vec) links)]
-    (->> (map #(nth % 1) clean-links)
-         (apply merge-with +)
-         (repeat (count links))
-         (zipvec clean-links)
-         (mapv flatten))))
+  (->> links (map (comp clean-link vec))
+       accumulate-links))
 
 (defn parse-link-data [user query-map]
   (->> (get-link-data user query-map)

@@ -52,6 +52,15 @@
 (defn echo [x]
   (println "Echo!") x)
 
+(defn third [x]
+  (-> x next next first))
+
+(defn fourth [x]
+  (-> x next next next first))
+
+(defn fifth [x]
+  (-> x next next next next first))
+
 (defn reset-if-found! [list header index]
   (if (and (not (nil? list)) (pos? (count list)))
     (reset! (index header) (first list))))
