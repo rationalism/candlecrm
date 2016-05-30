@@ -100,6 +100,8 @@
 (def contact-src 4)
 (def meta-src 5)
 
+(def src-features [edit-src nlp-src email-src contact-src])
+
 (def repeated-attr [s-name person-name org-name email-addr phone-num
                     mail-address website org-member])
 
