@@ -139,6 +139,10 @@
   (->> [coll1 coll2] flatten (map first)
        (map count) (apply max)))
 
+(defn bag-of-chars [s]
+  (->> [#"\p{Alpha}" #"\p{Digit}" #"\p{Punct}" #"\p{Space}"]
+       (map #(re-seq % s)) (map count)))
+
 (def conflicts
   {s/email [s/email-body s/email-subject s/email-sent]
    s/person []
