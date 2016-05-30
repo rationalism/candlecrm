@@ -177,7 +177,7 @@
 
 (def entity-attrs
   {s/person [s/s-name s/email-addr s/phone-num
-             s/birthday s/gender s/website]})
+              s/website]})
 
 (defn new-entity-switch [type]
   (state/set! [:input-meta :type] type)
@@ -187,21 +187,26 @@
     (state/set! [:new-entity attr] {0 ""}))
   (state/set! [:tabid] 7))
 
+(defn get-first [node attr]
+  (->> (get node attr) (into [])
+       (sort-by second >)
+       ffirst))
+
 (defn person-link [person attr]
   [node-link
-   (if-let [name (first (person attr))]
+   (if-let [name (get-first person attr)]
      name "(No name listed)")
    (person :id) s/person])
 
 (defn person-site [person attr]
-  [:a {:href (first (person attr))}
-   (first (person attr))])
+  [:a {:href (get-first person attr)}
+   (get-first person attr)])
 
 (defn person-cell [person attr]
   [:td (condp = attr
          s/s-name [person-link person attr]
          s/website [person-site person attr]
-         (first (person attr)))])
+         (get-first person attr))])
 
 (defn person-row [person]
   [:tr (for [attr (add-ids (s/person entity-attrs))]
