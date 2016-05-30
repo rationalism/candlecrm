@@ -141,6 +141,10 @@
        (map #(get sources %))
        (map (fnil identity 0))))
 
+(defn strongest-link [links]
+  (->> (group-by #(->> % drop-last last vals (apply +)) links)
+       (map vec) (sort-by first >) first second first))
+
 (defn get-link-data [user query-map]
   (->> [(str "MATCH (root:" (neo4j/prop-label user (s/type-label query-map))
              ")-[r:" (neo4j/esc-token (:prop query-map))
