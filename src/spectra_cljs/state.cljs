@@ -11,6 +11,7 @@
     :people-rows []
     :email-rows []
     :current-node nil
+    :prop-filters {}
     :cal-events [{:title "event1" :start "2015-11-05" :end "2015-11-06"}
                  {:title "event2" :start "2015-11-25" :end "2015-11-29"}]
     :map-center {s/lat 37.953235 s/lng -122.433765}

@@ -239,17 +239,18 @@
           :id "add-new-person" :class "pure-button"} "Add new person"]])
 
 (def email-attrs {s/email-sent "Date"
-                  s/email-subject "Subject"
-                  :id "ID"})
+                  s/email-subject "Subject"})
 
 (defn email-link [email attr]
-  [node-link (-> email attr first) (email :id) s/email])
+  [node-link (->> email attr (sort-by second >) ffirst)
+   (email :id) s/email])
 
 (defn email-cell [email attr]
   [:td (cond
          (= s/email-subject attr) [email-link email attr]
-         (some #{attr} s/date-times) [date-display (email attr)]
-         :else (email attr))])
+         (some #{attr} s/date-times)
+         [date-display (get-first email attr)]
+         :else (get-first email attr))])
 
 (defn email-row [email]
   [:tr (for [attr (-> email-attrs keys add-ids)]
@@ -457,12 +458,27 @@
      ^{:key (first piece)}
      [body-link (second piece)])])
 
+(defn see-more [attr]
+  [:a {:href "#" :on-click #(state/set! [:prop-filters attr] 1)}
+   "(See more)"])
+
+(defn see-all [attr]
+  [:a {:href "#" :on-click #(state/set! [:prop-filters attr] 2)}
+   "(See all)"])
+
+(defn ask-more [attr]
+  (if-let [filter-level (state/look :prop-filters attr)]
+    (condp = filter-level
+      1 [see-all attr] 2 [:div] [:div])
+    [see-more attr]))
+
 (defn string-item [item prop]
   [:span
    (cond (some #{prop} s/date-times) [date-display item]
          (= prop s/email-body) [body-links (first item)]
          (coll? item) (str/join ", " item)
-         :else item)])
+         :else item) " "
+   (when (coll? item) [ask-more prop])])
 
 (defn str-item [n k v]
   [:span [:strong (str n ": ")]
@@ -471,16 +487,27 @@
 (defn filter-display [attrs]
   (filter #(-> % key s/attr-names) attrs))
 
+(defn get-filter-limit [attr]
+  (if-let [filter-level (state/look :prop-filters attr)]
+    (condp = filter-level
+      1 -0.3333 2 -1.0 -9999.0)
+    0.3333))
+
+(defn filtered-list [attr item]
+  (let [limit (get-filter-limit attr)]
+    (->> attr (get item)
+         (filter #(-> % second (> limit)))
+         (sort-by second >) (map first))))
+
 (defn info-items [attrs item]
   [:div
-   (for [attr (add-ids attrs)]
-     ^{:key (first attr)}
-     [:p.infoitem
-      [str-item (-> attr second s/attr-names)
-       (second attr)
-       (->> attr second (get item)
-            (filter #(-> % second (> 0.333)))
-            (sort-by second >) (map first))]])])
+   (doall
+    (for [attr (add-ids attrs)]
+      ^{:key (first attr)}
+      [:p.infoitem
+       [str-item (-> attr second s/attr-names)
+        (second attr)
+        (filtered-list (second attr) item)]]))])
 
 (def person-disp [s/s-name s/email-addr s/phone-num s/website])
 (def email-disp [s/email-sent s/email-body])
@@ -511,7 +538,7 @@
       (str (if person-name person-name "(No name listed)")
            " (Person) ")
       [:a {:href "#" :on-click #(edit-entity-switch s/person)}
-       "(Edit)"] " "
+       "(Edit)"]" "
       [:a {:href "#" :on-click delete-entity-switch}
        "(Delete)"]]
      [info-items person-disp item]
