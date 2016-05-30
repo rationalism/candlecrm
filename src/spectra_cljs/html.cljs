@@ -177,7 +177,7 @@
 
 (def entity-attrs
   {s/person [s/s-name s/email-addr s/phone-num
-              s/website]})
+             s/website]})
 
 (defn new-entity-switch [type]
   (state/set! [:input-meta :type] type)
@@ -477,9 +477,12 @@
      ^{:key (first attr)}
      [:p.infoitem
       [str-item (-> attr second s/attr-names)
-       (second attr) (get item (second attr))]])])
+       (second attr)
+       (->> attr second (get item)
+            (filter #(-> % second (> 0.333)))
+            (sort-by second >) (map first))]])])
 
-(def person-disp [s/email-addr s/phone-num s/website])
+(def person-disp [s/s-name s/email-addr s/phone-num s/website])
 (def email-disp [s/email-sent s/email-body])
 (def org-disp [s/s-name])
 (def loc-disp [s/s-name])

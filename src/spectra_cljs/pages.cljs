@@ -15,9 +15,9 @@
 
 (defn show-person [person]
   [html/show-person
-   (when-let [name (-> person :center-node s/s-name first)]
+   (when-let [name (html/get-first (:center-node person) s/s-name)]
      name)
-   (-> person :center-node s/email-addr first)
+   (html/get-first (:center-node person) s/email-addr)
    (:center-node person)])
 
 (defn show-email [email]
