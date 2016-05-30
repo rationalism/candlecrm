@@ -143,6 +143,9 @@
   (->> [#"\p{Alpha}" #"\p{Digit}" #"\p{Punct}" #"\p{Space}"]
        (map #(re-seq % s)) (map count)))
 
+(def views
+  {s/s-name s/person s/email-addr s/person})
+
 (def conflicts
   {s/email [s/email-body s/email-subject s/email-sent]
    s/person []

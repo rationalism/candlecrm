@@ -22,11 +22,13 @@
 (def model-rollover 0)
 
 (def models-dir "/home/alyssa/clojure/spectra/resources/models")
+(def views-dir (str models-dir "/views"))
 (def recon-logs "/home/alyssa/recon_log.txt")
 
 (defonce recon-models (atom {}))
 (defonce conflict-models (atom {}))
 (defonce recon-logit (atom {}))
+(defonce view-models (atom {}))
 
 (defn dump-recon-log [items]
   (spit recon-logs "BEGIN RECON LOG DUMP\n\n" :append true)
@@ -35,10 +37,13 @@
         items)
   items)
 
-(defn new-model! [class place]
-  (->> (str models-dir "/" (name class) ".dat")
-       weka/deserialize
-       (swap! place assoc class)))
+(defn new-model!
+  ([class place]
+   (new-model! class models-dir place))
+  ([class dir place]
+   (->> (str dir "/" (name class) ".dat")
+        weka/deserialize
+        (swap! place assoc class))))
 
 (defn load-models! []
   (reset! recon-models {})
@@ -46,7 +51,9 @@
   (->> model/conflicts keys
        (mapv #(new-model! % recon-models)))
   (->> model/conflicts vals flatten
-       (mapv #(new-model! % conflict-models))))
+       (mapv #(new-model! % conflict-models)))
+  (->> model/views keys
+       (mapv #(new-model! % views-dir view-models))))
 
 (defn load-curve! [class]
   (weka/deserialize
