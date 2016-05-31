@@ -46,9 +46,6 @@
      user s/geo-src [(remove-geo-label id)])
     (neo4j/cypher-query (remove-geo-label id))))
 
-(defn geocode-batch-real [limit]
-  "jose dog")
-
 (defn geocode-batch [limit]
   (->> (queries/bare-locations limit)
        (map #(vector [(->> % (.labels) queries/find-user-labels)
