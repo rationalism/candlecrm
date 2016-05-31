@@ -69,8 +69,8 @@
      (.setProperty "ner.useSUTime" "false")
      (.setProperty "ner.model" (str/join "," ner-models))
      (.setProperty "parse.model" parse-model)
-                                        ;(.setProperty "openie.resolve_coref"
-                                        ;              (if (env :coreference) "true" "false"))
+     #_ (.setProperty "openie.resolve_coref"
+                      (if (env :coreference) "true" "false"))
      (.setProperty "openie.triple.all_nominals" "true"))
    false))
 
@@ -158,12 +158,13 @@
 (defn boundaries-detect [sentence word]
   (loop [text (str sentence)
          boundaries []]
-    (let [pieces (->> word regex/regex-escape re-pattern (str/split text))]
-      (if (= text (first pieces))
-        boundaries
-        (recur (->> pieces first count (+ (count word)) (subs text))
-               (->> pieces first count (+ (last-boundaries boundaries sentence))
-                    (boundary-vector word) (conj boundaries)))))))
+    (let [pieces (->> word regex/regex-escape re-pattern
+                      (str/split text) first)]
+      (if (not= text pieces)
+        (recur (->> pieces count (+ (count word)) (subs text))
+               (->> pieces count (+ (last-boundaries boundaries sentence))
+                    (boundary-vector word) (conj boundaries)))
+        boundaries))))
 
 (defn chain-sentences [chain]
   (->> (keys (.getMentionMap chain))
@@ -182,31 +183,15 @@
   (zipmap (map inc (range (count items)))
           items))
 
-(defn merge-coref [sentence corefs]
-  {:sentence sentence
-   :corefs corefs})
-
-(defn blank-coref [sentence]
-  {:sentence sentence
-   :corefs '()})
-
-(defn sentences [nlp-output]
-  (map :sentence nlp-output))
-
-(defn fill-in-corefs [candidate]
-  (if (map? candidate)
-    candidate (blank-coref candidate)))
-
 (defn pronoun? [tokens]
   (cond
     (not= (count tokens) 1) false
     (some #(= % (-> tokens first get-pos))
           pronoun-parts) true
-          :else false))
+    :else false))
 
 (defn pos-hash [pos-list]
-  (->> pos-list
-       (map #(mapv str %))
+  (->> (map #(mapv str %) pos-list)
        (map #(str/join " " %))
        (str/join " ") sha1))
 
@@ -219,7 +204,7 @@
           (tokens-pos sent-num tokens)))
 
 (defn tokens-str [tokens]
-  (->> tokens (map #(.originalText %))
+  (->> (map #(.originalText %) tokens)
        (str/join " ")))
 
 (defn mention-hash [mention]
@@ -229,16 +214,14 @@
        (map #(str (.sentNum mention) " " %))
        (str/join " ") sha1))
 
-(defn mention-nodes [nodes]
-  (map #(.mentionSpan %) nodes))
-
 (defn filter-singles [nodes]
   (if (< (count nodes) 2) '() nodes))
 
 (defn chain-nodes [chain]
   (->> chain (.getMentionMap) vals
        (mapcat #(into '() %))
-       mention-nodes filter-singles))
+       (map #(.mentionSpan %))
+       filter-singles))
 
 (defn root-node [chain]
   (as-> (.getRepresentativeMention chain) $
@@ -281,8 +264,7 @@
                     (list (triple-edge triple))))
 
 (defn triples-graph [triples]
-  (->> triples
-       (map triple-graph)
+  (->> (map triple-graph triples)
        loom/merge-graphs))
 
 (defn attach-pos-map [sent-num tokens g]
@@ -296,11 +278,10 @@
     (->> triples triples-graph
          (attach-pos-map sent-num tokens))))
   
-(defn recursive-triples [models sent-num tokens]
-  (->> tokens tokens-str
-       (run-nlp (:ner models))
-       (run-annotate (:mention models))
-       (run-annotate (:openie models))
+(defn recursive-triples [{:keys [ner mention openie]}
+                         sent-num tokens]
+  (->> tokens tokens-str (run-nlp ner)
+       (run-annotate mention) (run-annotate openie)
        get-sentences first get-triples
        (recursive-graph sent-num tokens)))
 
@@ -331,23 +312,20 @@
        (group-by #(node-hash g % sent-num))
        vals (filter #(> (count %) 1))))
 
-(defn remove-dupes [g dupes]
-  (as-> g $
-    (loom/remove-edges
-     $ (->> dupes rest
-            (mapcat #(loom/labeled-edges g % s/pos-map))))
-    (reduce (fn [a b]
-              (loom/replace-node
-               a b (first dupes)))
-            $ (rest dupes))))
+(defn remove-dupes [g [fdupes & rdupes]]
+  (reduce (fn [a b]
+            (loom/replace-node a b fdupes))
+          (loom/remove-edges
+           g (mapcat #(loom/labeled-edges g % s/pos-map)
+                     rdupes))
+          rdupes))
 
 (defn dedup-graph [g sent-num]
   (if-let [dupes (find-dupes g sent-num)]
     (reduce remove-dupes g dupes) g))
 
 (defn highest-fanout [g]
-  (->> (loom/nodes g)
-       (filter tokens?)
+  (->> (loom/nodes g) (filter tokens?)
        (sort-by #(loom/count-downstream g %) >)
        first))
 
@@ -392,11 +370,9 @@
             sent-num)))
 
 (defn breakup-node-impl [g sent-num]
-  (->> (loom/nodes g)
-       (filter tokens?)
+  (->> (loom/nodes g) (filter tokens?)
        (remove #(scanned? g %))
-       (filter #(> (count %) 1))
-       loom/sort-nodes
+       (filter #(> (count %) 1)) loom/sort-nodes
        (map #(hash-map % (recursive-triples sent-num %)))))
 
 (defn breakup-node [g sent-num]
@@ -412,26 +388,24 @@
 (defn stringify-node [node]
   (if (tokens? node) (tokens-str node) node))
 
-(defn string-vector [edge]
-  (vector (stringify-node (first edge))
-          (stringify-node (second edge))
-          (third edge)))
+(defn string-vector [[e1 e2 e3]]
+  [(stringify-node e1) (stringify-node e2) e3])
 
 (defn stringify-graph [g]
   (loom/build-graph
    (map stringify-node (loom/nodes g))
-   (->> g loom/edges
-        (map string-vector))))
+   (->> g loom/edges (map string-vector))))
 
 (defn pronoun-node []
-  (as-> "!PRONOUN!" $
-    (hash-map (sha1 $) $)))
+  (let [pr "!PRONOUN!"]
+    (hash-map (sha1 pr) pr)))
 
 (defn pronoun-edge [node]
   [node (pronoun-node) s/has-type])
 
 (defn pronoun-graph [nodes]
-  (loom/build-graph nodes (map pronoun-edge nodes)))
+  (->> (map pronoun-edge nodes)
+       (loom/build-graph nodes)))
 
 (def label-correction {s/person-name s/s-name s/org-name s/s-name
                        s/loc-name s/s-name s/email-addr s/email-addr
@@ -439,10 +413,10 @@
                        s/amount s/amount s/time-interval s/time-interval
                        s/url s/url})
 
-(defn format-value [edge]
-  (let [new-label (-> edge second label-correction)]
+(defn format-value [[e1 e2]]
+  (let [new-label (label-correction e2)]
     (if (some #{new-label} s/repeated-attr)
-      (vector (first edge)) (first edge))))
+      (vector e1) e1)))
 
 (defn label-edge [edge]
   {(label-correction (second edge)) (format-value edge)
@@ -452,11 +426,13 @@
   (.setNER label class) label)
 
 (defn tokens-annotate [tokens index class]
-  (.set tokens index (-> tokens (.get index) (label-annotate class)))
+  (.set tokens index
+        (-> tokens (.get index) (label-annotate class)))
   tokens)
 
 (defn tokens-annotate-all [tokens class-map]
-  (reduce #(tokens-annotate %1 (key %2) (val %2)) tokens class-map))
+  (reduce #(tokens-annotate %1 (key %2) (val %2))
+          tokens class-map))
 
 (defn sentence-annotate [sentence class-map]
   (->> class-map (tokens-annotate-all (get-tokens sentence))
@@ -464,7 +440,7 @@
   sentence)
 
 (defn map-attr [attr coll]
-  (->> coll (map #(hash-map % attr))
+  (->> (map #(hash-map % attr) coll)
        (apply merge)))
 
 (def attr-functions
@@ -486,11 +462,10 @@
   [(.beginPosition token) (.endPosition token)])
 
 (defn char-ends [text coll]
-  (->> text count vector
-       (concat [0] coll)))
+  (->> text count vector (concat [0] coll)))
 
-(defn subs-vec [text pos]
-  (subs text (first pos) (second pos)))
+(defn subs-vec [text [p1 p2]]
+  (subs text p1 p2))
 
 (defn swap-fpp [author token]
   (->> token (.originalText) str/lower-case
@@ -513,11 +488,12 @@
   (loop [rem-text text lib-map {}
          attr-map attr-functions]
     (if (empty? attr-map) lib-map
-        (let [found ((-> attr-map first first) rem-text)]
+        (let [[[f1 f2] & rmap] attr-map
+              found (f1 rem-text)]
           (recur (replace-all rem-text found)
-                 (-> attr-map first second 
-                     (map-attr found) (merge lib-map))
-                 (rest attr-map))))))
+                 (-> (map-attr f2 found)
+                     (merge lib-map))
+                 rmap)))))
 
 (defn token-pos-map [sentence pair]
   (->> pair key (boundaries-detect sentence)
@@ -548,14 +524,13 @@
         (->> (entity-mentions (val sent-pair))
              (map ner-graph) (remove nil?)
              loom/merge-graphs)])
-         ;(breakup-node (key sent-pair))
-         ;trampoline recursion-cleanup
+      #_ (breakup-node (key sent-pair))
+      #_ trampoline #_ recursion-cleanup
       (dedup-graph (key sent-pair))
       stringify-graph))
 
 (defn shorten-node [node]
-  (hash-map (subs (key node) 0 5)
-            (val node)))
+  (hash-map (subs (key node) 0 5) (val node)))
 
 (defn shorten-nodes [nodes]
   (map #(shorten-node (first %)) nodes))
@@ -577,9 +552,9 @@
    (->> g loom/edges (map strip-edge))))
 
 (defn lonely? [g pronoun]
-  (as-> (loom/out-edges g pronoun) $
-    (and (= (count $) 1)
-         (= s/has-type (third (first $))))))
+  (let [edges (loom/out-edges g pronoun)]
+    (and (= (count edges) 1)
+         (= s/has-type (third (first edges))))))
 
 (defn find-pronouns [g]
   (->> (pronoun-node) (loom/up-nodes g)
@@ -597,15 +572,13 @@
 
 (defn rewrite-pronouns [g]
   (as-> g $
-    (loom/add-edges $
-       (mapcat #(rewrite-edges g %) (find-pronouns g)))
-    (loom/remove-nodes $
-       (find-pronouns g))
-    (loom/remove-nodes $
-       (filter #(lonely? g %) (loom/up-nodes g (pronoun-node))))))
-
-(defn sentences-text [sentences]
-  (map str sentences))
+    (loom/add-edges
+     $ (mapcat #(rewrite-edges g %) (find-pronouns g)))
+    (loom/remove-nodes
+     $ (find-pronouns g))
+    (loom/remove-nodes
+     $ (filter #(lonely? g %)
+               (loom/up-nodes g (pronoun-node))))))
 
 (defn nlp-graph [parsed-text]
   (cond->
@@ -636,12 +609,10 @@
                nlp-graph)
     (env :coreference) rewrite-pronouns))
 
-(defn run-nlp-openie [models text]
-  (-> text strip-parens ;; (fpp-replace models author)
-      (run-nlp (:ner models))
-      library-annotate-all
-      (run-annotate (:mention models))
-      (run-annotate (:openie models))
+(defn run-nlp-openie [{:keys [ner mention openie]} text]
+  (-> text strip-parens ; (fpp-replace models author)
+      (run-nlp ner) library-annotate-all
+      (run-annotate mention) (run-annotate openie)
       nlp-graph))
 
 (defn fix-punct [text]

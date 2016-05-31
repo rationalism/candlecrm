@@ -16,8 +16,7 @@
        (user-label user) "`"))
 
 (defn deadlock-throw? [e]
-  (= (type e)
-     org.neo4j.driver.v1.exceptions.TransientException))
+  (= (type e) org.neo4j.driver.v1.exceptions.TransientException))
 
 (defn get-graph []
   (->> (AuthTokens/basic (env :database-username)
@@ -40,15 +39,12 @@
 
 (defn catch-keywords [pair]
   (update pair 1
-          #(if (keyword? %)
-             (name %) %)))
+          #(if (keyword? %) (name %) %)))
 
 (defn filter-props [props]
-  (->> props
-       (filter #(not-nil-ext? (val %)))
+  (->> (filter #(not-nil-ext? (val %)) props)
        (map dt/catch-dates-map)
-       (map catch-keywords)
-       (into {})))
+       (map catch-keywords) (into {})))
 
 (defn to-values [params]
   (->> params filter-props (into [])
@@ -85,8 +81,7 @@
 
 (defn cypher-properties [props]
   (str "{ "
-       (->> props
-            (filter val-not-nil?)
+       (->> (filter val-not-nil? props)
             (map cypher-property)
             (str/join ", "))
        " }"))
@@ -141,12 +136,11 @@
         {:id id}]
        cypher-list first))
 
-(defn decode-label-parts [parts]
-  [(-> parts first keyword)
-   (-> parts second (Integer/parseInt))])
+(defn decode-label-parts [[p1 p2]]
+  [(keyword p1) (Integer/parseInt p2)])
 
 (defn decode-label [label]
-  (-> label (str/replace #"user" "")
+  (-> (str/replace label #"user" "")
       (str/split #"__")
       decode-label-parts reverse))
 
@@ -154,8 +148,7 @@
   (->> [(str "MATCH (root) WHERE ID(root) = {id}"
              " RETURN root." (esc-token property))
         {:id (.id vertex)}]
-       cypher-query
-       first vals first))
+       cypher-query first vals first))
 
 (defn set-property! [vertex property value]
   (cypher-query
@@ -165,9 +158,7 @@
     {:id (.id vertex) :val (dt/catch-dates value)}]))
 
 (defn format-link [l]
-  [(.asMap l)
-   (.startNodeId l)
-   (.endNodeId l)
+  [(.asMap l) (.startNodeId l) (.endNodeId l)
    (keyword (.type l))])
 
 (defn all-links [ids]
@@ -214,18 +205,16 @@
   (->> [(str "MATCH (root:" (esc-token class)
              " " (cypher-properties props)
              ") RETURN root")
-        props]
-       cypher-list first))
+        props] cypher-list first))
 
 (defn get-vertices [user class props]
-  (->> props (filter val-not-nil?) (map val-query)
+  (->> (filter val-not-nil? props) (map val-query)
        (concat [(str "MATCH (root:" (prop-label user class) ")")])
        (str/join " WITH root ")
        (add-return props) cypher-list))
 
 (defn get-vertices-class [class]
-  (cypher-list (str "MATCH (root:" class
-                    ") RETURN root")))
+  (cypher-list (str "MATCH (root:" class ") RETURN root")))
 
 (defn delete-class! [class]
   (cypher-query (str "MATCH (root:" class

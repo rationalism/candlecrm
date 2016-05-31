@@ -24,31 +24,29 @@
    :cookies {"token" {:value token :http-only true :secure true
                       :max-age (* 3600 auth/exp-hours)}}})
 
-(defn login-form [req]
+(defn login-form [{:keys [flash]}]
   (html-wrapper
    (html/base-template
-    (html/signup-form (:flash req))
+    (html/signup-form flash)
     (html/login-form))))
 
-(defn homepage [req]
-  (cond (not (:identity req)) (login-form req)
-        (-> req :identity google/lookup-token)
+(defn homepage [{:keys [identity] :as req}]
+  (cond (not identity) (login-form req)
+        (google/lookup-token identity)
         (resp/redirect "/app")
         :else (resp/redirect "/gmail")))
 
 (defn app-page [req]
-  (html-wrapper
-   (html/app-template)))
+  (html-wrapper (html/app-template)))
 
-(defn gmail [req]
+(defn gmail [{:keys [identity flash]}]
   (html-wrapper
-   (let [user (:identity req)]
-     (html/base-template
-      (if (google/lookup-token user)
-        (resp/redirect "/app")
-        (html/gmail-setup (:flash req)
-                          (auth/get-username user)
-                          (google/make-auth-url)))))))
+   (html/base-template
+    (if (google/lookup-token identity)
+      (resp/redirect "/app")
+      (html/gmail-setup
+       flash (auth/get-username identity)
+       (google/make-auth-url))))))
 
 (defn login-needed [uri]
   (html/base-template
@@ -74,21 +72,20 @@
         (assoc (resp/redirect "/gmail")
                :flash "Error: Could not get auth token")))))
 
-(defn reset-confirm [req]
-  (let [token (-> req :params :token)]
-    (if-let [user (->> token (hash-map s/pwd-reset-token)
-                       (neo4j/get-vertex-raw s/user))]
-      (html-wrapper (new-password user token))
-      (home-with-message "Error: Invalid reset link"))))
+(defn reset-confirm [{{:keys [token]} :params}]
+  (if-let [user (->> token (hash-map s/pwd-reset-token)
+                     (neo4j/get-vertex-raw s/user))]
+    (html-wrapper (new-password user token))
+    (home-with-message "Error: Invalid reset link")))
 
 (defn request-reset [req]
   (auth/pwd-reset! req)
   (home-with-message "Password reset requested."))
 
-(defn set-password [req]
-  (if-let [user (->> req :params :token (hash-map s/pwd-reset-token)
+(defn set-password [{:keys [params]}]
+  (if-let [user (->> params :token (hash-map s/pwd-reset-token)
                      (neo4j/get-vertex-raw s/user))]
-    (do (auth/set-password! user (:params req))
+    (do (auth/set-password! user params)
         (home-with-message "Password has been reset."))
     (home-with-message "Error: Invalid reset link")))
 
@@ -105,8 +102,7 @@
     (token-cookie "/app" (:token user-token))
     (home-with-message "Error: Could not login.")))
 
-(defn init-account [req]
-  (let [user (:identity req)]
-    (quartz/add-new-queue! user)
-    (quartz/schedule-contacts! user)
-    (home-with-message "Congrats! Authentication successful")))
+(defn init-account [{:keys [identity]}]
+  (quartz/add-new-queue! identity)
+  (quartz/schedule-contacts! identity)
+  (home-with-message "Congrats! Authentication successful"))

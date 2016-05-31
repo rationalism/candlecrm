@@ -25,22 +25,21 @@
         (let [data-out (async/<!! (get pool-data :out-chan))]
           ((get pool-data :callback) data-out))))))
 
-(defn create-pool! [params]
-  {:pre [(= (set (keys params))
-            #{:name :process :param-gen :callback :num-threads})]}
-  (let [pn (:name params)]
-    (->> {:in-chan (async/chan) :out-chan (async/chan)
-          :param-gen (:param-gen params) :callback (:callback params)
-          :process (:process params)}
-         (swap! store assoc pn))
-    (swap! store assoc-in [pn :workers] {})
-    (doseq [n (range (:num-threads params))]
-      (swap! store assoc-in [pn :workers n]
-             (async-worker pn)))
-    (swap! store assoc-in [pn :outfeed]
-           (async-outfeed pn))
-    (fn [data-in] (async/>!! (get-in @store [pn :in-chan])
-                             data-in))))
+(defn create-pool! [{:keys [name process param-gen
+                            callback num-threads]}]
+  {:pre [name process param-gen callback num-threads]}
+  (->> {:in-chan (async/chan) :out-chan (async/chan)
+        :param-gen param-gen :callback callback
+        :process process}
+       (swap! store assoc name))
+  (swap! store assoc-in [name :workers] {})
+  (doseq [n (range num-threads)]
+    (swap! store assoc-in [name :workers n]
+           (async-worker name)))
+  (swap! store assoc-in [name :outfeed]
+         (async-outfeed name))
+  (fn [data-in] (async/>!! (get-in @store [name :in-chan])
+                           data-in)))
 
 (defn delete-pool! [pool-name]
   (swap! store dissoc pool-name))

@@ -41,9 +41,7 @@
       .build))
 
 (defn make-response-url [req]
-  (str (env :app-domain)
-       (:uri req)
-       "?"
+  (str (env :app-domain) (:uri req) "?"
        (:query-string req)))
 
 (defn auth-response [url]
@@ -60,8 +58,7 @@
           (JacksonFactory. )
           (env :google-client-id)
           (env :google-client-secret)
-          code
-          (full-callback-url)))]
+          code (full-callback-url)))]
     (.getRefreshToken token-response)))
 
 (defn lookup-token [user]
@@ -81,11 +78,12 @@
                                (env :google-client-secret))
             .build
             (.setFromTokenResponse
-             (.setRefreshToken (GoogleTokenResponse. ) refresh-token)))
+             (.setRefreshToken (GoogleTokenResponse. )
+                               refresh-token)))
     .refreshToken))
 
 (defn get-access-token! [refresh-token]
-  (.getAccessToken (build-google-cred! refresh-token)))
+  (-> refresh-token build-google-cred! .getAccessToken))
 
 (defn revoke-access-token! [user]
   (client/post revoke-url

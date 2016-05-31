@@ -24,11 +24,9 @@
                    (+ (/ cs 2) (/ str-compare-max 2)))
              (subs s (- cs str-compare-max) cs)))))
 
-(defn diff-first [a b f]
-  (if (or (not (first a))
-          (not (first b)))
-    default-score
-    (f (first a) (first b))))
+(defn diff-first [[a] [b] f]
+  (if (or (not a) (not b))
+    default-score (f a b)))
 
 (defn diff-empty [a b f]
   (if (or (empty? a) (empty? b))
@@ -37,8 +35,7 @@
 (defn diff-empty-all [a b f]
   (if (or (empty? a) (empty? b)
           (every? empty? a) (every? empty? b))
-    default-score
-    (f a b)))
+    default-score (f a b)))
 
 (defnp lev-distance [a b]
   (/ (StringUtils/getLevenshteinDistance a b)
@@ -46,23 +43,21 @@
 
 (defn lev [coll1 coll2]
   (diff-empty-all
-   coll1 coll2 #(->> (for [x (map str-compare-truncate %1)
-                           y (map str-compare-truncate %2)]
-                       (vector x y))
-                     (map (fn [x] (apply lev-distance x)))
-                     (apply min))))
+   coll1 coll2
+   #(->> (for [x (map str-compare-truncate %1)
+               y (map str-compare-truncate %2)]
+           (vector x y))
+         (map (fn [x] (apply lev-distance x)))
+         (apply min))))
 
 (defn abs [a b]
-  (diff-first
-   a b #(Math/abs (- %1 %2))))
+  (diff-first a b #(Math/abs (- %1 %2))))
 
 (defn sub [a b]
-  (diff-first
-   a b #(- %1 %2)))
+  (diff-first a b #(- %1 %2)))
 
 (defn is-eq [a b]
-  (diff-first
-   a b #(if (= %1 %2) 1.0 0.0)))
+  (diff-first a b #(if (= %1 %2) 1.0 0.0)))
 
 (defn nil-test [x]
   (if (or (empty? x) (every? nil? x))
@@ -80,23 +75,21 @@
      a b #(->> (map (fn [x] (re-seq regex x)) [%1 %2])
                (mapv count) (apply -)))))
 
-(defn len-and-diff [a b]
-  (let [f1 (first a) f2 (first b)]
-    (vector (count f1)
-            (- (count f2) (count f1)))))
+(defn len-and-diff [[f1] [f2]]
+  (vector (count f1)
+          (- (count f2) (count f1))))
 
-(defn diff-len-adj [s1 s2]
-  (let [a (first s1) b (first s2)]
-    (if (or (not a) (not b))
-      [0.0 default-score]
-      (let [diff (->> (run-diff a b)
-                      (remove #(= (.-operation %)
-                                  DiffMatchPatch$Operation/EQUAL))
-                      (map #(.-text %)) (apply str))]
-        [(min (count a) (count b))
-         (/ (->> (re-seq #"\s+" diff)
-                 (apply str) count (- (count diff)))
-            (min (count a) (count b)) 2)]))))
+(defn diff-len-adj [[a] [b]]
+  (if (or (not a) (not b))
+    [0.0 default-score]
+    (let [diff (->> (run-diff a b)
+                    (remove #(= (.-operation %)
+                                DiffMatchPatch$Operation/EQUAL))
+                    (map #(.-text %)) (apply str))]
+      [(min (count a) (count b))
+       (/ (->> (re-seq #"\s+" diff)
+               (apply str) count (- (count diff)))
+          (min (count a) (count b)) 2)])))
 
 (defn min-len [a b]
   (diff-empty

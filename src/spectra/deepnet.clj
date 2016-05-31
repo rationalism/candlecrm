@@ -35,7 +35,8 @@
   (into-array Integer/TYPE coll))
 
 (defn dim-array [data-size]
-  (int-wrap ((juxt :series-count :dims :series-length) data-size)))
+  (int-wrap ((juxt :series-count :dims :series-length)
+             data-size)))
 
 (defn make-zeros [data-size]
   (Nd4j/zeros (dim-array data-size)))

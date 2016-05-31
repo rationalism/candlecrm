@@ -119,8 +119,7 @@
   (reset! imap-lookup {}))
 
 (defnc refresh-inbox [user]
-  (-> user google/lookup-token
-      google/get-access-token!
+  (-> user google/lookup-token google/get-access-token!
       (google/get-imap-store! (auth/get-username user))
       get-inbox))
 
@@ -194,10 +193,8 @@
   {s/email-replyto (.getReplyTo message)})
 
 (defn headers [message]
-  (->> (.getAllHeaders message)
-       enumeration-seq
-       (map decode-header)
-       (apply merge)))
+  (->> (.getAllHeaders message) enumeration-seq
+       (map decode-header) (apply merge)))
 
 (defn strip-arrows [line num]
   (str/replace-first line (str/join (repeat num ">")) ""))
@@ -206,8 +203,7 @@
   (count (first (re-seq #"^>+" text))))
 
 (defn count-arrows [lines]
-  (->> lines
-       (map #(re-seq #"^>+" %))
+  (->> (map #(re-seq #"^>+" %) lines)
        (remove nil?)))
 
 (defn count-depth [lines]
@@ -230,8 +226,8 @@
         :else (f (count-nested (nth lines index)))))
 
 (defn email-body-nodes [chain]
-  (->> chain loom/nodes
-       (filter #(contains? % s/email-body))))
+  (filter #(contains? % s/email-body)
+          (loom/nodes chain)))
 
 (defn find-bottom [chain]
   (->> chain email-body-nodes
@@ -243,12 +239,11 @@
        (remove #(loom/in-edge-label chain % s/email-reply))
        first))
 
-(defn header->person [header]
-  (when (or (:email-from-name header)
-            (:email-from-addr header))
+(defn header->person [{:keys [email-from-name email-from-addr]}]
+  (when (or email-from-name email-from-addr)
     (-> (assoc {} s/type-label s/person)
-        (maybe-add s/s-name (:email-from-name header))
-        (maybe-add s/email-addr (:email-from-addr header)))))
+        (maybe-add s/s-name email-from-name)
+        (maybe-add s/email-addr email-from-addr))))
 
 (defn first-header [sep-model lines]
   (if (or (nil? lines) (empty? lines))
@@ -295,11 +290,11 @@
 
 (defn pick-name [header models email]
   (when email
-    (let [names (->> header (nlp/run-nlp-default models)
-                     nlp/nlp-names (map first))]
-      (->> (mapcat #(name-locations header %) names)
-           (map (loc-distance header email))
-           (sort-by first) first second))))
+    (->> header (nlp/run-nlp-default models)
+         nlp/nlp-names (map first)
+         (mapcat #(name-locations header %))
+         (map (loc-distance header email))
+         (sort-by first) first second)))
 
 (defn header-parse [header models]
   (let [date (-> header sent-date last)
@@ -319,9 +314,10 @@
   (->> lines (first-body sep-model)
        (assoc marks :end-header)))
 
-(defn find-end-body [marks sep-model lines]
-  (->> lines (drop (:end-header marks))
-       (first-header sep-model) (+ (:end-header marks))
+(defn find-end-body [{:keys [end-header] :as marks}
+                     sep-model lines]
+  (->> (drop end-header lines)
+       (first-header sep-model) (+ end-header)
        (assoc marks :end-body)))
 
 (defn remove-arrows [num lines]
@@ -341,21 +337,20 @@
 (defn chain-lines [chain]
   (-> chain find-top s/email-body))
 
-(defnp find-marks [models depth chain]
+(defnp find-marks [{:keys [sep nlp]} depth chain]
   (let [lines (chain-lines chain)]
     (-> {:depth depth s/email-sent nil :email-from-name nil
          :email-from-addr nil}
-        (find-end-header (:sep models) lines)
-        (find-end-body (:sep models) lines)
+        (find-end-header sep lines)
+        (find-end-body sep lines)
         (start-tail lines)
-        (find-header-vals (:nlp models) lines))))
+        (find-header-vals nlp lines))))
 
 (defn remove-arrows-if [lines]
   (remove-arrows (count-min-depth lines) lines))
 
-(defn new-top [marks chain]
-  (let [new-slice (slice (:end-body marks) (:start-tail marks)
-                         (chain-lines chain))]
+(defn new-top [{:keys [end-body start-tail]} chain]
+  (let [new-slice (slice end-body start-tail (chain-lines chain))]
     {s/email-body (remove-arrows-if new-slice)}))
 
 (defn end-bottom [chain]
@@ -367,10 +362,11 @@
    s/type-label s/email
    s/email-body (merge-lines (remove-arrows-if lines))})
 
-(defn make-new-node [marks chain]
+(defn make-new-node [{:keys [start-tail end-header end-body]
+                      :as marks} chain]
   (let [lines (chain-lines chain)]
-    (->> (slice (:start-tail marks) (count lines) lines)
-         (concat (slice (:end-header marks) (:end-body marks) lines))
+    (->> (slice start-tail (count lines) lines)
+         (concat (slice end-header end-body lines))
          (sub-email marks))))
 
 (defn maybe-add-edges [chain new-node email-from]
@@ -461,8 +457,7 @@
 (defn infer-email-chain [chain]
   (->> chain loom/nodes 
        (filter #(loom/out-edge-label chain % s/email-reply))
-       (map #(make-to % chain))
-       (filter #(second %))
+       (map #(make-to % chain)) (filter #(second %))
        (loom/add-edges chain)))
 
 (defn replace-subject [subject chain node]
@@ -506,10 +501,12 @@
                    (partial hash-brackets mentions))))
 
 (defn mention-nodes [chain]
-  (filter #(loom/out-edge-label chain % s/has-type) (loom/nodes chain)))
+  (filter #(loom/out-edge-label chain % s/has-type)
+          (loom/nodes chain)))
 
 (defn hyperlink-nodes [chain]
-  (filter #(loom/out-edge-label chain % s/link-to) (loom/nodes chain)))
+  (filter #(loom/out-edge-label chain % s/link-to)
+          (loom/nodes chain)))
 
 (defn map-interval [interval]
   {s/start-time (first interval)
@@ -544,9 +541,8 @@
                      % s/link-to))
        (loom/add-edges chain)))
 
-(defn link-pair [edge]
-  (hash-map (-> edge second)
-            (-> edge first s/link-id)))
+(defn link-pair [[e1 e2]]
+  (hash-map e2 (s/link-id e1)))
 
 (defn link-map [chain]
   (->> (loom/select-edges chain s/link-to)
@@ -601,17 +597,15 @@
         " REMOVE root:" (neo4j/esc-token s/nonlp))
    {:id id}])
 
-(defn run-email-nlp! [models email]
-  (if-let [graph (->> email :id (graph-from-id models))]
+(defn run-email-nlp! [models {:keys [id] :as email}]
+  (if-let [graph (graph-from-id models id)]
     (insert/push-graph!
      (loom/remove-nodes
       graph (->> (loom/select-edges graph s/email-from)
                  (map second)))
      (s/user email) s/nlp-src
-     (conj (-> email :id delete-email-body)
-           (-> email :id remove-nonlp)))
-    (-> email :id remove-nonlp
-        neo4j/cypher-query)))
+     (conj (delete-email-body id) (remove-nonlp id)))
+    (-> id remove-nonlp neo4j/cypher-query)))
 
 (defn push-email-nlp! []
   (let [emails (queries/email-for-nlp batch-size)]
@@ -631,10 +625,8 @@
        async/create-pool!
        (reset! nlp-channel)))
 
-(defn parse! [models message-and-user]
-  [(-> message-and-user :message
-       (full-parse models))
-   (:user message-and-user) s/email-src])
+(defn parse! [models {:keys [message user]}]
+  [(full-parse message models) user s/email-src])
 
 (defn parse-models-fn []
   {:sep ((weka/email-sep-model-fn))

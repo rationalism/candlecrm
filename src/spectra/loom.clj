@@ -11,16 +11,15 @@
 (defn multi-edge [g edge]
   (map #(conj edge %) (attr/attr g edge :label)))
 
-(defn add-edge [g edge]
+(defn add-edge [g [e1 e2 e3 :as edge]]
   {:pre [(= 3 (count edge))]}
   (cond
     (has-edge? g edge)
-    (->> (attr/attr g (vec (take 2 edge)) :label)
-         (cons (third edge)) distinct
-         (attr/add-attr g edge :label))
+    (->> (attr/attr g [e1 e2] :label) (cons e3)
+         distinct (attr/add-attr g edge :label))
     :else (attr/add-attr
-           (graph/add-edges g (vec (take 2 edge)))
-           edge :label (vector (third edge)))))
+           (graph/add-edges g [e1 e2])
+           edge :label [e3])))
 
 (defn nodes [g]
   (graph/nodes g))
@@ -38,8 +37,7 @@
   (mapcat #(multi-edge g %) (graph/in-edges g node)))
 
 (defn all-edges [g node]
-  (concat (out-edges g node)
-          (in-edges g node)))
+  (concat (out-edges g node) (in-edges g node)))
 
 (defn out-edge-label [g node label]
   (->> (out-edges g node)
@@ -72,30 +70,30 @@
 (defn loners [g]
   (galg/loners g))
 
-(defn one-label-left? [g edge]
-  (let [label (attr/attr g (vec (take 2 edge)) :label)]
+(defn one-label-left? [g [e1 e2 e3]]
+  (let [label (attr/attr g [e1 e2] :label)]
     (and (= 1 (count label))
-         (= (first label) (third edge)))))
+         (= (first label) e3))))
 
-(defn remove-edge [g edge]
+(defn remove-edge [g [e1 e2 e3 :as edge]]
   {:pre [(= 3 (count edge))]}
   (cond
     (not (has-edge? g edge)) g
-    (not (some #{(third edge)} (attr/attr g (vec (take 2 edge)) :label))) g
+    (not (some #{e3} (attr/attr g [e1 e2] :label))) g
     (one-label-left? g edge)
-    (-> (attr/remove-attr g (vec (take 2 edge)) :label)
-        (graph/remove-edges (vec (take 2 edge))))
-    :else (->> (attr/attr g (vec (take 2 edge)) :label)
-               (remove #(= (third edge) %))
+    (-> (attr/remove-attr g [e1 e2] :label)
+        (graph/remove-edges [e1 e2]))
+    :else (->> (attr/attr g [e1 e2] :label)
+               (remove #(= e3 %))
                (attr/add-attr g edge :label))))
 
 (defn remove-edges [g edges]
   (reduce remove-edge g edges))
 
 (defn remove-edges-label [g label]
-  (remove-edges
-   g (filter #(= label (third %))
-             (edges g))))
+  (->> (edges g)
+       (filter #(= label (third %)))
+       (remove-edges g)))
 
 (defn remove-nodes [g nodes]
   (as-> nodes $
@@ -115,12 +113,10 @@
   (sort-by count > g))
 
 (defn labeled-edges [g node label]
-  (->> (out-edges g node)
-       (filter #(= label (third %)))))
+  (filter #(= label (third %)) (out-edges g node)))
 
 (defn select-edges [g edge-type]
-  (->> (edges g)
-       (filter #(= edge-type (third %)))))
+  (filter #(= edge-type (third %))) (edges g))
 
 (defn replace-node [g old-node new-node]
   (if (= old-node new-node) g
@@ -151,8 +147,7 @@
 
 (defn attach-all [g old-nodes new-node label]
   (-> (add-nodes g [new-node])
-      (add-edges (->> old-nodes
-                      (map vector)
+      (add-edges (->> (map vector old-nodes)
                       (map #(assoc % 1 new-node))
                       (map #(assoc % 2 label))))))
 
@@ -164,9 +159,8 @@
                (mapcat edges graphs)))
 
 (defn count-downstream [g node]
-  (->> (galg/bf-span g node)
-       vals (apply concat)
-       distinct count))
+  (->> (galg/bf-span g node) vals
+       (apply concat) distinct count))
 
 (defn count-upstream [g node]
   (count-downstream (reverse-graph g) node))
@@ -181,12 +175,12 @@
 
 (defn spider-edges [g edge-set]
   (if (-> g edges count (= 0)) edge-set
-      (let [new-path (->> g nodes
-                          (sort-by (partial fan-out g) >)
-                          first (spider-path g '()))]
-        (recur (first new-path)
-               (->> new-path rest reverse
-                    (conj edge-set))))))
+      (let [[first-path & rest-path]
+            (->> g nodes
+                 (sort-by (partial fan-out g) >)
+                 first (spider-path g '()))]
+        (->> rest-path reverse (conj edge-set)
+             (recur first-path)))))
 
 (defn display-graph [g]
   (gviz/view g) g)
@@ -197,8 +191,7 @@
 
 (defn structure [g]
   (let [i (atom 0)]
-    (-> replace-inc
-        (partial i)
+    (-> replace-inc (partial i)
         (reduce g (nodes g)))))
 
 (defn display-structure [g]

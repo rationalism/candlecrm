@@ -30,8 +30,7 @@
   (-> user email/fetch-imap-folder email/message-count))
 
 (defn queue-new? [queue]
-  (< (s/loaded-top queue)
-     (s/top-uid queue)))
+  (< (s/loaded-top queue) (s/top-uid queue)))
 
 (defn range-top [queue]
   (if (queue-new? queue)
@@ -67,33 +66,27 @@
        (-> user email/fetch-imap-folder email/last-uid str)]
       str/join neo4j/cypher-query))
 
-(defn run-insertion! [queue-user]
+(defn run-insertion! [queue user]
   (println "inserting emails")
-  (email/insert-raw-range! (:user queue-user)
-                           (range-bottom (:queue queue-user))
-                           (range-top (:queue queue-user))))
+  (email/insert-raw-range!
+   user (range-bottom queue) (range-top queue)))
 
 (defn queue-pop! []
   (neo4j/thread-wrap
-   (let [queue-user (queries/next-email-queue)]
-     (when (:queue queue-user)
-       (if (-> queue-user :user (queries/nonlp-count)
-               (< nonlp-insert-limit))
-         (do (queue-reset! (:queue queue-user))
-             (run-insertion! queue-user))
-         (queue-time-reset! (:queue queue-user)))))))
+   (let [{:keys [queue user]} (queries/next-email-queue)]
+     (when queue
+       (if (< (queries/nonlp-count user) nonlp-insert-limit)
+         (do (queue-reset! queue) (run-insertion! queue user))
+         (queue-time-reset! queue))))))
 
 (defn new-queue-map [top-uid]
-  {s/top-uid top-uid
-   s/loaded-top top-uid
-   s/loaded-bottom top-uid
-   s/type-label s/email-queue
+  {s/top-uid top-uid s/loaded-top top-uid
+   s/loaded-bottom top-uid s/type-label s/email-queue
    s/modified (dt/now)})
 
 (defn add-new-queue! [user]
   (-> user email/fetch-imap-folder
-      email/last-uid
-      new-queue-map vector
+      email/last-uid new-queue-map vector
       (insert/push-entities! user s/meta-src)
       first neo4j/find-by-id
       (neo4j/create-edge! user s/user-queue)))
@@ -148,8 +141,7 @@
   (neo4j/thread-wrap (delete-reset-tokens!)))
 
 (defn user-job [ctx]
-  (-> ctx qc/from-job-data
-      (get "user")))
+  (-> ctx qc/from-job-data (get "user")))
 
 (jobs/defjob LoadContacts [ctx]
   (let [user (user-job ctx)]

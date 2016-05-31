@@ -10,9 +10,7 @@
              :refer (pspy pspy* profile defnp p p*)]))
 
 (defn clojure-map [m]
-  (if m
-    (into {} (java.util.HashMap. m))
-    {}))
+  (if m (into {} (java.util.HashMap. m)) {}))
 
 (defn node-attrs [node]
   (merge (.asMap node) (hash-map :id (.id node))))
@@ -112,9 +110,9 @@
 (defn merge-if-exists [node query-map]
   (when node (merge node {:type (:type query-map)})))
 
-(defn node-by-id [user query-map]
-  (-> user (node-from-id (:id query-map) (:type query-map))
-      first (merge-if-exists query-map)))
+(defn node-by-id [user {:keys [id type] :as query-map}]
+  (-> (node-from-id user id type) first
+      (merge-if-exists query-map)))
 
 (defn key-link [user query-map]
   (->> [(str "MATCH (k:" (neo4j/prop-label user s/link-id)
@@ -234,9 +232,8 @@
        {:limit limit}]
       neo4j/cypher-list))
 
-(defn recon-count-expand [labels]
-  (->> labels first
-       (map #(hash-map % (second labels)))))
+(defn recon-count-expand [[l1 l2]]
+  (map #(hash-map % l2) l1))
 
 (defn nonlp-count [user]
   (->> ["MATCH (root:" (neo4j/prop-label user s/email)
@@ -263,26 +260,22 @@
         " RETURN ID(r)")
    {:query query}])
 
-(defn id-row [row]
-  (update row 1 #(map (comp first vals) %)))
+(defn id-row [[r1 r2]]
+  [r1 (map (comp first vals) r2)])
 
 (defn search-query [id]
   [(str "MATCH (root) WHERE ID(root) = {id}"
         " WITH root, 0 as o" (vals-collect))
    {:id id}])
 
-(defn search-row [row]
-  (update
-   row 1
-   (fn [r]
-     (vec (map (comp first #(mapv mapify-params %)
-                     neo4j/cypher-query
-                     search-query)
-               r)))))
+(defn search-row [[r1 r2]]
+  [r1 (-> (comp first #(mapv mapify-params %)
+                neo4j/cypher-query
+                search-query)
+          (map r2) vec)])
 
-(defn include-pred [row]
-  (map #(merge % {:pred (first row)})
-       (second row)))
+(defn include-pred [[r1 r2]]
+  (map #(merge % {:pred r1}) r2))
 
 (defn full-search [user query-map]
   (let [query (:query query-map)]

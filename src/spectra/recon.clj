@@ -19,8 +19,7 @@
 
 (defn dupe-nodes [attr nodes]
   (->> (mapcat #(map-node % attr) nodes)
-       (remove nil?)
-       (sort-by first)
+       (remove nil?) (sort-by first)
        (partition-by first)
        (remove #(< (count %) 2))
        (map #(map second %))))
@@ -39,8 +38,7 @@
 (defn merge-nodes [nodes]
   (->> (map vectorize nodes)
        (apply merge-with concat)
-       distinct-all
-       devectorize))
+       distinct-all devectorize))
 
 (defn replace-dupes [g dupes]
   (reduce #(loom/replace-node %1 %2 (merge-nodes dupes)) g dupes))

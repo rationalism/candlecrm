@@ -29,40 +29,34 @@
      (second edge) (first edge))
    (third edge)])
 
-(defn new-cluster [clusters node]
-  [(-> clusters first (assoc node (third clusters)))
-   (-> clusters second (assoc (third clusters) [node]))
-   (-> clusters third inc)])
+(defn new-cluster [[c1 c2 c3] node]
+  [(assoc c1 node c3) (assoc c2 c3 [node]) (inc c3)])
 
 (defn sum-score [node-scores]
   [(ffirst node-scores)
-   (->> node-scores (map second)
-        (apply +))])
+   (->> node-scores (map second) (apply +))])
 
-(defn check-best [clusters node best]
-  (if (pos? (second best))
-    (let [cluster-id (->> best first (get (first clusters)))]
-      [(-> clusters first (assoc node cluster-id))
-       (-> clusters second
-           (update cluster-id #(conj % node)))
-       (nth clusters 2)])
-    (new-cluster clusters node)))
+(defn check-best [[c1 c2 c3] node [b1 b2]]
+  (if (pos? b2)
+    (let [cluster-id (get c1 b1)]
+      [(assoc c1 node cluster-id)
+       (update c2 cluster-id #(conj % node))
+       c3])
+    (new-cluster [c1 c2 c3] node)))
 
-(defn add-cluster [g clusters node]
+(defn add-cluster [g [c1 c2 c3] node]
   (if-let [candidates
            (->> (loom/all-edges g node)
                 (map #(filter-edge node %))
-                (filter #(contains? (first clusters) (first %)))
+                (filter #(contains? c1 (first %)))
                 seq)]
-    (->> (map first candidates)
-         (map (first clusters))
-         distinct (map (second clusters))
+    (->> (map first candidates) (map c1) distinct (map c2)
          (map #(map (zipmap (map first candidates)
                             candidates) %))
          (map #(remove nil? %)) (map sum-score)
          (sort-by second >) first
-         (check-best clusters node))
-    (new-cluster clusters node)))
+         (check-best [c1 c2 c3] node))
+    (new-cluster [c1 c2 c3] node)))
 
 (defn vote-clustering [g]
   (->> g loom/nodes
@@ -70,9 +64,8 @@
        second vals))
 
 (defn cluster-graph [clusters]
-  (->> clusters
-       (map (fn [nodes]
-              (map #(vector (first nodes) % 1)
-                   (rest nodes))))
+  (->> (map (fn [[fn & rn]]
+              (map #(vector fn % 1) rn))
+            clusters)
        (remove empty?) (apply concat)
        (loom/build-graph (apply concat clusters))))

@@ -97,13 +97,12 @@
             (->> (map first k) (map #(into {} %))
                  (apply merge-with +)))))
 
-(defn merge-link [link]
+(defn merge-link [[l1 l2 l3 l4]]
   [(str "MATCH (a) WHERE ID(a) = {id1}"
         " WITH a MATCH (b) WHERE ID(b) = {id2}"
-        " CREATE (a)-[:" (-> link third neo4j/esc-token)
-        " " (-> link fourth neo4j/cypher-properties) " ]->(b)")
-   (merge {:id1 (first link) :id2 (second link)}
-          (fourth link))])
+        " CREATE (a)-[:" (neo4j/esc-token l3)
+        " " (neo4j/cypher-properties l4) " ]->(b)")
+   (merge {:id1 l1 :id2 l2} l4)])
 
 (defn update-id [id-map id]
   (if (contains? id-map id)
@@ -174,7 +173,7 @@
        weka/make-forest))
 
 (defn classify-links [model links]
-  (->> links (map vec) (map #(conj % 0))
+  (->> (map vec links) (map #(conj % 0))
        node-link-features (map drop-last)
        (map #(weka/classify model %))))
 
@@ -202,8 +201,7 @@
        (mapv flatten)))
 
 (defn parse-node-links [links]
-  (->> links (map (comp clean-link vec))
-       accumulate-links))
+  (accumulate-links (map (comp clean-link vec) links)))
 
 (defn parse-link-data [user query-map]
   (->> (get-link-data user query-map)
@@ -211,8 +209,7 @@
        first (map vec) (mapv prn)))
 
 (defn train-pair-graph [class id1 id2 match?]
-  (let [match-node {s/type-label s/trainpair
-                    s/class class}]
+  (let [match-node {s/type-label s/trainpair s/class class}]
     (loom/build-graph
      []
      (if (contains? model/conflicts class)
@@ -223,8 +220,7 @@
 
 (defn even-conflict [class pairs]
   (if (contains? model/conflicts class)
-    (let [size-diff (quot (->> pairs (mapv count)
-                               (apply -)) 2)]
+    (let [size-diff (quot (->> pairs (mapv count) (apply -)) 2)]
       (cond (pos? size-diff)
             [(->> pairs first (drop size-diff) vec)
              (->> pairs first (take size-diff) (mapv reverse)
@@ -266,8 +262,7 @@
 
 (defn with-clause [n1 pred]
   (->> [["WITH root"]
-        (->> n1 range
-             (map #(str "b" %)))
+        (map #(str "b" %) (range n1))
         [(if-let [special-fn (special-paths pred)]
            (special-fn n1)
            (val-clause n1))]]
@@ -291,10 +286,10 @@
        (str/join " ")))
 
 (defn ret-vals [n]
-  (str "RETURN "
-       (->> n range
-            (map #(str "b" %))
-            (str/join ", "))))
+  (->> n range
+       (map #(str "b" %))
+       (str/join ", ")
+       (str "RETURN ")))
 
 (defn fetch-paths-query [id paths]
   [(str "MATCH (root) WHERE ID(root) = {id}"
@@ -407,9 +402,8 @@
 (defn pair-map [p m]
   (map #(get m %) p))
 
-(defn diff-pair [fp]
-  (map #(apply % (second fp))
-       (first fp)))
+(defn diff-pair [[p1 p2]]
+  (map #(apply % p2) p1))
 
 (defn score-diff [rules diff]
   (->> (apply zipvec diff)
@@ -448,10 +442,9 @@
        (score-map class)
        (into [])))
 
-(defn training-query [ids]
+(defn training-query [[ids1 ids2]]
   (str "MATCH (a)--(b) WHERE ID(a) IN ["
-       (first ids) ", " (second ids)
-       "] RETURN a, b"))
+       ids1 ", " ids2 "] RETURN a, b"))
 
 (defn find-conflicts [user class feature expected]
   (->> (find-candidates user class)
@@ -470,12 +463,11 @@
       (- (* x -1 (log2 x))
          (* (- 1 x) (log2 (- 1 x))))))
 
-(defn sample-one [n total accum sample]
-  (let [i (+ (first accum) (second sample))]
-    (if (-> accum second count (+ 0.5)
+(defn sample-one [n total [a1 a2] sample]
+  (let [i (+ a1 (second sample))]
+    (if (-> a2 count (+ 0.5)
             (* total) (/ n) (< i))
-      [i (conj (second accum) sample)]
-      [i (second accum)])))
+      [i (conj a2 sample)] [i a2])))
 
 (defn sample-display [candidates]
   (->> (map training-query candidates)
@@ -496,8 +488,7 @@
    (remove #(<= 0.05 (second (first %))) freqs)])
 
 (defn adjust-weight [n]
-  (fn [point]
-    (update point 1 #(/ % n))))
+  (fn [point] (update point 1 #(/ % n))))
 
 (defn adjust-weights [n freqs]
   (let [total (->> freqs (map second) (apply +))]
@@ -506,12 +497,11 @@
 (defn update-sqrt [point]
   (update point 1 #(Math/sqrt %)))
 
-(defn select-candidate [accum point]
-  [(reduce conj (first accum)
-           (repeat (- (int (+ (second point) (second accum)))
-                      (int (second accum)))
-                   (ffirst point)))
-   (+ (second accum) (second point))])
+(defn select-candidate [[a1 a2] [p1 p2]]
+  [(reduce conj a1
+           (repeat (- (int (+ p2 a2)) (int a2))
+                   (first p1)))
+   (+ a2 p2)])
 
 (defn select-candidates [freqs]
   (first (reduce select-candidate [[] 0.0] freqs)))
@@ -536,11 +526,9 @@
     (->> (old-model-points user class n)
          (map #(map candidate-map %)))))
 
-(defn append-scores [pos-and-neg]
-  [(->> pos-and-neg first
-        (map vec) (map #(conj % 1.0)))
-   (->> pos-and-neg second
-        (map vec) (map #(conj % 0.0)))])
+(defn append-scores [[pos neg]]
+  [(->> (map vec pos) (map #(conj % 1.0)))
+   (->> (map vec neg) (map #(conj % 0.0)))])
 
 (defn train-forest [user class pos-cs neg-cs]
   (->> [pos-cs neg-cs]
@@ -560,7 +548,7 @@
            (fetch-train-pairs class))))
 
 (defn groups-to-recon [class score-map]
-  (->> score-map (map #(update % 0 vec))
+  (->> (map #(update % 0 vec) score-map)
        (mapv #(apply conj %)) (map vec)
        (loom/build-graph [])
        cluster/prob-weights

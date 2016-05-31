@@ -45,8 +45,7 @@
   (->> filename slurp
        (nlp/run-nlp (nlp/make-default-pipeline
                      nlp/sentence-annotators))
-       nlp/get-sentences
-       nlp/sentences-text
+       nlp/get-sentences (map str)
        (->SentenceLoader (atom 0))))
 
 (defrecord TokenStore [pos tokens]
@@ -62,10 +61,8 @@
                nil)))
 
 (defn make-token-store [pipeline words]
-  (->> words
-       (nlp/run-nlp pipeline)
-       nlp/get-tokens
-       (map nlp/get-lemma)
+  (->> (nlp/run-nlp pipeline words)
+       nlp/get-tokens (map nlp/get-lemma)
        (->TokenStore (atom 0))))
   
 (defrecord TokenStoreFactory [pipeline]

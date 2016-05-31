@@ -69,14 +69,13 @@
   (route/not-found (slurp (io/resource "public/404.html"))))
 
 (defn form-params [req]
-  (merge (:form-params req)
-         (:multipart-params req)))
+  (merge (:form-params req) (:multipart-params req)))
 
-(defn csrf-token [req]
+(defn csrf-token [{:keys [headers params] :as req}]
   (or (-> req form-params (get "__anti-forgery-token"))
-      (-> req :headers (get "x-csrf-token"))
-      (-> req :headers (get "x-xsrf-token"))
-      (-> req :params :csrf-token)))
+      (get headers "x-csrf-token")
+      (get headers "x-xsrf-token")
+      (:csrf-token params)))
 
 (defn middleware-config []
   (-> secure-site-defaults
@@ -85,10 +84,9 @@
                 {:read-token csrf-token})))
 
 (defn unauthorized-handler []
-  (fn [uri]
-    (-> (pages/login-needed (:uri uri))
-        resp/response
-        (resp/status 401))))
+  (fn [{:keys [uri]}]
+    (-> (pages/login-needed uri)
+        resp/response (resp/status 401))))
 
 (defn wrap-authentication [handler]
   (fn [request]

@@ -21,11 +21,11 @@
 
 (defnc parse-dates [text reference]
   (CalendarSource/setBaseDate reference)
-  (->> text (.parse (Parser. ))
+  (->> (.parse (Parser. ) text)
        (remove #(no-info? % reference))))
 
 (defn unix-dates [text reference]
-  (->> reference (parse-dates text)
+  (->> (parse-dates text reference)
        (mapv #(.getDates %)) (map vec)))
 
 (defn now []
@@ -67,8 +67,7 @@
   (-> some-date .getTime (mod 1000) (not= 0)))
 
 (defn format-year [some-date]
-  (-> "yyyy" (SimpleDateFormat.)
-      (.format some-date)))
+  (-> "yyyy" SimpleDateFormat. (.format some-date)))
 
 (defn catch-dates [value]
   (if (= Date (type value))

@@ -32,27 +32,22 @@
 (def crossval-temp "/tmp/crossval.csv")
 
 (defn serialize [forest filename]
-  (-> filename
-      (FileOutputStream. )
-      (ObjectOutputStream. )
+  (-> (FileOutputStream. filename)
+      ObjectOutputStream. 
       (.writeObject forest)))
 
 (defn deserialize-stream [stream]
-  (-> stream
-      (ObjectInputStream. )
-      (.readObject )))
+  (.readObject (ObjectInputStream. stream)))
 
 (defn deserialize [filename]
-  (-> filename
-      (FileInputStream. )
-      deserialize-stream))
+  (deserialize-stream (FileInputStream. filename)))
 
 (defn save-traindat [traindat]
   (spit traindat-temp (vec traindat))
   traindat)
 
 (defn load-traindat []
-  (edn/read-string (slurp traindat-temp)))
+  (-> traindat-temp slurp edn/read-string))
 
 (defn get-copy-fn [class dir]
   (let [model (deserialize (str dir "/" class ".dat"))]
@@ -65,40 +60,36 @@
   (Attribute. (str "attr" n)))
 
 (defn all-attributes [point]
-  (->> point count range
-       (map attr-gen)))
+  (->> point count range (map attr-gen)))
 
 (defn add-element [attrs new-attr]
   (doto attrs (.addElement new-attr)))
 
 (defn class-vals [points]
-  (->> points (map last) 
-       distinct (into '())
-       sort))
+  (->> points (map last) distinct (into '()) sort))
 
 (defn class-attr [points]
   (Attribute. "@@class@@" (class-vals points)))
 
-(defn make-attributes [points]
-  (cond (-> points ffirst string?)
+(defn make-attributes [[p1 :as points]]
+  (cond (-> p1 first string?)
         (doto (FastVector. )
           (add-element (Attribute. "text" (cast FastVector nil)))
           (add-element (class-attr points)))
-        (-> points first last number?)
+        (-> p1 last number?)
         (reduce #(add-element %1 %2) (FastVector. )
-                (all-attributes (first points)))
+                (all-attributes p1))
         :else
         (reduce #(add-element %1 %2) (FastVector. )
-                (-> points first drop-last all-attributes vec
+                (-> p1 drop-last all-attributes vec
                     (conj (class-attr points))))))
 
 (defn double-if-num [n]
   (if (number? n) (double n) n))
 
-(defn set-value [instance attr-pairs]
+(defn set-value [instance [attr1 attr2]]
   (doto instance
-    (.setValue (first attr-pairs)
-               (-> attr-pairs second double-if-num))))
+    (.setValue attr1 (double-if-num attr2))))
 
 (defn make-instance [dataset point]
   (reduce #(set-value %1 %2)
@@ -120,8 +111,7 @@
   (reduce #(add-point %1 %2) instances points))
 
 (defn instances [points]
-  (add-points (make-instances points)
-              points))
+  (add-points (make-instances points) points))
 
 (defn make-forest [points]
   (doto (RandomForest. )
@@ -209,9 +199,7 @@
        (map edn/read-string)))
 
 (defn pretty-classifier [classifier]
-  (-> classifier prn-str
-      (str/split #"\\n")
-      vec))
+  (-> classifier prn-str (str/split #"\\n") vec))
 
 (defn html-out [outfile]
   (doto (HTML. )
@@ -239,8 +227,7 @@
   (map #(Double/parseDouble %) point))
 
 (defn replace-class [point]
-  (update (vec point) 1
-          #(if (>= % 0.5) "t" "f")))
+  (update (vec point) 1 #(if (>= % 0.5) "t" "f")))
 
 (defn forest-curve [points]
   (let [traindat (instances points)]
@@ -266,6 +253,5 @@
           (recur (- x interval) interval)
           (< (classify-logit logit [(+ x interval)]) y)
           (recur (+ x interval) interval)
-          :else
-          (recur x (/ interval 2.0)))))
+          :else (recur x (/ interval 2.0)))))
 

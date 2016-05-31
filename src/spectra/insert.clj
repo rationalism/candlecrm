@@ -61,9 +61,8 @@
           "]->(b)")
      {:id1 id1 :id2 id2}]))
 
-(defn edge-cypher [e id-map]
-  (link-cypher (id-map (first e)) (id-map (second e))
-               (nth e 2)))
+(defn edge-cypher [[e1 e2 e3] id-map]
+  (link-cypher (id-map e1) (id-map e2) e3))
 
 (defn add-label-query [label ids]
   (if (and ids (not (empty? ids)))
@@ -96,10 +95,9 @@
 (defn new-resp [id type]
   {:id id s/type-label type})
 
-(defn new-entity! [user query-map]
-  (-> query-map :fields vector
-      (push-entities! user)
-      first (new-resp (-> query-map :fields s/type-label))))
+(defn new-entity! [user {:keys [fields]}]
+  (-> fields vector (push-entities! user) first
+      (new-resp (s/type-label fields))))
 
 (defn vals-query [attrs]
   (str "MATCH (root)-[r:" attrs
@@ -107,25 +105,25 @@
        " AND v." (neo4j/esc-token s/value)
        " IS NOT NULL"))
 
-(defn edit-entity! [user query-map]
-  (let [fields (:fields query-map)
-        attrs (->> (dissoc fields :id :type :label) keys
-                   (map neo4j/esc-token) (str/join "|"))]
+(defn edit-entity! [user {:keys [fields]}]
+  (let [attrs (->> (dissoc fields :id :type :label) keys
+                   (map neo4j/esc-token) (str/join "|"))
+        id (:id fields)]
     (->> (-> fields (dissoc :id :type :label)
-             (fmap vals) (hash-map (:id fields)) first
+             (fmap vals) (hash-map id) first
              (id-pair-cypher user s/edit-src))
          (concat
           [[(str "MATCH (root) WHERE ID(root) = {id}"
                  " SET root:" (neo4j/esc-token s/norecon))
-            {:id (:id fields)}]
+            {:id id}]
            [(str "MATCH (root) WHERE ID(root) = {id}"
                  " REMOVE root:" (neo4j/esc-token s/recon))
-            {:id (:id fields)}]
+            {:id id}]
            [(str (vals-query attrs) " WITH v MATCH (v)<--(x)"
                  " WITH v, count(x) as n WHERE n = {limit} DETACH DELETE v")
-            {:id (:id fields) :limit 1}]
+            {:id id :limit 1}]
            [(str (vals-query attrs) " DELETE r")
-            {:id (:id fields)}]])
+            {:id id}]])
          neo4j/cypher-combined-tx)))
 
 

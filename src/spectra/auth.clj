@@ -25,11 +25,12 @@
 (def privkey (keys/private-key "privkey.pem" (env :privkey-pwd)))
 (def exp-hours 3)
 
-(defn hash-pwd [query-map]
-  (-> query-map :password (hashers/encrypt hash-alg)))
+(defn hash-pwd [password]
+  (hashers/encrypt password hash-alg))
 
 (defn lookup-user [username]
-  (when-let [user (neo4j/get-vertex-raw s/user {s/email-addr username})]
+  (when-let [user (neo4j/get-vertex-raw
+                   s/user {s/email-addr username})]
     user))
 
 (defn find-user [email password]
@@ -81,10 +82,9 @@
 (defn list-users []
   (neo4j/get-vertices-class (name s/user)))
 
-(defn delete-entity! [user query-map]
-  (let [id (:id query-map)]
-    (when (neo4j/node-exists? user id (:type query-map))
-      (neo4j/delete-id! id))))
+(defn delete-entity! [user {:keys [id type]}]
+  (when (neo4j/node-exists? user id type)
+    (neo4j/delete-id! id)))
 
 (defn delete-user! [user]
   (when (google/lookup-token user)
@@ -125,25 +125,24 @@
         "This link will expire after 60 minutes."]
        (str/join "\n")))
 
-(defn pwd-reset! [req]
+(defn pwd-reset! [{{:keys [username]} :params}]
   (let [reset-token (random/base32 30)]
-    (when-let [user (-> req :params :username lookup-user)]
+    (when-let [user (lookup-user username)]
       (neo4j/set-property! user s/pwd-reset-token reset-token)
       (neo4j/set-property! user s/modified (dt/now))
       (sendgrid/send-email!
        {s/email-subject "Password reset"
         s/email-body (pwd-reset-email reset-token)
         s/email-from "alyssamvance@gmail.com"
-        s/email-to (-> req :params :username)}))))
+        s/email-to username}))))
 
-(defn set-password! [user params]
-  (if-let [err-msg (password-check (:password params) (:confirm params))]
+(defn set-password! [user {:keys [password confirm]}]
+  (if-let [err-msg (password-check password confirm)]
     err-msg
     (do (neo4j/delete-property! user s/pwd-reset-token)
-        (->> params hash-pwd
+        (->> password hash-pwd
              (neo4j/set-property! user s/pwd-hash)))))
 
-(defn login-handler [query-map]
-  (when-let [record (find-user (:username query-map)
-                               (:password query-map))]
+(defn login-handler [{:keys [username password]}]
+  (when-let [record (find-user username password)]
     (make-token record)))

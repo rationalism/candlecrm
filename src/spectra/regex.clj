@@ -23,7 +23,7 @@
        (str/join "|") re-pattern))
 
 (defn find-email-addrs [text]
-  (->> text (re-seq email-regex)
+  (->> (re-seq email-regex text)
        (remove #(.contains % "..."))))
 
 (defn find-urls [text]
@@ -45,18 +45,15 @@
        distinct))
 
 (defn one-email? [text]
-  (= (count (find-email-addrs text)) 1))
+  (-> text find-email-addrs count (= 1)))
 
 (defn filter-arrows [text]
-  (-> text
-      (str/replace "<" "")
+  (-> (str/replace text "<" "")
       (str/replace ">" "")))
 
 (defn parse-name [text email]
-  (-> text
-      (str/replace email "")
-      filter-arrows
-      str/trim))
+  (-> (str/replace text email "")
+      filter-arrows str/trim))
   
 (defn parse-name-email [text]
   (let [addrs (find-email-addrs text)]
@@ -80,5 +77,4 @@
 
 (defn find-phone-people [text]
   (->> (find-phone-nums text)
-       (map phone-person)
-       distinct))
+       (map phone-person) distinct))

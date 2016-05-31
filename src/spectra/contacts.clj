@@ -63,14 +63,11 @@
 
 (defn organizations [contact]
   (when-let [orgs (.getOrganizations contact)]
-    (->> orgs
-         (map #(.getOrgName %))
-         (remove nil?)
+    (->> (map #(.getOrgName %) orgs) (remove nil?)
          (map #(.getValue %)))))
 
 (defn filter-map [contact-map]
-  (->> contact-map
-       (filter #(-> % val not-nil-ext?))
+  (->> (filter #(-> % val not-nil-ext?) contact-map)
        (into {})))
 
 (defn maybe-add [m k v]
@@ -94,5 +91,4 @@
       (insert/push-entities! user s/contact-src)))
 
 (defn load-all-contacts! [user]
-  (->> user all-contacts
-       (batch-insert! user)))
+  (->> user all-contacts (batch-insert! user)))

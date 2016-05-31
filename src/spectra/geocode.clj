@@ -31,8 +31,7 @@
 
 (defn geocode-str [s]
   (when-let [geocode (fetch-geocode s)]
-    (-> geocode (.geometry)
-        (.location) map-latlng)))
+    (-> geocode .geometry .location map-latlng)))
 
 (defn remove-geo-label [id]
   [(str "MATCH (root) WHERE ID(root) = {id}"
