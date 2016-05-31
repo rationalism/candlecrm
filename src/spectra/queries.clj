@@ -74,7 +74,9 @@
              ")-[:" (neo4j/esc-token (:link query-map))
              "]->(p:" (neo4j/prop-label user s/person)
              ") WHERE ID(p) = {`person-id`}"
-             " WITH root, root." (neo4j/esc-token s/email-sent)
+             " WITH root MATCH (root)-[r]->(v:"
+             (neo4j/prop-label user s/email-sent)
+             ") WITH root, v." (neo4j/esc-token s/value)
              " as o ORDER BY o DESC SKIP {start} LIMIT {limit}"
              (vals-collect))
         (dissoc query-map :link)]
