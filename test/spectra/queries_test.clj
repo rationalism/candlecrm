@@ -13,7 +13,7 @@
     (def test-user (auth/create-user! {:username test-username
                                        :password test-password}))
     (is test-user)
-    (is (= [test-username]
+    (is (= {test-username 1.0}
            (-> test-user (person-from-user {:start 0 :limit 10})
                first s/email-addr)))
     
