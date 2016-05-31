@@ -11,6 +11,7 @@
              :refer (pspy pspy* profile defnp p p*)]))
 
 (def insert-csv-block 100)
+(def preprocess-labels {s/nonlp s/email s/nogeocode s/location})
 
 (defn create-cypher [user label]
   {:pre [user label]}
@@ -64,23 +65,25 @@
   (link-cypher (id-map (first e)) (id-map (second e))
                (nth e 2)))
 
-(defn add-label-query [ids]
-  (if ids
-    [[(str "MATCH (root) WHERE ID(root) IN {ids}"
-           " SET root:" (neo4j/esc-token s/nonlp))
+(defn add-label-query [label ids]
+  (if (and ids (not (empty? ids)))
+    [[(str "MATCH (root) WHERE ID(root) IN {ids} SET root:"
+           (neo4j/esc-token label))
       {:ids ids}]] []))
 
-(defn add-nlp-labels [id-map]
-  (->> (filter #(-> % first s/type-label (= s/email)) id-map)
-       (remove #(-> % first :id))
-       (map second) seq add-label-query))
+(defn add-process-labels [id-map]
+  (->> (remove #(-> % first :id) id-map)
+       (group-by #(-> % first s/type-label))
+       (compose-maps preprocess-labels)
+       (fmapl #(map second %)) (into [])
+       (mapcat #(apply add-label-query %))))
 
 (defnp push-graph!
   ([g user source]
    (push-graph! g user source []))
   ([g user source pre-queries]
    (let [id-map (insert-nodes! g user)]
-     (->> [pre-queries (add-nlp-labels id-map)
+     (->> [pre-queries (add-process-labels id-map)
            (mapcat #(id-pair-cypher % user source) id-map)
            (map #(edge-cypher % id-map) (loom/edges g))]
           (apply concat) neo4j/cypher-combined-tx)

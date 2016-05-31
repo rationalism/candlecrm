@@ -46,6 +46,9 @@
 (defn fmap [m fn]
   (reduce #(update %1 %2 fn) m (keys m)))
 
+(defn fmapl [fn m]
+  (fmap m fn))
+
 (defn zipvec [a b]
   (map vector a b))
 

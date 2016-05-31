@@ -85,6 +85,7 @@
 (def recon-run :recon-run)
 (def index-run :index-run)
 (def nonlp :nonlp)
+(def nogeocode :nogeocode)
 
 (def match :match)
 (def notmatch :notmatch)
