@@ -4,7 +4,8 @@
             [spectra_cljs.html :as html]
             [spectra_cljc.schema :as s]
             [spectra_cljs.state :as state]
-            [spectra_cljs.update :as u] 
+            [spectra_cljs.update :as u]
+            [spectra_cljs.util :as util]
             [reagent.core :as r]
             [jayq.core :as jq])
   (:use [jayq.core :only [$]]))
@@ -61,7 +62,7 @@
      5 [:div#tab5.tab-show [html/my-account]]
      6 [node-page (state/look :current-node)]
      7 [html/entity-form "Add new person"
-        (html/add-ids (s/person html/entity-attrs))
+        (util/add-ids (s/person html/entity-attrs))
         [:new-entity]
         (html/submit-new-entity s/person)
         (when (state/look :new-entity-msg)
@@ -70,7 +71,7 @@
         (str "Edit " (-> :current-node (state/look :type) name)
              " named " (-> (state/look :current-node :center-node s/s-name)
                            first second))
-        (html/add-ids (s/person html/entity-attrs))
+        (util/add-ids (s/person html/entity-attrs))
         [:current-node :center-node] #(u/edit-entity!)
         (when (state/look :edit-entity-msg)
           [html/edit-message])]
