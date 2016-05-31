@@ -100,10 +100,10 @@
 (defn merge-link [link]
   [(str "MATCH (a) WHERE ID(a) = {id1}"
         " WITH a MATCH (b) WHERE ID(b) = {id2}"
-        " CREATE (a)-[:" (-> link (nth 2) neo4j/esc-token)
-        " " (-> link (nth 3) neo4j/cypher-properties) " ]->(b)")
+        " CREATE (a)-[:" (-> link third neo4j/esc-token)
+        " " (-> link fourth neo4j/cypher-properties) " ]->(b)")
    (merge {:id1 (first link) :id2 (second link)}
-          (nth link 3))])
+          (fourth link))])
 
 (defn update-id [id-map id]
   (if (contains? id-map id)
@@ -344,7 +344,7 @@
          (apply str) neo4j/cypher-query
          first vals first (group-by first) vals
          (mapv (comp normalize-pair #(mapv rest %)))
-         (group-by #(nth % 2)) ((juxt :true :false))
+         (group-by third) ((juxt :true :false))
          (mapv #(mapv (comp vec drop-last) %))
          (even-conflict class))))
 

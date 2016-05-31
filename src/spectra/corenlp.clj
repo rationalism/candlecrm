@@ -415,7 +415,7 @@
 (defn string-vector [edge]
   (vector (stringify-node (first edge))
           (stringify-node (second edge))
-          (nth edge 2)))
+          (third edge)))
 
 (defn stringify-graph [g]
   (loom/build-graph
@@ -562,14 +562,14 @@
 
 (defn shorten-edge [edge]
   (conj (map shorten-node (take 2 edge))
-        (nth edge 2)))
+        (third edge)))
 
 (defn strip-nodes [nodes]
   (->> nodes (apply merge) vals))
 
 (defn strip-edge [edge]
   (conj (->> (take 2 edge) (map vals) (map first))
-        (nth edge 2)))
+        (third edge)))
 
 (defn strip-graph [g]
   (loom/build-graph
@@ -579,7 +579,7 @@
 (defn lonely? [g pronoun]
   (as-> (loom/out-edges g pronoun) $
     (and (= (count $) 1)
-         (= s/has-type (nth (first $) 2)))))
+         (= s/has-type (third (first $))))))
 
 (defn find-pronouns [g]
   (->> (pronoun-node) (loom/up-nodes g)
@@ -590,8 +590,8 @@
 
 (defn rewrite-edges [g pronoun]
   (->> (loom/out-edges g pronoun)
-       (remove #(= s/coref-is (nth % 2)))
-       (remove #(= s/has-type (nth % 2)))
+       (remove #(= s/coref-is (third %)))
+       (remove #(= s/has-type (third %)))
        (map #(slice 1 3 %))
        (map #(into (vector (find-referent g pronoun)) %))))
 

@@ -16,11 +16,11 @@
   (cond
     (has-edge? g edge)
     (->> (attr/attr g (vec (take 2 edge)) :label)
-         (cons (nth edge 2)) distinct
+         (cons (third edge)) distinct
          (attr/add-attr g edge :label))
     :else (attr/add-attr
            (graph/add-edges g (vec (take 2 edge)))
-           edge :label (vector (nth edge 2)))))
+           edge :label (vector (third edge)))))
 
 (defn nodes [g]
   (graph/nodes g))
@@ -43,12 +43,12 @@
 
 (defn out-edge-label [g node label]
   (->> (out-edges g node)
-       (filter #(= (nth % 2) label))
+       (filter #(= (third %) label))
        first))
 
 (defn in-edge-label [g node label]
   (->> (in-edges g node)
-       (filter #(= (nth % 2) label))
+       (filter #(= (third %) label))
        first))
 
 (defn fan-in [g node]
@@ -75,18 +75,18 @@
 (defn one-label-left? [g edge]
   (let [label (attr/attr g (vec (take 2 edge)) :label)]
     (and (= 1 (count label))
-         (= (first label) (nth edge 2)))))
+         (= (first label) (third edge)))))
 
 (defn remove-edge [g edge]
   {:pre [(= 3 (count edge))]}
   (cond
     (not (has-edge? g edge)) g
-    (not (some #{(nth edge 2)} (attr/attr g (vec (take 2 edge)) :label))) g
+    (not (some #{(third edge)} (attr/attr g (vec (take 2 edge)) :label))) g
     (one-label-left? g edge)
     (-> (attr/remove-attr g (vec (take 2 edge)) :label)
         (graph/remove-edges (vec (take 2 edge))))
     :else (->> (attr/attr g (vec (take 2 edge)) :label)
-               (remove #(= (nth edge 2) %))
+               (remove #(= (third edge) %))
                (attr/add-attr g edge :label))))
 
 (defn remove-edges [g edges]
@@ -94,7 +94,7 @@
 
 (defn remove-edges-label [g label]
   (remove-edges
-   g (filter #(= label (nth % 2))
+   g (filter #(= label (third %))
              (edges g))))
 
 (defn remove-nodes [g nodes]
@@ -116,11 +116,11 @@
 
 (defn labeled-edges [g node label]
   (->> (out-edges g node)
-       (filter #(= label (nth % 2)))))
+       (filter #(= label (third %)))))
 
 (defn select-edges [g edge-type]
   (->> (edges g)
-       (filter #(= edge-type (nth % 2)))))
+       (filter #(= edge-type (third %)))))
 
 (defn replace-node [g old-node new-node]
   (if (= old-node new-node) g

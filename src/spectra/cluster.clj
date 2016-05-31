@@ -27,12 +27,12 @@
 (defn filter-edge [node edge]
   [(if (= node (first edge))
      (second edge) (first edge))
-   (nth edge 2)])
+   (third edge)])
 
 (defn new-cluster [clusters node]
-  [(-> clusters first (assoc node (nth clusters 2)))
-   (-> clusters second (assoc (nth clusters 2) [node]))
-   (-> clusters (nth 2) inc)])
+  [(-> clusters first (assoc node (third clusters)))
+   (-> clusters second (assoc (third clusters) [node]))
+   (-> clusters third inc)])
 
 (defn sum-score [node-scores]
   [(ffirst node-scores)
