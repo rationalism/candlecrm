@@ -40,7 +40,10 @@
     :id (.id geocode)}])
 
 (defn geocode-batch [limit]
-  (->> (queries/bare-locations limit)
+  "doggy")
+
+(defn geocode-batch-real [user limit]
+  (->> (queries/bare-locations user limit)
        (map queries/node-attrs)
        (map #(update % s/s-name first))
        (map #(update % s/s-name geocode-str))
@@ -49,4 +52,4 @@
        neo4j/cypher-combined-tx))
 
 
-       
+
