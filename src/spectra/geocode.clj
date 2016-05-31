@@ -2,6 +2,7 @@
   (:require [clojure.set :as set]
             [clojure.string :as str]
             [spectra.common :refer :all]
+            [spectra.insert :as insert]
             [spectra.mlrecon :as mlrecon]
             [spectra.neo4j :as neo4j]
             [spectra.queries :as queries]
@@ -18,8 +19,8 @@
   (reset! context (make-context)))
 
 (defn map-latlng [latlng]
-  {(name s/lat) (.lat latlng)
-   (name s/lng) (.lng latlng)})
+  {s/lat (.lat latlng)
+   s/lng (.lng latlng)})
 
 (defn fetch-geocode [s]
   (-> @context

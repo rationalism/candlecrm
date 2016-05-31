@@ -100,6 +100,7 @@
 (def email-src 3)
 (def contact-src 4)
 (def meta-src 5)
+(def geo-src 6)
 
 (def src-features [edit-src nlp-src email-src contact-src])
 
