@@ -30,18 +30,6 @@
     (-> geocode (.geometry)
         (.location) map-latlng)))
 
-(defn geocode-cached [limit]
-  (-> ["MATCH (aloc:" (neo4j/esc-token s/location)
-       ") WITH aloc MATCH (bloc:" (neo4j/esc-token s/location)
-       ")-[:" (neo4j/esc-token s/has-coord)
-       "]->(g:" (neo4j/esc-token s/geocode)
-       ") WHERE aloc." (neo4j/esc-token s/s-name)
-       " = bloc." (neo4j/esc-token s/s-name)
-       " AND NOT (aloc)-[:" (neo4j/esc-token s/has-coord)
-       "]->() CREATE (aloc)-[:" (neo4j/esc-token s/has-coord)
-       "]->(g) RETURN aloc LIMIT " limit]
-      str/join neo4j/cypher-list))
-
 (defn insert-query [geocode]
   [(str "MATCH (root:" (neo4j/esc-token s/location)
         ") WHERE ID(root) = {id}"

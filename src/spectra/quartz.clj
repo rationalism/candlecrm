@@ -132,9 +132,6 @@
 (jobs/defjob NewGeocodes [ctx]
   (neo4j/thread-wrap (geocode/geocode-batch 10)))
 
-(jobs/defjob CachedGeocodes [ctx]
-  (neo4j/thread-wrap (geocode/geocode-cached 20)))
-
 (jobs/defjob ProcessRecon [ctx]
   (when :nil (run-recon!)))
 
@@ -216,9 +213,6 @@
   (qs/schedule @scheduler
                (make-job NewGeocodes "jobs.geocode.load.1")
                (periodic-trigger 5000 nil "geocode.trigger.1"))
-  (qs/schedule @scheduler
-               (make-job CachedGeocodes "jobs.geocode.insert.1")
-               (periodic-trigger 5000 nil "geocode.trigger.2"))
   (qs/schedule @scheduler
                (make-job ProcessRecon "jobs.recon.do.1")
                (periodic-trigger 5000 nil "recon.trigger.1"))
