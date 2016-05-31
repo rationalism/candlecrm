@@ -15,6 +15,8 @@
     {}))
 
 (defn node-attrs [node]
+  (println "node-attrs")
+  (println node)
   (merge (.asMap node) (hash-map :id (.id node))))
 
 (defn filter-decode-labels [labels]
@@ -226,8 +228,8 @@
        (map vals) (map #(apply merge %))
        distinct))
 
-(defn bare-locations [user limit]
-  (-> [(str "MATCH (root:" (neo4j/prop-label user s/location)
+(defn bare-locations [limit]
+  (-> [(str "MATCH (root:" (neo4j/esc-token s/nogeocode)
             ":" (neo4j/esc-token s/recon)
             ") WHERE NOT (root)-[:" (neo4j/esc-token s/has-coord)
             "]->() RETURN root LIMIT {limit}")
