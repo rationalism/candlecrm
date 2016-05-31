@@ -218,8 +218,8 @@
              " AND NOT (g." (neo4j/esc-token s/lat)
              " IS NULL) RETURN ev, g"
              " SKIP {start} LIMIT {limit}")
-        query-map]
-       neo4j/cypher-query
+        query-map] debug
+       neo4j/cypher-query 
        (map #(update % "ev" node-attrs))
        (map #(update % "g" node-attrs))
        (map #(update-in % ["g"] dissoc :id))

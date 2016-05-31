@@ -130,7 +130,7 @@
   (when :nil (queue-pop!)))
 
 (jobs/defjob NewGeocodes [ctx]
-  (neo4j/thread-wrap (geocode/geocode-batch 10)))
+  (neo4j/thread-wrap (when nil (geocode/geocode-batch 10))))
 
 (jobs/defjob ProcessRecon [ctx]
   (when :nil (run-recon!)))
