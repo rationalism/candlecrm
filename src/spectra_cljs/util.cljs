@@ -4,6 +4,11 @@
             [spectra_cljs.state :as state]
             [spectra_cljs.update :as u]))
 
+(defn get-first [node attr]
+  (->> (get node attr) (into [])
+       (sort-by second >)
+       ffirst))
+
 (defn node-link [text id type]
   [:a.go-node
    {:href "#" :on-click #(u/go-node! id type)}

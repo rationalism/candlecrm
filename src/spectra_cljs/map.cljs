@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]
             [spectra_cljc.schema :as s]
             [spectra_cljs.state :as state]
-            [spectra_cljs.util :as util]
+            [spectra_cljs.util :refer [node-link]]
             [reagent.core :as r]
             [goog.dom :as dom]
             [jayq.core :as jq])
@@ -11,7 +11,7 @@
 (defn event-info-window []
   (let [marker (state/look :map-markers :clicked)]
     [:div#markerinfo>h3
-     [util/node-link (:title marker) (:id marker) s/location]]))
+     [node-link (:title marker) (:id marker) s/location]]))
 
 (defn render-window []
   (r/render [event-info-window]
