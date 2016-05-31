@@ -15,8 +15,6 @@
     {}))
 
 (defn node-attrs [node]
-  (println "node-attrs")
-  (println node)
   (merge (.asMap node) (hash-map :id (.id node))))
 
 (defn filter-decode-labels [labels]
