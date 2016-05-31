@@ -34,18 +34,22 @@
     (-> geocode (.geometry)
         (.location) map-latlng)))
 
-(defn insert-graph [[[user id] geocode]]
-  (insert/push-graph!
-   (loom/build-graph [] [[{:id id} geocode s/has-coord]])
-   user s/geo-src 
-   [[(str "MATCH (root) WHERE ID(root) = {id}"
-          " REMOVE root:" (neo4j/esc-token s/nogeocode))
-     {:id id}]]))
+(defn remove-geo-label [id]
+  [(str "MATCH (root) WHERE ID(root) = {id}"
+        " REMOVE root:" (neo4j/esc-token s/nogeocode))
+   {:id id}])
 
-(defn geocode-batch [limit]
-  "jose dog")
+(defn insert-graph [[[user id] geocode]]
+  (if geocode
+    (insert/push-graph!
+     (loom/build-graph [] [[{:id id} geocode s/has-coord]])
+     user s/geo-src [(remove-geo-label id)])
+    (neo4j/cypher-query (remove-geo-label id))))
 
 (defn geocode-batch-real [limit]
+  "jose dog")
+
+(defn geocode-batch [limit]
   (->> (queries/bare-locations limit)
        (map #(vector [(->> % (.labels) queries/find-user-labels)
                       (.id %)] (.id %))) (into {}) 
