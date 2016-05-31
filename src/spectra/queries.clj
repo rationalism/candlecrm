@@ -272,11 +272,13 @@
    {:id id}])
 
 (defn search-row [row]
-  (update row 1
-          #(vec (map (comp first (mapv mapify-params)
-                           neo4j/cypher-query
-                           search-query)
-                     %))))
+  (update
+   row 1
+   (fn [r]
+     (vec (map (comp first #(mapv mapify-params %)
+                     neo4j/cypher-query
+                     search-query)
+               r)))))
 
 (defn include-pred [row]
   (map #(merge % {:pred (first row)})

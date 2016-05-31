@@ -1,5 +1,6 @@
 (ns spectra.queries-test
   (:require [clojure.test :refer :all]
+            [spectra.common :refer :all]
             [spectra.auth :as auth]
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]
@@ -126,8 +127,8 @@
                                        :password test-password}))
     (is test-user)
     (is (->> test-username vector (zipmap [:query])
-             (full-search test-user)
-             first s/email-addr first
+             (full-search test-user) 
+             first s/email-addr keys first
              (= test-username)))
     
     (auth/delete-user! test-user)))
