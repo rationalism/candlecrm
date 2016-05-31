@@ -204,25 +204,28 @@
              " WITH ev as root, 0 as o"
              " SKIP {start} LIMIT {limit}"
              (vals-collect))
-        query-map]
+        (update query-map :person-id #(Integer/parseInt %))]
        neo4j/cypher-query (mapv mapify-params)))
+
+(def loc-paths [[s/s-name] [s/has-coord s/lat] [s/has-coord s/lng]])
+
+(defn update-lat-lon [m]
+  (-> (update m s/lat first)
+      (update s/lng first)))
 
 (defn loc-related [user query-map]
   (->> [(str (rel-query user)
              (neo4j/prop-label user s/location)
              ")-[:" (neo4j/esc-token s/has-coord)
-             "]->(g:" (neo4j/esc-token s/geocode)
+             "]->(g:" (neo4j/prop-label user s/geocode)
              ") WHERE ID(root) = {`person-id`}"
-             " AND NOT (g." (neo4j/esc-token s/lat)
-             " IS NULL) RETURN ev, g"
-             " SKIP {start} LIMIT {limit}")
-        query-map] debug
-       neo4j/cypher-query 
-       (map #(update % "ev" node-attrs))
-       (map #(update % "g" node-attrs))
-       (map #(update-in % ["g"] dissoc :id))
-       (map vals) (map #(apply merge %))
-       distinct))
+             " RETURN ID(ev) SKIP {start} LIMIT {limit}")
+        (update query-map :person-id #(Integer/parseInt %))]
+       neo4j/cypher-query (map vals) (mapv first)
+       (mlrecon/fetch-all-paths loc-paths)
+       (fmapl #(zipmap (map last loc-paths) %))
+       (map #(merge (val %) {:id (key %) :label s/location}))
+       (map update-lat-lon)))
 
 (defn bare-locations [limit]
   (-> [(str "MATCH (root:" (neo4j/esc-token s/nogeocode)
