@@ -99,7 +99,7 @@
                                        :password test-password}))
     (is test-user)
     (is (= '() (event-related test-user {:start 0 :limit 10
-                                         :person-id 17})))
+                                         :person-id "17"})))
     
     (auth/delete-user! test-user)))
 
@@ -109,7 +109,7 @@
                                        :password test-password}))
     (is test-user)
     (is (= '() (loc-related test-user {:start 0 :limit 10
-                                       :person-id 17})))
+                                       :person-id "17"})))
     
     (auth/delete-user! test-user)))
 
