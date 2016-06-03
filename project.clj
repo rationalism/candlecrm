@@ -44,7 +44,7 @@
                  [org.nd4j/nd4j-x86 "0.4-rc3.8"
                   :exclusions [org.bytedeco/javacpp]]
                  [com.joestelmach/natty "0.12"]
-                 [org.neo4j.driver/neo4j-java-driver "1.0.1"]
+                 [org.neo4j.driver/neo4j-java-driver "1.0.2"]
                  [pandect "0.6.0"]
                  [aysylu/loom "0.6.0"]
                  [com.taoensso/sente "1.8.1"]
