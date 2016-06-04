@@ -60,7 +60,9 @@
                  [reagent-forms "0.5.24"]
                  [org.apache.commons/commons-math3 "3.6.1"]
                  [org.bitbucket.cowwoc/diff-match-patch "1.1"]
-                 [org.seleniumhq.selenium/selenium-java "2.53.0"]]
+                 [org.seleniumhq.selenium/selenium-java "2.53.0"]
+                 [com.cemerick/piggieback "0.2.1"]
+                 [figwheel-sidecar "0.5.3-2"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.3"]
             [lein-kibit "0.1.2"
