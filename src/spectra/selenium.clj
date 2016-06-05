@@ -4,6 +4,8 @@
             [spectra.common :refer :all]
             [spectra.neo4j :as neo4j])
   (:import [org.openqa.selenium.firefox FirefoxDriver FirefoxProfile]
+           [org.openqa.selenium.support.ui
+            ExpectedConditions WebDriverWait]
            [org.openqa.selenium By]
            [java.io File]))
 
@@ -30,6 +32,11 @@
 
 (defn by-link [link-text]
   (By/linkText link-text))
+
+(defn wait-fn [driver]
+  (fn [by seconds]
+    (-> driver (WebDriverWait. seconds)
+        (.until (ExpectedConditions/visibilityOfElementLocated by)))))
 
 (defn send-keys [element text]
   (.sendKeys element (into-array [(str text)])))
@@ -71,3 +78,8 @@
     (-> permission-button by-id find .click)
     (Thread/sleep 1000)
     (.quit driver)))
+
+(defn neo4j-query []
+  (let [driver (firefox-driver)
+        find (find-fn driver) wait (wait-fn driver)]
+    (.get driver (env :neo4j-browser))))
