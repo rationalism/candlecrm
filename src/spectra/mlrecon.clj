@@ -117,8 +117,13 @@
     (-> (update l 1 update-f)
         (update 2 update-f))))
 
-(defn combined-links [ids]
+(defn is-bad-link? [[l1 l2 l3 l4] bad-links]
+  (or (contains? bad-links [l2 l4])
+      (contains? bad-links [l3 l4])))
+
+(defn combined-links [bad-links ids]
   (->> ids neo4j/all-links
+       (remove #(is-bad-link? % (set bad-links)))
        (map #(swap-ids (id-map ids) %))
        (group-by rest) strip-link-map
        (map #(conj (vec (key %)) (val %)))))
@@ -138,8 +143,8 @@
           (->> id-set last delete-links vector)
           (map merge-link links)))
 
-(defn merge-all [id-set]
-  (->> id-set combined-links
+(defn merge-all [id-set bad-links]
+  (->> id-set (combined-links bad-links)
        (remove #(= (first %) (second %)))
        (merge-statements id-set)))
 
@@ -567,16 +572,16 @@
                            g)) groups) 
          (map #(compare/estimate-scores
                 % (conflict-prob class)))
-         (map rest) (map #(map ffirst %)) 
-         (apply concat)
-         (map #(delete-prop % class)))))
+         (map rest) (mapcat #(map ffirst %)) 
+         (map #(vector % class)))))
 
 (defn run-recon! [user class]
   (let [recon-groups (->> class (score-all user)
-                          (groups-to-recon class))]
+                          (groups-to-recon class))
+        bad-links (->> class model/conflicts
+                       (mapcat #(delete-queries user % recon-groups))
+                       doall)]
     (->> (recon-finished user class)
-         (concat (doall (mapcat merge-all recon-groups)))
-         (concat (->> class model/conflicts
-                      (mapcat #(delete-queries user % recon-groups))
-                      doall))
+         (concat (doall (mapcat #(merge-all % bad-links)
+                                recon-groups)))
          (neo4j/cypher-combined-tx nil))))
