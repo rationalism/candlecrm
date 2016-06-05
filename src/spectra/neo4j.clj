@@ -41,6 +41,9 @@
     (.close *session*))
   (def ^:dynamic *session* (get-session)))
 
+(graph-connect!)
+(reset-session!)
+
 (defn esc-token [token]
   (str "`" (name token) "`"))
 
