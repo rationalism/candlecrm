@@ -28,8 +28,8 @@
 (def plain-type "text/plain")
 (def html-type "text/html")
 (def multi-type "multipart")
-(def parse-threads 6)
-(def nlp-threads 6)
+(def parse-threads 1)
+(def nlp-threads 1)
 (def batch-size 50)
 
 (defonce parse-channel (atom nil))
@@ -149,7 +149,9 @@
        (range (.getCount multipart))))
 
 (defn import-label [chain edge]
-  (loom/replace-node chain (first edge) (nlp/label-edge edge)))
+  (if (-> edge first map? not)
+    (loom/replace-node chain (first edge) (nlp/label-edge edge))
+    chain))
 
 (defn maybe-add [m k v]
   (if v (assoc m k v) m))
@@ -556,6 +558,11 @@
       (when (-> nlp-result loom/nodes empty? not)
         (->> nlp-result append-hyperlinks
              (conj [chain]) loom/merge-graphs)))))
+
+(defn print-graph-nodes [g]
+  (println "Printing graph nodes")
+  (clojure.pprint/pprint (loom/nodes g))
+  g)
 
 (defn use-nlp [models message chain]
   (when-let [nlp-chain (make-nlp-chain models message chain)]
