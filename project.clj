@@ -62,7 +62,8 @@
                  [org.bitbucket.cowwoc/diff-match-patch "1.1"]
                  [org.seleniumhq.selenium/selenium-java "2.53.0"]
                  [com.cemerick/piggieback "0.2.1"]
-                 [figwheel-sidecar "0.5.3-2"]]
+                 [figwheel-sidecar "0.5.3-2"]
+                 [org.jsoup/jsoup "1.9.2"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.3"]
             [lein-kibit "0.1.2"
