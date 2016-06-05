@@ -37,9 +37,10 @@
         :else (resp/redirect "/gmail")))
 
 (defn app-page [{:keys [identity]}]
-  (if identity
-    (html-wrapper (html/app-template))
-    (home-with-message "Logged out")))
+  (cond (not identity) (home-with-message "Logged out")
+        (google/lookup-token identity)
+        (html-wrapper (html/app-template))
+        :else (resp/redirect "/gmail")))
 
 (defn gmail [{:keys [identity flash]}]
   (html-wrapper

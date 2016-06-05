@@ -67,6 +67,7 @@
     (-> "signupConfirm" by-id find (send-keys (env :test-acct-pwd)))
     (-> signup-button by-css find .click)
     (-> gmail-button by-css find .click)
+    (Thread/sleep 4000)
     (-> permission-button by-id find .click)
     
     #_ (.quit driver)))
