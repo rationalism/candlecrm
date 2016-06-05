@@ -26,7 +26,7 @@
                          (env :database-password))
        (GraphDatabase/driver (env :database-url))))
 
-(defn graph-connect!
+(defn graph-connect! []
   (reset! conn (get-graph)))
 
 (defnc get-session []
