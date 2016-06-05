@@ -105,7 +105,7 @@
 (defn start-broadcaster! []
   (go-loop [i 0]
     (<! (async/timeout 10000))
-                                        ; (println (format "Broadcasting server>user: %s" @connected-uids))
+    #_ (println (format "Broadcasting server>user: %s" @connected-uids))
     (doseq [uid (:any @connected-uids)]
       (chsk-send! uid
                   [:some/broadcast
@@ -115,7 +115,7 @@
                     :i i}]))
     (recur (inc i))))
 
-                                        ; Note that this'll be fast+reliable even over Ajax!:
+;;Note that this'll be fast+reliable even over Ajax!:
 (defn test-fast-server>user-pushes []
   (doseq [uid (:any @connected-uids)]
     (doseq [i (range 100)]

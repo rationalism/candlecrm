@@ -99,7 +99,8 @@
                            :output-to "resources/public/js/login.js"
                            :optimizations :none
                            :pretty-print true}}]}
-  :repl-options {:init (set! *print-length* 50)}
+  :repl-options {:init (do (set! *print-length* 60)
+                           (-main))}
   :main spectra.web
   :jvm-opts ["-Xmx3g" "-XX:-OmitStackTraceInFastThrow"]
   :uberjar-name "spectra-standalone.jar")
