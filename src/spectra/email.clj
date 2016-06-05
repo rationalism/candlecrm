@@ -21,7 +21,8 @@
   (:import [javax.mail FetchProfile Folder
             Message Message$RecipientType]
            [javax.mail.internet InternetAddress]
-           [com.sun.mail.imap IMAPFolder$FetchProfileItem]))
+           [com.sun.mail.imap IMAPFolder$FetchProfileItem]
+           [org.jsoup Jsoup]))
 
 ;; Global variables
 (def inbox-folder-name "[Gmail]/All Mail")
@@ -416,6 +417,9 @@
       (->> message content get-parts
            (map get-text-recursive)
            (str/join ""))
+      (.contains c-type html-type)
+      (-> message content Jsoup/parse
+          .text)
       :else "")))
 
 (defn make-headers [pair root]
