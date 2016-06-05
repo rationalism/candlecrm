@@ -356,10 +356,6 @@
   (let [new-slice (slice end-body start-tail (chain-lines chain))]
     {s/email-body (remove-arrows-if new-slice)}))
 
-(defn end-bottom [chain]
-  {s/email-body (-> chain chain-lines merge-lines)
-   s/type-label s/email})
-
 (defn sub-email [marks lines]
   {s/email-sent (-> marks s/email-sent)
    s/type-label s/email
