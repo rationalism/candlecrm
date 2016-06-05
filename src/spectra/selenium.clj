@@ -3,11 +3,16 @@
             [environ.core :refer [env]]
             [spectra.common :refer :all]
             [spectra.neo4j :as neo4j])
-  (:import [org.openqa.selenium.firefox FirefoxDriver]
-           [org.openqa.selenium By]))
+  (:import [org.openqa.selenium.firefox FirefoxDriver FirefoxProfile]
+           [org.openqa.selenium By]
+           [java.io File]))
+
+(defn firefox-driver []
+  (-> :firefox-profile env File.
+      FirefoxProfile. FirefoxDriver.))
 
 (defn start-browser []
-  (let [driver (FirefoxDriver. )]
+  (let [driver (firefox-driver)]
     (.get driver (env :app-domain))
     (.quit driver)))
 
@@ -46,7 +51,7 @@
   (str "submit_approve_access"))
 
 (defn recreate-account []
-  (let [driver (FirefoxDriver. )
+  (let [driver (firefox-driver)
         find (find-fn driver)]
     (.get driver (env :app-domain))
     (-> "loginUsername" by-id find (send-keys (env :test-acct-email)))
