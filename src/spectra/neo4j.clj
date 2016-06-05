@@ -8,6 +8,9 @@
              :refer (pspy pspy* profile defnp p p*)])
   (:import [org.neo4j.driver.v1 AuthTokens GraphDatabase Values]))
 
+(defonce conn (atom nil))
+(def ^:dynamic *session* nil)
+
 (defn user-label [user]
   (str "user_" (.id user)))
 
@@ -23,20 +26,20 @@
                          (env :database-password))
        (GraphDatabase/driver (env :database-url))))
 
-(defonce conn (get-graph))
+(defn graph-connect!
+  (reset! conn (get-graph)))
 
 (defnc get-session []
-  (.session conn))
-
-(def ^:dynamic *session* (get-session))
+  (.session @conn))
 
 (defmacro thread-wrap [& body]
   `(binding [*session* (get-session)]
      ~@body (.close *session*)))
 
 (defn reset-session! []
-  (.close *session*)
-  (def ^:dynamic *session* (.session conn)))
+  (when *session*
+    (.close *session*))
+  (def ^:dynamic *session* (get-session)))
 
 (defn esc-token [token]
   (str "`" (name token) "`"))

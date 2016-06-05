@@ -100,6 +100,8 @@
    (middleware-config)))
 
 (defn app-init! []
+  (neo4j/graph-connect!)
+  (neo4j/reset-session!)
   (sendgrid/init-server!)
   (email/make-parse-pool!)
   (email/make-nlp-pool!)
