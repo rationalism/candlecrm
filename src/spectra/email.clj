@@ -564,6 +564,11 @@
   (clojure.pprint/pprint (loom/nodes g))
   g)
 
+(defn print-graph-edges [g]
+  (println "Printing graph edges")
+  (clojure.pprint/pprint (loom/edges g))
+  g)
+
 (defn use-nlp [models message chain]
   (when-let [nlp-chain (make-nlp-chain models message chain)]
     (as-> nlp-chain $
@@ -618,7 +623,7 @@
   (let [emails (queries/email-for-nlp batch-size)]
     (when (not (empty? emails))
       (println "run email nlp")
-      (dorun (pmap @nlp-channel emails)))))
+      (dorun (pmap @nlp-channel (-> emails first vector))))))
 
 (defn nlp-models-fn []
   {:ner ((nlp/get-ner-fn))

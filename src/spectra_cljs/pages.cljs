@@ -105,27 +105,29 @@
    (:center-node person)])
 
 (defn show-email [email]
-  [node/show-email (-> email :center-node :subject first)
+  [node/show-email 
+   (get-first (:center-node email) s/email-subject)
    (:center-node email)])
 
 (defn show-organization [organization]
   [node/show-organization
    (-> organization :center-node :name first)
+   (get-first (:center-node organization) s/s-name)
    (:center-node organization)])
 
 (defn show-location [location]
   [node/show-location
-   (-> location :center-node s/s-name first)
+   (get-first (:center-node location) s/s-name)
    (:center-node location)])
 
 (defn show-event [event]
   [node/show-event
-   (-> event :center-node s/s-name first)
+   (get-first (:center-node event) s/s-name)
    (:center-node event)])
 
 (defn show-money [money]
   [node/show-money
-   (-> money :center-node s/s-name first)
+   (get-first (:center-node money) s/s-name)
    (:center-node money)])
 
 (def node-fn {s/person show-person s/email show-email

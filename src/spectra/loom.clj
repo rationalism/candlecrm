@@ -116,7 +116,7 @@
   (filter #(= label (third %)) (out-edges g node)))
 
 (defn select-edges [g edge-type]
-  (filter #(= edge-type (third %))) (edges g))
+  (filter #(= edge-type (third %)) (edges g)))
 
 (defn replace-node [g old-node new-node]
   (if (= old-node new-node) g
