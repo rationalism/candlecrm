@@ -412,15 +412,24 @@
   (let [c-type (-> message content-type str/lower-case)]
     (cond
       (.contains c-type plain-type)
-      (content message)
+      [{:text (content message)}]
       (.contains c-type multi-type)
       (->> message content get-parts
-           (map get-text-recursive)
-           (str/join ""))
+           (mapcat get-text-recursive))
       (.contains c-type html-type)
-      (-> message content Jsoup/parse
-          .text)
-      :else "")))
+      (->> message content Jsoup/parse .text
+           (hash-map :html) vector)
+      :else [""])))
+
+(defn get-text [message]
+  (let [parts (get-text-recursive message)
+        mapjoin #(->> % (mapcat vals) (str/join ""))]
+    (condp = (->> parts (mapcat keys) distinct set)
+      #{:text} (mapjoin parts)
+      #{:html} (mapjoin parts)
+      #{:text :html} (->> parts (group-by (comp first keys))
+                          :text mapjoin)
+      "")))
 
 (defn make-headers [pair root]
   (map #(vector root % (key pair)) (val pair)))
@@ -487,7 +496,7 @@
                        (find-bottom $))))
 
 (defnp message-fetch [folder message]
-  (let [message-text (get-text-recursive message)]
+  (let [message-text (get-text message)]
     (vector (if (or (nil? message-text) (empty? message-text))
               "(No body)" message-text)
             (headers-fetch message folder))))
