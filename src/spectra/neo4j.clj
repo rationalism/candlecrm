@@ -24,10 +24,14 @@
        (GraphDatabase/driver (env :database-url))))
 
 (defonce conn (get-graph))
-(def ^:dynamic *session* (.session conn))
+
+(defnc get-session []
+  (.session conn))
+
+(def ^:dynamic *session* (get-session))
 
 (defmacro thread-wrap [& body]
-  `(binding [*session* (.session conn)]
+  `(binding [*session* (get-session)]
      ~@body (.close *session*)))
 
 (defn reset-session! []

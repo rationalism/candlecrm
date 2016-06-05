@@ -552,7 +552,8 @@
        (mapv #(apply conj %)) (map vec)
        (loom/build-graph [])
        cluster/prob-weights
-       cluster/vote-clustering))
+       cluster/vote-clustering
+       (remove #(-> % count (< 2)))))
 
 (defn delete-prop [id class]
   [(str "MATCH (a)-[:" (neo4j/esc-token class)
