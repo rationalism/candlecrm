@@ -399,10 +399,16 @@
 (defn start-email-graph [body]
   (loom/build-graph [{s/email-body body}] []))
 
+(defn full-email-graph [body]
+  (loom/build-graph [{s/email-body (merge-lines body)
+                      s/type-label s/email}] []))
+
 (defnp raw-msg-chain [body models]
-  (let [lines (str/split-lines body)]
-    (recursive-split models (count-max-depth lines)
-                     (start-email-graph lines))))
+  (let [lines (str/split-lines body)
+        depth (count-max-depth lines)]
+    (if (> depth 0)
+      (recursive-split models depth (start-email-graph lines))
+      (full-email-graph lines))))
 
 (defnp get-text-recursive [message]
   (let [c-type (-> message content-type str/lower-case)]
