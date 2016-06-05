@@ -27,23 +27,26 @@
        (neo4j/esc-token s/value) ")"))
 
 (defn make-constraints! [user]
-  (->> (map #(val-unique "CREATE" user %) unique-exists-vals)
-       neo4j/cypher-combined-tx)
-  (->> (map #(val-exists "CREATE" user %) unique-exists-vals)
-       neo4j/cypher-combined-tx))
+  (neo4j/thread-wrap
+   (->> (map #(val-unique "CREATE" user %) unique-exists-vals)
+        neo4j/cypher-combined-tx)
+   (->> (map #(val-exists "CREATE" user %) unique-exists-vals)
+        neo4j/cypher-combined-tx)))
 
 (defn drop-constraints! [user]
-  (->> (map #(val-unique "DROP" user %) unique-exists-vals)
-       neo4j/cypher-combined-tx)
-  (->> (map #(val-exists "DROP" user %) unique-exists-vals)
-       neo4j/cypher-combined-tx))
+  (neo4j/thread-wrap
+   (->> (map #(val-unique "DROP" user %) unique-exists-vals)
+        neo4j/cypher-combined-tx)
+   (->> (map #(val-exists "DROP" user %) unique-exists-vals)
+        neo4j/cypher-combined-tx)))
 
 (defn delete-with-prop [user prop]
   (str "MATCH (root:" (neo4j/prop-label user prop)
        ") DETACH DELETE root"))
 
 (defn delete-all! [user]
-  (->> (map #(delete-with-prop user %) unique-exists-vals)
-       neo4j/cypher-combined-tx)
-  (->> (map #(delete-with-prop user %) obj-types)
-       neo4j/cypher-combined-tx))
+  (neo4j/thread-wrap
+   (->> (map #(delete-with-prop user %) unique-exists-vals)
+        neo4j/cypher-combined-tx)
+   (->> (map #(delete-with-prop user %) obj-types)
+        neo4j/cypher-combined-tx)))
