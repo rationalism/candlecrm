@@ -13,6 +13,7 @@
             [spectra.geocode :as geocode]
             [spectra.google :as google]
             [spectra.mlrecon :as mlrecon]
+            [spectra.neo4j :as neo4j]
             [spectra.pages :as pages]
             [spectra.quartz :as quartz]
             [spectra.sendgrid :as sendgrid]
