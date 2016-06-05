@@ -69,5 +69,4 @@
     (-> gmail-button by-css find .click)
     (Thread/sleep 4000)
     (-> permission-button by-id find .click)
-    
-    #_ (.quit driver)))
+    (.quit driver)))
