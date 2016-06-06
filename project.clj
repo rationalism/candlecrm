@@ -6,7 +6,7 @@
                  [org.clojure/clojurescript "1.9.36"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [ns-tracker "0.3.0"]
-                 [clj-time "0.11.0"
+                 [clj-time "0.12.0"
                   :exclusions [joda-time]]
                  [clj-http "3.1.0"]
                  [http-kit "2.1.19"]
