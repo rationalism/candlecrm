@@ -10,7 +10,7 @@
   (testing "Create a user, create and delete indexes"
     (def test-user (auth/create-user! {:username test-username :password test-password}))
 
-    (is (make-constraints! test-user))
-    (is (drop-constraints! test-user))
+    (is (not (make-constraints! test-user)))
+    (is (not (drop-constraints! test-user)))
 
     (auth/delete-user! test-user)))

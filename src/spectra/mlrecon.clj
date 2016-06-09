@@ -143,7 +143,7 @@
           (->> id-set last delete-links vector)
           (map merge-link links)))
 
-(defn merge-all [id-set bad-links]
+(defn merge-all [bad-links id-set]
   (->> id-set (combined-links bad-links)
        (remove #(= (first %) (second %)))
        (merge-statements id-set)))
@@ -582,6 +582,6 @@
                        (mapcat #(delete-queries user % recon-groups))
                        doall)]
     (->> (recon-finished user class)
-         (concat (doall (mapcat #(merge-all % bad-links)
+         (concat (doall (mapcat #(merge-all bad-links %)
                                 recon-groups)))
          (neo4j/cypher-combined-tx nil))))
