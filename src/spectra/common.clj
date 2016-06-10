@@ -1,5 +1,6 @@
 (ns spectra.common
-  (:require [pandect.algo.sha1 :as sha1]
+  (:require [clojure.string :as str]
+            [pandect.algo.sha1 :as sha1]
             [taoensso.encore :as enc]
             [environ.core :refer [env]]
             [taoensso.timbre :as timbre
@@ -14,8 +15,13 @@
    {:appenders
     {:spit
      (appenders/spit-appender
-      {:fname (str (env :home-dir)
-                   (env :log-file))})}}))
+      {:min-level :debug
+       :fname (str (env :home-dir)
+                   (env :log-file))})}}
+   {:println
+    (appenders/println-appender
+     {:min-level :warn
+      :stream :auto})}))
 
 (defn throw-error! [e]
   (error e))
@@ -49,11 +55,11 @@
 (defn add-try-catch [fn-name params body]
   `(try ~@body
         (catch Exception e#
-          (->> [(str "Error thrown in function: "
-                     (name '~fn-name))
-                (str "Error message: " e#)]
-               (concat ~(print-params params))
-               throw-error!)
+          (->> [~@(print-params params)]
+               (concat [(str "Error thrown in function: "
+                             (name '~fn-name))
+                        (str "Error message: " e#)])
+               (str/join "\n") throw-error!)
           nil)))
 
 (defmacro defnc
