@@ -3,6 +3,7 @@
             [clojure.edn :as edn]
             [clojure-csv.core :as csv]
             [clojure.java.io :as io]
+            [environ.core :refer [env]]
             [spectra.common :refer :all]
             [spectra.async :as async]
             [taoensso.timbre.profiling :as profiling
@@ -26,7 +27,7 @@
 (def crossval-folds 10)
 (def num-threads 4)
 (def token-delims " \r\n\t.,@;&_/:\"()?!\\>=")
-(def models-dir "/home/alyssa/clojure/spectra/resources/models")
+(def models-dir (str (env :home-dir) "resources/models")
 (def email-sep-key "emailbreak")
 (def traindat-temp "/tmp/traindat.txt")
 (def crossval-temp "/tmp/crossval.csv")

@@ -3,6 +3,7 @@
             [clojure.edn :as edn]
             [clojure.string :as str]
             [clojure.java.io :as io]
+            [environ.core :refer [env]]
             [spectra.common :refer :all]
             [spectra.auth :as auth]
             [spectra.cluster :as cluster]
@@ -21,7 +22,7 @@
 
 (def model-rollover 0)
 
-(def models-dir "/home/alyssa/clojure/spectra/resources/models")
+(def models-dir (str (env :home-dir) "resources/models"))
 (def views-dir (str models-dir "/views"))
 (def recon-logs "/home/alyssa/recon_log.txt")
 

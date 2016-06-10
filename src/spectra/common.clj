@@ -1,8 +1,31 @@
 (ns spectra.common
   (:require [pandect.algo.sha1 :as sha1]
-            [taoensso.encore :as enc]))
+            [taoensso.encore :as enc]
+            [environ.core :refer [env]]
+            [taoensso.timbre :as timbre
+             :refer (log trace debug info warn error fatal report
+                         logf tracef debugf infof warnf errorf fatalf reportf
+                         spy get-env log-env)]
+            [taoensso.timbre.appenders.core :as appenders]))
 
 ;; Common library functions. Shouldn't depend on anything else.
+
+(defn log-setup! []
+  (timbre/merge-config!
+   {:appenders
+    {:spit
+     (appenders/spit-appender
+      {:fname (str (env :home-dir)
+                   (env :log-file))})}}))
+
+(defn throw-error! [e]
+  (error e))
+
+(defn throw-warn! [e]
+  (warn e))
+
+(defn throw-info! [e]
+  (info e))
 
 (defn fn-params [[params & others]]
   (let [has-prepost-map?
@@ -21,18 +44,17 @@
         (Exception. ) throw)))
 
 (defn print-params [params]
-  (map (fn [p] `(println
-                 (str "Value of " (name '~p) ": "))
-         `(prn ~p))
+  (map (fn [p] `(str "Value of " (name '~p) ": " ~p))
        params))
 
 (defn add-try-catch [fn-name params body]
   `(try ~@body
         (catch Exception e#
-          (println (str "Error thrown in function: "
-                        (name '~fn-name)))
-          (println (str "Error message: " e#))
-          ~@(print-params params)
+          (->> [(str "Error thrown in function: "
+                     (name '~fn-name))
+                (str "Error message: " e#)]
+               (concat ~(print-params params))
+               throw-error!)
           nil)))
 
 (defmacro defnc
