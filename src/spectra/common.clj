@@ -17,11 +17,10 @@
      (appenders/spit-appender
       {:min-level :debug
        :fname (str (env :home-dir)
-                   (env :log-file))})}}
-   {:println
-    (appenders/println-appender
-     {:min-level :warn
-      :stream :auto})}))
+                   (env :log-file))})
+     :println
+     (assoc (appenders/println-appender)
+            :min-level :warn)}}))
 
 (defn throw-error! [e]
   (error e))
