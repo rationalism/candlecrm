@@ -16,7 +16,7 @@
                  [compojure "1.5.0"]
                  [hiccup "1.0.5"]
                  [environ "1.0.3"]
-                 [com.taoensso/timbre "4.3.1"]
+                 [com.taoensso/timbre "4.4.0"]
                  [buddy "0.13.0"]
                  [com.google.api-client/google-api-client "1.22.0"
                   :exclusions [com.fasterxml.jackson.core/jackson-core]]
