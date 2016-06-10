@@ -9,20 +9,39 @@
            [java.text SimpleDateFormat]
            [java.util Date]))
 
+;; Arbitrary date: 1960-01-02 05:11:48.874
+(def ref-date-1 (java.util.Date. -315514073744))
+
+;; Arbitrary date: 1960-01-14 20:00:26.256
+(def ref-date-2 (java.util.Date. -314423973744))
+
+(def known-bad ["may"])
+
 (defn interval? [natty-date]
   (let [parsed-date (-> natty-date (.getDates) vec)]
     (and (= 2 (count parsed-date))
          (not= (first parsed-date) (second parsed-date)))))
 
-(defn no-info? [natty-date reference]
-  (and (not (interval? natty-date))
-       (= (first (.getDates natty-date))
-          reference)))
+(defn has-info? [[d1 d2 d3]]
+  (let [n1 (first (.getDates d1))
+        n2 (first (.getDates d2))]
+    (or (interval? d3)
+        (= (.getDate n1) (.getDate n2))
+        (= (.getHours n1) (.getHours n2)))))
 
-(defnc parse-dates [text reference]
+(defn is-bad? [natty-date]
+  (some #{(.getText natty-date)} known-bad))
+
+(defnc parse-dates-raw [text reference]
   (CalendarSource/setBaseDate reference)
-  (->> (.parse (Parser. ) text)
-       (remove #(no-info? % reference))))
+  (.parse (Parser. ) text))
+
+(defn parse-dates [text reference]
+  (->> [ref-date-1 ref-date-2 reference]
+       (mapv #(parse-dates-raw text %))
+       (apply map vector)
+       (filter has-info?) (map third)
+       (remove is-bad?)))
 
 (defn unix-dates [text reference]
   (->> (parse-dates text reference)
