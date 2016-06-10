@@ -56,7 +56,7 @@
                         (s/loaded-bottom queue) (range-bottom queue))))
 
 (defn refresh-queue! [user]
-  (println "refreshing queue")
+  (throw-info! "refreshing queue")
   (-> ["MATCH (root:" (neo4j/prop-label user s/top-uid)
        ")<-[:" (neo4j/esc-token s/top-uid)
        "]-(d:" (neo4j/prop-label user s/email-queue)
@@ -68,7 +68,7 @@
       str/join neo4j/cypher-query))
 
 (defn run-insertion! [queue user]
-  (println "inserting emails")
+  (throw-info! "inserting emails")
   (email/insert-raw-range!
    user (range-bottom queue) (range-top queue)))
 
@@ -94,7 +94,7 @@
 
 (defn maybe-run-recon! [params]
   (when params
-    (println "running recon")
+    (throw-info! "running recon")
     (neo4j/set-property! (first params) s/recon-run true)
     (apply mlrecon/run-recon! params)
     (neo4j/set-property! (first params) s/recon-run false)))

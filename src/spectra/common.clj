@@ -20,7 +20,12 @@
                    (env :log-file))})
      :println
      (assoc (appenders/println-appender)
-            :min-level :warn)}}))
+            :min-level :warn)}})
+  (Thread/setDefaultUncaughtExceptionHandler
+   (reify Thread$UncaughtExceptionHandler
+     (uncaughtException [_ thread ex]
+       (error ex "Uncaught exception on"
+              (.getName thread))))))
 
 (defn throw-error! [e]
   (error e))

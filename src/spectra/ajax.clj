@@ -105,7 +105,6 @@
 (defn start-broadcaster! []
   (go-loop [i 0]
     (<! (async/timeout 10000))
-    #_ (println (format "Broadcasting server>user: %s" @connected-uids))
     (doseq [uid (:any @connected-uids)]
       (chsk-send! uid
                   [:some/broadcast
@@ -137,7 +136,7 @@
 
 ;; Restart Ajax when reloading the namespace
 (defn restart-ajax! []
-  (println "Restarting Ajax")
+  (throw-info! "Restarting Ajax")
   (stop-router!)
   (start-router!)
   (start-broadcaster!))

@@ -627,7 +627,7 @@
 (defn push-email-nlp! []
   (let [emails (queries/email-for-nlp batch-size)]
     (when (not (empty? emails))
-      (println "run email nlp")
+      (throw-info! "run email nlp")
       (dorun (pmap @nlp-channel emails)))))
 
 (defn nlp-models-fn []

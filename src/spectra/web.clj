@@ -112,7 +112,7 @@
   (mlrecon/load-thresholds!)
   (geocode/define-context!)
   (quartz/start!)
-  (println "Ready to start server")
+  (throw-info! "Ready to start server")
   (nrepl-server/start-server
    :port 9998
    :handler cider-nrepl-handler))
