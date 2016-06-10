@@ -3,8 +3,7 @@
             [taoensso.encore :as enc]
             [environ.core :refer [env]]
             [taoensso.timbre :as timbre
-             :refer (log trace debug info warn error fatal report
-                         logf tracef debugf infof warnf errorf fatalf reportf
+             :refer (log trace info warn error fatal report
                          spy get-env log-env)]
             [taoensso.timbre.appenders.core :as appenders]))
 
