@@ -82,7 +82,7 @@
         (catch Exception e
           (def caught-exception true))))
     
-    (is (not caught-exception))))
+    (is caught-exception)))
 
 (deftest add-remove-label
   (testing "Add and remove a node label"
