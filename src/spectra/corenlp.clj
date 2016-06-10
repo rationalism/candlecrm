@@ -25,13 +25,16 @@
             CorefCoreAnnotations$CorefChainAnnotation]
            [java.util Properties]))
 
+(defn coreference? []
+  (= "true" (env :coreference)))
+
 (def sentence-annotators ["tokenize" "ssplit"])
 (def token-annotators ["tokenize" "ssplit" "pos" "lemma"])
 (def ner-annotators (concat token-annotators ["ner"]))
 (def mention-annotators ["entitymentions"])
 (def full-annotators
   (concat ner-annotators
-          (if (env :coreference) ["parse" "dcoref"] [])
+          (if (coreference?) ["parse" "dcoref"] [])
           ["depparse" "natlog" "openie"]))
 (def openie-annotators ["depparse" "natlog" "openie"])
 (def truecase-annotators
@@ -75,9 +78,6 @@
                       (if (env :coreference) "true" "false"))
      (.setProperty "openie.triple.all_nominals" "true"))
    false))
-
-(defn coreference? []
-  (= "true" (env :coreference)))
 
 (defn get-copy-fn [annotators]
   (fn [] (make-pipeline annotators pcfg-parse-model)))
