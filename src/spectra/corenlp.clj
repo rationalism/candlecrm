@@ -50,8 +50,8 @@
 
 (def schema-map {"PERSON" s/person-name "LOCATION" s/loc-name
                  "ORGANIZATION" s/org-name "MONEY" s/amount
-                 "DATETIME" s/date-time "EMAIL" s/email-addr
-                 "PHONE" s/phone-num "TIMEINTERVAL" s/time-interval})
+                 "DATE" s/date-time "TIME" s/date-time "EMAIL" s/email-addr
+                 "PHONE" s/phone-num "DURATION" s/time-interval})
 
 (def pronoun-parts ["PRP" "PRP$"])
 
@@ -66,7 +66,8 @@
    (doto (Properties. )
      (.setProperty "annotators" (str/join ", " annotators))
      (.setProperty "ner.applyNumericClassifiers" "false")
-     (.setProperty "ner.useSUTime" "false")
+     (.setProperty "ner.useSUTime" "true")
+     (.setProperty "sutime.markTimeRanges" "true")
      (.setProperty "ner.model" (str/join "," ner-models))
      (.setProperty "parse.model" parse-model)
      #_ (.setProperty "openie.resolve_coref"
@@ -445,8 +446,8 @@
 
 (def attr-functions
   [[regex/find-email-addrs "EMAIL"] [regex/find-urls "URL"]
-   [regex/find-phone-nums "PHONE"] [dt/find-intervals "TIMEINTERVAL"]
-   [dt/find-dates "DATETIME"]])
+   [regex/find-phone-nums "PHONE"] #_ [dt/find-intervals "TIMEINTERVAL"]
+   #_ [dt/find-dates "DATETIME"]])
 
 (defn replace-all [text coll]
   (str/replace text (regex/regex-or coll) ""))
@@ -522,7 +523,7 @@
   (-> (loom/merge-graphs
        [(-> sent-pair val get-triples triples-graph)
         (->> (entity-mentions (val sent-pair))
-             (map ner-graph) (remove nil?)
+             (map ner-graph) debug (remove nil?)
              loom/merge-graphs)])
       #_ (breakup-node (key sent-pair))
       #_ trampoline #_ recursion-cleanup
@@ -598,7 +599,7 @@
 (defnc run-nlp-default [models text]
   (->> text (run-nlp (:ner models))
        library-annotate-all
-       (run-annotate (:mention models))
+       (run-annotate (:mention models)) 
        nlp-graph))
 
 (defnc run-nlp-full [models author text]
