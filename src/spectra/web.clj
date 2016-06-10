@@ -22,6 +22,9 @@
             [cider.nrepl :refer (cider-nrepl-handler)])
   (:use [org.httpkit.server :only [run-server]]))
 
+(defn in-dev? []
+  (= (env :in-dev) "true"))
+
 (defn logout [req]
   {:status 302
    :headers {"Location" "/"}
@@ -136,7 +139,7 @@
 
 (defn -main [& args]
   (app-init!)
-  (let [handler (if (env :in-dev)
+  (let [handler (if (in-dev?)
                   (wrap-reload #'secure-app)
                   secure-app)]
     (run-server handler {:port 3000})))

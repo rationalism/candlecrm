@@ -65,15 +65,19 @@
   (StanfordCoreNLP.
    (doto (Properties. )
      (.setProperty "annotators" (str/join ", " annotators))
-     (.setProperty "ner.applyNumericClassifiers" "false")
+     (.setProperty "ner.applyNumericClassifiers" "true")
      (.setProperty "ner.useSUTime" "true")
-     (.setProperty "sutime.markTimeRanges" "true")
+     (.setProperty "ner.markTimeRanges" "true")
+     (.setProperty "ner.includeRange" "true")
      (.setProperty "ner.model" (str/join "," ner-models))
      (.setProperty "parse.model" parse-model)
      #_ (.setProperty "openie.resolve_coref"
                       (if (env :coreference) "true" "false"))
      (.setProperty "openie.triple.all_nominals" "true"))
    false))
+
+(defn coreference? []
+  (= "true" (env :coreference)))
 
 (defn get-copy-fn [annotators]
   (fn [] (make-pipeline annotators pcfg-parse-model)))
@@ -523,7 +527,7 @@
   (-> (loom/merge-graphs
        [(-> sent-pair val get-triples triples-graph)
         (->> (entity-mentions (val sent-pair))
-             (map ner-graph) debug (remove nil?)
+             (map ner-graph) (remove nil?)
              loom/merge-graphs)])
       #_ (breakup-node (key sent-pair))
       #_ trampoline #_ recursion-cleanup
@@ -585,10 +589,10 @@
   (cond->
       (->> parsed-text get-sentences number-items
            (map sentence-graph) loom/merge-graphs)
-    (env :coreference)
+    (coreference?)
     (vector
      (-> parsed-text get-coref vals coref-graph))
-    (env :coreference)
+    (coreference?)
     loom/merge-graphs))
 
 (defn capitalize-words [text]
@@ -608,7 +612,7 @@
                library-annotate-all
                (run-annotate (:mention models))
                nlp-graph)
-    (env :coreference) rewrite-pronouns))
+    (coreference?) rewrite-pronouns))
 
 (defn run-nlp-openie [{:keys [ner mention openie]} text]
   (-> text strip-parens ; (fpp-replace models author)

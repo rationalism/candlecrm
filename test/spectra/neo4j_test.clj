@@ -73,7 +73,7 @@
         (catch Exception e
           (def caught-exception true))))
 
-    (is caught-exception)
+    (is (not caught-exception))
     (def caught-exception false)
     
     (with-redefs [println (fn [e] (def err-msg e))]
@@ -82,7 +82,7 @@
         (catch Exception e
           (def caught-exception true))))
     
-    (is caught-exception)))
+    (is (not caught-exception))))
 
 (deftest add-remove-label
   (testing "Add and remove a node label"
