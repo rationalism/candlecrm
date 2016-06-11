@@ -614,8 +614,8 @@
                nlp-graph)
     (coreference?) rewrite-pronouns))
 
-(defn run-nlp-openie [{:keys [ner mention openie]} text]
-  (-> text strip-parens ; (fpp-replace models author)
+(defn run-nlp-openie [{:keys [ner mention openie] :as models} author text]
+  (-> text strip-parens (fpp-replace models author)
       (run-nlp ner) library-annotate-all
       (run-annotate mention) (run-annotate openie)
       nlp-graph))

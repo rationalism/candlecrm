@@ -676,8 +676,18 @@
   (let [limit (last-uid (fetch-imap-folder user))]
     (insert-raw-range! user (- limit n) limit)))
 
-(defn date-graphs [user start limit]
-  (->> (queries/emails-with-dates user start limit)
-       (map #(.get % "body"))
-       (map regex/strip-tags)
-       (map nlp/run-nlp-openie)))
+(defn event-sentences [n]
+  (let [models (nlp-models-fn)]
+    (->> (queries/email-for-nlp n)
+         (mapcat (comp nlp/get-sentences
+                       #(nlp/run-annotate (:mention models) %)                    
+                       #(nlp/run-nlp (:ner models) %)
+                       #(apply (partial nlp/fpp-replace models) %)
+                       #(update % 0 nlp/strip-parens)
+                       vec fetch-body :id))
+         nlp/number-items
+         (map #(vector % (.toString (val %))))
+         (map #(update % 0 nlp/sentence-graph))
+         (filter #(some #{s/date-time}
+                        (loom/nodes (first %))))
+         (mapv second))))
