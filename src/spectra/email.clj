@@ -590,9 +590,12 @@
       (loom/remove-nodes
        $ (->> s/has-type (loom/select-edges $) (map second))))))
 
+(defn fetch-body [id]
+  (->> [[s/email-body] [s/email-from s/s-name]]
+       (mlrecon/fetch-paths id) (map first)))
+
 (defn graph-from-id [models id]
-  (let [vals (->> [[s/email-body] [s/email-from s/s-name]]
-                  (mlrecon/fetch-paths id) (map first))
+  (let [vals (fetch-body id)
         message {s/type-label s/email :id id s/email-body (first vals)}]
     (->> [message {s/s-name (second vals)} s/email-from]
          vector (loom/build-graph [])
