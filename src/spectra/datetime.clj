@@ -32,16 +32,20 @@
 (defn is-bad? [natty-date]
   (some #{(.getText natty-date)} known-bad))
 
-(defnc parse-dates-raw [text reference]
+(defn parse-dates-raw [text reference]
   (CalendarSource/setBaseDate reference)
   (.parse (Parser. ) text))
 
 (defn parse-dates [text reference]
-  (->> [ref-date-1 ref-date-2 reference]
-       (mapv #(parse-dates-raw text %))
-       (apply map vector)
-       (filter has-info?) (map third)
-       (remove is-bad?)))
+  (try
+    (->> [ref-date-1 ref-date-2 reference]
+         (mapv #(parse-dates-raw text %))
+         (apply map vector)
+         (filter has-info?) (map third)
+         (remove is-bad?))
+    (catch java.lang.NullPointerException e
+      (do (throw-info! (str "Date parse error on: " text))
+          []))))
 
 (defn unix-dates [text reference]
   (->> (parse-dates text reference)

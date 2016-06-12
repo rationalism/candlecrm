@@ -685,7 +685,8 @@
   (let [models (nlp-models-fn)]
     (->> (queries/email-for-nlp n)
          (mapcat (comp nlp/get-sentences
-                       #(nlp/run-annotate (:mention models) %)                    
+                       #(nlp/run-annotate (:mention models) %)
+                       nlp/library-annotate-all
                        #(nlp/run-nlp (:ner models) %)
                        #(apply (partial nlp/fpp-replace models) %)
                        #(update % 0 nlp/strip-parens)
@@ -693,7 +694,7 @@
          nlp/number-items
          (map #(vector % (.toString (val %))))
          (map #(update % 0 nlp/sentence-graph))
-         (filter #(some #{s/date-time}
+         (filter #(some #{s/date-time s/time-interval}
                         (loom/nodes (first %))))
          (mapv second))))
 
