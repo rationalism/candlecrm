@@ -53,8 +53,9 @@
 
 (def schema-map {"PERSON" s/person-name "LOCATION" s/loc-name
                  "ORGANIZATION" s/org-name "MONEY" s/amount
-                 "DATE" s/date-time "TIME" s/date-time "EMAIL" s/email-addr
-                 "PHONE" s/phone-num "DURATION" s/time-interval})
+                 "DATE" s/date-time "DATETIME" s/date-time
+                 "EMAIL" s/email-addr "PHONE" s/phone-num
+                 "DURATION" s/time-interval "TIMEINTERVAL" s/time-interval})
 
 (def pronoun-parts ["PRP" "PRP$"])
 
@@ -69,7 +70,7 @@
    (doto (Properties. )
      (.setProperty "annotators" (str/join ", " annotators))
      (.setProperty "ner.applyNumericClassifiers" "true")
-     (.setProperty "ner.useSUTime" "true")
+     (.setProperty "ner.useSUTime" "false")
      (.setProperty "ner.markTimeRanges" "true")
      (.setProperty "ner.includeRange" "true")
      (.setProperty "ner.model" (str/join "," ner-models))
@@ -450,8 +451,8 @@
 
 (def attr-functions
   [[regex/find-email-addrs "EMAIL"] [regex/find-urls "URL"]
-   [regex/find-phone-nums "PHONE"] #_ [dt/find-intervals "TIMEINTERVAL"]
-   #_ [dt/find-dates "DATETIME"]])
+   [regex/find-phone-nums "PHONE"] [dt/find-intervals "TIMEINTERVAL"]
+   [dt/find-dates "DATETIME"]])
 
 (defn replace-all [text coll]
   (str/replace text (regex/regex-or coll) ""))
@@ -461,7 +462,7 @@
 
 (defn is-fpp? [token]
   (some #{(str/lower-case (.originalText token))}
-        ["i" "me" "my" "mine" "myself"]))
+        ["i" "me" "my" "mine" "myself" "i'm" "i'll" "i've"]))
 
 (defn char-pos [token]
   [(.beginPosition token) (.endPosition token)])
@@ -475,7 +476,9 @@
 (defn swap-fpp [author token]
   (->> token (.originalText) str/lower-case
        (get {"i" author "me" author "my" (str author "'s")
-             "mine" (str author "'s") "myself" "themselves"})))
+             "mine" (str author "'s") "myself" "themselves"
+             "i'm" (str author " is") "i'll" (str author " will")
+             "i've" (str author " has")})))
 
 (defn mesh-fpps [author fpps pieces]
   (interleave pieces
