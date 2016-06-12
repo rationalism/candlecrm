@@ -614,11 +614,10 @@
                nlp-graph)
     (coreference?) rewrite-pronouns))
 
-(defn run-nlp-openie [{:keys [ner mention openie] :as models} author text]
-  (-> text strip-parens (fpp-replace models author)
-      (run-nlp ner) library-annotate-all
-      (run-annotate mention) (run-annotate openie)
-      nlp-graph))
+(defn run-nlp-openie [{:keys [ner mention openie] :as models} text]
+  (->> (run-nlp ner text) library-annotate-all
+       (run-annotate mention) (run-annotate openie)
+       nlp-graph))
 
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))

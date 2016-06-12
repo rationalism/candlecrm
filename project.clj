@@ -17,7 +17,7 @@
                  [hiccup "1.0.5"]
                  [environ "1.0.3"]
                  [com.taoensso/timbre "4.4.0"]
-                 [buddy "0.13.0"]
+                 [buddy "1.0.0"]
                  [com.google.api-client/google-api-client "1.22.0"
                   :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [com.google.gdata/core "1.47.1"
@@ -62,7 +62,7 @@
                  [org.bitbucket.cowwoc/diff-match-patch "1.1"]
                  [org.seleniumhq.selenium/selenium-java "2.53.0"]
                  [com.cemerick/piggieback "0.2.1"]
-                 [figwheel-sidecar "0.5.3-2"]
+                 [figwheel-sidecar "0.5.4"]
                  [org.jsoup/jsoup "1.9.2"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.3"]

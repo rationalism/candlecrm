@@ -638,6 +638,11 @@
    :mention ((nlp/get-mention-fn))
    :token ((nlp/get-tokenize-fn))})
 
+(defn openie-models-fn []
+  {:ner ((nlp/get-ner-fn))
+   :mention ((nlp/get-mention-fn))
+   :openie ((nlp/get-openie-fn))})
+
 (defn make-nlp-pool! []
   (->> {:name "email-nlp" :process run-email-nlp!
         :param-gen nlp-models-fn
@@ -691,3 +696,7 @@
          (filter #(some #{s/date-time}
                         (loom/nodes (first %))))
          (mapv second))))
+
+(defn openie-sentence [text]
+  (let [models (openie-models-fn)]
+    (nlp/run-nlp-openie models text)))
