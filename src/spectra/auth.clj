@@ -14,7 +14,7 @@
             [clj-time.core :refer [hours from-now]]
             [buddy.auth.backends.token :refer (jwe-backend)]
             [buddy.hashers :as hashers]
-            [buddy.sign.jwe :as jwe]
+            [buddy.sign.jwt :as jwt]
             [buddy.core.keys :as keys])
   (:import java.net.URI
            [org.passay PasswordData PasswordValidator LengthRule]))
@@ -41,12 +41,12 @@
 
 (defnc user-from-token [token]
   (when token
-    (-> token (jwe/decrypt privkey encryption)
+    (-> token (jwt/decrypt privkey encryption)
         :user :id neo4j/find-by-id)))
 
 (defn make-token [user]
   {:token
-   (jwe/encrypt {:user {:id (.id user)}
+   (jwt/encrypt {:user {:id (.id user)}
                  :exp (-> exp-hours hours from-now)}
                 pubkey encryption)})
 
