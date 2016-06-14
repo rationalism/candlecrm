@@ -1,5 +1,6 @@
 (ns spectra.email
   (:require [clojure.string :as str]
+            [clojure.edn :as edn]
             [crypto.random :as rnd]
             [spectra.async :as async]
             [spectra.auth :as auth]
@@ -717,18 +718,19 @@
        (map #(str "(" (second %) ")" (first %)))
        (str/join " ")))
 
-(def abbr-map {"a" "ADDRESS" "e" "EVENT" "n" :next "q" :quit "" nil})
+(def abbr-map {"a" "ADDRESS" "e" "EVENT" "n" :next "q" :quit})
 
 (defn translate-codes [s]
-  (if (and (not (empty? s)) (Character/isDigit (first s)))
-    (let [[s1 s2] (str/split s #" ")
-          s3 (->> (str/split s1 #"-") reverse
-                  (map #(Integer/parseInt %)))]
-      (if (= 1 (count s3))
-        {(first s3) (abbr-map s2)}
-        (zipmap (range (second s3) (inc (first s3)))
-                (repeat (inc (apply - s3)) (abbr-map s2)))))
-    (abbr-map s)))
+  (if (empty? s) nil
+      (if (Character/isDigit (first s))
+        (let [[s1 s2] (str/split s #" ")
+              s3 (->> (str/split s1 #"-") reverse
+                      (map #(Integer/parseInt %)))]
+          (if (= 1 (count s3))
+            {(first s3) (abbr-map s2)}
+            (zipmap (range (second s3) (inc (first s3)))
+                    (repeat (inc (apply - s3)) (abbr-map s2)))))
+        (abbr-map s))))
 
 (def known-tokens (atom []))
 
@@ -765,4 +767,5 @@
 (defn write-traindata [filename]
   (->> @known-tokens (map #(map tabline %))
        (map #(str/join "\n" %))
-       (str/join "\n\n") (spit-append filename)))
+       (str/join "\n\n") (spit-append filename))
+  (def known-tokens (atom [])))
