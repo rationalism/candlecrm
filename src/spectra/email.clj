@@ -717,10 +717,10 @@
        (map #(str "(" (second %) ")" (first %)))
        (str/join " ")))
 
-(def abbr-map {"a" "ADDRESS" "e" "EVENT" "n" :next "q" :quit})
+(def abbr-map {"a" "ADDRESS" "e" "EVENT" "n" :next "q" :quit "" nil})
 
 (defn translate-codes [s]
-  (if (Character/isDigit (first s))
+  (if (and (not (empty? s)) (Character/isDigit (first s)))
     (let [[s1 s2] (str/split s #" ")
           s3 (->> (str/split s1 #"-") reverse
                   (map #(Integer/parseInt %)))]
@@ -765,4 +765,4 @@
 (defn write-traindata [filename]
   (->> @known-tokens (map #(map tabline %))
        (map #(str/join "\n" %))
-       (str/join #"\n\n") (spit-append filename)))
+       (str/join "\n\n") (spit-append filename)))
