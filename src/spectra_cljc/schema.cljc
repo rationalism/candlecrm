@@ -52,6 +52,7 @@
 (def amount :amount)
 (def event :event)
 (def time-interval :time-interval)
+(def duration :duration)
 (def start-time :start-time)
 (def stop-time :stop-time)
 (def over-time :over-time)
