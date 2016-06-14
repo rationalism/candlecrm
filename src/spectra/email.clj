@@ -11,6 +11,7 @@
             [spectra.mlrecon :as mlrecon]
             [spectra.neo4j :as neo4j]
             [spectra.corenlp :as nlp]
+            [spectra.nlptrain :as nlptrain]
             [spectra.queries :as queries]
             [spectra.recon :as recon]
             [spectra.regex :as regex]
@@ -701,9 +702,54 @@
        (mapv second) distinct))
 
 (defn addr-sentences [n]
-  (->> (email-sentences n) (map #(.toString %)) distinct
-       (filter regex/might-have-addr?)))
+  (->> (email-sentences n) (map nlp/get-tokens)
+       (map #(map nlp/get-text %)) distinct
+       (filter #(->> % (str/join " ") regex/might-have-addr?))))
 
 (defn openie-sentence [text]
   (let [models (openie-models-fn)]
     (nlp/run-nlp-openie models text)))
+
+(defn number-tokens [tokens]
+  (->> tokens count range (zipvec tokens)
+       (map #(str "(" (second %) ")" (first %)))
+       (str/join " ")))
+
+(def abbr-map {"a" "ADDRESS" "e" "EVENT" "n" :next "q" :quit})
+
+(defn translate-codes [s]
+  (if (Character/isDigit (first s))
+    (let [[s1 s2] (str/split s #" ")
+          s3 (->> (str/split s1 #"-") reverse
+                  (map #(Integer/parseInt %)))]
+      (if (= 1 (count s3))
+        {(first s3) (abbr-map s2)}
+        (zipmap (range (second s3) (inc (first s3)))
+                (repeat (inc (apply - s3)) (abbr-map s2)))))
+    (abbr-map s)))
+
+(def known-tokens (atom []))
+
+(defn display-tokens
+  ([tokens]
+   (println "Next sentence:")
+   (->> tokens number-tokens println)
+   (display-tokens tokens {}))
+  ([tokens tag-map]
+   (println "Enter codes:")
+   (let [resp (translate-codes (read-line))]
+     (condp = resp
+       nil (do (println "Error: Try again")
+               (recur tokens tag-map))
+       :next (mapcat #(vector
+                       %1 (if (contains? tag-map %2)
+                            (tag-map %2) "O"))
+                     tokens (range (count tokens)))
+       :quit nil
+       (recur tokens (merge tag-map resp))))))
+
+(defn gather-traindata [sentences]
+  (if (or (nil? sentences) (empty? sentences)) nil
+      (when-let [resp (-> sentences first display-tokens)]
+        (swap! known-tokens conj resp)
+        (recur (rest sentences)))))

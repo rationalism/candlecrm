@@ -134,6 +134,9 @@
 (defn true-case [token]
   (.get token CoreAnnotations$TrueCaseTextAnnotation))
 
+(defn get-text [annotation]
+  (.originalText annotation))
+
 (defn char-token-map [token]
   (zipmap (range (.beginPosition token)
                  (.endPosition token))
@@ -210,8 +213,7 @@
           (tokens-pos sent-num tokens)))
 
 (defn tokens-str [tokens]
-  (->> (map #(.originalText %) tokens)
-       (str/join " ")))
+  (->> tokens (map get-text) (str/join " ")))
 
 (defn mention-hash [mention]
   (->> (range (.startIndex mention)
@@ -461,7 +463,7 @@
   (replace-all text ["(" ")"]))
 
 (defn is-fpp? [token]
-  (some #{(str/lower-case (.originalText token))}
+  (some #{(str/lower-case (get-text token))}
         ["i" "me" "my" "mine" "myself" "i'm" "i'll" "i've"]))
 
 (defn char-pos [token]
@@ -474,7 +476,7 @@
   (subs text p1 p2))
 
 (defn swap-fpp [author token]
-  (->> token (.originalText) str/lower-case
+  (->> token get-text str/lower-case
        (get {"i" author "me" author "my" (str author "'s")
              "mine" (str author "'s") "myself" "themselves"
              "i'm" (str author " is") "i'll" (str author " will")
