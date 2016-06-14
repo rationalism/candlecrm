@@ -698,7 +698,11 @@
        (map #(update % 0 nlp/sentence-graph))
        (filter #(some #{s/date-time s/time-interval}
                       (loom/nodes (first %))))
-       (mapv second)))
+       (mapv second) distinct))
+
+(defn addr-sentences [n]
+  (->> (email-sentences n) (map #(.toString %)) distinct
+       (filter regex/might-have-addr?)))
 
 (defn openie-sentence [text]
   (let [models (openie-models-fn)]
