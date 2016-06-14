@@ -44,12 +44,6 @@
     (-> token (jwe/decrypt privkey encryption)
         :user :id neo4j/find-by-id)))
 
-(defn make-id-token [id]
-  {:token
-   (jwe/encrypt {:user {:id id}
-                 :exp (-> exp-hours hours from-now)}
-                pubkey encryption)})
-
 (defn make-token [user]
   {:token
    (jwe/encrypt {:user {:id (.id user)}
