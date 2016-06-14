@@ -743,10 +743,10 @@
      (condp = resp
        nil (do (println "Error: Try again")
                (recur tokens tag-map))
-       :next (mapcat #(vector
-                       %1 (if (contains? tag-map %2)
-                            (tag-map %2) "O"))
-                     tokens (range (count tokens)))
+       :next (map #(vector
+                    %1 (if (contains? tag-map %2)
+                         (tag-map %2) "O"))
+                  tokens (range (count tokens)))
        :quit nil
        (recur tokens (merge tag-map resp))))))
 
@@ -755,3 +755,14 @@
       (when-let [resp (-> sentences first display-tokens)]
         (swap! known-tokens conj resp)
         (recur (rest sentences)))))
+
+(defn tabline [[word tag]]
+  (str word "\t" tag))
+
+(defn spit-append [filename text]
+  (spit filename (str "\n\n" text) :append true))
+
+(defn write-traindata [filename]
+  (->> @known-tokens (map #(map tabline %))
+       (map #(str/join "\n" %))
+       (str/join #"\n\n") (spit-append filename)))
