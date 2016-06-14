@@ -53,9 +53,9 @@
 
 (def schema-map {"PERSON" s/person-name "LOCATION" s/loc-name
                  "ORGANIZATION" s/org-name "MONEY" s/amount
-                 "DATE" s/date-time "DATETIME" s/date-time
-                 "EMAIL" s/email-addr "PHONE" s/phone-num
-                 "DURATION" s/time-interval "TIMEINTERVAL" s/time-interval})
+                 "DATETIME" s/date-time "EMAIL" s/email-addr
+                 "PHONE" s/phone-num "DURATION" s/time-interval
+                 "TIMEINTERVAL" s/time-interval})
 
 (def pronoun-parts ["PRP" "PRP$"])
 
