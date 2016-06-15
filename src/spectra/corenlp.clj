@@ -45,7 +45,8 @@
 (def ner-models
   (map #(str ner-model-dir %)
        ["english.all.3class.distsim.crf.ser.gz"
-        "english.muc.7class.distsim.crf.ser.gz"]))
+        "english.muc.7class.distsim.crf.ser.gz"
+        "english.event.2class.crf.ser.gz"]))
         ;"english.math.resume.distsim.crf.ser.gz"]
 
 ;; Shift model supposed to be much faster, but takes much longer to load
