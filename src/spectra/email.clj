@@ -697,6 +697,12 @@
 (defn get-tokens [s]
   (->> s nlp/get-tokens (map nlp/get-text)))
 
+(defn roth-sentence [id sentence]
+  (zipmap (-> sentence nlp/get-tokens count range)
+          (map (juxt (constantly id) nlp/get-tag
+                     nlp/get-pos #(.originalText %))
+               (nlp/get-tokens sentence))))
+
 (defn event-sentences [sentences]
   (->> sentences nlp/number-items
        (map #(vector % (get-tokens (val %))))
