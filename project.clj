@@ -30,7 +30,7 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.1-SNAPSHOT"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1-SNAPSHOT"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.4.2"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.4.3"]
                  [org.deeplearning4j/deeplearning4j-core "0.4-rc3.10"
                   :exclusions [com.google.guava/guava org.json/json
                                com.fasterxml.jackson.core/jackson-core
