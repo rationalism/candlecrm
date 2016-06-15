@@ -27,7 +27,7 @@
                  [com.google.apis/google-api-services-oauth2 "v2-rev112-1.22.0"]
                  [com.google.http-client/google-http-client-jackson "1.22.0"]
                  [com.sun.mail/javax.mail "1.5.5"]
-                 [edu.stanford.nlp/stanford-corenlp "3.6.0"]
+                 [edu.stanford.nlp/stanford-corenlp "3.6.1-SNAPSHOT"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.0"
                   :classifier "models"]
                  [com.googlecode.libphonenumber/libphonenumber "7.4.2"]
@@ -79,6 +79,7 @@
             [lein-ancient "0.6.10"]
             [lein-cloverage "1.0.6"
              :exclusions [org.clojure/clojure]]]
+  :repositories [["local" "file:maven_repo"]]
   :resource-paths ["config" "resources"]
   :source-paths ["src"]
   :cljsbuild {:builds

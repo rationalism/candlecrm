@@ -22,3 +22,4 @@ pom.xml
 /src/spectra/.*
 /src/spectra/#*
 /logs
+/maven_repo
