@@ -62,13 +62,13 @@
                  [org.bitbucket.cowwoc/diff-match-patch "1.1"]
                  [org.seleniumhq.selenium/selenium-java "2.53.0"]
                  [com.cemerick/piggieback "0.2.1"]
-                 [figwheel-sidecar "0.5.3-2"]
+                 [figwheel-sidecar "0.5.4-3"]
                  [org.jsoup/jsoup "1.9.2"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.3"]
             [lein-kibit "0.1.2"
              :exclusions [org.clojure/clojure]]
-            [lein-figwheel "0.5.3-1"
+            [lein-figwheel "0.5.4-3"
              :exclusions [org.clojure/clojure]]
             [lein-cljsbuild "1.1.3"]
             [cider/cider-nrepl "0.12.0"]
@@ -84,8 +84,7 @@
   :cljsbuild {:builds
               [{:id "dev"
                 :source-paths ["src/spectra_cljs" "src/spectra_cljc"]
-                :figwheel {:websocket-url "wss://localhost:3450/figwheel-ws"
-                           :server-port 3450}
+                :figwheel {:websocket-url "wss://localhost:3450/figwheel-ws"}
                 :compiler {:main "spectra_cljs.init"
                            :asset-path "/js/main"
                            :output-dir "resources/public/js/main"
@@ -103,5 +102,5 @@
   :repl-options {:init (do (set! *print-length* 60)
                            (-main))}
   :main spectra.web
-  :jvm-opts ["-Xmx3g" "-XX:-OmitStackTraceInFastThrow"]
+  :jvm-opts ["-Xmx4g" "-XX:-OmitStackTraceInFastThrow"]
   :uberjar-name "spectra-standalone.jar")
