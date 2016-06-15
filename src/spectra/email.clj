@@ -697,16 +697,16 @@
 (defn get-tokens [s]
   (->> s nlp/get-tokens (map nlp/get-text)))
 
-(defn event-sentences [n]
-  (->> (email-sentences n) nlp/number-items
+(defn event-sentences [sentences]
+  (->> sentences nlp/number-items
        (map #(vector % (get-tokens (val %))))
        (map #(update % 0 nlp/sentence-graph))
        (filter #(some #{s/date-time s/time-interval}
                       (loom/nodes (first %))))
        (mapv second) distinct))
 
-(defn addr-sentences [n]
-  (->> (email-sentences n) (map get-tokens) distinct
+(defn addr-sentences [sentences]
+  (->> sentences (map get-tokens) distinct
        (filter #(->> % (str/join " ") regex/might-have-addr?))))
 
 (defn openie-sentence [text]

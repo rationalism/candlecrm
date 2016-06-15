@@ -12,6 +12,7 @@
            [edu.stanford.nlp.ling
             CoreAnnotations$SentencesAnnotation
             CoreAnnotations$MentionsAnnotation
+            CoreAnnotations$NamedEntityTagAnnotation
             CoreAnnotations$EntityTypeAnnotation
             CoreAnnotations$TokensAnnotation
             CoreAnnotations$PartOfSpeechAnnotation
@@ -121,6 +122,9 @@
 
 (defn get-pos [token]
   (.get token CoreAnnotations$PartOfSpeechAnnotation))
+
+(defn get-tag [token]
+  (.get token CoreAnnotations$NamedEntityTagAnnotation))
 
 (defn entity-type [entity]
   (.get entity CoreAnnotations$EntityTypeAnnotation))
