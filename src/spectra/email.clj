@@ -697,15 +697,20 @@
 (defn get-tokens [s]
   (->> s nlp/get-tokens (map nlp/get-text)))
 
-(defn roth-sentence [id sentence]
+(defn roth-sentence [[id sentence]]
   (zipmap (-> sentence nlp/get-tokens count range)
           (map (juxt (constantly id) nlp/get-tag
                      nlp/get-pos #(.originalText %))
                (nlp/get-tokens sentence))))
 
+(defn roth-print [[k v]]
+  (->> [(first v) (second v) k "O"
+        (third v) (fourth v) "O" "O" "O"]
+       (str/join "\t")))
+
 (defn event-sentences [sentences]
   (->> sentences nlp/number-items
-       (map #(vector % (get-tokens (val %))))
+       (map #(vector % (roth-sentence %)))
        (map #(update % 0 nlp/sentence-graph))
        (filter #(some #{s/date-time s/time-interval}
                       (loom/nodes (first %))))
