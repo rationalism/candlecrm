@@ -697,11 +697,25 @@
 (defn get-tokens [s]
   (->> s nlp/get-tokens (map nlp/get-text)))
 
+(defn split-no-tag [tokens]
+  (if (-> tokens first nlp/get-tag (= "O"))
+    (partition 1 tokens) (list tokens)))
+
+(defn group-tag [tokens]
+  (->> tokens first nlp/get-tag))
+
+(defn group-pos [tokens]
+  (->> tokens (map nlp/get-pos) (str/join "/")))
+
+(defn group-text [tokens]
+  (->> tokens (map #(.originalText %)) (str/join "/")))
+
 (defn roth-sentence [[id sentence]]
-  (zipmap (-> sentence nlp/get-tokens count range)
-          (map (juxt (constantly id) nlp/get-tag
-                     nlp/get-pos #(.originalText %))
-               (nlp/get-tokens sentence))))
+  (let [token-groups (->> sentence nlp/get-tokens (partition-by nlp/get-tag)
+                          (mapcat split-no-tag))]
+    (->> (map (juxt (constantly id) group-tag group-pos group-text)
+              token-groups)
+         (zipmap (-> token-groups count range)))))
 
 (defn roth-print [[k v]]
   (->> [(first v) (second v) k "O"
