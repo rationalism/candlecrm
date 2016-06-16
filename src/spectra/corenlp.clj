@@ -57,7 +57,8 @@
                  "ORGANIZATION" s/org-name "MONEY" s/amount
                  "DATETIME" s/date-time "EMAIL" s/email-addr
                  "PHONE" s/phone-num "DURATION" s/duration
-                 "TIMEINTERVAL" s/time-interval})
+                 "TIMEINTERVAL" s/time-interval
+                 "ADDRESS" s/street-addr "EVENT" s/event-type})
 
 (def pronoun-parts ["PRP" "PRP$"])
 
