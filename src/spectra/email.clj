@@ -844,7 +844,7 @@
   (if (nil-or-empty? s) s (str s "\n")))
 
 (defn write-roth [[k v]]
-  (str (->> k (map roth-print) (str/join "\n")) "\n\n"
+  (str (->> k sort (map roth-print) (str/join "\n")) "\n\n"
        (->> v (map #(str/join " " %))
             (str/join "\n") add-line)
        "\n"))
