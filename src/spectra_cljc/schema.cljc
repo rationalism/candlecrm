@@ -42,6 +42,7 @@
 (def lng :lng)
 (def has-coord :has-coord)
 (def geocode :geocode)
+(def street-addr :street-addr)
 
 (def organization :org)
 (def person-name :person-name)
@@ -56,6 +57,13 @@
 (def start-time :start-time)
 (def stop-time :stop-time)
 (def over-time :over-time)
+(def event-attend :event-attend)
+(def event-features :event-features)
+(def event-org :event-org)
+(def event-loc :event-loc)
+(def event-addr :event-addr)
+(def event-type :event-type)
+(def event-cost :event-cost)
 
 (def coref-is :coref-is)
 (def has-type :has-type)
