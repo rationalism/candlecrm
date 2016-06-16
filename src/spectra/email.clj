@@ -763,6 +763,15 @@
                     (repeat (inc (apply - s3)) (abbr-map s2)))))
         (abbr-map s))))
 
+(defn translate-rels [s]
+  (let [codes (str/split s #" ")]
+    (if (= 3 (count codes))
+      (let [[c1 c2 c3] codes rel (rel-map c3)]
+        (when rel
+          [(Integer/parseInt c1) (Integer/parseInt c2) rel]))
+      (when (= 1 (count codes))
+        (-> codes first rel-map)))))
+
 (def known-tokens (atom []))
 
 (defn display-tokens
