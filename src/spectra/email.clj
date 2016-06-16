@@ -839,3 +839,17 @@
        (map #(str/join "\n" %))
        (str/join "\n\n") (spit-append filename))
   (def known-tokens (atom [])))
+
+(defn add-line [s]
+  (if (nil-or-empty? s) s (str s "\n")))
+
+(defn write-roth [[k v]]
+  (str (->> k (map roth-print) (str/join "\n")) "\n\n"
+       (->> v (map #(str/join " " %))
+            (str/join "\n") add-line)
+       "\n"))
+
+(defn write-rels [filename]
+  (->> @rel-sentences (map write-roth) 
+       str/join (spit-append filename))
+  (def rel-sentences (atom {})))
