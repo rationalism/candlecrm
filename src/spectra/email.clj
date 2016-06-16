@@ -782,7 +782,7 @@
         (-> codes first rel-map)))))
 
 (def known-tokens (atom []))
-(def rel-sentences (atom []))
+(def rel-sentences (atom {}))
 
 (defn display-tokens
   ([tokens]
@@ -806,6 +806,26 @@
   (if (or (nil? sentences) (empty? sentences)) nil
       (when-let [resp (-> sentences first display-tokens)]
         (swap! known-tokens conj resp)
+        (recur (rest sentences)))))
+
+(defn display-sentence
+  ([sentence]
+   (roth-display sentence)
+   (display-sentence sentence []))
+  ([sentence rels]
+   (println "Enter codes:")
+   (let [resp (translate-rels (read-line))]
+     (condp = resp
+       nil (do (println "Error: Try again")
+               (recur sentence rels))
+       :next (hash-map sentence rels)
+       :quit nil
+       (recur sentence (conj rels resp))))))
+
+(defn gather-rels [sentences]
+  (if (or (nil? sentences) (empty? sentences)) nil
+      (when-let [resp (-> sentences first display-sentence)]
+        (swap! rel-sentences merge resp)
         (recur (rest sentences)))))
 
 (defn tabline [[word tag]]
