@@ -722,6 +722,15 @@
         (third v) (fourth v) "O" "O" "O"]
        (str/join "\t")))
 
+(defn roth-display [sentence]
+  (let [rep-slash #(str/replace % #"/" " ")]
+    (->> sentence sort (map second) (map fourth) (map rep-slash)
+         (str/join " ") (str "Sentence: ") println)
+    (->> sentence sort (remove #(-> % second second (= "O")))
+         (map #(str (first %) ": " (rep-slash (fourth (second %)))
+                    " (" (second (second %)) ")"))
+         (str/join "\n") println)))
+
 (defn event-sentences [sentences]
   (->> sentences nlp/number-items
        (map #(vector % (roth-sentence %)))
@@ -773,6 +782,7 @@
         (-> codes first rel-map)))))
 
 (def known-tokens (atom []))
+(def rel-sentences (atom []))
 
 (defn display-tokens
   ([tokens]
