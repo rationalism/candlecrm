@@ -30,6 +30,10 @@
   (->> (re-seq email-regex text)
        (remove #(.contains % "..."))))
 
+(defn find-zipcode [text]
+  (->> (re-seq zipcode-regex text)
+       (map #(subs % 1 (dec (count %))))))
+
 (defn might-have-addr? [text]
   (->> [zipcode-regex state-regex street-regex]
        (map #(re-seq % text))

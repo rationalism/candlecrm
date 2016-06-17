@@ -59,7 +59,8 @@
                  "DATE" s/date-time "TIME" s/date-time
                  "PHONE" s/phone-num "DURATION" s/duration
                  "TIMEINTERVAL" s/time-interval
-                 "ADDRESS" s/street-addr "EVENT" s/event-type})
+                 "ADDRESS" s/street-addr "EVENT" s/event-type
+                 "ZIPCODE" s/zipcode})
 
 (def pronoun-parts ["PRP" "PRP$"])
 
@@ -438,7 +439,10 @@
    :label (s/attr-entity (second edge))})
 
 (defn label-annotate [label class]
-  (.setNER label class) label)
+  (when-let [old-class (.ner label)]
+    (when (not= old-class "O")
+      (.setNER label class)))
+  label)
 
 (defn tokens-annotate [tokens index class]
   (.set tokens index
@@ -460,7 +464,8 @@
 
 (def attr-functions
   [[regex/find-email-addrs "EMAIL"] [regex/find-urls "URL"]
-   [regex/find-phone-nums "PHONE"] [dt/find-dates "DATETIME"]])
+   [regex/find-phone-nums "PHONE"] [dt/find-dates "DATETIME"]
+   [regex/find-zipcode "ZIPCODE"]])
 
 (defn replace-all [text coll]
   (str/replace text (regex/regex-or coll) ""))

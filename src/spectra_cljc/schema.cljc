@@ -43,6 +43,7 @@
 (def has-coord :has-coord)
 (def geocode :geocode)
 (def street-addr :street-addr)
+(def zipcode :zipcode)
 
 (def organization :org)
 (def person-name :person-name)
