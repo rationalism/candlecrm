@@ -440,7 +440,7 @@
 
 (defn label-annotate [label class]
   (when-let [old-class (.ner label)]
-    (when (not= old-class "O")
+    (when (= old-class "O")
       (.setNER label class)))
   label)
 
