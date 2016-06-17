@@ -9,6 +9,7 @@
             [spectra.common :refer :all]
             [spectra.ajax :as ajax]
             [spectra.auth :as auth]
+            [spectra.datetime :as dt]
             [spectra.email :as email]
             [spectra.geocode :as geocode]
             [spectra.google :as google]
@@ -108,6 +109,7 @@
   (neo4j/graph-connect!)
   (neo4j/reset-session!)
   (sendgrid/init-server!)
+  (dt/load-date-model!)
   (email/make-parse-pool!)
   (email/make-nlp-pool!)
   (ajax/start!)

@@ -6,11 +6,22 @@
             [spectra.common :refer :all]
             [spectra.model :as model]
             [spectra.weka :as weka]
+            [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [com.joestelmach.natty CalendarSource Parser]
            [java.text SimpleDateFormat]
            [java.util Date]))
+
+(defonce bad-date-model (atom nil))
+
+(def models-dir (str (env :home-dir) "resources/models"))
+(def bad-date-file "baddates.dat")
+(def bad-date-threshold 0.9)
+
+(defn load-date-model! []
+  (->> bad-date-file (str models-dir "/")
+       weka/deserialize (reset! bad-date-model)))
 
 (defn interval? [natty-date]
   (let [parsed-date (-> natty-date (.getDates) vec)]
@@ -83,7 +94,7 @@
            (model/cap-ratio text)]))
 
 (defn file-train [filename]
-  (->> filename slurp (str/split "\n")
+  (->> (str/split (slurp filename) #"\n")
        (map bad-model-features) (mapv vec)))
 
 (defn train-bad-model [goodfile badfile]
@@ -92,4 +103,6 @@
        weka/make-forest))
 
 (defn is-bad-date? [text]
-  false)
+  (->> text bad-model-features
+       (weka/classify @bad-date-model)
+       (> bad-date-threshold)))

@@ -735,7 +735,7 @@
   (->> sentences nlp/number-items
        (map #(vector % (roth-sentence %)))
        (map #(update % 0 nlp/sentence-graph))
-       (filter #(some #{s/date-time s/time-interval}
+       (filter #(some #{s/date-time}
                       (loom/nodes (first %))))
        (mapv second) distinct))
 

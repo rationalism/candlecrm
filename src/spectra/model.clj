@@ -141,10 +141,11 @@
   (count (str/split s #" ")))
 
 (defn cap-ratio [s]
-  (let [tokens (map first (str/split s #" "))
+  (let [tokens (remove nil? (map first (str/split s #" ")))
         upper-count (count (filter #(Character/isUpperCase %) tokens))]
-    (->> tokens (filter #(Character/isLowerCase %)) count
-         (+ upper-count) (/ upper-count))))
+    (if (> upper-count 0)
+      (->> tokens (filter #(Character/isLowerCase %)) count
+           (+ upper-count) (/ upper-count)) 0)))
 
 (def views
   {s/s-name s/person s/email-addr s/person})
