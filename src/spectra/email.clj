@@ -717,8 +717,14 @@
               token-groups)
          (zipmap (-> token-groups count range)))))
 
+(def roth-tag-map {"DATE" "DATETIME" "ZIPCODE" "LOCATION"})
+
+(defn roth-swap [tag]
+  (if-let [new-tag (roth-tag-map tag)]
+    new-tag tag))
+
 (defn roth-print [[k v]]
-  (->> [(first v) (second v) k "O"
+  (->> [(first v) (roth-swap (second v)) k "O"
         (third v) (fourth v) "O" "O" "O"]
        (str/join "\t")))
 
