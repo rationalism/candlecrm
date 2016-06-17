@@ -685,14 +685,15 @@
 
 (defn email-sentences [n]
   (let [models (nlp-models-fn)]
-    (mapcat (comp nlp/get-sentences
-                  #(nlp/run-annotate (:mention models) %)
-                  nlp/library-annotate-all
-                  #(nlp/run-nlp (:ner models) %)
-                  #(apply (partial nlp/fpp-replace models) %)
-                  #(update % 0 nlp/strip-parens)
-                  vec fetch-body :id)
-            (queries/email-for-nlp n))))
+    (->> (queries/email-for-nlp n)
+         (map :id) (map fetch-body) (map vec)
+         (pmap (comp nlp/get-sentences
+                     #(nlp/run-annotate (:mention models) %)
+                     nlp/library-annotate-all
+                     #(nlp/run-nlp (:ner models) %)
+                     #(apply (partial nlp/fpp-replace models) %)
+                     #(update % 0 nlp/strip-parens)))
+         (apply concat) vec)))
 
 (defn get-tokens [s]
   (->> s nlp/get-tokens (map nlp/get-text)))
@@ -764,7 +765,7 @@
               "p" "EventAttend" "f" "EventFeatures" "o" "EventOrg"
               "l" "EventLocation" "a" "EventAddr" "t" "EventType"
               "i" "EventInterval" "c" "EventCost" "w" "EventWebsite"
-              "q" :quit "n" :next})
+              "m" "EventTime" "q" :quit "n" :next})
 
 (defn translate-codes [s]
   (if (empty? s) nil
