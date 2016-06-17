@@ -2,7 +2,6 @@
   (:require [clojure.string :as str]
             [clojure-csv.core :as csv]
             [spectra.common :refer :all]
-            [spectra.datetime :as dt]
             [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]
@@ -38,7 +37,7 @@
              " {" (neo4j/esc-token s/value) ": {v}"
              "}) CREATE (a)-[r:" (neo4j/esc-token prop)
              " {src" source ": {cnt}}]->(b)")
-        {:id id :v (dt/catch-dates val) :cnt 1}]])))
+        {:id id :v (catch-dates val) :cnt 1}]])))
 
 (defn id-pair-cypher [id-pair user source]
   (->> (apply dissoc (key id-pair) s/exclude-upload)

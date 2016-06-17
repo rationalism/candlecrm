@@ -1,7 +1,6 @@
 (ns spectra.neo4j
   (:require [clojure.string :as str]
             [spectra.common :refer :all]
-            [spectra.datetime :as dt]
             [spectra_cljc.schema :as s]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
@@ -54,7 +53,7 @@
 
 (defn filter-props [props]
   (->> (filter #(not-nil-ext? (val %)) props)
-       (map dt/catch-dates-map)
+       (map catch-dates-map)
        (map catch-keywords) (into {})))
 
 (defn to-values [params]
@@ -169,7 +168,7 @@
    [(str "MATCH (n) WHERE ID(n) = {id}"
          " SET n." (esc-token property)
          " = {val}")
-    {:id (.id vertex) :val (dt/catch-dates value)}]))
+    {:id (.id vertex) :val (catch-dates value)}]))
 
 (defn format-link [l]
   [(.asMap l) (.startNodeId l) (.endNodeId l)

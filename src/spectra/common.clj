@@ -6,7 +6,8 @@
             [taoensso.timbre :as timbre
              :refer (log trace info warn error fatal report
                          spy get-env log-env)]
-            [taoensso.timbre.appenders.core :as appenders]))
+            [taoensso.timbre.appenders.core :as appenders])
+  (:import [java.util Date]))
 
 ;; Common library functions. Shouldn't depend on anything else.
 
@@ -134,3 +135,14 @@
 
 (defn val-not-nil? [pair]
   (-> pair val nil? not))
+
+(defn to-ms [some-date]
+  (.getTime some-date))
+
+(defn catch-dates [value]
+  (if (= Date (type value))
+    (to-ms value) value))
+
+(defn catch-dates-map [pair]
+  (update pair 1 catch-dates))
+

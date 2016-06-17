@@ -56,6 +56,7 @@
 (def schema-map {"PERSON" s/person-name "LOCATION" s/loc-name
                  "ORGANIZATION" s/org-name "MONEY" s/amount
                  "DATETIME" s/date-time "EMAIL" s/email-addr
+                 "DATE" s/date-time "TIME" s/date-time
                  "PHONE" s/phone-num "DURATION" s/duration
                  "TIMEINTERVAL" s/time-interval
                  "ADDRESS" s/street-addr "EVENT" s/event-type})
@@ -73,9 +74,9 @@
    (doto (Properties. )
      (.setProperty "annotators" (str/join ", " annotators))
      (.setProperty "ner.applyNumericClassifiers" "true")
-     (.setProperty "ner.useSUTime" "false")
-     (.setProperty "ner.markTimeRanges" "true")
-     (.setProperty "ner.includeRange" "true")
+     (.setProperty "ner.useSUTime" "true")
+     (.setProperty "ner.markTimeRanges" "false")
+     (.setProperty "ner.includeRange" "false")
      (.setProperty "ner.model" (str/join "," ner-models))
      (.setProperty "parse.model" parse-model)
      #_ (.setProperty "openie.resolve_coref"
@@ -131,7 +132,7 @@
 (defn entity-type [entity]
   (.get entity CoreAnnotations$EntityTypeAnnotation))
 
-(defn entity-mentions [parsed-text]
+(defn entity-mentions-raw [parsed-text]
   (.get parsed-text CoreAnnotations$MentionsAnnotation))
   
 (defn get-coref [parsed-text]
@@ -459,8 +460,7 @@
 
 (def attr-functions
   [[regex/find-email-addrs "EMAIL"] [regex/find-urls "URL"]
-   [regex/find-phone-nums "PHONE"] [dt/find-intervals "TIMEINTERVAL"]
-   [dt/find-dates "DATETIME"]])
+   [regex/find-phone-nums "PHONE"] [dt/find-dates "DATETIME"]])
 
 (defn replace-all [text coll]
   (str/replace text (regex/regex-or coll) ""))
@@ -534,6 +534,15 @@
        (.set annotation CoreAnnotations$SentencesAnnotation))
   annotation)
 
+(defn remove-bad-dates [nodes]
+  (remove #(and (-> % entity-type schema-map (= s/date-time))
+                (->> % get-tokens (map get-text)
+                     (str/join " ") dt/is-bad-date?))
+          nodes))
+
+(defn entity-mentions [sentence]
+  (remove-bad-dates (entity-mentions-raw sentence)))
+
 (defnp sentence-graph [sent-pair]
   (-> (loom/merge-graphs
        [(-> sent-pair val get-triples triples-graph)
@@ -598,7 +607,7 @@
 
 (defn nlp-graph [parsed-text]
   (cond->
-      (->> parsed-text get-sentences number-items
+      (->> parsed-text number-items
            (map sentence-graph) loom/merge-graphs)
     (coreference?)
     (vector
@@ -615,20 +624,20 @@
   (->> text (run-nlp (:ner models))
        library-annotate-all
        (run-annotate (:mention models)) 
-       nlp-graph))
+       get-sentences nlp-graph))
 
 (defnc run-nlp-full [models author text]
   (cond-> (->> (fpp-replace models (strip-parens text) author)
                (run-nlp (:ner models))
                library-annotate-all
                (run-annotate (:mention models))
-               nlp-graph)
+               get-sentences nlp-graph)
     (coreference?) rewrite-pronouns))
 
 (defn run-nlp-openie [{:keys [ner mention openie] :as models} text]
   (->> (run-nlp ner text) library-annotate-all
        (run-annotate mention) (run-annotate openie)
-       nlp-graph))
+       get-sentences nlp-graph))
 
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))

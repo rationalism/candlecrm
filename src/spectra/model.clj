@@ -1,5 +1,6 @@
 (ns spectra.model
-  (:require [spectra.common :refer :all]
+  (:require [clojure.string :as str]
+            [spectra.common :refer :all]
             [spectra_cljc.schema :as s]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -135,6 +136,15 @@
 (defn bag-of-chars [s]
   (->> [#"\p{Alpha}" #"\p{Digit}" #"\p{Punct}" #"\p{Space}"]
        (map #(re-seq % s)) (map count)))
+
+(defn count-tokens [s]
+  (count (str/split s #" ")))
+
+(defn cap-ratio [s]
+  (let [tokens (map first (str/split s #" "))
+        upper-count (count (filter #(Character/isUpperCase %) tokens))]
+    (->> tokens (filter #(Character/isLowerCase %)) count
+         (+ upper-count) (/ upper-count))))
 
 (def views
   {s/s-name s/person s/email-addr s/person})

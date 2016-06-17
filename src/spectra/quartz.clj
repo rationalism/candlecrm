@@ -116,7 +116,7 @@
 (defn delete-reset-tokens! []
   (->> (queries/users-reset-tokens)
        (filter #(-> % (.get (name s/modified))
-                    (- 3600000) (< (dt/to-ms (dt/now)))))
+                    (- 3600000) (< (to-ms (dt/now)))))
        (run! #(neo4j/delete-property! % s/pwd-reset-token))))
 
 ;; Nils here allow for easy switching on/off
