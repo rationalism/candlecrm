@@ -58,7 +58,6 @@
                  "DATETIME" s/date-time "EMAIL" s/email-addr
                  "DATE" s/date-time "TIME" s/date-time
                  "PHONE" s/phone-num "DURATION" s/duration
-                 "TIMEINTERVAL" s/time-interval
                  "ADDRESS" s/street-addr "EVENT" s/event-type
                  "ZIPCODE" s/zipcode})
 
@@ -440,7 +439,7 @@
 
 (defn label-annotate [label class]
   (when-let [old-class (.ner label)]
-    (when (= old-class "O")
+    (when (some #{old-class} ["O" "NUMBER" "ORDINAL" "PERCENT"])
       (.setNER label class)))
   label)
 
