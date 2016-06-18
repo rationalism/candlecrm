@@ -23,6 +23,17 @@
   (->> bad-date-file (str models-dir "/")
        weka/deserialize (reset! bad-date-model)))
 
+(defn bad-model-features [text]
+  (concat (model/bag-of-chars text)
+          [(count text)
+           (model/count-tokens text)
+           (model/cap-ratio text)]))
+
+(defn is-bad-date? [text]
+  (->> text bad-model-features
+       (weka/classify @bad-date-model)
+       (> bad-date-threshold)))
+
 (defn interval? [natty-date]
   (let [parsed-date (-> natty-date (.getDates) vec)]
     (and (= 2 (count parsed-date))
@@ -34,7 +45,8 @@
 
 (defn parse-dates [text reference]
   (try
-    (parse-dates-raw text reference)
+    (->> (parse-dates-raw text reference)
+         (remove #(-> % (.getText) is-bad-date?)))
     (catch java.lang.NullPointerException e
       (do (throw-info! (str "Date parse error on: " text))
           []))))
@@ -87,12 +99,6 @@
   (->> (Date. value) coerce/from-date
        (format/unparse formatter)))
 
-(defn bad-model-features [text]
-  (concat (model/bag-of-chars text)
-          [(count text)
-           (model/count-tokens text)
-           (model/cap-ratio text)]))
-
 (defn file-train [filename]
   (->> (str/split (slurp filename) #"\n")
        (map bad-model-features) (mapv vec)))
@@ -102,7 +108,3 @@
        (concat (map #(conj % 1.0) (file-train goodfile)))
        weka/make-forest))
 
-(defn is-bad-date? [text]
-  (->> text bad-model-features
-       (weka/classify @bad-date-model)
-       (> bad-date-threshold)))

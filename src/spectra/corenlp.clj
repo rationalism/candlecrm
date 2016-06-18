@@ -44,10 +44,9 @@
 (def ner-model-dir "edu/stanford/nlp/models/ner/")
 (def ner-models
   (map #(str ner-model-dir %)
-       ["english.all.3class.distsim.crf.ser.gz"
-        "english.muc.7class.distsim.crf.ser.gz"
-        "english.event.2class.crf.ser.gz"]))
-        ;"english.math.resume.distsim.crf.ser.gz"]
+       ["english.event.2class.crf.ser.gz"
+        "english.all.3class.distsim.crf.ser.gz"
+        "english.muc.7class.distsim.crf.ser.gz"]))
 
 ;; Shift model supposed to be much faster, but takes much longer to load
 (def shift-parse-model "edu/stanford/nlp/models/srparser/englishSR.ser.gz")
@@ -439,7 +438,9 @@
 
 (defn label-annotate [label class]
   (when-let [old-class (.ner label)]
-    (when (some #{old-class} ["O" "NUMBER" "ORDINAL" "PERCENT"])
+    (when (or (some #{old-class} ["O" "NUMBER" "ORDINAL" "PERCENT"])
+              (and (some #{old-class} ["DATE" "TIME"])
+                   (= class "DATETIME")))
       (.setNER label class)))
   label)
 
@@ -462,9 +463,9 @@
        (apply merge)))
 
 (def attr-functions
-  [[regex/find-email-addrs "EMAIL"] [regex/find-urls "URL"]
-   [regex/find-phone-nums "PHONE"] [dt/find-dates "DATETIME"]
-   [regex/find-zipcode "ZIPCODE"]])
+  [[regex/find-zipcode "ZIPCODE"] [regex/find-email-addrs "EMAIL"]
+   [regex/find-urls "URL"] [regex/find-phone-nums "PHONE"]
+   [dt/find-dates "DATETIME"]])
 
 (defn replace-all [text coll]
   (str/replace text (regex/regex-or coll) ""))
