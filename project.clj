@@ -6,9 +6,9 @@
                  [org.clojure/clojurescript "1.9.76"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [ns-tracker "0.3.0"]
-                 [clj-time "0.12.0"
-                  :exclusions [joda-time]]
-                 [clj-http "3.1.0"]
+                 [clj-time "0.12.0"]
+                 [clj-http "3.1.0"
+                  :exclusions [commons-io]]
                  [http-kit "2.1.19"]
                  [ring/ring-core "1.5.0"]
                  [ring/ring-devel "1.5.0"]
@@ -16,6 +16,7 @@
                  [compojure "1.5.0"]
                  [hiccup "1.0.5"]
                  [environ "1.0.3"]
+                 [com.taoensso/encore "2.56.1"]
                  [com.taoensso/timbre "4.4.0"]
                  [buddy "1.0.0"]
                  [com.google.api-client/google-api-client "1.22.0"
@@ -33,24 +34,24 @@
                   :classifier "models"]
                  [com.googlecode.libphonenumber/libphonenumber "7.4.3"]
                  [org.deeplearning4j/deeplearning4j-core "0.4-rc3.10"
-                  :exclusions [com.google.guava/guava org.json/json
-                               com.fasterxml.jackson.core/jackson-core
-                               org.apache.commons/commons-compress]]
+                  :exclusions [com.fasterxml.jackson.core/jackson-core
+                               org.apache.commons/commons-compress
+                               com.google.guava/guava org.json/json]]
                  [org.deeplearning4j/deeplearning4j-nlp "0.4-rc3.10"
                   :uberjar-merge-with {#"\.properties$" [slurp str spit]
                                        "reference.conf" [slurp str spit]}
-                  :exclusions [com.google.guava/guava
-                               com.google.code.findbugs/jsr305
+                  :exclusions [com.google.code.findbugs/jsr305
+                               com.google.guava/guava
                                com.fasterxml.jackson.core/jackson-core]]
                  [org.nd4j/nd4j-x86 "0.4-rc3.8"
-                  :exclusions [org.bytedeco/javacpp]]
+                  :exclusions [org.bytedeco/javacpp com.google.guava/guava]]
                  [com.joestelmach/natty "0.12"]
                  [org.neo4j.driver/neo4j-java-driver "1.0.3"]
                  [pandect "0.6.0"]
                  [aysylu/loom "0.6.0"]
                  [com.taoensso/sente "1.8.1"]
                  [clojurewerkz/quartzite "2.0.0"]
-                 [reagent "0.5.1"]
+                 [reagent "0.6.0-rc"]
                  [jayq "2.5.4"]
                  [com.google.maps/google-maps-services "0.1.15"]
                  [nz.ac.waikato.cms.weka/weka-dev "3.7.13"]
@@ -62,7 +63,8 @@
                  [org.apache.commons/commons-math3 "3.6.1"]
                  [org.bitbucket.cowwoc/diff-match-patch "1.1"]
                  [org.seleniumhq.selenium/selenium-java "2.53.0"]
-                 [com.cemerick/piggieback "0.2.1"]
+                 [com.cemerick/piggieback "0.2.1"
+                  :exclusions [com.google.guava/guava]]
                  [figwheel-sidecar "0.5.4-3"]
                  [org.jsoup/jsoup "1.9.2"]]
   :min-lein-version "2.0.0"
@@ -71,7 +73,8 @@
              :exclusions [org.clojure/clojure]]
             [lein-figwheel "0.5.4-3"
              :exclusions [org.clojure/clojure]]
-            [lein-cljsbuild "1.1.3"]
+            [lein-cljsbuild "1.1.3"
+             :exclusions [org.clojure/clojure]]
             [cider/cider-nrepl "0.12.0"]
             [jonase/eastwood "0.2.3"
              :exclusions [org.clojure/clojure]]
