@@ -23,6 +23,8 @@
   (->> bad-date-file (str models-dir "/")
        weka/deserialize (reset! bad-date-model)))
 
+(load-date-model!)
+
 (defn bad-model-features [text]
   (concat (model/bag-of-chars text)
           [(count text)

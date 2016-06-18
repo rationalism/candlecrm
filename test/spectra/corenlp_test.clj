@@ -40,11 +40,11 @@
     (is (= ["Michael Vassar" s/person-name s/has-type]
            (name-from-email models "michael.vassar@gmail.com")))))
 
-;(deftest fix-case
-;  (testing "Fix the case of text"
-;    (is (= "Welcome to the Black Mesa Research Facility."
-;           (correct-case "Welcome to the Black Mesa Research Facility.")))
-;    (is (= "Welcome to the Black Mesa Research Facility."
-;           (correct-case "WELCOME TO THE BLACK MESA RESEARCH FACILITY.")))
-;    (is (= "Welcome to the Black Mesa Research Facility."
-;           (correct-case "welcome to the black mesa research facility.")))))
+(deftest fix-case
+  (testing "Fix the case of text"
+    (is (= "Welcome to the Black Mesa Research Facility."
+           (correct-case "Welcome to the Black Mesa Research Facility.")))
+    (is (= "Welcome to the Black Mesa Research Facility."
+           (correct-case "WELCOME TO THE BLACK MESA RESEARCH FACILITY.")))
+    (is (= "Welcome to the Black Mesa Research Facility."
+           (correct-case "welcome to the black mesa research facility.")))))

@@ -48,6 +48,8 @@
         "english.all.3class.distsim.crf.ser.gz"
         "english.muc.7class.distsim.crf.ser.gz"]))
 
+(def truecase-model "edu/stanford/nlp/models/truecase/truecasing.fast.qn.ser.gz")
+
 ;; Shift model supposed to be much faster, but takes much longer to load
 (def shift-parse-model "edu/stanford/nlp/models/srparser/englishSR.ser.gz")
 (def pcfg-parse-model "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
@@ -66,7 +68,8 @@
   (StanfordCoreNLP.
    (doto (Properties. )
      (.setProperty "annotators"
-                   (str/join ", " annotators)))))
+                   (str/join ", " annotators))
+     (.setProperty "truecase.model" truecase-model))))
 
 (defn make-pipeline [annotators parse-model]
   (StanfordCoreNLP.
