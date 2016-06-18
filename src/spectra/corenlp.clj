@@ -24,6 +24,8 @@
             NaturalLogicAnnotations$RelationTriplesAnnotation]
            [edu.stanford.nlp.dcoref
             CorefCoreAnnotations$CorefChainAnnotation]
+           [edu.stanford.nlp.ie.machinereading.structure
+            MachineReadingAnnotations$RelationMentionsAnnotation]
            [java.util Properties]))
 
 (defn coreference? []
@@ -37,7 +39,7 @@
   (concat ner-annotators
           (if (coreference?) ["parse" "dcoref"] [])
           ["depparse" "natlog" "openie"]))
-(def relation-annotators ["relation"])
+(def relation-annotators ["parse" "relation"])
 (def openie-annotators ["depparse" "natlog" "openie"])
 (def truecase-annotators
   (concat token-annotators ["truecase"]))
@@ -144,6 +146,9 @@
   
 (defn get-coref [parsed-text]
   (.get parsed-text CorefCoreAnnotations$CorefChainAnnotation))
+
+(defn get-relations [parsed-text]
+  (.get parsed-text MachineReadingAnnotations$RelationMentionsAnnotation))
 
 (defn true-case [token]
   (.get token CoreAnnotations$TrueCaseTextAnnotation))
