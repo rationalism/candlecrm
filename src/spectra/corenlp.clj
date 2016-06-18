@@ -60,7 +60,7 @@
                  "DATE" s/date-time "TIME" s/date-time
                  "PHONE" s/phone-num "DURATION" s/duration
                  "ADDRESS" s/street-addr "EVENT" s/event-type
-                 "ZIPCODE" s/zipcode})
+                 "ZIPCODE" s/zipcode "URL" s/webpage})
 
 (def pronoun-parts ["PRP" "PRP$"])
 
@@ -613,6 +613,19 @@
     (loom/remove-nodes
      $ (filter #(lonely? g %)
                (loom/up-nodes g (pronoun-node))))))
+
+(defn count-schema [freq-count]
+  (let [schema (->> schema-map vals sort vec)]
+    (zipmap schema
+            (map #(if (contains? freq-count %)
+                    (freq-count %) 0) schema))))
+
+(defn parse-sentence? [sentence]
+  (->> sentence vector number-items
+       (map sentence-graph) first
+       loom/edges (filter #(= (third %) s/has-type))
+       (map second) frequencies count-schema
+       sort (mapv second)))
 
 (defn nlp-graph [parsed-text]
   (cond->
