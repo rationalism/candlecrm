@@ -37,6 +37,7 @@
   (concat ner-annotators
           (if (coreference?) ["parse" "dcoref"] [])
           ["depparse" "natlog" "openie"]))
+(def relation-annotators ["relation"])
 (def openie-annotators ["depparse" "natlog" "openie"])
 (def truecase-annotators
   (concat token-annotators ["truecase"]))
@@ -81,7 +82,7 @@
      (.setProperty "ner.includeRange" "false")
      (.setProperty "ner.model" (str/join "," ner-models))
      (.setProperty "parse.model" parse-model)
-     (.setProperty "parse.maxlen" 80)
+     (.setProperty "parse.maxlen" "80")
      #_ (.setProperty "openie.resolve_coref"
                       (if (env :coreference) "true" "false"))
      (.setProperty "openie.triple.all_nominals" "true"))
@@ -101,6 +102,9 @@
 
 (defn get-openie-fn []
   (get-copy-fn openie-annotators))
+
+(defn get-relation-fn []
+  (get-copy-fn relation-annotators))
 
 (defonce letter-count (atom 0))
 
@@ -615,7 +619,7 @@
                (loom/up-nodes g (pronoun-node))))))
 
 (defn count-schema [freq-count]
-  (let [schema (->> schema-map vals sort vec)]
+  (let [schema (->> schema-map vals distinct sort vec)]
     (zipmap schema
             (map #(if (contains? freq-count %)
                     (freq-count %) 0) schema))))
@@ -646,7 +650,7 @@
   (->> text (run-nlp (:ner models))
        library-annotate-all
        (run-annotate (:mention models)) 
-       get-sentences nlp-graph))
+       #_ get-sentences #_nlp-graph))
 
 (defnc run-nlp-full [models author text]
   (cond-> (->> (fpp-replace models (strip-parens text) author)
