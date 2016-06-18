@@ -725,8 +725,9 @@
     new-tag tag))
 
 (defn roth-print [[k v]]
-  (->> [(first v) (roth-swap (second v)) k "O"
-        (third v) (fourth v) "O" "O" "O"]
+  (->> [(first v) (roth-swap (second v)) k "O" (third v)
+        (if (= (second v) "URL") "URLURLURL" (fourth v))
+        "O" "O" "O"]
        (str/join "\t")))
 
 (defn roth-display [sentence]
@@ -743,6 +744,8 @@
        (map #(vector % (roth-sentence %)))
        (map #(update % 0 nlp/sentence-graph))
        (filter #(some #{s/date-time}
+                      (loom/nodes (first %))))
+       (remove #(some #{s/email-addr}
                       (loom/nodes (first %))))
        (mapv second) distinct))
 
