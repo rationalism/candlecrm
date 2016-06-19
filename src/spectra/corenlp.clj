@@ -571,8 +571,7 @@
   (remove-bad-dates (entity-mentions-raw sentence)))
 
 (defn relation-graph [relation]
-  (->> relation (.getEntityMentionArgs)
-       (map #(.getExtentString %)) 
+  (->> relation (.getEntityMentionArgs) (map #(.getExtentString %))
        (concat (-> relation (.getType) relation-map vector))
        reverse vec vector (loom/build-graph [])))
 
