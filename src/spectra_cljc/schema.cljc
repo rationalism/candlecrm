@@ -37,6 +37,7 @@
 (def email-uid :email-uid)
 
 (def location :location)
+(def located-in :located-in)
 (def loc-name :loc-name)
 (def lat :lat)
 (def lng :lng)
@@ -65,6 +66,7 @@
 (def event-addr :event-addr)
 (def event-type :event-type)
 (def event-cost :event-cost)
+(def event-time :event-time)
 
 (def coref-is :coref-is)
 (def has-type :has-type)

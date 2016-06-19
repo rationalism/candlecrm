@@ -65,6 +65,15 @@
                  "ADDRESS" s/street-addr "EVENT" s/event-type
                  "ZIPCODE" s/zipcode "URL" s/webpage})
 
+(def relation-map {"EventStart" s/start-time "EventStop" s/stop-time
+                   "EventDuration" s/duration "EventAttend" s/event-attend
+                   "EventFeatures" s/event-features "EventOrg" s/event-org
+                   "EventLocation" s/event-loc "EventAddr" s/event-addr
+                   "EventType" s/event-type "EventCost" s/event-cost
+                   "EventWebsite" s/website "EventTime" s/event-time
+                   "Live_In" s/location "Located_In" s/located-in
+                   "OrgBased_In" s/location "Work_For" s/org-member})
+
 (def pronoun-parts ["PRP" "PRP$"])
 
 (defn make-default-pipeline [annotators]
@@ -561,9 +570,19 @@
 (defn entity-mentions [sentence]
   (remove-bad-dates (entity-mentions-raw sentence)))
 
+(defn relation-graph [relation]
+  (->> relation (.getEntityMentionArgs)
+       (map #(.getExtentString %)) 
+       (concat (-> relation (.getType) relation-map vector))
+       reverse vec vector (loom/build-graph [])))
+
+(defn relations-graph [relations]
+  (->> (remove #(= (.getType %) "_NR") relations)
+       (map relation-graph) loom/merge-graphs))
+
 (defnp sentence-graph [sent-pair]
   (-> (loom/merge-graphs
-       [(-> sent-pair val get-triples triples-graph)
+       [(-> sent-pair val get-relations relations-graph)
         (->> (entity-mentions (val sent-pair))
              (map ner-graph) (remove nil?)
              loom/merge-graphs)])
