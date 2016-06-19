@@ -13,7 +13,7 @@
                  [ring/ring-core "1.5.0"]
                  [ring/ring-devel "1.5.0"]
                  [ring/ring-defaults "0.2.1"]
-                 [compojure "1.5.0"]
+                 [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [environ "1.0.3"]
                  [com.taoensso/encore "2.56.1"]
