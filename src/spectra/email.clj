@@ -905,7 +905,8 @@
 
 (defn relation-odds-train [rels mult relation]
   (let [type-lookup (known-rel-map rels)]
-    (conj (->> relation first (map second) (mapv #(* mult %)))
+    (conj (->> relation first (map second)
+               (mapv #(* mult %)) (concat [mult]))
           (if-let [reltype (->> relation (take-last 2) type-lookup)]
             (if (->> relation first (sort-by second >)
                      ffirst (= reltype)) 1.0 0.0)
