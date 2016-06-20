@@ -609,7 +609,7 @@
 
 (defn normalize-odds [rel-odds]
   (->> rel-odds (map first) (map #(map second %))
-       (map #(apply + %)) sort last (/ 1.0)))
+       (map #(apply + 2%)) sort last (/ 1.0)))
 
 (defn relation-graph [relation]
   (->> relation (.getEntityMentionArgs) 
@@ -630,7 +630,7 @@
 
 (defnp sentence-graph [sent-pair]
   (-> (loom/merge-graphs
-       [(-> sent-pair val get-relations relations-graph)
+       [(-> sent-pair val get-relations debug relations-graph)
         (->> (entity-mentions (val sent-pair))
              (map ner-graph) (remove nil?)
              loom/merge-graphs)])
