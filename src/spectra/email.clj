@@ -903,17 +903,22 @@
        (map #(update % 0 map-int))
        (mapv vec) (into {})))
 
-(defn relation-odds-train [known-rels relation]
-  (let [type-lookup (known-rel-map known-rels)]
-    (conj (mapv second (first relation))
+(defn relation-odds-train [rels mult relation]
+  (let [type-lookup (known-rel-map rels)]
+    (conj (->> relation first (map second) (mapv #(* mult %)))
           (if-let [reltype (->> relation (take-last 2) type-lookup)]
             (if (->> relation first (sort-by second >)
                      ffirst (= reltype)) 1.0 0.0)
             0.0))))
 
-(defn relation-train [sentence-pair relation]
-  (->> (relation-odds-map (first sentence-pair) relation)
-       (relation-odds-train (second sentence-pair))))
+(defn normalize-odds [rel-odds]
+  (->> rel-odds (map first) (map #(map second %))
+       (map #(apply + %)) sort last (/ 1.0)))
+
+(defn relations-train [[sentence rels] relations]
+  (let [rel-odds (map #(relation-odds-map sentence %) relations)]
+    (map #(relation-odds-train rels (normalize-odds rel-odds) %)
+         rel-odds)))
 
 (defn relation-filter [sentence-pair]
   (let [ner-models (nlp-models-fn)
@@ -922,7 +927,7 @@
          (nlp/run-nlp-default ner-models)
          (nlp/run-annotate rel-models)
          nlp/get-sentences first nlp/get-relations
-         (map #(relation-train sentence-pair %)))))
+         (relations-train sentence-pair))))
 
 (defn train-rel-scorer [filename]
   (->> filename load-roth (pmap relation-filter)
