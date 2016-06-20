@@ -911,6 +911,11 @@
                      ffirst (= reltype)) 1.0 0.0)
             0.0))))
 
+(defn relation-train [sentence-pair relation]
+  (->> (relation-odds-map (first sentence-pair) relation)
+       (relation-odds-train (second sentence-pair))
+       (vector relation)))
+
 (defn relation-filter [sentence-pair]
   (let [ner-models (nlp-models-fn)
         rel-models ((nlp/get-relation-fn))]
@@ -918,5 +923,4 @@
          (nlp/run-nlp-default ner-models)
          (nlp/run-annotate rel-models)
          nlp/get-sentences first nlp/get-relations
-         (map #(relation-odds-map (first sentence-pair) %))
-         (map #(relation-odds-train (second sentence-pair) %)))))
+         (map #(relation-train sentence-pair %)))))
