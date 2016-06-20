@@ -863,3 +863,16 @@
   (->> @rel-sentences (map write-roth) 
        str/join (spit-append filename))
   (def rel-sentences (atom {})))
+
+(defn insert-blank-rels [roth-group]
+  (->> roth-group (partition-by first)
+       (interpose [])))
+
+(defn load-roth [filename]
+  (->> (str/split (slurp filename) #"\n")
+       (map #(str/split % #"\t")) (partition-by count)
+       (remove #(-> % first count (<= 1)))
+       (apply concat) (partition-by count)
+       (mapcat #(if (-> % first count (= 9))
+                  (insert-blank-rels %) (vector %)))
+       (partition 2)))

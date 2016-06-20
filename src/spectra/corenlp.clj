@@ -51,11 +51,11 @@
         "english.all.3class.distsim.crf.ser.gz"
         "english.muc.7class.distsim.crf.ser.gz"]))
 
+;; Does this only support one model??
 (def relation-model-dir "edu/stanford/nlp/models/supervised_relation_extractor/")
 (def relation-models
   (map #(str relation-model-dir %)
-       ["event_relation_model.ser"
-        "roth_relation_model_pipelineNER.ser"]))
+       ["event_relation_model.ser"]))
 
 (def truecase-model "edu/stanford/nlp/models/truecase/truecasing.fast.qn.ser.gz")
 
@@ -100,7 +100,7 @@
      (.setProperty "ner.model" (str/join "," ner-models))
      (.setProperty "parse.model" parse-model)
      (.setProperty "parse.maxlen" "80")
-     (.setProperty "relation.model" (str/join "," relation-models))
+     (.setProperty "sup.relation.model" (str/join "," relation-models))
      #_ (.setProperty "openie.resolve_coref"
                       (if (env :coreference) "true" "false"))
      (.setProperty "openie.triple.all_nominals" "true"))
