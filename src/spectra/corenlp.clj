@@ -699,7 +699,9 @@
 
 (defnc run-nlp-full [models author text]
   (cond-> (->> (fpp-replace models (strip-parens text) author)
-               (run-nlp-default models))
+               (run-nlp-ner models)
+               (run-annotate (:relation models))
+               get-sentences nlp-graph)
     (coreference?) rewrite-pronouns))
 
 (defn run-nlp-openie [{:keys [ner mention openie] :as models} text]

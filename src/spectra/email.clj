@@ -86,7 +86,8 @@
 (defn nlp-models-fn []
   {:ner ((nlp/get-ner-fn))
    :mention ((nlp/get-mention-fn))
-   :token ((nlp/get-tokenize-fn))})
+   :token ((nlp/get-tokenize-fn))
+   :relation ((nlp/get-relation-fn))})
 
 (defn fetch-body [id]
   (->> [[s/email-body] [s/email-from s/s-name]]
