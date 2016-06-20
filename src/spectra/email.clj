@@ -877,7 +877,7 @@
            vec))))
 
 (defn mention-token-map [sentence]
-  (->> sentence (map third) (map #(Integer/parseInt %))
+  (->> sentence (map third) map-int
        (zipvec (map #(vector (nth % 4) (nth % 5)) sentence))
        (mapcat token-map)))
 
@@ -898,6 +898,19 @@
          (map #(nth token %))
          (concat (-> relation nlp/relation-odds vector)))))
 
+(defn known-rel-map [rels]
+  (->> rels (map (juxt drop-last last))
+       (map #(update % 0 map-int))
+       (mapv vec) (into {})))
+
+(defn relation-odds-train [known-rels relation]
+  (let [type-lookup (known-rel-map known-rels)]
+    (conj (mapv second (first relation))
+          (if-let [reltype (->> relation (take-last 2) type-lookup)]
+            (if (->> relation first (sort-by second >)
+                     ffirst (= reltype)) 1.0 0.0)
+            0.0))))
+
 (defn relation-filter [sentence-pair]
   (let [ner-models (nlp-models-fn)
         rel-models ((nlp/get-relation-fn))]
@@ -905,4 +918,5 @@
          (nlp/run-nlp-default ner-models)
          (nlp/run-annotate rel-models)
          nlp/get-sentences first nlp/get-relations
-         (map #(relation-odds-map (first sentence-pair) %)))))
+         (map #(relation-odds-map (first sentence-pair) %))
+         (map #(relation-odds-train (second sentence-pair) %)))))

@@ -146,3 +146,5 @@
 (defn catch-dates-map [pair]
   (update pair 1 catch-dates))
 
+(defn map-int [coll]
+  (map #(Integer/parseInt %) coll))
