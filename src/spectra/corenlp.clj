@@ -609,7 +609,7 @@
 
 (defn normalize-odds [rel-odds]
   (->> rel-odds (map first) (map #(map second %))
-       (map #(apply + 2%)) sort last (/ 1.0)))
+       (map #(apply + %)) sort last (/ 1.0)))
 
 (defn relation-graph [relation]
   (->> relation (.getEntityMentionArgs) 
