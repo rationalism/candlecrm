@@ -15,6 +15,7 @@
             [spectra.email :as email]
             [spectra.geocode :as geocode]
             [spectra.google :as google]
+            [spectra.imap :as imap]
             [spectra.index :as index]
             [spectra.insert :as insert]
             [spectra.mlrecon :as mlrecon]
@@ -28,7 +29,7 @@
 (def nonlp-insert-limit 600000)
 
 (defn message-count [user]
-  (-> user email/fetch-imap-folder email/message-count))
+  (-> user imap/fetch-imap-folder imap/message-count))
 
 (defn queue-new? [queue]
   (< (s/loaded-top queue) (s/top-uid queue)))
@@ -36,12 +37,12 @@
 (defn range-top [queue]
   (if (queue-new? queue)
     (min (s/top-uid queue)
-         (-> queue s/loaded-top (+ email/batch-size) inc))
+         (-> queue s/loaded-top (+ imap/batch-size) inc))
     (-> queue s/loaded-bottom)))
 
 (defn range-bottom [queue]
   (max (if (queue-new? queue) (s/loaded-top queue) 275000)
-       (-> queue range-top (- email/batch-size) inc)))
+       (-> queue range-top (- imap/batch-size) inc)))
 
 (defn queue-time-reset! [queue]
   (neo4j/update-vals! (:id queue) s/modified
@@ -64,12 +65,12 @@
        "]->(u:" (neo4j/esc-token s/user)
        ") WHERE ID(u) = " (.id user)
        " SET root.val = "
-       (-> user email/fetch-imap-folder email/last-uid str)]
+       (-> user imap/fetch-imap-folder imap/last-uid str)]
       str/join neo4j/cypher-query))
 
 (defn run-insertion! [queue user]
   (throw-info! "inserting emails")
-  (email/insert-raw-range!
+  (imap/insert-raw-range!
    user (range-bottom queue) (range-top queue)))
 
 (defn queue-pop! []
@@ -86,8 +87,8 @@
    s/modified (dt/now)})
 
 (defn add-new-queue! [user]
-  (-> user email/fetch-imap-folder
-      email/last-uid new-queue-map vector
+  (-> user imap/fetch-imap-folder
+      imap/last-uid new-queue-map vector
       (insert/push-entities! user s/meta-src)
       first neo4j/find-by-id
       (neo4j/create-edge! user s/user-queue)))

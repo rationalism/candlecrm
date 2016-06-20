@@ -1,7 +1,7 @@
 (ns spectra.quartz-test
   (:require [clojure.test :refer :all]
             [spectra.auth :as auth]
-            [spectra.email :as email]
+            [spectra.imap :as imap]
             [spectra.queries :as queries]
             [spectra.quartz :refer :all]))
 
@@ -18,8 +18,8 @@
     (def test-user (auth/create-user! {:username test-username
                                        :password test-password}))
 
-    (with-redefs [email/fetch-imap-folder (fn [x] nil)
-                  email/last-uid (fn [x] 777777)
+    (with-redefs [imap/fetch-imap-folder (fn [x] nil)
+                  imap/last-uid (fn [x] 777777)
                   println (fn [& x] nil)]
       (add-new-queue! test-user)
       (refresh-queue! test-user)

@@ -13,6 +13,7 @@
             [spectra.email :as email]
             [spectra.geocode :as geocode]
             [spectra.google :as google]
+            [spectra.imap :as imap]
             [spectra.mlrecon :as mlrecon]
             [spectra.neo4j :as neo4j]
             [spectra.pages :as pages]
@@ -110,7 +111,7 @@
   (neo4j/reset-session!)
   (sendgrid/init-server!)
   (dt/load-date-model!)
-  (email/make-parse-pool!)
+  (imap/make-parse-pool!)
   (email/make-nlp-pool!)
   (ajax/start!)
   (mlrecon/load-models!)
@@ -123,7 +124,7 @@
    :handler cider-nrepl-handler))
 
 (defn app-shutdown! []
-  (email/close-imap-lookup!))
+  (imap/close-imap-lookup!))
 
 ;; Modified version of https://github.com/ring-clojure/ring/
 ;; blob/master/ring-devel/src/ring/middleware/reload.clj

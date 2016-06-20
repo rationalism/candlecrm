@@ -683,23 +683,22 @@
        (map str/capitalize)
        (str/join " ")))
 
-(defnc run-nlp-default [models text]
+(defnc run-nlp-ner [models text]
   (->> text (run-nlp (:ner models))
        library-annotate-all
-       (run-annotate (:mention models)) 
-       #_ get-sentences #_nlp-graph))
+       (run-annotate (:mention models))))
+
+(defnc run-nlp-default [models text]
+  (->> text (run-nlp-ner models)
+       get-sentences nlp-graph))
 
 (defnc run-nlp-full [models author text]
   (cond-> (->> (fpp-replace models (strip-parens text) author)
-               (run-nlp (:ner models))
-               library-annotate-all
-               (run-annotate (:mention models))
-               get-sentences nlp-graph)
+               (run-nlp-default models))
     (coreference?) rewrite-pronouns))
 
 (defn run-nlp-openie [{:keys [ner mention openie] :as models} text]
-  (->> (run-nlp ner text) library-annotate-all
-       (run-annotate mention) (run-annotate openie)
+  (->> text (run-nlp-ner models) (run-annotate openie)
        get-sentences nlp-graph))
 
 (defn fix-punct [text]
