@@ -577,6 +577,12 @@
 (defn entity-mentions [sentence]
   (remove-bad-dates (entity-mentions-raw sentence)))
 
+(defn relation-odds [relation]
+  (->> relation (.getTypeProbabilities) (.entrySet) set
+       (map (juxt #(.getKey %) #(.getValue %)))
+       (remove #(= (first %) "_NR"))
+       (sort-by first)))
+
 (defn relation-graph [relation]
   (->> relation (.getEntityMentionArgs) (map #(.getExtentString %))
        (concat (-> relation (.getType) relation-map vector))
@@ -716,3 +722,4 @@
     (when (-> $ (str/split #" ") count (> 1))
       (->> $ capitalize-words (run-nlp-default models)
            nlp-names first))))
+
