@@ -913,8 +913,7 @@
 
 (defn relation-train [sentence-pair relation]
   (->> (relation-odds-map (first sentence-pair) relation)
-       (relation-odds-train (second sentence-pair))
-       (vector relation)))
+       (relation-odds-train (second sentence-pair))))
 
 (defn relation-filter [sentence-pair]
   (let [ner-models (nlp-models-fn)
@@ -924,3 +923,7 @@
          (nlp/run-annotate rel-models)
          nlp/get-sentences first nlp/get-relations
          (map #(relation-train sentence-pair %)))))
+
+(defn train-rel-scorer [filename]
+  (->> filename load-roth (pmap relation-filter)
+       (apply concat) weka/make-forest))
