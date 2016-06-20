@@ -297,13 +297,6 @@
        (partition 2) (map vec)
        (map #(update % 0 mention-token-map))))
 
-(defn relation-odds-map [token-map relation]
-  (let [token (mapv second token-map)]
-    (->> relation (.getEntityMentionArgs)
-         (map #(.getHeadTokenStart %))
-         (map #(nth token %))
-         (concat (-> relation nlp/relation-odds vector)))))
-
 (defn known-rel-map [rels]
   (->> rels (map (juxt drop-last last))
        (map #(update % 0 map-int))
@@ -318,13 +311,9 @@
                      ffirst (= reltype)) 1.0 0.0)
             0.0))))
 
-(defn normalize-odds [rel-odds]
-  (->> rel-odds (map first) (map #(map second %))
-       (map #(apply + %)) sort last (/ 1.0)))
-
 (defn relations-train [[sentence rels] relations]
-  (let [rel-odds (map #(relation-odds-map sentence %) relations)]
-    (map #(relation-odds-train rels (normalize-odds rel-odds) %)
+  (let [rel-odds (map #(nlp/relation-odds-map sentence %) relations)]
+    (map #(relation-odds-train rels (nlp/normalize-odds rel-odds) %)
          rel-odds)))
 
 (defn relation-filter [sentence-pair]

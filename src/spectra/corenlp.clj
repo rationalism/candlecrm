@@ -588,6 +588,17 @@
        (remove #(= (first %) "_NR"))
        (sort-by first)))
 
+(defn relation-odds-map [token-map relation]
+  (let [token (mapv second token-map)]
+    (->> relation (.getEntityMentionArgs)
+         (map #(.getHeadTokenStart %))
+         (map #(nth token %))
+         (concat (-> relation relation-odds vector)))))
+
+(defn normalize-odds [rel-odds]
+  (->> rel-odds (map first) (map #(map second %))
+       (map #(apply + %)) sort last (/ 1.0)))
+
 (defn relation-graph [relation]
   (->> relation (.getEntityMentionArgs) 
        (map #(.getExtentString %)) reverse
