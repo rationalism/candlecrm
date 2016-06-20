@@ -868,15 +868,6 @@
   (->> roth-group (partition-by first)
        (interpose [])))
 
-(defn load-roth [filename]
-  (->> (str/split (slurp filename) #"\n")
-       (map #(str/split % #"\t")) (partition-by count)
-       (remove #(-> % first count (<= 1)))
-       (apply concat) (partition-by count)
-       (mapcat #(if (-> % first count (= 9))
-                  (insert-blank-rels %) (vector %)))
-       (partition 2)))
-
 (defn token-map [tokens]
   (let [letters (-> tokens first second)]
     (if (-> tokens ffirst (str/split #"/") count (= 1))
@@ -889,3 +880,13 @@
   (->> sentence (map third) (map #(Integer/parseInt %))
        (zipvec (map #(vector (nth % 4) (nth % 5)) sentence))
        (mapcat token-map)))
+
+(defn load-roth [filename]
+  (->> (str/split (slurp filename) #"\n")
+       (map #(str/split % #"\t")) (partition-by count)
+       (remove #(-> % first count (<= 1)))
+       (apply concat) (partition-by count)
+       (mapcat #(if (-> % first count (= 9))
+                  (insert-blank-rels %) (vector %)))
+       (partition 2) (map vec)
+       (map #(update % 0 mention-token-map))))
