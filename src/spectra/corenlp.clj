@@ -624,13 +624,14 @@
        (> bad-relation-threshold)))
 
 (defn relations-graph [relations]
+  (println (/ (count relations) 2))
   (let [rel-odds (zipvec (map relation-odds relations) relations)]
     (->> (remove #(relation-bad? (normalize-odds rel-odds) %) rel-odds)
          (map second) (map relation-graph) loom/merge-graphs)))
 
 (defnp sentence-graph [sent-pair]
   (-> (loom/merge-graphs
-       [(-> sent-pair val get-relations debug relations-graph)
+       [(-> sent-pair val get-relations relations-graph)
         (->> (entity-mentions (val sent-pair))
              (map ner-graph) (remove nil?)
              loom/merge-graphs)])
