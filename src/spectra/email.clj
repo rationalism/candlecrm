@@ -876,3 +876,16 @@
        (mapcat #(if (-> % first count (= 9))
                   (insert-blank-rels %) (vector %)))
        (partition 2)))
+
+(defn token-map [tokens]
+  (let [letters (-> tokens first second)]
+    (if (-> tokens ffirst (str/split #"/") count (= 1))
+      [[letters (second tokens)]]
+      (->> (str/split letters #"/")
+           (map #(vector % (second tokens)))
+           vec))))
+
+(defn mention-token-map [sentence]
+  (->> sentence (map third) (map #(Integer/parseInt %))
+       (zipvec (map #(vector (nth % 4) (nth % 5)) sentence))
+       (mapcat token-map)))
