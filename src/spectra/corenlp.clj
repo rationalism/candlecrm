@@ -5,6 +5,7 @@
             [spectra.loom :as loom]
             [spectra_cljc.schema :as s]
             [spectra.regex :as regex]
+            [spectra.weka :as weka]
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -81,6 +82,17 @@
                    "OrgBased_In" s/location "Work_For" s/org-member})
 
 (def pronoun-parts ["PRP" "PRP$"])
+
+(defonce bad-relation-filter (atom nil))
+(def models-dir (str (env :home-dir) "resources/models"))
+(def bad-relation-file "event-scorer.dat")
+(def bad-relation-threshold 0.9)
+
+(defn load-relation-filter! []
+  (->> bad-relation-file (str models-dir "/")
+       weka/deserialize (reset! bad-relation-filter)))
+
+(load-relation-filter!)
 
 (defn make-default-pipeline [annotators]
   (StanfordCoreNLP.
@@ -605,9 +617,16 @@
        (concat (-> relation (.getType) relation-map vector))
        reverse vec vector (loom/build-graph [])))
 
+(defn relation-bad? [mult relation]
+  (->> relation first (map second)
+       (mapv #(* mult %)) (concat [mult])
+       (weka/classify @bad-relation-filter)
+       (> bad-relation-threshold)))
+
 (defn relations-graph [relations]
-  (->> (remove #(= (.getType %) "_NR") relations)
-       (map relation-graph) loom/merge-graphs))
+  (let [rel-odds (zipvec (map relation-odds relations) relations)]
+    (->> (remove #(relation-bad? (normalize-odds rel-odds) %) rel-odds)
+         (map second) (map relation-graph) loom/merge-graphs)))
 
 (defnp sentence-graph [sent-pair]
   (-> (loom/merge-graphs
