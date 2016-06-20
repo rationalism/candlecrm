@@ -83,90 +83,14 @@
   (->> (loom/select-edges chain s/link-to)
        (map link-pair) (apply merge)))
 
-(defn make-nlp-chain [models message chain]
-  (when (-> message s/email-body nil-or-empty? not)
-    (let [nlp-result
-          (->> message s/email-body
-               (nlp/run-nlp-full models (author-name chain message)))]
-      (when (-> nlp-result loom/nodes empty? not)
-        (->> nlp-result append-hyperlinks
-             (conj [chain]) loom/merge-graphs)))))
-
-(defn use-nlp [models message chain]
-  (when-let [nlp-chain (make-nlp-chain models message chain)]
-    (as-> nlp-chain $
-      (loom/add-edges $ (->> $ hyperlink-nodes
-                             (map #(vector message % s/has-link))))
-      (loom/replace-node $ message
-                         (->> (link-map $)
-                              (hyperlink-text (s/email-body message))
-                              (assoc message s/email-body)))
-      (reduce import-label $ (loom/select-edges $ s/has-type))
-      (reduce parse-datetime $ (->> $ loom/nodes
-                                    (filter #(= s/event (:label %)))))
-      (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/s-name])
-      (loom/remove-nodes
-       $ (->> s/has-type (loom/select-edges $) (map second))))))
-
-(defn fetch-body [id]
-  (->> [[s/email-body] [s/email-from s/s-name]]
-       (mlrecon/fetch-paths id) (map first)))
-
-(defn graph-from-id [models id]
-  (let [vals (fetch-body id)
-        message {s/type-label s/email :id id s/email-body (first vals)}]
-    (->> [message {s/s-name (second vals)} s/email-from]
-         vector (loom/build-graph [])
-         (use-nlp models message))))
-
-(defn body-query []
-  (str "MATCH (root)-[r:" (neo4j/esc-token s/email-body)
-       "]->(b) WHERE ID(root) = {id}"))
-
-(defn delete-email-body [id]
-  [[(str (body-query) " WITH b MATCH (b)<--(x)"
-         " WITH b, count(x) as n WHERE n = {limit} DETACH DELETE b")
-    {:id id :limit 1}]
-   [(str (body-query) " DELETE r")
-    {:id id}]])
-
-(defn remove-nonlp [id]
-  [(str "MATCH (root) WHERE ID(root) = {id}"
-        " REMOVE root:" (neo4j/esc-token s/nonlp))
-   {:id id}])
-
-(defn run-email-nlp! [models {:keys [id] :as email}]
-  (if-let [graph (graph-from-id models id)]
-    (insert/push-graph!
-     (loom/remove-nodes
-      graph (->> (loom/select-edges graph s/email-from)
-                 (map second)))
-     (s/user email) s/nlp-src
-     (conj (delete-email-body id) (remove-nonlp id)))
-    (-> id remove-nonlp neo4j/cypher-query)))
-
-(defn push-email-nlp! []
-  (let [emails (queries/email-for-nlp batch-size)]
-    (when (not (empty? emails))
-      (throw-info! "run email nlp")
-      (dorun (pmap @nlp-channel emails)))))
-
 (defn nlp-models-fn []
   {:ner ((nlp/get-ner-fn))
    :mention ((nlp/get-mention-fn))
    :token ((nlp/get-tokenize-fn))})
 
-(defn openie-models-fn []
-  {:ner ((nlp/get-ner-fn))
-   :mention ((nlp/get-mention-fn))
-   :openie ((nlp/get-openie-fn))})
-
-(defn make-nlp-pool! []
-  (->> {:name "email-nlp" :process run-email-nlp!
-        :param-gen nlp-models-fn
-        :callback identity :num-threads nlp-threads}
-       async/create-pool!
-       (reset! nlp-channel)))
+(defn fetch-body [id]
+  (->> [[s/email-body] [s/email-from s/s-name]]
+       (mlrecon/fetch-paths id) (map first)))
 
 (defn email-sentences [n]
   (let [models (nlp-models-fn)]
@@ -237,6 +161,11 @@
 (defn addr-sentences [sentences]
   (->> sentences (map get-tokens) distinct
        (filter #(->> % (str/join " ") regex/might-have-addr?))))
+
+(defn openie-models-fn []
+  {:ner ((nlp/get-ner-fn))
+   :mention ((nlp/get-mention-fn))
+   :openie ((nlp/get-openie-fn))})
 
 (defn openie-sentence [text]
   (let [models (openie-models-fn)]
@@ -418,3 +347,74 @@
 (defn train-rel-scorer [filename]
   (->> filename load-roth (pmap relation-filter)
        (apply concat) weka/make-forest))
+
+(defn make-nlp-chain [models message chain]
+  (when (-> message s/email-body nil-or-empty? not)
+    (let [nlp-result
+          (->> message s/email-body
+               (nlp/run-nlp-full models (author-name chain message)))]
+      (when (-> nlp-result loom/nodes empty? not)
+        (->> nlp-result append-hyperlinks
+             (conj [chain]) loom/merge-graphs)))))
+
+(defn use-nlp [models message chain]
+  (when-let [nlp-chain (make-nlp-chain models message chain)]
+    (as-> nlp-chain $
+      (loom/add-edges $ (->> $ hyperlink-nodes
+                             (map #(vector message % s/has-link))))
+      (loom/replace-node $ message
+                         (->> (link-map $)
+                              (hyperlink-text (s/email-body message))
+                              (assoc message s/email-body)))
+      (reduce import-label $ (loom/select-edges $ s/has-type))
+      (reduce parse-datetime $ (->> $ loom/nodes
+                                    (filter #(= s/event (:label %)))))
+      (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/s-name])
+      (loom/remove-nodes
+       $ (->> s/has-type (loom/select-edges $) (map second))))))
+
+(defn graph-from-id [models id]
+  (let [vals (fetch-body id)
+        message {s/type-label s/email :id id s/email-body (first vals)}]
+    (->> [message {s/s-name (second vals)} s/email-from]
+         vector (loom/build-graph [])
+         (use-nlp models message))))
+
+(defn body-query []
+  (str "MATCH (root)-[r:" (neo4j/esc-token s/email-body)
+       "]->(b) WHERE ID(root) = {id}"))
+
+(defn delete-email-body [id]
+  [[(str (body-query) " WITH b MATCH (b)<--(x)"
+         " WITH b, count(x) as n WHERE n = {limit} DETACH DELETE b")
+    {:id id :limit 1}]
+   [(str (body-query) " DELETE r")
+    {:id id}]])
+
+(defn remove-nonlp [id]
+  [(str "MATCH (root) WHERE ID(root) = {id}"
+        " REMOVE root:" (neo4j/esc-token s/nonlp))
+   {:id id}])
+
+(defn run-email-nlp! [models {:keys [id] :as email}]
+  (if-let [graph (graph-from-id models id)]
+    (insert/push-graph!
+     (loom/remove-nodes
+      graph (->> (loom/select-edges graph s/email-from)
+                 (map second)))
+     (s/user email) s/nlp-src
+     (conj (delete-email-body id) (remove-nonlp id)))
+    (-> id remove-nonlp neo4j/cypher-query)))
+
+(defn push-email-nlp! []
+  (let [emails (queries/email-for-nlp batch-size)]
+    (when (not (empty? emails))
+      (throw-info! "run email nlp")
+      (dorun (pmap @nlp-channel emails)))))
+
+(defn make-nlp-pool! []
+  (->> {:name "email-nlp" :process run-email-nlp!
+        :param-gen nlp-models-fn
+        :callback identity :num-threads nlp-threads}
+       async/create-pool!
+       (reset! nlp-channel)))
