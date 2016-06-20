@@ -624,7 +624,6 @@
        (> bad-relation-threshold)))
 
 (defn relations-graph [relations]
-  (println (/ (count relations) 2))
   (let [rel-odds (zipvec (map relation-odds relations) relations)]
     (->> (remove #(relation-bad? (normalize-odds rel-odds) %) rel-odds)
          (map second) (map relation-graph) loom/merge-graphs)))
