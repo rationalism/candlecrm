@@ -890,3 +890,19 @@
                   (insert-blank-rels %) (vector %)))
        (partition 2) (map vec)
        (map #(update % 0 mention-token-map))))
+
+(defn relation-odds-map [token-map relation]
+  (let [token (mapv second token-map)]
+    (->> relation (.getEntityMentionArgs)
+         (map #(.getHeadTokenStart %))
+         (map #(nth token %))
+         (concat (-> relation nlp/relation-odds vector)))))
+
+(defn relation-filter [sentence-pair]
+  (let [ner-models (nlp-models-fn)
+        rel-models ((nlp/get-relation-fn))]
+    (->> sentence-pair first (map first) (str/join " ")
+         (nlp/run-nlp-default ner-models)
+         (nlp/run-annotate rel-models)
+         nlp/get-sentences first nlp/get-relations
+         (map #(relation-odds-map (first sentence-pair) %)))))

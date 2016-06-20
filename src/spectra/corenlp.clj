@@ -584,7 +584,8 @@
        (sort-by first)))
 
 (defn relation-graph [relation]
-  (->> relation (.getEntityMentionArgs) (map #(.getExtentString %))
+  (->> relation (.getEntityMentionArgs) 
+       (map #(.getExtentString %)) reverse
        (concat (-> relation (.getType) relation-map vector))
        reverse vec vector (loom/build-graph [])))
 
