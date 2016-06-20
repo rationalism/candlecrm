@@ -124,6 +124,11 @@
 (defn get-relation-fn []
   (get-copy-fn relation-annotators))
 
+(defn openie-models-fn []
+  {:ner ((get-ner-fn))
+   :mention ((get-mention-fn))
+   :openie ((get-openie-fn))})
+
 (defonce letter-count (atom 0))
 
 (defnc run-nlp [pipeline text]
@@ -723,3 +728,6 @@
       (->> $ capitalize-words (run-nlp-default models)
            nlp-names first))))
 
+(defn openie-sentence [text]
+  (let [models (openie-models-fn)]
+    (run-nlp-openie models text)))

@@ -162,15 +162,6 @@
   (->> sentences (map get-tokens) distinct
        (filter #(->> % (str/join " ") regex/might-have-addr?))))
 
-(defn openie-models-fn []
-  {:ner ((nlp/get-ner-fn))
-   :mention ((nlp/get-mention-fn))
-   :openie ((nlp/get-openie-fn))})
-
-(defn openie-sentence [text]
-  (let [models (openie-models-fn)]
-    (nlp/run-nlp-openie models text)))
-
 (defn number-tokens [tokens]
   (->> tokens count range (zipvec tokens)
        (map #(str "(" (second %) ")" (first %)))
