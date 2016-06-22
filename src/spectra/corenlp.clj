@@ -25,7 +25,9 @@
             NaturalLogicAnnotations$RelationTriplesAnnotation]
            [edu.stanford.nlp.dcoref
             CorefCoreAnnotations$CorefChainAnnotation]
+           [edu.stanford.nlp.ie.machinereading BasicEntityExtractor]
            [edu.stanford.nlp.ie.machinereading.structure
+            EntityMentionFactory
             MachineReadingAnnotations$RelationMentionsAnnotation]
            [java.util Properties]))
 
@@ -188,6 +190,11 @@
 
 (defn get-text [annotation]
   (.originalText annotation))
+
+;; Use this like a pipeline, as prep for relation extractor
+(defn entity-extractor []
+  (BasicEntityExtractor. nil false nil false
+                         (EntityMentionFactory. ) true))
 
 (defn char-token-map [token]
   (zipmap (range (.beginPosition token)
