@@ -25,7 +25,8 @@
             NaturalLogicAnnotations$RelationTriplesAnnotation]
            [edu.stanford.nlp.dcoref
             CorefCoreAnnotations$CorefChainAnnotation]
-           [edu.stanford.nlp.ie.machinereading BasicEntityExtractor]
+           [edu.stanford.nlp.ie.machinereading BasicEntityExtractor
+            BasicRelationFeatureFactory]
            [edu.stanford.nlp.ie.machinereading.structure
             EntityMentionFactory RelationMention RelationMentionFactory
             MachineReadingAnnotations$EntityMentionsAnnotation
@@ -66,6 +67,16 @@
 ;; Shift model supposed to be much faster, but takes much longer to load
 (def shift-parse-model "edu/stanford/nlp/models/srparser/englishSR.ser.gz")
 (def pcfg-parse-model "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
+
+(def relation-features
+  ["arg_words" "arg_type" "dependency_path_lowlevel"  "dependency_path_words"
+   "surface_path_POS" "entities_between_args" "full_tree_path"
+   "dependency_path_POS_unigrams" "dependency_path_word_n_grams"
+   "dependency_path_POS_n_grams" "dependency_path_edge_lowlevel_n_grams"
+   "dependency_path_edge-node-edge-grams_lowlevel"
+   "dependency_path_node-edge-node-grams_lowlevel"
+   "dependency_path_directed_bigrams" "dependency_path_edge_unigrams"
+   "same_head" "entity_counts"])
 
 (def schema-map {"PERSON" s/person-name "LOCATION" s/loc-name
                  "ORGANIZATION" s/org-name "MONEY" s/amount
@@ -199,6 +210,12 @@
 
 (defn get-text [annotation]
   (.originalText annotation))
+
+(defn feature-factory []
+  (MachineReading/makeRelationFeatureFactory
+   BasicRelationFeatureFactory
+   (str/join "," relation-features)
+   false))
 
 (defn blank-relation [mentions]
   (RelationMention/createUnrelatedRelation
