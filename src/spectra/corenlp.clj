@@ -26,7 +26,8 @@
            [edu.stanford.nlp.dcoref
             CorefCoreAnnotations$CorefChainAnnotation]
            [edu.stanford.nlp.ie.machinereading BasicEntityExtractor
-            BasicRelationExtractor BasicRelationFeatureFactory]
+            BasicRelationExtractor BasicRelationFeatureFactory
+            MachineReading]
            [edu.stanford.nlp.ie.machinereading.structure
             EntityMentionFactory RelationMention RelationMentionFactory
             MachineReadingAnnotations$EntityMentionsAnnotation
