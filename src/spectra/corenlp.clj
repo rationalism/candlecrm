@@ -28,6 +28,7 @@
            [edu.stanford.nlp.ie.machinereading BasicEntityExtractor]
            [edu.stanford.nlp.ie.machinereading.structure
             EntityMentionFactory
+            MachineReadingAnnotations$EntityMentionsAnnotation
             MachineReadingAnnotations$RelationMentionsAnnotation]
            [java.util Properties]))
 
@@ -189,6 +190,9 @@
 
 (defn get-relations [parsed-text]
   (.get parsed-text MachineReadingAnnotations$RelationMentionsAnnotation))
+
+(defn relation-mentions [sentence]
+  (.get sentence MachineReadingAnnotations$EntityMentionsAnnotation))
 
 (defn true-case [token]
   (.get token CoreAnnotations$TrueCaseTextAnnotation))
