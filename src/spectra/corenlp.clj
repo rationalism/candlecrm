@@ -138,6 +138,11 @@
 (defn get-relation-fn []
   (get-copy-fn relation-annotators))
 
+;; Use this like a pipeline, as prep for relation extractor
+(defn entity-extractor []
+  (BasicEntityExtractor. nil false nil false
+                         (EntityMentionFactory. ) true))
+
 (defn openie-models-fn []
   {:ner ((get-ner-fn))
    :mention ((get-mention-fn))
@@ -190,11 +195,6 @@
 
 (defn get-text [annotation]
   (.originalText annotation))
-
-;; Use this like a pipeline, as prep for relation extractor
-(defn entity-extractor []
-  (BasicEntityExtractor. nil false nil false
-                         (EntityMentionFactory. ) true))
 
 (defn char-token-map [token]
   (zipmap (range (.beginPosition token)
