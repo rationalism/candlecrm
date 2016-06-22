@@ -79,23 +79,6 @@
    "dependency_path_directed_bigrams" "dependency_path_edge_unigrams"
    "same_head" "entity_counts"])
 
-(def schema-map {"PERSON" s/person-name "LOCATION" s/loc-name
-                 "ORGANIZATION" s/org-name "MONEY" s/amount
-                 "DATETIME" s/date-time "EMAIL" s/email-addr
-                 "DATE" s/date-time "TIME" s/date-time
-                 "PHONE" s/phone-num "DURATION" s/duration
-                 "ADDRESS" s/street-addr "EVENT" s/event-type
-                 "ZIPCODE" s/zipcode "URL" s/webpage})
-
-(def relation-map {"EventStart" s/start-time "EventStop" s/stop-time
-                   "EventDuration" s/duration "EventAttend" s/event-attend
-                   "EventFeatures" s/event-features "EventOrg" s/event-org
-                   "EventLocation" s/event-loc "EventAddr" s/event-addr
-                   "EventType" s/event-type "EventCost" s/event-cost
-                   "EventWebsite" s/website "EventTime" s/event-time
-                   "Live_In" s/location "Located_In" s/located-in
-                   "OrgBased_In" s/location "Work_For" s/org-member})
-
 (def pronoun-parts ["PRP" "PRP$"])
 
 (defonce bad-relation-filter (atom nil))
@@ -343,7 +326,7 @@
   (vec (get-tokens entity)))
 
 (defn ner-edge [entity]
-  (when-let [schema-type (-> entity entity-type schema-map)]
+  (when-let [schema-type (-> entity entity-type s/schema-map)]
     (vector (ner-node entity) schema-type s/has-type)))
 
 (defn ner-graph [entity]
@@ -625,7 +608,7 @@
   annotation)
 
 (defn remove-bad-dates [nodes]
-  (remove #(and (-> % entity-type schema-map (= s/date-time))
+  (remove #(and (-> % entity-type s/schema-map (= s/date-time))
                 (->> % get-tokens (map get-text)
                      (str/join " ") dt/is-bad-date?))
           nodes))
@@ -653,7 +636,7 @@
 (defn relation-graph [relation]
   (->> relation (.getEntityMentionArgs) 
        (map #(.getExtentString %)) reverse
-       (concat (-> relation (.getType) relation-map vector))
+       (concat (-> relation (.getType) s/relation-map vector))
        reverse vec vector (loom/build-graph [])))
 
 (defn relation-bad? [mult relation]
@@ -730,7 +713,7 @@
                (loom/up-nodes g (pronoun-node))))))
 
 (defn count-schema [freq-count]
-  (let [schema (->> schema-map vals distinct sort vec)]
+  (let [schema (->> s/schema-map vals distinct sort vec)]
     (zipmap schema
             (map #(if (contains? freq-count %)
                     (freq-count %) 0) schema))))

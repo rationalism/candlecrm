@@ -140,6 +140,23 @@
                  url "Page address" start-time "Begins at"
                  stop-time "Ends at"})
 
+(def schema-map {"PERSON" person-name "LOCATION" loc-name
+                 "ORGANIZATION" org-name "MONEY" amount
+                 "DATETIME" date-time "EMAIL" email-addr
+                 "DATE" date-time "TIME" date-time
+                 "PHONE" phone-num "DURATION" duration
+                 "ADDRESS" street-addr "EVENT" event-type
+                 "ZIPCODE" zipcode "URL" webpage})
+
+(def relation-map {"EventStart" start-time "EventStop" stop-time
+                   "EventDuration" duration "EventAttend" event-attend
+                   "EventFeatures" event-features "EventOrg" event-org
+                   "EventLocation" event-loc "EventAddr" event-addr
+                   "EventType" event-type "EventCost" event-cost
+                   "EventWebsite" website "EventTime" event-time
+                   "Live_In" location "Located_In" located-in
+                   "OrgBased_In" location "Work_For" org-member})
+
 (def person-attrs [s-name email-addr phone-num website])
 
 (def email-links [email-to email-cc email-bcc
