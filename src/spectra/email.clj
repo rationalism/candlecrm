@@ -170,11 +170,14 @@
 
 (def abbr-map {"a" "ADDRESS" "e" "EVENT" "n" :next "q" :quit})
 
-(def rel-map {"b" "EventStart" "e" "EventStop" "d" "EventDuration"
-              "p" "EventAttend" "f" "EventFeatures" "o" "EventOrg"
-              "l" "EventLocation" "a" "EventAddr" "t" "EventType"
+(def rel-map {"sta" "EventStart" "sto" "EventStop" "d" "EventDuration"
+              "at" "EventAttend" "f" "EventFeatures" "o" "EventOrg"
+              "l" "EventLocation" "ad" "EventAddr" "ty" "EventType"
               "i" "EventInterval" "c" "EventCost" "w" "EventWebsite"
-              "m" "EventTime" "q" :quit "n" :next})
+              "ti" "EventTime" "li" "Live_In" "lo" "Located_In"
+              "ob" "OrgBased_In" "wf" "Work_For" "pa" "PersonAddr"
+              "oa" "OrgAddr" "ph" "PersonPhone" "op" "OrgPhone"
+              "pw" "PersonWebsite" "ow" "OrgWebsite" "q" :quit "n" :next})
 
 (defn translate-codes [s]
   (if (empty? s) nil
