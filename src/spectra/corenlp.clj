@@ -27,7 +27,7 @@
             CorefCoreAnnotations$CorefChainAnnotation]
            [edu.stanford.nlp.ie.machinereading BasicEntityExtractor]
            [edu.stanford.nlp.ie.machinereading.structure
-            EntityMentionFactory
+            EntityMentionFactory RelationMention RelationMentionFactory
             MachineReadingAnnotations$EntityMentionsAnnotation
             MachineReadingAnnotations$RelationMentionsAnnotation]
            [java.util Properties]))
@@ -199,6 +199,11 @@
 
 (defn get-text [annotation]
   (.originalText annotation))
+
+(defn blank-relation [mentions]
+  (RelationMention/createUnrelatedRelation
+   (RelationMentionFactory. )
+   (into-array mentions)))
 
 (defn char-token-map [token]
   (zipmap (range (.beginPosition token)
