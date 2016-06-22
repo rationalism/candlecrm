@@ -26,7 +26,7 @@
            [edu.stanford.nlp.dcoref
             CorefCoreAnnotations$CorefChainAnnotation]
            [edu.stanford.nlp.ie.machinereading BasicEntityExtractor
-            BasicRelationFeatureFactory]
+            BasicRelationExtractor BasicRelationFeatureFactory]
            [edu.stanford.nlp.ie.machinereading.structure
             EntityMentionFactory RelationMention RelationMentionFactory
             MachineReadingAnnotations$EntityMentionsAnnotation
@@ -216,6 +216,11 @@
    BasicRelationFeatureFactory
    (str/join "," relation-features)
    false))
+
+(defn relation-extractor []
+  (MachineReading/makeRelationExtractor
+   BasicRelationExtractor (feature-factory) false
+   (RelationMentionFactory. )))
 
 (defn blank-relation [mentions]
   (RelationMention/createUnrelatedRelation
