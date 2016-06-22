@@ -9,6 +9,7 @@
 (def google-token :google-token)
 (def type-label :label)
 (def date-time :date-time)
+(def time :time)
 
 (def person :person)
 (def email-addr :email-addr)
@@ -143,7 +144,7 @@
 (def schema-map {"PERSON" person-name "LOCATION" loc-name
                  "ORGANIZATION" org-name "MONEY" amount
                  "DATETIME" date-time "EMAIL" email-addr
-                 "DATE" date-time "TIME" date-time
+                 "DATE" date-time "TIME" time
                  "PHONE" phone-num "DURATION" duration
                  "ADDRESS" street-addr "EVENT" event-type
                  "ZIPCODE" zipcode "URL" webpage})
@@ -155,7 +156,33 @@
                    "EventType" event-type "EventCost" event-cost
                    "EventWebsite" website "EventTime" event-time
                    "Live_In" location "Located_In" located-in
-                   "OrgBased_In" location "Work_For" org-member})
+                   "OrgBased_In" location "Work_For" org-member
+                   "PersonAddr" mail-address "OrgAddr" mail-address
+                   "PersonPhone" phone-num "OrgPhone" phone-num
+                   "PersonWebsite" website "OrgWebsite" website})
+
+(def relation-types {[date-time time] ["EventStart" "EventStop" "EventTime"]
+                     [date-time duration] ["EventDuration"]
+                     [date-time person-name] ["EventFeatures" "EventAttend"]
+                     [date-time org-name] ["EventOrg"]
+                     [date-time location] ["EventLocation"]
+                     [date-time webpage] ["EventWebsite"]
+                     [date-time street-addr] ["EventAddr"]
+                     [date-time event-type] ["EventType"]
+                     [date-time amount] ["EventCost"]
+                     [person-name loc-name] ["Live_In"]
+                     [loc-name loc-name] ["Located_In"]
+                     [org-name loc-name] ["OrgBased_In"]
+                     [person-name zipcode] ["Live_In"]
+                     [loc-name zipcode] ["Located_In"]
+                     [org-name zipcode] ["OrgBased_In"]
+                     [person-name org-name] ["Work_For"]
+                     [org-name street-addr] ["OrgAddr"]
+                     [person-name street-addr] ["PersonAddr"]
+                     [person-name phone-num] ["PersonPhone"]
+                     [org-name phone-num] ["OrgPhone"]
+                     [person-name webpage] ["PersonWebsite"]
+                     [org-name webpage] ["OrgWebsite"]})
 
 (def person-attrs [s-name email-addr phone-num website])
 
