@@ -625,6 +625,11 @@
 (defn entity-mentions [sentence]
   (remove-bad-dates (entity-mentions-raw sentence)))
 
+(defn relation-id [relation]
+  (mapcat (juxt #(.getHeadTokenStart %)
+                #(.getHeadTokenEnd %))
+          (.getEntityMentionArgs relation)))
+
 (defn cross-relations [[a b]]
   (for [fm a sm b]
     (blank-relation [fm sm])))
@@ -635,6 +640,11 @@
     (->> s/relation-types keys (map #(map type-map %))
          (filter #(not-any? nil? %))
          (map cross-relations) (map #(set-rels sentence %)))))
+
+(defn golden-relation-map [sentence]
+  (->> sentence get-relations
+       (map (juxt relation-id #(.getType %)))
+       (mapv vec) (into {})))
 
 (defn relation-odds [relation]
   (->> relation (.getTypeProbabilities) (.entrySet) set

@@ -174,8 +174,8 @@
   (let [rel-set (->> s/relation-types keys (map set) set)
         rel-map (->> s/relation-types keys (apply concat) distinct
                      (mapv #(vector % %)) (into {}))]
-    (->> sentences nlp/number-items (map #(vector % %))
-         (map #(update % 0 nlp/sentence-graph))
+    (->> sentences nlp/number-items
+         (map (juxt nlp/sentence-graph identity))
          (remove #(some #{s/email-addr}
                         (loom/nodes (first %))))
          (remove #(->> % first loom/nodes (map rel-map)
