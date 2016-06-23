@@ -1,5 +1,6 @@
 (ns spectra.email
   (:require [clojure.string :as str]
+            [clojure.set :as cset]
             [crypto.random :as rnd]
             [spectra.async :as async]
             [spectra.common :refer :all]
@@ -96,7 +97,7 @@
 (defn email-sentences [n]
   (let [models (nlp-models-fn)]
     (->> (queries/email-for-nlp n)
-         (map :id) (map fetch-body) (map vec)
+         (map :id) (map fetch-body) (map vec) distinct
          (pmap (comp nlp/get-sentences
                      #(nlp/run-annotate (:mention models) %)
                      nlp/library-annotate-all
@@ -149,15 +150,25 @@
                     " (" (second (second %)) ")"))
          (str/join "\n") println)))
 
+(defn cartesian-product
+  ([coll] (cartesian-product coll []))
+  ([coll sets]
+   (if (empty? coll) (set sets)
+       (->> coll rest (map #(hash-set (first coll) %))
+            (concat sets) (recur (rest coll))))))
+
 (defn event-sentences [sentences]
-  (->> sentences nlp/number-items
-       (map #(vector % (roth-sentence %)))
-       (map #(update % 0 nlp/sentence-graph))
-       (filter #(some #{s/date-time}
-                      (loom/nodes (first %))))
-       (remove #(some #{s/email-addr}
-                      (loom/nodes (first %))))
-       (mapv second) distinct))
+  (let [rel-set (->> s/relation-types keys (map set) set)
+        rel-map (->> s/relation-types keys (apply concat) distinct
+                     (mapv #(vector % %)) (into {}))]
+    (->> sentences nlp/number-items (map #(vector % %))
+         (map #(update % 0 nlp/sentence-graph))
+         (remove #(some #{s/email-addr}
+                        (loom/nodes (first %))))
+         (remove #(->> % first loom/nodes (map rel-map)
+                       (remove nil?) distinct cartesian-product
+                       (cset/intersection rel-set) empty?))
+         (map second) (mapv second) distinct)))
 
 (defn addr-sentences [sentences]
   (->> sentences (map get-tokens) distinct
