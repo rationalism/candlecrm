@@ -88,7 +88,8 @@
   {:ner ((nlp/get-ner-fn))
    :mention ((nlp/get-mention-fn))
    :token ((nlp/get-tokenize-fn))
-   :relation ((nlp/get-relation-fn))})
+   :relation ((nlp/get-relation-fn))
+   :entity (nlp/entity-extractor)})
 
 (defn fetch-body [id]
   (->> [[s/email-body] [s/email-from s/s-name]]
@@ -99,6 +100,7 @@
     (->> (queries/email-for-nlp n)
          (map :id) (map fetch-body) (map vec) distinct
          (pmap (comp nlp/get-sentences
+                     #(nlp/run-annotate (:entity models) %)
                      #(nlp/run-annotate (:mention models) %)
                      nlp/library-annotate-all
                      #(nlp/run-nlp (:ner models) %)
