@@ -152,6 +152,17 @@
                     " (" (second (second %)) ")"))
          (str/join "\n") println)))
 
+(defn add-ids [coll]
+  (-> coll count range (zipvec coll)))
+
+(defn mention-display [sentence]
+  (->> sentence (.toString) (str "Sentence: ") println)
+  (->> sentence nlp/relation-mentions
+       (map (juxt #(.getValue %) #(.getType %)))
+       (map #(str (first %) " (" (second %) ")"))
+       add-ids (map #(str (first %) ": " (second %)))
+       (str/join "\n") println))
+
 (defn cartesian-product
   ([coll] (cartesian-product coll []))
   ([coll sets]
@@ -214,7 +225,7 @@
         (-> codes first rel-map)))))
 
 (def known-tokens (atom []))
-(def rel-sentences (atom {}))
+(def rel-sentences (atom []))
 
 (defn display-tokens
   ([tokens]
@@ -242,7 +253,7 @@
 
 (defn display-sentence
   ([sentence]
-   (roth-display sentence)
+   (mention-display sentence)
    (display-sentence sentence []))
   ([sentence rels]
    (println "Enter codes:")
@@ -250,14 +261,25 @@
      (condp = resp
        nil (do (println "Error: Try again")
                (recur sentence rels))
-       :next (hash-map sentence rels)
+       :next (vector sentence rels)
        :quit nil
        (recur sentence (conj rels resp))))))
+
+(defn insert-rels [[sentence rels]]
+  (let [mention-map (->> sentence nlp/relation-mentions
+                         add-ids (into {}))]
+    (->> rels (map #(update % 0 mention-map))
+         (map #(update % 1 mention-map))
+         (map #(vector (drop-last %) (last %)))
+         (map #(update % 0 nlp/blank-relation))
+         (map nlp/set-rel-type)
+         (nlp/set-rels sentence))))
 
 (defn gather-rels [sentences]
   (if (or (nil? sentences) (empty? sentences)) nil
       (when-let [resp (-> sentences first display-sentence)]
-        (swap! rel-sentences merge resp)
+        (->> resp insert-rels
+             (swap! rel-sentences conj))
         (recur (rest sentences)))))
 
 (defn tabline [[word tag]]

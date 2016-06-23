@@ -195,6 +195,15 @@
 (defn get-text [annotation]
   (.originalText annotation))
 
+(defn set-rels [sentence rels]
+  (.set sentence MachineReadingAnnotations$RelationMentionsAnnotation
+        rels)
+  sentence)
+
+(defn set-rel-type [[rel type]]
+  (.setType rel type)
+  rel)
+
 (defn feature-factory []
   (MachineReading/makeRelationFeatureFactory
    BasicRelationFeatureFactory
