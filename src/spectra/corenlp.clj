@@ -641,10 +641,22 @@
          (filter #(not-any? nil? %))
          (map cross-relations) (map #(set-rels sentence %)))))
 
-(defn golden-relation-map [sentence]
+(defn gold-rel-map [sentence]
   (->> sentence get-relations
        (map (juxt relation-id #(.getType %)))
        (mapv vec) (into {})))
+
+(defn add-goldens [sentence golden-map]
+  (let [rels (get-relations sentence)]
+    (doseq [r rels]
+      (when-let [new-type (-> r relation-id golden-map)]
+        (.setType r new-type)))
+    (set-rels sentence rels)
+    sentence))
+
+(defn add-all-goldens [gold-sentence]
+  (->> gold-sentence split-relations
+       (map #(add-goldens % (gold-rel-map gold-sentence)))))
 
 (defn relation-odds [relation]
   (->> relation (.getTypeProbabilities) (.entrySet) set
