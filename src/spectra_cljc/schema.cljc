@@ -171,7 +171,6 @@
                      [date-time event-type] ["EventType"]
                      [date-time amount] ["EventCost"]
                      [person-name loc-name] ["Live_In"]
-                     [loc-name loc-name] ["Located_In"]
                      [org-name loc-name] ["OrgBased_In"]
                      [person-name zipcode] ["Live_In"]
                      [loc-name zipcode] ["Located_In"]

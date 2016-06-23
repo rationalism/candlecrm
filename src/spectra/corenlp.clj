@@ -625,6 +625,18 @@
 (defn entity-mentions [sentence]
   (remove-bad-dates (entity-mentions-raw sentence)))
 
+(defn cross-relations [[a b]]
+  (for [fm a sm b]
+    (blank-relation [fm sm])))
+
+(defn split-relations [sentence]
+  (let [type-map (->> sentence relation-mentions
+                      (group-by #(-> % .getType s/schema-map)))]
+    (->> s/relation-types keys (map #(map type-map %))
+         (filter #(not-any? nil? %))
+         (map cross-relations)
+         (map #(set-rels sentence %)))))
+
 (defn relation-odds [relation]
   (->> relation (.getTypeProbabilities) (.entrySet) set
        (map (juxt #(.getKey %) #(.getValue %)))
