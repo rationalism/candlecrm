@@ -3,7 +3,7 @@
   :url "http://spectra.herokuapp.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.9.90"]
+                 [org.clojure/clojurescript "1.9.92"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [ns-tracker "0.3.0"]
                  [clj-time "0.12.0"]
@@ -65,7 +65,7 @@
                  [org.seleniumhq.selenium/selenium-java "2.53.0"]
                  [com.cemerick/piggieback "0.2.1"
                   :exclusions [com.google.guava/guava]]
-                 [figwheel-sidecar "0.5.4-3"]
+                 [figwheel-sidecar "0.5.4-4"]
                  [org.jsoup/jsoup "1.9.2"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.3"]

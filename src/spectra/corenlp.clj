@@ -634,8 +634,7 @@
                       (group-by #(-> % .getType s/schema-map)))]
     (->> s/relation-types keys (map #(map type-map %))
          (filter #(not-any? nil? %))
-         (map cross-relations)
-         (map #(set-rels sentence %)))))
+         (map cross-relations) (map #(set-rels sentence %)))))
 
 (defn relation-odds [relation]
   (->> relation (.getTypeProbabilities) (.entrySet) set
