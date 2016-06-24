@@ -1,4 +1,4 @@
-(defproject spectra "0.2.3"
+(defproject spectra "0.2.4"
   :description "Personal semantic graphs"
   :url "http://spectra.herokuapp.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
