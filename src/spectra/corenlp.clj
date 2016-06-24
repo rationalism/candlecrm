@@ -667,7 +667,8 @@
 
 (defn train-rel-models [sentences]
   (->> sentences (map add-all-goldens)
-       (fmapl vector) (apply merge-with concat)
+       (map #(fmap % vector))
+       (apply merge-with concat)
        (fmapl train-extractor)))
 
 (defn relation-odds [relation]

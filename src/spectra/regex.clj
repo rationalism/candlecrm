@@ -31,7 +31,7 @@
        (remove #(.contains % "..."))))
 
 (defn find-zipcode [text]
-  (->> (re-seq zipcode-regex text)
+  (->> (re-seq zipcode-regex (str text " "))
        (map #(subs % 1 (dec (count %))))))
 
 (defn might-have-addr? [text]

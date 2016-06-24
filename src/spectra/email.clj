@@ -282,6 +282,11 @@
              (swap! rel-sentences conj))
         (recur (rest sentences)))))
 
+(defn serialize-rel-models [dir models]
+  (mapv #(.save (val %) (->> % key (map name) (interpose "_")
+                             (apply str) (str dir "/")))
+        models))
+
 (defn tabline [[word tag]]
   (str word "\t" tag))
 
