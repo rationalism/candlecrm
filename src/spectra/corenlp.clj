@@ -636,10 +636,11 @@
 
 (defn split-relations [sentence]
   (let [type-map (->> sentence relation-mentions
-                      (group-by #(-> % .getType s/schema-map)))]
-    (->> s/relation-types keys (map #(map type-map %))
-         (filter #(not-any? nil? %))
-         (map cross-relations) (map #(set-rels sentence %)))))
+                      (group-by #(-> % .getType s/schema-map)))
+        rel-keys (keys s/relation-types)]
+    (->> rel-keys (map #(map type-map %)) (zipmap rel-keys)
+         (filter #(not-any? nil? (val %))) (into {})
+         (fmapl cross-relations) (fmapl #(set-rels sentence %)))))
 
 (defn gold-rel-map [sentence]
   (->> sentence get-relations
