@@ -204,6 +204,11 @@
   (.setType rel type)
   rel)
 
+(defn make-doc [sentences]
+  (let [doc (Annotation. )]
+    (.set doc CoreAnnotations$SentencesAnnotation sentences)
+    doc))
+
 (defn feature-factory []
   (MachineReading/makeRelationFeatureFactory
    BasicRelationFeatureFactory
@@ -661,10 +666,8 @@
        (fmapl #(add-goldens % (gold-rel-map gold-sentence)))))
 
 (defn train-extractor [sentences]
-  (let [extractor (relation-extractor)
-        doc (Annotation. )]
-    (.set doc CoreAnnotations$SentencesAnnotation sentences)
-    (.train extractor doc) extractor))
+  (let [extractor (relation-extractor)]
+    (.train extractor (make-doc sentences)) extractor))
 
 (defn train-rel-models [sentences]
   (->> sentences (map add-all-goldens)

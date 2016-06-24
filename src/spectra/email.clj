@@ -173,7 +173,8 @@
 (defn event-sentences [sentences]
   (let [rel-set (->> s/relation-types keys (map set) set)
         rel-map (->> s/relation-types keys (apply concat) distinct
-                     (mapv #(vector % %)) (into {}))]
+                     (mapv #(vector % %)) (into {}))
+        models (nlp-models-fn)]
     (->> sentences nlp/number-items
          (map (juxt nlp/sentence-graph identity))
          (remove #(some #{s/email-addr}
@@ -181,7 +182,8 @@
          (remove #(->> % first loom/nodes (map rel-map)
                        (remove nil?) distinct cartesian-product
                        (cset/intersection rel-set) empty?))
-         (map second) (mapv second) distinct)))
+         (map second) (mapv second) distinct nlp/make-doc
+         (nlp/run-annotate (:parse models)) nlp/get-sentences)))
 
 (defn addr-sentences [sentences]
   (->> sentences (map get-tokens) distinct
