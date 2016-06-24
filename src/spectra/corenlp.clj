@@ -31,7 +31,7 @@
             EntityMentionFactory RelationMention RelationMentionFactory
             MachineReadingAnnotations$EntityMentionsAnnotation
             MachineReadingAnnotations$RelationMentionsAnnotation]
-           [java.util Properties]))
+           [java.util Properties] [java.util.logging Level]))
 
 (defn coreference? []
   (= "true" (env :coreference)))
@@ -135,8 +135,9 @@
 
 ;; Use this like a pipeline, as prep for relation extractor
 (defn entity-extractor []
-  (BasicEntityExtractor. nil false nil false
-                         (EntityMentionFactory. ) true))
+  (let [extractor (BasicEntityExtractor. nil false nil false
+                                         (EntityMentionFactory. ) true)]
+    (.setLoggerLevel extractor Level/WARNING) extractor))
 
 (defn openie-models-fn []
   {:ner ((get-ner-fn))
@@ -798,7 +799,8 @@
 (defnc run-nlp-ner [models text]
   (->> text (run-nlp (:ner models))
        library-annotate-all
-       (run-annotate (:mention models))))
+       (run-annotate (:mention models))
+       (run-annotate (:entity models))))
 
 (defnc run-nlp-default [models text]
   (->> text (run-nlp-ner models)
@@ -807,7 +809,7 @@
 (defnc run-nlp-full [models author text]
   (cond-> (->> (fpp-replace models (strip-parens text) author)
                (run-nlp-ner models)
-               (run-annotate (:relation models))
+               #_ (run-annotate (:relation models))
                get-sentences nlp-graph)
     (coreference?) rewrite-pronouns))
 
