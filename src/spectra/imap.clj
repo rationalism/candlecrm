@@ -426,7 +426,8 @@
 (defn parse-models-fn []
   {:sep ((weka/email-sep-model-fn))
    :nlp {:ner ((nlp/get-ner-fn))
-         :mention ((nlp/get-mention-fn))}})
+         :mention ((nlp/get-mention-fn))
+         :entity (nlp/entity-extractor)}})
 
 (defn make-parse-pool! []
   (->> {:name "email-parse" :process parse!
