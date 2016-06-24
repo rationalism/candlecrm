@@ -661,7 +661,7 @@
        (fmapl #(add-goldens % (gold-rel-map gold-sentence)))))
 
 (defn train-extractor [sentences]
-  (let [extractor (entity-extractor)
+  (let [extractor (relation-extractor)
         doc (Annotation. )]
     (.set doc CoreAnnotations$SentencesAnnotation sentences)
     (.train extractor doc) extractor))
