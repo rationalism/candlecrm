@@ -88,7 +88,7 @@
   {:ner ((nlp/get-ner-fn))
    :mention ((nlp/get-mention-fn))
    :token ((nlp/get-tokenize-fn))
-   :relation ((nlp/get-relation-fn))
+   :parse ((nlp/get-parse-fn))
    :entity (nlp/entity-extractor)})
 
 (defn fetch-body [id]
@@ -351,33 +351,6 @@
   (->> rels (map (juxt drop-last last))
        (map #(update % 0 map-int))
        (mapv vec) (into {})))
-
-(defn relation-odds-train [rels mult relation]
-  (let [type-lookup (known-rel-map rels)]
-    (conj (->> relation first (map second)
-               (mapv #(* mult %)) (concat [mult]))
-          (if-let [reltype (->> relation (take-last 2) type-lookup)]
-            (if (->> relation first (sort-by second >)
-                     ffirst (= reltype)) 1.0 0.0)
-            0.0))))
-
-(defn relations-train [[sentence rels] relations]
-  (let [rel-odds (map #(nlp/relation-odds-map sentence %) relations)]
-    (map #(relation-odds-train rels (nlp/normalize-odds rel-odds) %)
-         rel-odds)))
-
-(defn relation-filter [sentence-pair]
-  (let [ner-models (nlp-models-fn)
-        rel-models ((nlp/get-relation-fn))]
-    (->> sentence-pair first (map first) (str/join " ")
-         (nlp/run-nlp-ner ner-models)
-         (nlp/run-annotate rel-models)
-         nlp/get-sentences first nlp/get-relations
-         (relations-train sentence-pair))))
-
-(defn train-rel-scorer [filename]
-  (->> filename load-roth (pmap relation-filter)
-       (apply concat) weka/make-forest))
 
 (defn make-nlp-chain [models message chain]
   (when (-> message s/email-body nil-or-empty? not)

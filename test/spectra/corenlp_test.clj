@@ -13,7 +13,7 @@
 (def models {:ner ((get-ner-fn))
              :mention ((get-mention-fn))
              :token ((get-tokenize-fn))
-             :relation ((get-relation-fn))})
+             :parse ((get-parse-fn))})
 
 (deftest nlp
   (testing "all types of entities"

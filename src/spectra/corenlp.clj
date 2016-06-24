@@ -44,7 +44,7 @@
   (concat ner-annotators
           (if (coreference?) ["parse" "dcoref"] [])
           ["depparse" "natlog" "openie"]))
-(def relation-annotators ["parse" "relation"])
+(def parse-annotators ["parse" "dcoref"])
 (def openie-annotators ["depparse" "natlog" "openie"])
 (def truecase-annotators
   (concat token-annotators ["truecase"]))
@@ -130,8 +130,8 @@
 (defn get-openie-fn []
   (get-copy-fn openie-annotators))
 
-(defn get-relation-fn []
-  (get-copy-fn relation-annotators))
+(defn get-parse-fn []
+  (get-copy-fn parse-annotators))
 
 ;; Use this like a pipeline, as prep for relation extractor
 (defn entity-extractor []
