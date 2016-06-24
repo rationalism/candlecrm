@@ -10,7 +10,7 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [edu.stanford.nlp.pipeline Annotation StanfordCoreNLP]
-           [edu.stanford.nlp.ling
+           [edu.stanford.nlp.ling CoreLabel
             CoreAnnotations$SentencesAnnotation
             CoreAnnotations$MentionsAnnotation
             CoreAnnotations$NamedEntityTagAnnotation
@@ -19,8 +19,7 @@
             CoreAnnotations$PartOfSpeechAnnotation
             CoreAnnotations$LemmaAnnotation
             CoreAnnotations$TrueCaseTextAnnotation
-            CoreAnnotations$CharacterOffsetBeginAnnotation
-            CoreLabel]
+            CoreAnnotations$CharacterOffsetBeginAnnotation]
            [edu.stanford.nlp.naturalli
             NaturalLogicAnnotations$RelationTriplesAnnotation]
            [edu.stanford.nlp.dcoref
@@ -658,7 +657,18 @@
 
 (defn add-all-goldens [gold-sentence]
   (->> gold-sentence split-relations
-       (map #(add-goldens % (gold-rel-map gold-sentence)))))
+       (fmapl #(add-goldens % (gold-rel-map gold-sentence)))))
+
+(defn train-extractor [sentences]
+  (let [extractor (entity-extractor)
+        doc (Annotation. )]
+    (.set doc CoreAnnotations$SentencesAnnotation sentences)
+    (.train extractor doc) extractor))
+
+(defn train-rel-models [sentences]
+  (->> sentences (map add-all-goldens)
+       (fmapl vector) (apply merge-with concat)
+       (fmapl train-extractor)))
 
 (defn relation-odds [relation]
   (->> relation (.getTypeProbabilities) (.entrySet) set
