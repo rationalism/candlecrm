@@ -308,6 +308,13 @@
             (str/join "\n") add-line)
        "\n"))
 
+(defn save-rels [filename]
+  (weka/serialize @rel-sentences filename))
+
+(defn load-rels [filename]
+  (->> filename weka/deserialize
+       (reset! rel-sentences)))
+
 (defn write-rels [filename]
   (->> @rel-sentences (map write-roth) 
        str/join (spit-append filename))
