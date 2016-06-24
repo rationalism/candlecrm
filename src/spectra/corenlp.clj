@@ -640,7 +640,8 @@
         rel-keys (keys s/relation-types)]
     (->> rel-keys (map #(map type-map %)) (zipmap rel-keys)
          (filter #(not-any? nil? (val %))) (into {})
-         (fmapl cross-relations) (fmapl #(set-rels sentence %)))))
+         (fmapl cross-relations)
+         (fmapl #(set-rels (Annotation. sentence) %)))))
 
 (defn gold-rel-map [sentence]
   (->> sentence get-relations
