@@ -1,9 +1,9 @@
-(defproject spectra "0.2.2"
+(defproject spectra "0.2.3"
   :description "Personal semantic graphs"
   :url "http://spectra.herokuapp.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.9.92"]
+                 [org.clojure/clojurescript "1.9.93"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [ns-tracker "0.3.0"]
                  [clj-time "0.12.0"]
