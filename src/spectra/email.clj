@@ -90,7 +90,8 @@
    :mention ((nlp/get-mention-fn))
    :token ((nlp/get-tokenize-fn))
    :parse ((nlp/get-parse-fn))
-   :entity (nlp/entity-extractor)})
+   :entity (nlp/entity-extractor)
+   :relation ((nlp/get-rel-fn))})
 
 (defn fetch-body [id]
   (->> [[s/email-body] [s/email-from s/s-name]]

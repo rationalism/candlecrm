@@ -86,6 +86,7 @@
 
 (defonce bad-relation-filter (atom nil))
 (def models-dir (str (env :home-dir) "resources/models"))
+(def rel-model-dir (str models-dir "/relations"))
 (def bad-relation-file "event-scorer.dat")
 (def bad-relation-threshold 0.9)
 
@@ -154,6 +155,9 @@
        (map (juxt #(str/split % #"/") rel-from-file))
        (map #(update % 0 types-from-dirnames))
        (into {})))
+
+(defn get-rel-fn []
+  (fn [] (deserialize-rel-models rel-model-dir)))
 
 ;; Use this like a pipeline, as prep for relation extractor
 (defn entity-extractor []
