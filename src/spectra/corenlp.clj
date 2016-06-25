@@ -705,7 +705,8 @@
 (defn find-relations [models sentence]
   (if (has-rel-candidates? sentence)
     (let [rel-map (->> sentence vector make-doc
-                       (run-annotate (:parse models)) get-sentences
+                       (run-annotate (:parse models))
+                       add-heads get-sentences
                        split-relations cset/map-invert)]
       (->> (compose-maps rel-map (:relation models))
            (map #(apply rel-annotate %))
@@ -713,8 +714,8 @@
     sentence))
 
 (defn find-all-relations [models doc]
-  (->> doc add-heads get-sentences
-       (map #(find-relations models))
+  (->> doc get-sentences
+       (map #(find-relations models %))
        make-doc))
 
 (defn gold-rel-map [sentence]
