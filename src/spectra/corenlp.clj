@@ -84,17 +84,9 @@
 
 (def pronoun-parts ["PRP" "PRP$"])
 
-(defonce bad-relation-filter (atom nil))
 (def models-dir (str (env :home-dir) "resources/models"))
 (def rel-model-dir (str models-dir "/relations"))
-(def bad-relation-file "event-scorer.dat")
 (def bad-relation-threshold 0.9)
-
-(defn load-relation-filter! []
-  (->> bad-relation-file (str models-dir "/")
-       weka/deserialize (reset! bad-relation-filter)))
-
-(load-relation-filter!)
 
 (defn make-default-pipeline [annotators]
   (StanfordCoreNLP.
@@ -728,39 +720,14 @@
        (apply merge-with concat)
        (fmapl train-extractor)))
 
-(defn relation-odds [relation]
-  (->> relation (.getTypeProbabilities) (.entrySet) set
-       (map (juxt #(.getKey %) #(.getValue %)))
-       (remove #(= (first %) "_NR"))
-       (sort-by first)))
-
-(defn relation-odds-map [token-map relation]
-  (let [token (mapv second token-map)]
-    (->> relation (.getEntityMentionArgs)
-         (map #(.getHeadTokenStart %))
-         (map #(nth token %))
-         (concat (-> relation relation-odds vector)))))
-
-(defn normalize-odds [rel-odds]
-  (->> rel-odds (map first) (map #(map second %))
-       (map #(apply + %)) sort last (/ 1.0)))
-
 (defn relation-graph [relation]
   (->> relation (.getEntityMentionArgs) 
        (map #(.getExtentString %)) reverse
        (concat (-> relation (.getType) s/relation-map vector))
        reverse vec vector (loom/build-graph [])))
 
-(defn relation-bad? [mult relation]
-  (->> relation first (map second)
-       (mapv #(* mult %)) (concat [mult])
-       (weka/classify @bad-relation-filter)
-       (> bad-relation-threshold)))
-
 (defn relations-graph [relations]
-  (let [rel-odds (zipvec (map relation-odds relations) relations)]
-    (->> (remove #(relation-bad? (normalize-odds rel-odds) %) rel-odds)
-         (map second) (map relation-graph) loom/merge-graphs)))
+  (->> relations (map relation-graph) loom/merge-graphs))
 
 (defnp sentence-graph [sent-pair]
   (-> (loom/merge-graphs
