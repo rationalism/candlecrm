@@ -1,6 +1,7 @@
 (ns spectra.corenlp
   (:require [clojure.set :as cset]
             [clojure.string :as str]
+            [clojure.java.io :as io]
             [spectra.common :refer :all]
             [spectra.datetime :as dt]
             [spectra.loom :as loom]
@@ -135,6 +136,24 @@
 
 (defn get-parse-fn []
   (get-copy-fn parse-annotators))
+
+(defn rel-from-file [filename]
+  (BasicRelationExtractor/load filename))
+
+(defn serialize-rel-models [dir models]
+  (mapv #(.save (val %) (->> % key (map name) (interpose "_")
+                             (apply str) (str dir "/")))
+        models))
+
+(defn types-from-dirnames [dirnames]
+  (->> (str/split (last dirnames) #"_")
+       (mapv keyword)))
+
+(defn deserialize-rel-models [dir]
+  (->> dir io/file file-seq rest (map #(.getCanonicalPath %))
+       (map (juxt #(str/split % #"/") rel-from-file))
+       (map #(update % 0 types-from-dirnames))
+       (into {})))
 
 ;; Use this like a pipeline, as prep for relation extractor
 (defn entity-extractor []
@@ -666,6 +685,10 @@
     (->> (compose-maps rel-map models)
          (map #(apply rel-annotate %))
          (map get-relations))))
+
+(defn find-all-relations [models doc]
+  (->> doc add-heads get-sentences
+       (map #(find-relations models %))))
 
 (defn gold-rel-map [sentence]
   (->> sentence get-relations

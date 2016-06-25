@@ -1,6 +1,7 @@
 (ns spectra.email
   (:require [clojure.string :as str]
             [clojure.set :as cset]
+            [clojure.java.io :as io]
             [crypto.random :as rnd]
             [spectra.async :as async]
             [spectra.common :refer :all]
@@ -285,11 +286,6 @@
         (->> resp insert-rels
              (swap! rel-sentences conj))
         (recur (rest sentences)))))
-
-(defn serialize-rel-models [dir models]
-  (mapv #(.save (val %) (->> % key (map name) (interpose "_")
-                             (apply str) (str dir "/")))
-        models))
 
 (defn tabline [[word tag]]
   (str word "\t" tag))
