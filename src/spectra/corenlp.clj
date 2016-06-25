@@ -692,30 +692,29 @@
        (map ner-graph) (remove nil?)
        loom/merge-graphs))
 
-(defn selective-parse [model sentences]
+(defn has-rel-candidates? [sentence]
   (let [rel-set (->> s/relation-types keys (map set) set)
         rel-map (->> s/relation-types keys (apply concat) distinct
-                     (mapv #(vector % %)) (into {}))]
-    (->> (map (juxt all-ner-graph identity) sentences)
-         (remove #(some #{s/email-addr}
-                        (loom/nodes (first %))))
-         (remove #(->> % first loom/nodes (map rel-map)
-                       (remove nil?) distinct cartesian-product
-                       (cset/intersection rel-set) empty?))
-         (map second) (mapv second) distinct
-         (map vector) (map make-doc) (map #(run-annotate model %))
-         (map get-sentences) (mapv first))))
+                     (mapv #(vector % %)) (into {}))
+        nodes (->> sentence all-ner-graph loom/nodes)]
+    (->> (map rel-map nodes) (remove nil?) distinct
+         cartesian-product (cset/intersection rel-set) empty?
+         (vector (some #{s/email-addr} nodes))
+         (every? nil?))))
 
 (defn find-relations [models sentence]
-  (let [rel-map (-> sentence split-relations cset/map-invert)]
-    (->> (compose-maps rel-map models)
-         (map #(apply rel-annotate %))
-         combine-rels)))
+  (if (has-rel-candidates? sentence)
+    (let [rel-map (->> sentence vector make-doc
+                       (run-annotate (:parse models)) get-sentences
+                       split-relations cset/map-invert)]
+      (->> (compose-maps rel-map (:relation models))
+           (map #(apply rel-annotate %))
+           combine-rels))
+    sentence))
 
 (defn find-all-relations [models doc]
   (->> doc add-heads get-sentences
-       (selective-parse (:parse models))
-       (map #(find-relations (:relation models) %))
+       (map #(find-relations models))
        make-doc))
 
 (defn gold-rel-map [sentence]
