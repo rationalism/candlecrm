@@ -1,5 +1,6 @@
 (ns spectra.corenlp
-  (:require [clojure.string :as str]
+  (:require [clojure.set :as cset]
+            [clojure.string :as str]
             [spectra.common :refer :all]
             [spectra.datetime :as dt]
             [spectra.loom :as loom]
@@ -157,6 +158,9 @@
 (defnp run-annotate [pipeline annotation]
   (.annotate pipeline annotation)
   annotation)
+
+(defn rel-annotate [sentence rel-model]
+  (.annotateSentence rel-model sentence) sentence)
 
 (defnc get-tokens [words]
   (.get words CoreAnnotations$TokensAnnotation))
@@ -656,6 +660,12 @@
          (filter #(not-any? nil? (val %))) (into {})
          (fmapl cross-relations)
          (fmapl #(set-rels (Annotation. sentence) %)))))
+
+(defn find-relations [models sentence]
+  (let [rel-map (-> sentence split-relations cset/map-invert)]
+    (->> (compose-maps rel-map models)
+         (map #(apply rel-annotate %))
+         (map get-relations))))
 
 (defn gold-rel-map [sentence]
   (->> sentence get-relations
