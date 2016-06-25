@@ -25,7 +25,7 @@
                   :exclusions [com.google.guava/guava
                                com.google.code.findbugs/jsr305]]
                  [org.passay/passay "1.1.0"]
-                 [com.google.apis/google-api-services-oauth2 "v2-rev112-1.22.0"]
+                 [com.google.apis/google-api-services-oauth2 "v2-rev113-1.22.0"]
                  [com.google.http-client/google-http-client-jackson "1.22.0"]
                  [com.sun.mail/javax.mail "1.5.5"]
                  [de.jollyday/jollyday "0.4.7"]
