@@ -680,6 +680,32 @@
   (->> sentences (mapcat get-relations)
        (set-rels (first sentences))))
 
+(defn cartesian-product
+  ([coll] (cartesian-product coll []))
+  ([coll sets]
+   (if (empty? coll) (set sets)
+       (->> coll rest (map #(hash-set (first coll) %))
+            (concat sets) (recur (rest coll))))))
+
+(defn all-ner-graph [sentence]
+  (->> (entity-mentions sentence)
+       (map ner-graph) (remove nil?)
+       loom/merge-graphs))
+
+(defn selective-parse [model sentences]
+  (let [rel-set (->> s/relation-types keys (map set) set)
+        rel-map (->> s/relation-types keys (apply concat) distinct
+                     (mapv #(vector % %)) (into {}))]
+    (->> (map (juxt all-ner-graph identity) sentences)
+         (remove #(some #{s/email-addr}
+                        (loom/nodes (first %))))
+         (remove #(->> % first loom/nodes (map rel-map)
+                       (remove nil?) distinct cartesian-product
+                       (cset/intersection rel-set) empty?))
+         (map second) (mapv second) distinct
+         (map vector) (map make-doc) (map #(run-annotate model %))
+         (map get-sentences) (mapv first))))
+
 (defn find-relations [models sentence]
   (let [rel-map (-> sentence split-relations cset/map-invert)]
     (->> (compose-maps rel-map models)
@@ -688,7 +714,8 @@
 
 (defn find-all-relations [models doc]
   (->> doc add-heads get-sentences
-       (map #(find-relations models %))
+       (selective-parse (:parse models))
+       (map #(find-relations (:relation models) %))
        make-doc))
 
 (defn gold-rel-map [sentence]
@@ -732,9 +759,7 @@
 (defnp sentence-graph [sent-pair]
   (-> (loom/merge-graphs
        [(-> sent-pair val get-relations relations-graph)
-        (->> (entity-mentions (val sent-pair))
-             (map ner-graph) (remove nil?)
-             loom/merge-graphs)])
+        (-> sent-pair val all-ner-graph)])
       #_ (breakup-node (key sent-pair))
       #_ trampoline #_ recursion-cleanup
       (dedup-graph (key sent-pair))
@@ -832,7 +857,7 @@
 (defnc run-nlp-full [models author text]
   (cond-> (->> (fpp-replace models (strip-parens text) author)
                (run-nlp-ner models)
-               (find-all-relations (:relation models))
+               (find-all-relations models)
                get-sentences nlp-graph)
     (coreference?) rewrite-pronouns))
 

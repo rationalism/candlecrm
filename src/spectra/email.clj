@@ -165,30 +165,6 @@
        add-ids (map #(str (first %) ": " (second %)))
        (str/join "\n") println))
 
-(defn cartesian-product
-  ([coll] (cartesian-product coll []))
-  ([coll sets]
-   (if (empty? coll) (set sets)
-       (->> coll rest (map #(hash-set (first coll) %))
-            (concat sets) (recur (rest coll))))))
-
-(defn event-sentences [sentences]
-  (let [rel-set (->> s/relation-types keys (map set) set)
-        rel-map (->> s/relation-types keys (apply concat) distinct
-                     (mapv #(vector % %)) (into {}))
-        models (nlp-models-fn)]
-    (->> sentences nlp/number-items
-         (map (juxt nlp/sentence-graph identity))
-         (remove #(some #{s/email-addr}
-                        (loom/nodes (first %))))
-         (remove #(->> % first loom/nodes (map rel-map)
-                       (remove nil?) distinct cartesian-product
-                       (cset/intersection rel-set) empty?))
-         (map second) (mapv second) distinct
-         (map vector) (map nlp/make-doc)
-         (pmap #(nlp/run-annotate (:parse models) %))
-         (map nlp/get-sentences) (mapv first))))
-
 (defn addr-sentences [sentences]
   (->> sentences (map get-tokens) distinct
        (filter #(->> % (str/join " ") regex/might-have-addr?))))
