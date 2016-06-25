@@ -675,7 +675,9 @@
 
 (defn train-extractor [sentences]
   (let [extractor (relation-extractor)]
-    (.train extractor (make-doc sentences)) extractor))
+    (->> sentences make-doc add-heads
+         (.train extractor))
+    extractor))
 
 (defn train-rel-models [sentences]
   (->> sentences (map add-all-goldens)
