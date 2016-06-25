@@ -174,9 +174,6 @@
   (.annotate pipeline annotation)
   annotation)
 
-(defn rel-annotate [sentence rel-model]
-  (.annotateSentence rel-model sentence) sentence)
-
 (defnc get-tokens [words]
   (.get words CoreAnnotations$TokensAnnotation))
 
@@ -218,6 +215,10 @@
 
 (defn get-text [annotation]
   (.originalText annotation))
+
+(defn rel-annotate [sentence rel-model]
+  (.annotateSentence rel-model sentence)
+  sentence)
 
 (defn set-rels [sentence rels]
   (.set sentence MachineReadingAnnotations$RelationMentionsAnnotation
@@ -699,14 +700,14 @@
         nodes (->> sentence all-ner-graph loom/nodes)]
     (->> (map rel-map nodes) (remove nil?) distinct
          cartesian-product (cset/intersection rel-set) empty?
-         (vector (some #{s/email-addr} nodes))
-         (every? nil?))))
+         (vector (-> #{s/email-addr} (some nodes) boolean))
+         (every? false?))))
 
 (defn find-relations [models sentence]
   (if (has-rel-candidates? sentence)
     (let [rel-map (->> sentence vector make-doc
                        (run-annotate (:parse models))
-                       add-heads get-sentences
+                       add-heads get-sentences first
                        split-relations cset/map-invert)]
       (->> (compose-maps rel-map (:relation models))
            (map #(apply rel-annotate %))
@@ -754,7 +755,8 @@
        reverse vec vector (loom/build-graph [])))
 
 (defn relations-graph [relations]
-  (->> relations (map relation-graph) loom/merge-graphs))
+  (->> relations (remove #(-> % (.getType) (= "_NR")))
+       (map relation-graph) loom/merge-graphs))
 
 (defnp sentence-graph [sent-pair]
   (-> (loom/merge-graphs
