@@ -118,7 +118,7 @@
    false))
 
 (defn get-copy-fn [annotators]
-  (fn [] (make-pipeline annotators pcfg-parse-model)))
+  (fn [] (make-pipeline annotators shift-parse-model)))
 
 (defn get-ner-fn []
   (get-copy-fn ner-annotators))
