@@ -295,7 +295,7 @@
     (->> labels filter-decode-labels
          first neo4j/find-by-id)))
 
-(defn email-for-nlp [limit]
+(defnp email-for-nlp [limit]
   (->> [(str "MATCH (root:" (neo4j/esc-token s/nonlp)
              ":" (neo4j/esc-token s/recon)
              ")-[:" (neo4j/esc-token s/email-body)

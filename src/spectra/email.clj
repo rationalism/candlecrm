@@ -106,7 +106,7 @@
                      #(nlp/run-nlp (:ner models) %)
                      #(apply (partial nlp/fpp-replace models) %)
                      #(update % 0 nlp/strip-parens)))
-         (apply concat) vec)))
+         (apply concat) shuffle vec)))
 
 (defn get-tokens [s]
   (->> s nlp/get-tokens (map nlp/get-text)))
@@ -182,8 +182,10 @@
          (remove #(->> % first loom/nodes (map rel-map)
                        (remove nil?) distinct cartesian-product
                        (cset/intersection rel-set) empty?))
-         (map second) (mapv second) distinct nlp/make-doc
-         (nlp/run-annotate (:parse models)) nlp/get-sentences)))
+         (map second) (mapv second) distinct
+         (map vector) (map nlp/make-doc)
+         (pmap #(nlp/run-annotate (:parse models) %))
+         (map nlp/get-sentences) (mapv first))))
 
 (defn addr-sentences [sentences]
   (->> sentences (map get-tokens) distinct

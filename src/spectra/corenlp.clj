@@ -46,7 +46,7 @@
   (concat ner-annotators
           (if (coreference?) ["parse" "dcoref"] [])
           ["depparse" "natlog" "openie"]))
-(def parse-annotators ["parse" "dcoref"])
+(def parse-annotators ["parse"])
 (def openie-annotators ["depparse" "natlog" "openie"])
 (def truecase-annotators
   (concat token-annotators ["truecase"]))
