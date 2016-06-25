@@ -684,15 +684,20 @@
          (fmapl cross-relations)
          (fmapl #(set-rels (Annotation. sentence) %)))))
 
+(defn combine-rels [sentences]
+  (->> sentences (mapcat get-relations)
+       (set-rels (first sentences))))
+
 (defn find-relations [models sentence]
   (let [rel-map (-> sentence split-relations cset/map-invert)]
     (->> (compose-maps rel-map models)
          (map #(apply rel-annotate %))
-         (map get-relations))))
+         combine-rels)))
 
 (defn find-all-relations [models doc]
   (->> doc add-heads get-sentences
-       (map #(find-relations models %))))
+       (map #(find-relations models %))
+       make-doc))
 
 (defn gold-rel-map [sentence]
   (->> sentence get-relations
@@ -860,7 +865,7 @@
 (defnc run-nlp-full [models author text]
   (cond-> (->> (fpp-replace models (strip-parens text) author)
                (run-nlp-ner models)
-               #_ (run-annotate (:relation models))
+               (find-all-relations (:relation models))
                get-sentences nlp-graph)
     (coreference?) rewrite-pronouns))
 

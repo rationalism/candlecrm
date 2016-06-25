@@ -14,7 +14,8 @@
              :mention ((get-mention-fn))
              :token ((get-tokenize-fn))
              :parse ((get-parse-fn))
-             :entity (entity-extractor)})
+             :entity (entity-extractor)
+             :relation ((get-rel-fn))})
 
 (deftest nlp
   (testing "all types of entities"
