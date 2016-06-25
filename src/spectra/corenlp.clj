@@ -215,7 +215,8 @@
     doc))
 
 (defn add-heads [doc]
-  (.preProcessSentences (GenericDataSetReader. ) doc))
+  (.preProcessSentences (GenericDataSetReader. ) doc)
+  doc)
 
 (defn feature-factory []
   (MachineReading/makeRelationFeatureFactory
