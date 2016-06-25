@@ -22,11 +22,13 @@
             CoreAnnotations$CharacterOffsetBeginAnnotation]
            [edu.stanford.nlp.naturalli
             NaturalLogicAnnotations$RelationTriplesAnnotation]
+           [edu.stanford.nlp.trees
+            TreeCoreAnnotations$TreeAnnotation]
            [edu.stanford.nlp.dcoref
             CorefCoreAnnotations$CorefChainAnnotation]
            [edu.stanford.nlp.ie.machinereading BasicEntityExtractor
             BasicRelationExtractor BasicRelationFeatureFactory
-            MachineReading]
+            GenericDataSetReader MachineReading]
            [edu.stanford.nlp.ie.machinereading.structure
             EntityMentionFactory RelationMention RelationMentionFactory
             MachineReadingAnnotations$EntityMentionsAnnotation
@@ -179,7 +181,10 @@
 
 (defn entity-mentions-raw [parsed-text]
   (.get parsed-text CoreAnnotations$MentionsAnnotation))
-  
+
+(defn get-tree [sentence]
+  (.get sentence TreeCoreAnnotations$TreeAnnotation))
+
 (defn get-coref [parsed-text]
   (.get parsed-text CorefCoreAnnotations$CorefChainAnnotation))
 
@@ -208,6 +213,9 @@
   (let [doc (Annotation. )]
     (.set doc CoreAnnotations$SentencesAnnotation sentences)
     doc))
+
+(defn add-heads [doc]
+  (.preProcessSentences (GenericDataSetReader. ) doc))
 
 (defn feature-factory []
   (MachineReading/makeRelationFeatureFactory
