@@ -125,47 +125,6 @@
 (defn get-tokens [s]
   (->> s nlp/get-tokens (map nlp/get-text)))
 
-(defn split-no-tag [tokens]
-  (if (-> tokens first nlp/get-tag (= "O"))
-    (partition 1 tokens) (list tokens)))
-
-(defn group-tag [tokens]
-  (->> tokens first nlp/get-tag))
-
-(defn group-pos [tokens]
-  (->> tokens (map nlp/get-pos) (str/join "/")))
-
-(defn group-text [tokens]
-  (->> tokens (map #(.originalText %)) (str/join "/")))
-
-(defn roth-sentence [[id sentence]]
-  (let [token-groups (->> sentence nlp/get-tokens (partition-by nlp/get-tag)
-                          (mapcat split-no-tag))]
-    (->> (map (juxt (constantly id) group-tag group-pos group-text)
-              token-groups)
-         (zipmap (-> token-groups count range)))))
-
-(def roth-tag-map {"DATE" "DATETIME" "ZIPCODE" "LOCATION"})
-
-(defn roth-swap [tag]
-  (if-let [new-tag (roth-tag-map tag)]
-    new-tag tag))
-
-(defn roth-print [[k v]]
-  (->> [(first v) (roth-swap (second v)) k "O" (third v)
-        (if (= (second v) "URL") "URLURLURL" (fourth v))
-        "O" "O" "O"]
-       (str/join "\t")))
-
-(defn roth-display [sentence]
-  (let [rep-slash #(str/replace % #"/" " ")]
-    (->> sentence sort (map second) (map fourth) (map rep-slash)
-         (str/join " ") (str "Sentence: ") println)
-    (->> sentence sort (remove #(-> % second second (= "O")))
-         (map #(str (first %) ": " (rep-slash (fourth (second %)))
-                    " (" (second (second %)) ")"))
-         (str/join "\n") println)))
-
 (defn add-ids [coll]
   (-> coll count range (zipvec coll)))
 
@@ -289,26 +248,12 @@
        (str/join "\n\n") (spit-append filename))
   (def known-tokens (atom [])))
 
-(defn add-line [s]
-  (if (nil-or-empty? s) s (str s "\n")))
-
-(defn write-roth [[k v]]
-  (str (->> k sort (map roth-print) (str/join "\n")) "\n\n"
-       (->> v (map #(str/join " " %))
-            (str/join "\n") add-line)
-       "\n"))
-
 (defn save-rels [filename]
   (weka/serialize @rel-sentences filename))
 
 (defn load-rels [filename]
   (->> filename weka/deserialize
        (reset! rel-sentences)))
-
-(defn write-rels [filename]
-  (->> @rel-sentences (map write-roth) 
-       str/join (spit-append filename))
-  (def rel-sentences (atom {})))
 
 (defn insert-blank-rels [roth-group]
   (->> roth-group (partition-by first)
