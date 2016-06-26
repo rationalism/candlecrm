@@ -99,6 +99,7 @@
   (StanfordCoreNLP.
    (doto (Properties. )
      (.setProperty "annotators" (str/join ", " annotators))
+     (.setProperty "ssplit.newlineIsSentenceBreak" "two")
      (.setProperty "ner.applyNumericClassifiers" "true")
      (.setProperty "ner.useSUTime" "true")
      (.setProperty "ner.markTimeRanges" "false")
