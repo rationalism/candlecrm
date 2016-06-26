@@ -110,6 +110,18 @@
                      #(update % 0 nlp/strip-parens)))
          (apply concat) shuffle vec)))
 
+(defn date-sentence? [sentence]
+  (->> sentence nlp/all-ner-graph loom/nodes
+       (some #{s/date-time})))
+
+(defn addr-sentence? [sentence]
+  (-> sentence (str " ") regex/might-have-addr?))
+
+(defn ner-sentences [sentences]
+  (->> (filter date-sentence? sentences)
+       (concat (filter addr-sentence? sentences))
+       distinct shuffle))
+
 (defn get-tokens [s]
   (->> s nlp/get-tokens (map nlp/get-text)))
 
@@ -229,7 +241,8 @@
 
 (defn gather-traindata [sentences]
   (if (or (nil? sentences) (empty? sentences)) nil
-      (when-let [resp (-> sentences first display-tokens)]
+      (when-let [resp (->> sentences first nlp/get-tokens
+                           (map nlp/get-text) display-tokens)]
         (swap! known-tokens conj resp)
         (recur (rest sentences)))))
 
