@@ -748,6 +748,13 @@
        (apply merge-with concat)
        (fmapl train-extractor)))
 
+(defn prepare-rel-training [models sentences]
+  (->> sentences (filter has-rel-candidates?)
+       (map vector) (map make-doc)
+       (pmap #(run-annotate (:parse models) %))
+       (map get-sentences) (map first)
+       make-doc add-heads get-sentences))
+
 (defn relation-graph [relation]
   (->> relation (.getEntityMentionArgs) 
        (map #(.getExtentString %)) reverse
