@@ -50,6 +50,7 @@
           (if (coreference?) ["parse" "dcoref"] [])
           ["depparse" "natlog" "openie"]))
 (def parse-annotators ["parse"])
+(def coref-annotators ["dcoref"])
 (def openie-annotators ["depparse" "natlog" "openie"])
 (def truecase-annotators
   (concat token-annotators ["truecase"]))
@@ -101,6 +102,7 @@
    (doto (Properties. )
      (.setProperty "annotators" (str/join ", " annotators))
      (.setProperty "ssplit.newlineIsSentenceBreak" "two")
+     (.setProperty "dcoref.maxdist" "3")
      (.setProperty "ner.applyNumericClassifiers" "true")
      (.setProperty "ner.useSUTime" "true")
      (.setProperty "ner.markTimeRanges" "false")
@@ -131,6 +133,9 @@
 
 (defn get-parse-fn []
   (get-copy-fn parse-annotators))
+
+(defn get-coref-fn []
+  (get-copy-fn coref-annotators))
 
 (defn rel-from-file [filename]
   (BasicRelationExtractor/load filename))

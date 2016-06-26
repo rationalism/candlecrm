@@ -91,7 +91,8 @@
    :token ((nlp/get-tokenize-fn))
    :parse ((nlp/get-parse-fn))
    :entity (nlp/entity-extractor)
-   :relation ((nlp/get-rel-fn))})
+   :relation ((nlp/get-rel-fn))
+   :coref ((nlp/get-coref-fn))})
 
 (defn fetch-body [id]
   (->> [[s/email-body] [s/email-from s/s-name]]
@@ -101,14 +102,16 @@
   (let [models (nlp-models-fn)]
     (->> (queries/email-for-nlp n)
          (map :id) (map fetch-body) (map vec) distinct
-         (pmap (comp nlp/get-sentences
+         (pmap (comp #_nlp/get-sentences
+                     #(nlp/run-annotate (:coref models) %)
+                     #(nlp/run-annotate (:parse models) %)
                      #(nlp/run-annotate (:entity models) %)
                      #(nlp/run-annotate (:mention models) %)
                      nlp/library-annotate-all
                      #(nlp/run-nlp (:ner models) %)
                      #(apply (partial nlp/fpp-replace models) %)
                      #(update % 0 nlp/strip-parens)))
-         (apply concat) shuffle vec)))
+         #_(apply concat) shuffle vec)))
 
 (defn date-sentence? [sentence]
   (->> sentence nlp/all-ner-graph loom/nodes
