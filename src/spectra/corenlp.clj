@@ -32,7 +32,8 @@
             BasicRelationExtractor BasicRelationFeatureFactory
             GenericDataSetReader MachineReading]
            [edu.stanford.nlp.ie.machinereading.structure
-            EntityMentionFactory RelationMention RelationMentionFactory
+            EntityMentionFactory ExtractionObject
+            RelationMention RelationMentionFactory
             MachineReadingAnnotations$EntityMentionsAnnotation
             MachineReadingAnnotations$RelationMentionsAnnotation]
            [java.util Properties] [java.util.logging Level]))
@@ -138,6 +139,15 @@
   (mapv #(.save (val %) (->> % key (map name) (interpose "_")
                              (apply str) (str dir "/")))
         models))
+
+(def rel-sentences (atom []))
+
+(defn save-rels [filename]
+  (weka/serialize @rel-sentences filename))
+
+(defn load-rels [filename]
+  (->> filename weka/deserialize
+       (reset! rel-sentences)))
 
 (defn types-from-dirnames [dirnames]
   (->> (str/split (last dirnames) #"_")
@@ -250,10 +260,10 @@
    BasicRelationExtractor (feature-factory) false
    (RelationMentionFactory. )))
 
-(defn blank-relation [mentions]
+(defn blank-relation [^ExtractionObject sub ^ExtractionObject obj]
   (RelationMention/createUnrelatedRelation
    (RelationMentionFactory. )
-   (into-array mentions)))
+   (into-array [sub obj])))
 
 (defn char-token-map [token]
   (zipmap (range (.beginPosition token)
@@ -667,7 +677,7 @@
 
 (defn cross-relations [[a b]]
   (for [fm a sm b]
-    (blank-relation [fm sm])))
+    (blank-relation fm sm)))
 
 (defn split-relations [sentence]
   (let [type-map (->> sentence relation-mentions

@@ -178,7 +178,6 @@
         (-> codes first rel-map)))))
 
 (def known-tokens (atom []))
-(def rel-sentences (atom []))
 
 (defn display-tokens
   ([tokens]
@@ -219,13 +218,15 @@
        :quit nil
        (recur sentence (conj rels resp))))))
 
+(defn map-rel [mention-map rel]
+  (->> rel drop-last (mapv mention-map)
+       (apply nlp/blank-relation)
+       (vector (last rel)) reverse))
+
 (defn insert-rels [[sentence rels]]
   (let [mention-map (->> sentence nlp/relation-mentions
-                         add-ids (into {}))]
-    (->> rels (map #(update % 0 mention-map))
-         (map #(update % 1 mention-map))
-         (map #(vector (drop-last %) (last %)))
-         (map #(update % 0 nlp/blank-relation))
+                         add-ids (into {}) (repeat (count rels)))]
+    (->> (map map-rel mention-map rels)
          (map nlp/set-rel-type)
          (nlp/set-rels sentence))))
 
@@ -233,7 +234,7 @@
   (if (or (nil? sentences) (empty? sentences)) nil
       (when-let [resp (-> sentences first display-sentence)]
         (->> resp insert-rels
-             (swap! rel-sentences conj))
+             (swap! nlp/rel-sentences conj))
         (recur (rest sentences)))))
 
 (defn tabline [[word tag]]
@@ -243,17 +244,11 @@
   (spit filename (str "\n\n" text) :append true))
 
 (defn write-traindata [filename]
-  (->> @known-tokens (map #(map tabline %))
+  (->> @known-tokens (map #(map tabline 
+                                %))
        (map #(str/join "\n" %))
        (str/join "\n\n") (spit-append filename))
   (def known-tokens (atom [])))
-
-(defn save-rels [filename]
-  (weka/serialize @rel-sentences filename))
-
-(defn load-rels [filename]
-  (->> filename weka/deserialize
-       (reset! rel-sentences)))
 
 (defn insert-blank-rels [roth-group]
   (->> roth-group (partition-by first)
