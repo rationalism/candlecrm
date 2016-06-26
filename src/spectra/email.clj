@@ -223,6 +223,7 @@
        (apply nlp/blank-relation)
        (vector (last rel)) reverse))
 
+;; This weird map is needed to avoid crazy serialization bug
 (defn insert-rels [[sentence rels]]
   (let [mention-map (->> sentence nlp/relation-mentions
                          add-ids (into {}) (repeat (count rels)))]
