@@ -218,7 +218,8 @@
   (.get sentence TreeCoreAnnotations$TreeAnnotation))
 
 (defn get-coref [parsed-text]
-  (.get parsed-text CorefCoreAnnotations$CorefChainAnnotation))
+  (.get parsed-text
+        edu.stanford.nlp.hcoref.CorefCoreAnnotations$CorefChainAnnotation))
 
 (defn get-relations [parsed-text]
   (.get parsed-text MachineReadingAnnotations$RelationMentionsAnnotation))
