@@ -50,14 +50,14 @@
      [:a {:href "#" :on-click (u/next-fetch! counter update-fn)
           :class "next-email-page pure-button"} "Next -->"])])
 
-
 (defn people-table []
   [:div
    [:table {:id "people-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "people-header"}
-     (for [attr (util/add-ids (s/person entity-attrs))]
-       ^{:key (first attr)}
-       [:td (get s/attr-names (second attr))])]
+     [:tr
+      (for [attr (util/add-ids (s/person entity-attrs))]
+        ^{:key (first attr)}
+        [:td (get s/attr-names (second attr))])]]
     [:tbody {:id "people-rows"}
      (for [p-row (-> :people-rows state/look util/add-ids)]
        ^{:key (first p-row)}
@@ -87,9 +87,10 @@
   [:div
    [:table {:id "email-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "email-header"}
-     (for [attr (util/add-ids email-attrs)]
-       ^{:key (first attr)}
-       [:td (second attr)])]
+     [:tr
+      (for [attr (util/add-ids email-attrs)]
+        ^{:key (first attr)}
+        [:td (second attr)])]]
     [:tbody {:id "email-rows"}
      (for [e-row (util/add-ids (apply state/look row-keys))]
        ^{:key (first e-row)}
