@@ -24,7 +24,7 @@
 
 (def models-dir (str (env :home-dir) "resources/models"))
 (def views-dir (str models-dir "/views"))
-(def recon-logs "/home/alyssa/recon_log.txt")
+(def recon-logs (env :recon-log-file))
 
 (defonce recon-models (atom {}))
 (defonce conflict-models (atom {}))

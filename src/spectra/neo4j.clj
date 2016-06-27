@@ -62,8 +62,8 @@
        (into-array Object) (Values/parameters)))
 
 (defn dump-queries [queries]
-  (spit "/home/alyssa/cypherlog.txt" "BEGIN TRANSACTION\n\n" :append true)
-  (run! #(spit "/home/alyssa/cypherlog.txt"
+  (spit (env :cypher-log-file) "BEGIN TRANSACTION\n\n" :append true)
+  (run! #(spit (env :cypher-log-file)
                (str % "\n\n") :append true)
         queries))
 

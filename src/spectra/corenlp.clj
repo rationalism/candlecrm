@@ -58,7 +58,7 @@
 (def ner-model-dir "edu/stanford/nlp/models/ner/")
 (def ner-models
   (map #(str ner-model-dir %)
-       ["english.event.2class.crf.ser.gz"
+       [#_ "english.event.2class.crf.ser.gz"
         "english.all.3class.distsim.crf.ser.gz"
         "english.muc.7class.distsim.crf.ser.gz"]))
 
@@ -117,7 +117,7 @@
    false))
 
 (defn get-copy-fn [annotators]
-  (fn [] (make-pipeline annotators shift-parse-model)))
+  (fn [] (make-pipeline annotators pcfg-parse-model)))
 
 (defn get-ner-fn []
   (get-copy-fn ner-annotators))
