@@ -94,6 +94,10 @@
     (-> (pages/login-needed uri)
         resp/response (resp/status 401))))
 
+(defn wrap-neo4j-thread [handler]
+  (fn [request]
+    (neo4j/thread-wrap (handler request))))
+
 (defn wrap-authentication [handler]
   (fn [request]
     (handler (->> (get-in request [:cookies "token" :value])
@@ -101,9 +105,9 @@
                   (assoc request :identity)))))
 
 (def secure-app
-  (wrap-defaults
-   (wrap-authentication app)
-   (middleware-config)))
+  (-> app wrap-authentication
+      wrap-neo4j-thread
+      (wrap-defaults (middleware-config))))
 
 (defn app-init! []
   (log-setup!)
