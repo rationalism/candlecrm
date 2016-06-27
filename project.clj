@@ -104,8 +104,9 @@
                            :output-to "resources/public/js/login.js"
                            :optimizations :none
                            :pretty-print true}}]}
-  :repl-options {:init (do (set! *print-length* 60)
-                           (-main))}
+  
+  :repl-options {:init (do (set! *print-length* 60) (-main))
+                 :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
   :main spectra.web
   :jvm-opts ["-Xmx4g" "-XX:-OmitStackTraceInFastThrow"]
   :uberjar-name "spectra-standalone.jar")
