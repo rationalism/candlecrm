@@ -69,7 +69,7 @@
           (include-js goog-jquery)
           (include-js "https://code.highcharts.com/highcharts.js")
           (include-js "/js/libs/moment.min.js")
-          (include-js "/js/libs/fullcalendar-2.6.1/fullcalendar.js")
+          (include-js "/js/libs/fullcalendar-2.8.0/fullcalendar.js")
           (include-js "/js/main.js")]))
           ;[:script "google.maps.core.main();"]]))
 
