@@ -101,7 +101,7 @@
   (StanfordCoreNLP.
    (doto (Properties. )
      (.setProperty "annotators" (str/join ", " annotators))
-     (.setProperty "ssplit.newlineIsSentenceBreak" "two")
+     (.setProperty "ssplit.newlineIsSentenceBreak" "never")
      (.setProperty "dcoref.maxdist" "3")
      (.setProperty "ner.applyNumericClassifiers" "true")
      (.setProperty "ner.useSUTime" "true")
