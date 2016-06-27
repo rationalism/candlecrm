@@ -122,7 +122,7 @@
    (doall
     (for [attr (util/add-ids attrs)]
       ^{:key (first attr)}
-      [:p.infoitem
+      [:div.infoitem
        [str-item (-> attr second s/attr-names)
         (second attr)
         (filtered-list (second attr) item)]]))])
