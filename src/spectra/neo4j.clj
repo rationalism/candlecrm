@@ -33,8 +33,9 @@
 
 (defmacro thread-wrap [& body]
   `(binding [*session* (get-session)]
-     ~(add-try-catch "thread-wrap" [] body)
-     (.close *session*)))
+     (let [retval# ~(add-try-catch "thread-wrap" [] body)]
+       (.close *session*)
+       retval#)))
 
 (defn reset-session! []
   (when *session*
