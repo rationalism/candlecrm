@@ -29,8 +29,8 @@
                  [com.google.http-client/google-http-client-jackson "1.22.0"]
                  [com.sun.mail/javax.mail "1.5.5"]
                  [de.jollyday/jollyday "0.4.7"]
-                 [edu.stanford.nlp/stanford-corenlp "3.6.0"]
-                 [edu.stanford.nlp/stanford-corenlp "3.6.0"
+                 [edu.stanford.nlp/stanford-corenlp "3.6.1-SNAPSHOT"]
+                 [edu.stanford.nlp/stanford-corenlp "3.6.1-SNAPSHOT"
                   :classifier "models"]
                  [com.googlecode.libphonenumber/libphonenumber "7.4.3"]
                  [org.deeplearning4j/deeplearning4j-core "0.4-rc3.10"
@@ -46,7 +46,7 @@
                  [org.nd4j/nd4j-x86 "0.4-rc3.8"
                   :exclusions [org.bytedeco/javacpp com.google.guava/guava]]
                  [com.joestelmach/natty "0.12"]
-                 [org.neo4j.driver/neo4j-java-driver "1.0.3"]
+                 [org.neo4j.driver/neo4j-java-driver "1.0.4"]
                  [pandect "0.6.0"]
                  [aysylu/loom "0.6.0"]
                  [com.taoensso/sente "1.8.1"]
@@ -65,7 +65,7 @@
                  [org.seleniumhq.selenium/selenium-java "2.53.0"]
                  [com.cemerick/piggieback "0.2.1"
                   :exclusions [com.google.guava/guava]]
-                 [figwheel-sidecar "0.5.4-4"]
+                 [figwheel-sidecar "0.5.4-5"]
                  [org.jsoup/jsoup "1.9.2"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.3"]
