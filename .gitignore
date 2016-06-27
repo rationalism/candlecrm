@@ -18,7 +18,8 @@ pom.xml
 /client_s*
 /repl
 /out
-/resources/public/js
+/resources/public/js/login
+/resources/public/js/main
 /src/spectra/.*
 /src/spectra/#*
 /logs
