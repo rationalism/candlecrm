@@ -108,5 +108,5 @@
   :repl-options {:init (do (set! *print-length* 60) (-main))
                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
   :main spectra.web
-  :jvm-opts ["-Xmx4g" "-XX:-OmitStackTraceInFastThrow"]
+  :jvm-opts ["-Xmx6g" "-XX:-OmitStackTraceInFastThrow"]
   :uberjar-name "spectra-standalone.jar")
