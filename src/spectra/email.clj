@@ -102,7 +102,7 @@
   (let [models (nlp-models-fn)]
     (->> (queries/email-for-nlp n)
          (map :id) (map fetch-body) (map vec) distinct
-         (map #(nlp/sentence-parse models %))
+         (pmap #(nlp/sentence-parse models %))
          (apply concat) shuffle vec)))
 
 (defn date-sentence? [sentence]
