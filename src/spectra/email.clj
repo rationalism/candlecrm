@@ -102,13 +102,7 @@
   (let [models (nlp-models-fn)]
     (->> (queries/email-for-nlp n)
          (map :id) (map fetch-body) (map vec) distinct
-         (pmap (comp nlp/get-sentences
-                     #(nlp/run-annotate (:entity models) %)
-                     #(nlp/run-annotate (:mention models) %)
-                     nlp/library-annotate-all
-                     #(nlp/run-nlp (:ner models) %)
-                     #(apply (partial nlp/fpp-replace models) %)
-                     #(update % 0 nlp/strip-parens)))
+         (map #(nlp/sentence-parse models %))
          (apply concat) shuffle vec)))
 
 (defn date-sentence? [sentence]

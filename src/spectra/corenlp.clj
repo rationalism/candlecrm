@@ -178,10 +178,7 @@
    :mention ((get-mention-fn))
    :openie ((get-openie-fn))})
 
-(defonce letter-count (atom 0))
-
-(defnc run-nlp [pipeline text]
-  (swap! letter-count #(+ % (count text)))
+(defnp run-nlp [pipeline text]
   (let [parsed-text (Annotation. text)]
     (.annotate pipeline parsed-text)
     parsed-text))
@@ -661,7 +658,7 @@
 (defn library-annotate [sentence]
   (sentence-annotate sentence (class-map sentence)))
 
-(defn library-annotate-all [annotation]
+(defnp library-annotate-all [annotation]
   (->> (get-sentences annotation)
        (map library-annotate)
        (.set annotation CoreAnnotations$SentencesAnnotation))
@@ -875,6 +872,15 @@
        library-annotate-all
        (run-annotate (:mention models))
        (run-annotate (:entity models))))
+
+(defnp sentence-parse [models text]
+  (->> (update text 0 strip-parens)
+       (apply (partial fpp-replace models))
+       (run-nlp (:ner models))
+       library-annotate-all
+       (run-annotate (:mention models))
+       (run-annotate (:entity models))
+       get-sentences))
 
 (defnc run-nlp-default [models text]
   (->> text (run-nlp-ner models)
