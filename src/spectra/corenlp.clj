@@ -58,7 +58,7 @@
 (def ner-model-dir "edu/stanford/nlp/models/ner/")
 (def ner-models
   (map #(str ner-model-dir %)
-       [#_ "english.event.2class.crf.ser.gz"
+       ["english.event.2class.crf.ser.gz"
         "english.all.3class.distsim.crf.ser.gz"
         "english.muc.7class.distsim.crf.ser.gz"]))
 
