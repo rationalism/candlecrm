@@ -393,7 +393,7 @@
                      s/link-id (s/hash-code node)}
                     node s/link-to]))
 
-(defn add-links [g]
+(defnc add-links [g]
   (reduce add-link g (loom/nodes g)))
 
 (defn triple-nodes [triple]
@@ -708,15 +708,15 @@
             (concat sets) (recur (rest coll))))))
 
 (defn all-ner-graph [sentence]
-  (->> (relation-mentions sentence)
-       (map ner-graph) (remove nil?)
-       loom/merge-graphs))
+  (->> sentence relation-mentions (map ner-graph)
+       (remove nil?) loom/merge-graphs))
 
 (defn has-rel-candidates? [sentence]
   (let [rel-set (->> s/relation-types keys (map set) set)
         rel-map (->> s/relation-types keys (apply concat) distinct
                      (mapv #(vector % %)) (into {}))
-        nodes (->> sentence all-ner-graph loom/nodes (mapv s/type-label))]
+        nodes (->> sentence relation-mentions
+                   (map #(.getType %)) (map s/schema-map))]
     (->> (map rel-map nodes) (remove nil?) distinct
          cartesian-product (cset/intersection rel-set) empty?
          (vector (-> #{s/email-addr} (some nodes) boolean))
@@ -774,21 +774,22 @@
        (map get-sentences) (map first)
        make-doc add-heads get-sentences))
 
-(defn relation-graph [ner-graph relation]
+(defnc relation-graph [ner-graph relation]
   (let [rel-type (-> relation .getType s/relation-map)
         graph-map (zipmap (mapv s/hash-code (loom/nodes ner-graph))
                           (loom/nodes ner-graph))
         old-node (->> relation .getEntityMentionArgs
-                      first .hashCode graph-map)]
+                      first .hashCode (str "hc") graph-map)]
     (if (some #{rel-type} s/is-attr)
       (->> relation .getEntityMentionArgs second .getExtentString
            vector (hash-map rel-type) (merge-with concat old-node)
            (loom/replace-node ner-graph old-node))
-      (->> relation .getEntityMentionArgs (map #(.hashCode %))
-           (map graph-map) (rconj rel-type) vector
+      (->> relation .getEntityMentionArgs reverse
+           (map #(str "hc" (.hashCode %))) (map graph-map)
+           (cons rel-type) reverse vec vector
            (loom/add-edges ner-graph)))))
 
-(defn relations-graph [ner-graph relations]
+(defnc relations-graph [ner-graph relations]
   (->> relations (remove #(-> % (.getType) (= "_NR")))
        (reduce relation-graph ner-graph)))
 
@@ -808,7 +809,7 @@
        (reduce add-hyperlink (.toString sentence))
        (vector (.toString sentence))))
 
-(defnp sentence-graph [sent-pair]
+(defnc sentence-graph [sent-pair]
   (->> sent-pair val ((juxt all-ner-graph get-relations))
        (apply relations-graph) add-links))
 
@@ -863,7 +864,7 @@
      $ (filter #(lonely? g %)
                (loom/up-nodes g (pronoun-node))))))
 
-(defn nlp-graph [parsed-text]
+(defnc nlp-graph [parsed-text]
   (cond->
       (->> parsed-text number-items
            (map sentence-graph) loom/merge-graphs)
