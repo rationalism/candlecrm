@@ -385,7 +385,7 @@
                         (-> entity .getType s/schema-map)
                         (.getExtentString entity)
                         s/link-text (.getExtentString entity)
-                        s/hash-code (.hashCode entity)}]
+                        s/hash-code (str "hc" (.hashCode entity))}]
                       [])))
 
 (defn triple-nodes [triple]
