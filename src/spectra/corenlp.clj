@@ -784,6 +784,19 @@
   (->> relations (remove #(-> % (.getType) (= "_NR")))
        (reduce relation-graph ner-graph)))
 
+(defn hash-brackets [code text]
+  (str "<node " code ">" text "</node>"))
+
+(defn add-hyperlink [sentence mention]
+  (->> mention .getExtentString
+       (hash-brackets (str "hc" (.hashCode mention)))
+       (str/replace-first sentence (.getExtentString mention))))
+
+(defn add-hyperlinks [sentence]
+  (->> sentence relation-mentions
+       (sort-by #(.getHeadTokenStart %))
+       (reduce add-hyperlink (.toString sentence))))
+
 (defnp sentence-graph [sent-pair]
   (apply relations-graph
          ((juxt all-ner-graph get-relations)
