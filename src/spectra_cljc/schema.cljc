@@ -161,6 +161,12 @@
                    "PersonPhone" phone-num "OrgPhone" phone-num
                    "PersonWebsite" website "OrgWebsite" website})
 
+(def entity-map {person-name person org-name organization
+                 email-addr person phone-num person
+                 loc-name location date-time event})
+
+
+
 (def relation-types {[date-time time] ["EventStart" "EventStop" "EventTime"]
                      [date-time duration] ["EventDuration"]
                      [date-time person-name] ["EventFeatures" "EventAttend"]
