@@ -165,8 +165,6 @@
                  email-addr person phone-num person
                  loc-name location date-time event})
 
-
-
 (def relation-types {[date-time time] ["EventStart" "EventStop" "EventTime"]
                      [date-time duration] ["EventDuration"]
                      [date-time person-name] ["EventFeatures" "EventAttend"]
