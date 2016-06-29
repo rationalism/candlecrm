@@ -388,6 +388,14 @@
                         s/hash-code (str "hc" (.hashCode entity))}]
                       [])))
 
+(defn add-link [g node]
+  (loom/add-edge g [{s/type-label s/hyperlink
+                     s/link-id (s/hash-code node)}
+                    node s/link-to]))
+
+(defn add-links [g]
+  (reduce add-link g (loom/nodes g)))
+
 (defn triple-nodes [triple]
   (mapv vec [(.-subject triple) (.-object triple)]))
       
@@ -798,9 +806,8 @@
        (reduce add-hyperlink (.toString sentence))))
 
 (defnp sentence-graph [sent-pair]
-  (apply relations-graph
-         ((juxt all-ner-graph get-relations)
-          (val sent-pair))))
+  (->> sent-pair val ((juxt all-ner-graph get-relations))
+       (apply relations-graph) add-links))
 
 (defn shorten-node [node]
   (hash-map (subs (key node) 0 5) (val node)))
