@@ -627,7 +627,7 @@
   (interleave pieces
               (conj (mapv #(swap-fpp author %) fpps) "")))
 
-(defnc fpp-replace [models text author]
+(defnc fpp-replace [models author text]
   (let [fpps (->> text (run-nlp (:token models))
                   get-tokens (filter is-fpp?))]
     (->> (mapcat char-pos fpps)
@@ -716,7 +716,7 @@
   (let [rel-set (->> s/relation-types keys (map set) set)
         rel-map (->> s/relation-types keys (apply concat) distinct
                      (mapv #(vector % %)) (into {}))
-        nodes (->> sentence all-ner-graph loom/nodes (mapv s/hash-code))]
+        nodes (->> sentence all-ner-graph loom/nodes (mapv s/type-label))]
     (->> (map rel-map nodes) (remove nil?) distinct
          cartesian-product (cset/intersection rel-set) empty?
          (vector (-> #{s/email-addr} (some nodes) boolean))
@@ -796,14 +796,17 @@
   (str "<node " code ">" text "</node>"))
 
 (defn add-hyperlink [sentence mention]
-  (->> mention .getExtentString
-       (hash-brackets (str "hc" (.hashCode mention)))
-       (str/replace-first sentence (.getExtentString mention))))
+  (if (-> mention .getType s/schema-map s/entity-map)
+    (->> mention .getExtentString
+         (hash-brackets (str "hc" (.hashCode mention)))
+         (str/replace-first sentence (.getExtentString mention)))
+    sentence))
 
 (defn add-hyperlinks [sentence]
   (->> sentence relation-mentions
        (sort-by #(.getHeadTokenStart %))
-       (reduce add-hyperlink (.toString sentence))))
+       (reduce add-hyperlink (.toString sentence))
+       (vector (.toString sentence))))
 
 (defnp sentence-graph [sent-pair]
   (->> sent-pair val ((juxt all-ner-graph get-relations))
@@ -882,7 +885,7 @@
        (run-annotate (:entity models))))
 
 (defnp sentence-parse [models text]
-  (->> (update text 0 strip-parens)
+  (->> (update text 1 strip-parens)
        (apply (partial fpp-replace models))
        (run-nlp (:ner models))
        library-annotate-all
@@ -895,11 +898,12 @@
        get-sentences nlp-graph))
 
 (defnc run-nlp-full [models author text]
-  (cond-> (->> (fpp-replace models (strip-parens text) author)
-               (run-nlp-ner models)
-               (find-all-relations models)
-               get-sentences nlp-graph)
-    (coreference?) rewrite-pronouns))
+  (let [sentences (->> text strip-parens
+                       (fpp-replace models author)
+                       (run-nlp-ner models))]
+    [(->> sentences (find-all-relations models)
+          get-sentences nlp-graph)
+     (->> sentences get-sentences (map add-hyperlinks))]))
 
 (defn run-nlp-openie [{:keys [ner mention openie] :as models} text]
   (->> text (run-nlp-ner models) (run-annotate openie)

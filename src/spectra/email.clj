@@ -95,7 +95,7 @@
    :coref ((nlp/get-coref-fn))})
 
 (defn fetch-body [id]
-  (->> [[s/email-body] [s/email-from s/s-name]]
+  (->> [[s/email-from s/s-name] [s/email-body]]
        (mlrecon/fetch-paths id) (map first)))
 
 (defn email-sentences [n]
@@ -251,14 +251,41 @@
        (map #(update % 0 map-int))
        (mapv vec) (into {})))
 
+(defn append-hyperlink [[graph message] link-node]
+  [(loom/add-edge graph [message link-node s/email-mentions])
+   message])
+
+(defn append-hyperlinks [graph message]
+  (->> graph loom/nodes
+       (filter #(= s/hyperlink (s/type-label %)))
+       (reduce append-hyperlink [graph message])
+       first))
+
+(defn link-message [[graph message] [orig linked]]
+  (let [new-message (->> #(str/replace-first % orig linked)
+                         (update message s/email-body))]
+    [(loom/replace-node graph message new-message) new-message]))
+
+(defn link-message-all [graph message linked-text]
+  (->> linked-text (reduce link-message [graph message]) first))
+
+(defn remove-metadata [graph node]
+  (->> (dissoc node s/link-text s/hash-code)
+       (loom/replace-node graph node)))
+
+(defn remove-all-metadata [graph]
+  (->> graph loom/nodes (filter #(contains? % s/hash-code))
+       (reduce remove-metadata graph)))
+
 (defn make-nlp-chain [models message chain]
   (when (-> message s/email-body nil-or-empty? not)
-    (let [nlp-result
+    (let [[graph linked-text]
           (->> message s/email-body
                (nlp/run-nlp-full models (author-name chain message)))]
-      (when (-> nlp-result loom/nodes empty? not)
-        (->> nlp-result append-hyperlinks
-             (conj [chain]) loom/merge-graphs)))))
+      (when (-> graph loom/nodes empty? not)
+        (-> (append-hyperlinks graph message)
+            (link-message-all message linked-text)
+            remove-all-metadata)))))
 
 (defn use-nlp [models message chain]
   (when-let [nlp-chain (make-nlp-chain models message chain)]
@@ -277,11 +304,11 @@
        $ (->> s/has-type (loom/select-edges $) (map second))))))
 
 (defn graph-from-id [models id]
-  (let [vals (fetch-body id)
-        message {s/type-label s/email :id id s/email-body (first vals)}]
-    (->> [message {s/s-name (second vals)} s/email-from]
+  (let [[name body] (fetch-body id)
+        message {s/type-label s/email :id id s/email-body body}]
+    (->> [message {s/s-name name} s/email-from]
          vector (loom/build-graph [])
-         (use-nlp models message))))
+         (make-nlp-chain models message))))
 
 (defn body-query []
   (str "MATCH (root)-[r:" (neo4j/esc-token s/email-body)
@@ -302,10 +329,7 @@
 (defn run-email-nlp! [models {:keys [id] :as email}]
   (if-let [graph (graph-from-id models id)]
     (insert/push-graph!
-     (loom/remove-nodes
-      graph (->> (loom/select-edges graph s/email-from)
-                 (map second)))
-     (s/user email) s/nlp-src
+     graph (s/user email) s/nlp-src
      (conj (delete-email-body id) (remove-nonlp id)))
     (-> id remove-nonlp neo4j/cypher-query)))
 
