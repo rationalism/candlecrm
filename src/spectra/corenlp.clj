@@ -839,19 +839,6 @@
      $ (filter #(lonely? g %)
                (loom/up-nodes g (pronoun-node))))))
 
-(defn count-schema [freq-count]
-  (let [schema (->> s/schema-map vals distinct sort vec)]
-    (zipmap schema
-            (map #(if (contains? freq-count %)
-                    (freq-count %) 0) schema))))
-
-(defn parse-sentence? [sentence]
-  (->> sentence vector number-items
-       (map sentence-graph) first
-       loom/edges (filter #(= (third %) s/has-type))
-       (map second) frequencies count-schema
-       sort (mapv second)))
-
 (defn nlp-graph [parsed-text]
   (cond->
       (->> parsed-text number-items
@@ -877,9 +864,9 @@
   (->> (update text 0 strip-parens)
        (apply (partial fpp-replace models))
        (run-nlp (:ner models))
-       library-annotate-all
-       (run-annotate (:mention models))
-       (run-annotate (:entity models))
+       #_ library-annotate-all
+       #_ (run-annotate (:mention models))
+       #_ (run-annotate (:entity models))
        get-sentences))
 
 (defnc run-nlp-default [models text]

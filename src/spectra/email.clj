@@ -102,7 +102,7 @@
   (let [models (nlp-models-fn)]
     (->> (queries/email-for-nlp n)
          (map :id) (map fetch-body) (map vec) distinct
-         (pmap #(nlp/sentence-parse models %))
+         (map #(nlp/sentence-parse models %))
          (apply concat) shuffle vec)))
 
 (defn date-sentence? [sentence]
@@ -283,6 +283,7 @@
     (let [nlp-result
           (->> message s/email-body
                (nlp/run-nlp-full models (author-name chain message)))]
+      (loom/display-graph nlp-result)
       (when (-> nlp-result loom/nodes empty? not)
         (->> nlp-result append-hyperlinks
              (conj [chain]) loom/merge-graphs)))))
