@@ -84,6 +84,9 @@
 (defn zipvec [a b]
   (map vector a b))
 
+(defn rconj [a b]
+  (conj b a))
+
 (defn echo [x]
   (println "Echo!") x)
 

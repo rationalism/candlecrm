@@ -46,6 +46,7 @@
 (def geocode :geocode)
 (def street-addr :street-addr)
 (def zipcode :zipcode)
+(def building :building)
 
 (def organization :org)
 (def person-name :person-name)
@@ -78,6 +79,8 @@
 (def link-to :link-to)
 (def link-id :link-id)
 (def has-link :has-link)
+(def link-text :link-text)
+(def hash-code :hash-code)
 
 (def webpage :webpage)
 (def url :url)
@@ -161,9 +164,13 @@
                    "PersonPhone" phone-num "OrgPhone" phone-num
                    "PersonWebsite" website "OrgWebsite" website})
 
+(def is-attr [start-time stop-time duration event-type
+              event-cost website event-time phone-num])
+
 (def entity-map {person-name person org-name organization
                  email-addr person phone-num person
-                 loc-name location date-time event})
+                 loc-name location date-time event
+                 street-addr building})
 
 (def relation-types {[date-time time] ["EventStart" "EventStop" "EventTime"]
                      [date-time duration] ["EventDuration"]

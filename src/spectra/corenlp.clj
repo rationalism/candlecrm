@@ -379,17 +379,14 @@
   (loom/merge-graphs
    (map chain-graph coref)))
 
-(defn ner-node [entity]
-  (vec (get-tokens entity)))
-
-(defn ner-edge [entity]
-  (when-let [schema-type (-> entity entity-type s/schema-map)]
-    (vector (ner-node entity) schema-type s/has-type)))
-
 (defn ner-graph [entity]
-  (when (ner-edge entity)
-    (loom/build-graph (list (ner-node entity))
-                      (list (ner-edge entity)))))
+  (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
+    (loom/build-graph [{s/type-label node-type
+                        (-> entity .getType s/schema-map)
+                        (.getExtentString entity)
+                        s/link-text (.getExtentString entity)
+                        s/hash-code (.hashCode entity)}]
+                      [])))
 
 (defn triple-nodes [triple]
   (mapv vec [(.-subject triple) (.-object triple)]))
@@ -703,7 +700,7 @@
             (concat sets) (recur (rest coll))))))
 
 (defn all-ner-graph [sentence]
-  (->> (entity-mentions sentence)
+  (->> (relation-mentions sentence)
        (map ner-graph) (remove nil?)
        loom/merge-graphs))
 
@@ -711,7 +708,7 @@
   (let [rel-set (->> s/relation-types keys (map set) set)
         rel-map (->> s/relation-types keys (apply concat) distinct
                      (mapv #(vector % %)) (into {}))
-        nodes (->> sentence all-ner-graph loom/nodes)]
+        nodes (->> sentence all-ner-graph loom/nodes (mapv s/hash-code))]
     (->> (map rel-map nodes) (remove nil?) distinct
          cartesian-product (cset/intersection rel-set) empty?
          (vector (-> #{s/email-addr} (some nodes) boolean))
@@ -769,24 +766,28 @@
        (map get-sentences) (map first)
        make-doc add-heads get-sentences))
 
-(defn relation-graph [relation]
-  (->> relation (.getEntityMentionArgs) 
-       (map #(.getExtentString %)) reverse
-       (concat (-> relation (.getType) s/relation-map vector))
-       reverse vec vector (loom/build-graph [])))
+(defn relation-graph [ner-graph relation]
+  (let [rel-type (-> relation .getType s/relation-map)
+        graph-map (zipmap (mapv s/hash-code (loom/nodes ner-graph))
+                          (loom/nodes ner-graph))
+        old-node (->> relation .getEntityMentionArgs
+                      first .hashCode graph-map)]
+    (if (some #{rel-type} s/is-attr)
+      (->> relation .getEntityMentionArgs second .getExtentString
+           vector (hash-map rel-type) (merge-with concat old-node)
+           (loom/replace-node ner-graph old-node))
+      (->> relation .getEntityMentionArgs (map #(.hashCode %))
+           (map graph-map) (rconj rel-type) vector
+           (loom/add-edges ner-graph)))))
 
-(defn relations-graph [relations]
+(defn relations-graph [ner-graph relations]
   (->> relations (remove #(-> % (.getType) (= "_NR")))
-       (map relation-graph) loom/merge-graphs))
+       (reduce relation-graph ner-graph)))
 
 (defnp sentence-graph [sent-pair]
-  (-> (loom/merge-graphs
-       [(-> sent-pair val get-relations relations-graph)
-        (-> sent-pair val all-ner-graph)])
-      #_ (breakup-node (key sent-pair))
-      #_ trampoline #_ recursion-cleanup
-      (dedup-graph (key sent-pair))
-      stringify-graph))
+  (apply relations-graph
+         ((juxt all-ner-graph get-relations)
+          (val sent-pair))))
 
 (defn shorten-node [node]
   (hash-map (subs (key node) 0 5) (val node)))
@@ -864,9 +865,9 @@
   (->> (update text 0 strip-parens)
        (apply (partial fpp-replace models))
        (run-nlp (:ner models))
-       #_ library-annotate-all
-       #_ (run-annotate (:mention models))
-       #_ (run-annotate (:entity models))
+       library-annotate-all
+       (run-annotate (:mention models))
+       (run-annotate (:entity models))
        get-sentences))
 
 (defnc run-nlp-default [models text]
@@ -888,9 +889,9 @@
   (str/replace text #" [,\.']" #(subs %1 1)))
 
 (defn nlp-names [graph]
-  (->> (loom/select-edges graph s/has-type)
-       (filter #(some #{(second %)} [s/person-name s/org-name]))
-       distinct))
+  (->> graph loom/nodes
+       (filter #(some #{(s/hash-code %)} [s/person-name s/org-name]))
+       (map s/link-text) distinct))
 
 (defn correct-case [text]
   (->> (str/lower-case text)
