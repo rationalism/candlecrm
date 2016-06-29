@@ -890,7 +890,7 @@
 
 (defn nlp-names [graph]
   (->> graph loom/nodes
-       (filter #(some #{(s/hash-code %)} [s/person-name s/org-name]))
+       (filter #(some #{(s/type-label %)} [s/person s/organization]))
        (map s/link-text) distinct))
 
 (defn correct-case [text]

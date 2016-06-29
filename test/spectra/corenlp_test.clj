@@ -1,5 +1,6 @@
 (ns spectra.corenlp-test
   (:require [clojure.test :refer :all]
+            [spectra.common :refer :all]
             [spectra.loom :as loom]
             [spectra_cljc.schema :as s]
             [clojure.set :as set]
@@ -19,13 +20,12 @@
 
 (deftest nlp
   (testing "all types of entities"
-    (let [entities (as-> wikipedia-blurb $
-                     (run-nlp-default models $)
-                     (loom/select-edges $ s/has-type)
-                     (map #(hash-map (second %) (vector (first %))) $)
-                     (apply merge-with concat $))]
-      (is (set/subset? wikipedia-people (set (s/person-name entities))))
-      (is (set/subset? wikipedia-locations (set (s/loc-name entities))))))
+    (let [entities (->> wikipedia-blurb (run-nlp-default models) loom/nodes
+                        (map #(hash-map (s/type-label %)
+                                        (vector (s/link-text %))))
+                        (apply merge-with concat))]
+      (is (set/subset? wikipedia-people (set (s/person entities))))
+      (is (set/subset? wikipedia-locations (set (s/location entities))))))
   (testing "empty set"
     (def empty-graph (loom/build-graph [] []))
     (is (= empty-graph (run-nlp-default models "")))))
@@ -40,8 +40,9 @@
 
 (deftest email-name
   (testing "Get a name from an email"
-    (is (= ["Michael Vassar" s/person-name s/has-type]
-           (name-from-email models "michael.vassar@gmail.com")))))
+    (is 
+     (= "Michael Vassar"
+        (name-from-email models "michael.vassar@gmail.com")))))
 
 (deftest fix-case
   (testing "Fix the case of text"
