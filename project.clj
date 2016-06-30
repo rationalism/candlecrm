@@ -90,12 +90,12 @@
               {:dev
                {:source-paths ["src/spectra_cljs" "src/spectra_cljc"]
                 :figwheel {:websocket-url "wss://localhost:3450/figwheel-ws"}
-                :compilerx {:main "spectra_cljs.init"
-                            :asset-path "/js/main"
-                            :output-dir "resources/public/js/main"
-                            :output-to "resources/public/js/main.js"
-                            :optimizations :none
-                            :pretty-print true}}
+                :compiler {:main "spectra_cljs.init"
+                           :asset-path "/js/main"
+                           :output-dir "resources/public/js/main"
+                           :output-to "resources/public/js/main.js"
+                           :optimizations :none
+                           :pretty-print true}}
                :login
                {:source-paths ["src/spectra_login"]
                 :compiler {:main "spectra_login.login"
