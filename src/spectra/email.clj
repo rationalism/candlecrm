@@ -20,7 +20,7 @@
              :refer (pspy pspy* profile defnp p p*)]))
 
 (def nlp-threads 1)
-(def batch-size 50)
+(def batch-size 10)
 
 (defonce nlp-channel (atom nil))
 
