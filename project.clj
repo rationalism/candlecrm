@@ -32,7 +32,7 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.1-SNAPSHOT"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1-SNAPSHOT"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.4.3"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.4.4"]
                  [org.deeplearning4j/deeplearning4j-core "0.4-rc3.10"
                   :exclusions [com.fasterxml.jackson.core/jackson-core
                                org.apache.commons/commons-compress
@@ -62,7 +62,7 @@
                  [reagent-forms "0.5.24"]
                  [org.apache.commons/commons-math3 "3.6.1"]
                  [org.bitbucket.cowwoc/diff-match-patch "1.1"]
-                 [org.seleniumhq.selenium/selenium-java "2.53.0"]
+                 [org.seleniumhq.selenium/selenium-java "2.53.1"]
                  [com.cemerick/piggieback "0.2.1"
                   :exclusions [com.google.guava/guava]]
                  [figwheel-sidecar "0.5.4-5"]
