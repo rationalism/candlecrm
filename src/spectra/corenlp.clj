@@ -134,7 +134,8 @@
   (get-copy-fn coref-annotators))
 
 (defn rel-from-file [filename]
-  (BasicRelationExtractor/load filename))
+  (doto (BasicRelationExtractor/load filename)
+    (.setLoggerLevel Level/WARNING)))
 
 (defn serialize-rel-models [dir models]
   (mapv #(.save (val %) (->> % key (map name) (interpose "_")
@@ -165,9 +166,9 @@
 
 ;; Use this like a pipeline, as prep for relation extractor
 (defn entity-extractor []
-  (let [extractor (BasicEntityExtractor. nil false nil false
-                                         (EntityMentionFactory. ) true)]
-    (.setLoggerLevel extractor Level/WARNING) extractor))
+  (doto (BasicEntityExtractor. nil false nil false
+                               (EntityMentionFactory. ) true)
+    (.setLoggerLevel Level/WARNING)))
 
 (defnp run-nlp [pipeline text]
   (let [parsed-text (Annotation. text)]
@@ -250,9 +251,10 @@
    false))
 
 (defn relation-extractor []
-  (MachineReading/makeRelationExtractor
-   BasicRelationExtractor (feature-factory) false
-   (RelationMentionFactory. )))
+  (doto (MachineReading/makeRelationExtractor
+         BasicRelationExtractor (feature-factory) false
+         (RelationMentionFactory. ))
+    (.setLoggerLevel Level/WARNING)))
 
 (defn blank-relation [^ExtractionObject sub ^ExtractionObject obj]
   (RelationMention/createUnrelatedRelation
