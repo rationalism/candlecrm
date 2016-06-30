@@ -87,8 +87,8 @@
   :resource-paths ["config" "resources"]
   :source-paths ["src"]
   :cljsbuild {:builds
-              [{:id "dev"
-                :source-paths ["src/spectra_cljs" "src/spectra_cljc"]
+              {:dev
+               {:source-paths ["src/spectra_cljs" "src/spectra_cljc"]
                 :figwheel {:websocket-url "wss://localhost:3450/figwheel-ws"}
                 :compiler {:main "spectra_cljs.init"
                            :asset-path "/js/main"
@@ -96,15 +96,14 @@
                            :output-to "resources/public/js/main.js"
                            :optimizations :none
                            :pretty-print true}}
-               {:id "login"
-                :source-paths ["src/spectra_login"]
+               :login
+               {:source-paths ["src/spectra_login"]
                 :compiler {:main "spectra_login.login"
                            :asset-path "/js/login"
                            :output-dir "resources/public/js/login"
                            :output-to "resources/public/js/login.js"
                            :optimizations :none
-                           :pretty-print true}}]}
-  
+                           :pretty-print true}}}}
   :repl-options {:init (do (set! *print-length* 60) (-main))
                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
   :main spectra.web
