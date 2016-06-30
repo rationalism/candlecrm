@@ -21,8 +21,8 @@
     (def g2 (loom/build-graph [message2 author]
                               [[message2 author s/email-from]]))
 
-    (def r1 (use-nlp nlp-models message1 g1))
-    (def r2 (use-nlp nlp-models message2 g2))
+    (def r1 (make-nlp-chain nlp-models message1 g1))
+    (def r2 (make-nlp-chain nlp-models message2 g2))
     (is r1)
     (is (not r2))))
 

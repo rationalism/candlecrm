@@ -12,7 +12,6 @@
             [spectra.neo4j :as neo4j]
             [spectra.corenlp :as nlp]
             [spectra.queries :as queries]
-            [spectra.recon :as recon]
             [spectra.regex :as regex]
             [spectra.weka :as weka]
             [spectra_cljc.schema :as s]
@@ -24,66 +23,9 @@
 
 (defonce nlp-channel (atom nil))
 
-(defn import-label [chain edge]
-  (if (-> edge first map? not)
-    (loom/replace-node chain (first edge) (nlp/label-edge edge))
-    chain))
-
-(defn hash-brackets [m text]
-  (str "<node " (get m text) ">" text "</node>"))
-
-(defn hyperlink-text [text mentions]
-  (if (nil-or-empty? mentions) text
-      (str/replace text (-> mentions keys regex/regex-or)
-                   (partial hash-brackets mentions))))
-
-(defn mention-nodes [chain]
-  (filter #(loom/out-edge-label chain % s/has-type)
-          (loom/nodes chain)))
-
-(defn hyperlink-nodes [chain]
-  (filter #(loom/out-edge-label chain % s/link-to)
-          (loom/nodes chain)))
-
-(defn map-interval [interval]
-  {s/start-time (first interval)
-   s/stop-time (second interval)})
-
-(defn normalize-event [event time-ref]
-  (cond
-    (contains? event s/date-time)
-    (as-> event $
-      (get $ s/date-time) (dt/dates-in-text $ time-ref)
-      (first $) (assoc event s/start-time $)
-      (dissoc $ s/date-time))
-    (contains? event s/time-interval)
-    (-> event (get s/time-interval) (dt/intervals-in-text time-ref)
-        first map-interval (merge (dissoc event s/time-interval)))
-    :else event))
-
-(defn parse-datetime [chain event]
-  (if (-> event s/date-time type (= java.util.Date)) chain
-      (->> (loom/in-edge-label chain event s/email-mentions)
-           first s/email-sent (normalize-event event)
-           (loom/replace-node chain event))))
-
 (defn author-name [chain message]
   (-> (loom/out-edge-label chain message s/email-from)
       second (.get (name s/s-name))))
-
-(defn append-hyperlinks [chain]
-  (->> chain mention-nodes
-       (map #(vector {s/link-id (rnd/base64 6)
-                      s/type-label s/hyperlink}
-                     % s/link-to))
-       (loom/add-edges chain)))
-
-(defn link-pair [[e1 e2]]
-  (hash-map e2 (s/link-id e1)))
-
-(defn link-map [chain]
-  (->> (loom/select-edges chain s/link-to)
-       (map link-pair) (apply merge)))
 
 (defn nlp-models-fn []
   {:ner ((nlp/get-ner-fn))
@@ -130,10 +72,6 @@
        (map #(str (first %) " (" (second %) ")"))
        add-ids (map #(str (first %) ": " (second %)))
        (str/join "\n") println))
-
-(defn addr-sentences [sentences]
-  (->> sentences (map get-tokens) distinct
-       (filter #(->> % (str/join " ") regex/might-have-addr?))))
 
 (defn number-tokens [tokens]
   (->> tokens count range (zipvec tokens)
@@ -246,11 +184,6 @@
        (str/join "\n\n") (spit-append filename))
   (def known-tokens (atom [])))
 
-(defn known-rel-map [rels]
-  (->> rels (map (juxt drop-last last))
-       (map #(update % 0 map-int))
-       (mapv vec) (into {})))
-
 (defn append-hyperlink [[graph message] link-node]
   [(loom/add-edge graph [message link-node s/email-mentions])
    message])
@@ -286,22 +219,6 @@
         (-> (append-hyperlinks graph message)
             (link-message-all message linked-text)
             remove-all-metadata)))))
-
-(defn use-nlp [models message chain]
-  (when-let [nlp-chain (make-nlp-chain models message chain)]
-    (as-> nlp-chain $
-      (loom/add-edges $ (->> $ hyperlink-nodes
-                             (map #(vector message % s/has-link))))
-      (loom/replace-node $ message
-                         (->> (link-map $)
-                              (hyperlink-text (s/email-body message))
-                              (assoc message s/email-body)))
-      (reduce import-label $ (loom/select-edges $ s/has-type))
-      (reduce parse-datetime $ (->> $ loom/nodes
-                                    (filter #(= s/event (:label %)))))
-      (reduce recon/remove-dupes $ [s/email-addr s/phone-num s/s-name])
-      (loom/remove-nodes
-       $ (->> s/has-type (loom/select-edges $) (map second))))))
 
 (defn graph-from-id [models id]
   (let [[name body] (fetch-body id)

@@ -51,7 +51,6 @@
           ["depparse" "natlog" "openie"]))
 (def parse-annotators ["parse"])
 (def coref-annotators ["dcoref"])
-(def openie-annotators ["depparse" "natlog" "openie"])
 (def truecase-annotators
   (concat token-annotators ["truecase"]))
 
@@ -128,9 +127,6 @@
 (defn get-tokenize-fn []
   (get-copy-fn sentence-annotators))
 
-(defn get-openie-fn []
-  (get-copy-fn openie-annotators))
-
 (defn get-parse-fn []
   (get-copy-fn parse-annotators))
 
@@ -172,11 +168,6 @@
   (let [extractor (BasicEntityExtractor. nil false nil false
                                          (EntityMentionFactory. ) true)]
     (.setLoggerLevel extractor Level/WARNING) extractor))
-
-(defn openie-models-fn []
-  {:ner ((get-ner-fn))
-   :mention ((get-mention-fn))
-   :openie ((get-openie-fn))})
 
 (defnp run-nlp [pipeline text]
   (let [parsed-text (Annotation. text)]
@@ -287,97 +278,9 @@
        (map char-token-map)
        (apply merge)))
 
-(defn boundary-vector [word start]
-  (vector start (+ start (count word))))
-
-(defn last-boundaries [boundaries sentence]
-  (if (nil-or-empty? boundaries)
-    (.get sentence CoreAnnotations$CharacterOffsetBeginAnnotation)
-    (-> boundaries last second)))
-
-(defn boundaries-detect [sentence word]
-  (loop [text (str sentence)
-         boundaries []]
-    (let [pieces (->> word regex/regex-escape re-pattern
-                      (str/split text) first)]
-      (if (not= text pieces)
-        (recur (->> pieces count (+ (count word)) (subs text))
-               (->> pieces count (+ (last-boundaries boundaries sentence))
-                    (boundary-vector word) (conj boundaries)))
-        boundaries))))
-
-(defn chain-sentences [chain]
-  (->> (keys (.getMentionMap chain))
-       (map #(.getSource %))
-       distinct))
-
-(defn chain-maps [chain]
-  (->> chain chain-sentences
-       (map #(hash-map % [chain]))))
-
-(defn bucket-coref [coref]
-  (->> coref (mapcat chain-maps)
-       (apply merge-with concat)))
-
 (defn number-items [items]
   (zipmap (map inc (range (count items)))
           items))
-
-(defn pronoun? [tokens]
-  (cond
-    (not= (count tokens) 1) false
-    (some #(= % (-> tokens first get-pos))
-          pronoun-parts) true
-    :else false))
-
-(defn pos-hash [pos-list]
-  (->> (map #(mapv str %) pos-list)
-       (map #(str/join " " %))
-       (str/join " ") sha1))
-
-(defn tokens-pos [sent-num tokens]
-  (map #(vector sent-num (.index %)) tokens))
-
-(defn tokens-pos-map [sent-num tokens]
-  (zipmap (->> tokens count inc (range 1)
-               (map #(vector sent-num %)))
-          (tokens-pos sent-num tokens)))
-
-(defn tokens-str [tokens]
-  (->> tokens (map get-text) (str/join " ")))
-
-(defn mention-hash [mention]
-  (->> (range (.startIndex mention)
-              (.endIndex mention))
-       (map str)
-       (map #(str (.sentNum mention) " " %))
-       (str/join " ") sha1))
-
-(defn filter-singles [nodes]
-  (if (< (count nodes) 2) '() nodes))
-
-(defn chain-nodes [chain]
-  (->> chain (.getMentionMap) vals
-       (mapcat #(into '() %))
-       (map #(.mentionSpan %))
-       filter-singles))
-
-(defn root-node [chain]
-  (as-> (.getRepresentativeMention chain) $
-    (.mentionSpan $)))
-
-(defn chain-edges [chain]
-  (->> chain chain-nodes
-       (map #(vector % (root-node chain) s/coref-is))
-       (remove #(= (nth % 0) (nth % 1)))))
-
-(defn chain-graph [chain]
-  (loom/build-graph (chain-nodes chain)
-                    (chain-edges chain)))
-
-(defn coref-graph [coref]
-  (loom/merge-graphs
-   (map chain-graph coref)))
 
 (defn ner-graph [entity]
   (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
@@ -395,176 +298,6 @@
 
 (defnc add-links [g]
   (reduce add-link g (loom/nodes g)))
-
-(defn triple-nodes [triple]
-  (mapv vec [(.-subject triple) (.-object triple)]))
-      
-(defn triple-edge [triple]
-  (conj (triple-nodes triple)
-        (.relationLemmaGloss triple)))
-
-(defn triple-graph [triple]
-  (loom/build-graph (triple-nodes triple)
-                    (list (triple-edge triple))))
-
-(defn triples-graph [triples]
-  (->> (map triple-graph triples)
-       loom/merge-graphs))
-
-(defn attach-pos-map [sent-num tokens g]
-  (loom/attach-all
-   g (loom/nodes g)
-   (tokens-pos-map sent-num tokens)
-   s/pos-map))
-
-(defn recursive-graph [sent-num tokens triples]
-  (when (seq triples)
-    (->> triples triples-graph
-         (attach-pos-map sent-num tokens))))
-  
-(defn recursive-triples [{:keys [ner mention openie]}
-                         sent-num tokens]
-  (->> tokens tokens-str (run-nlp ner)
-       (run-annotate mention) (run-annotate openie)
-       get-sentences first get-triples
-       (recursive-graph sent-num tokens)))
-
-(defn scanned? [g node]
-  (-> (loom/labeled-edges g node s/scanned)
-      (concat (loom/labeled-edges g node s/has-type))
-      empty? not))
-
-(defn tokens? [tokens]
-  (cond (not (coll? tokens)) false
-        :else (every? identity (map #(= CoreLabel (type %)) tokens))))
-
-(defn pos-map-node [g node]
-  (->> (loom/labeled-edges g node s/pos-map)
-       (map #(nth % 1)) first))
-
-(defn pos-map-only [g]
-  (pos-map-node g (first (loom/nodes g))))
-  
-(defn node-hash [g node sent-num]
-  (if-let [pos-map (pos-map-node g node)]
-    (->> node (tokens-pos sent-num)
-         (map pos-map) pos-hash)
-    (pos-hash (tokens-pos sent-num node))))
-
-(defn find-dupes [g sent-num]
-  (->> (loom/nodes g) (filter tokens?)
-       (group-by #(node-hash g % sent-num))
-       vals (filter #(> (count %) 1))))
-
-(defn remove-dupes [g [fdupes & rdupes]]
-  (reduce (fn [a b]
-            (loom/replace-node a b fdupes))
-          (loom/remove-edges
-           g (mapcat #(loom/labeled-edges g % s/pos-map)
-                     rdupes))
-          rdupes))
-
-(defn dedup-graph [g sent-num]
-  (if-let [dupes (find-dupes g sent-num)]
-    (reduce remove-dupes g dupes) g))
-
-(defn highest-fanout [g]
-  (->> (loom/nodes g) (filter tokens?)
-       (sort-by #(loom/count-downstream g %) >)
-       first))
-
-(defn attach-scanned [g edit]
-  (loom/attach-all
-   g (vector (first (keys edit)))
-   "yes" s/scanned))
-
-(defn scanned-edits [edits]
-  (take-while #(-> % vals first nil?) edits))
-
-(defn pos-map-edit [g pos-map]
-  (loom/replace-node
-   g (pos-map-only g)
-   (compose-maps (pos-map-only g) pos-map)))
-
-(declare edit-graph breakup-node)
-
-(defn edit-graph [g sent-num edits]
-  (cond
-    (empty? edits) g
-    (-> edits first vals first nil? not)
-    (let [new-graph (-> edits first vals first)
-          old-node (-> edits first keys first)]
-      #(breakup-node 
-        (-> (if-let [pos-map (pos-map-node g old-node)]
-              (pos-map-edit new-graph pos-map)
-              new-graph)
-            vector
-            (conj (loom/remove-edges
-                   g (loom/labeled-edges
-                      g old-node s/pos-map)))
-            loom/merge-graphs
-            (loom/replace-node
-             old-node
-             (highest-fanout new-graph))
-            (dedup-graph sent-num))
-        sent-num))
-    :else #(breakup-node
-            (reduce attach-scanned
-                    g (scanned-edits edits))
-            sent-num)))
-
-(defn breakup-node-impl [g sent-num]
-  (->> (loom/nodes g) (filter tokens?)
-       (remove #(scanned? g %))
-       (filter #(> (count %) 1)) loom/sort-nodes
-       (map #(hash-map % (recursive-triples sent-num %)))))
-
-(defn breakup-node [g sent-num]
-  #(edit-graph g sent-num
-               (breakup-node-impl g sent-num)))
-
-(defn recursion-cleanup [g]
-  (as-> g $
-    (loom/remove-edges-label $ s/scanned)
-    (loom/remove-edges-label $ s/pos-map)
-    (loom/remove-nodes $ (loom/loners $))))
-
-(defn stringify-node [node]
-  (if (tokens? node) (tokens-str node) node))
-
-(defn string-vector [[e1 e2 e3]]
-  [(stringify-node e1) (stringify-node e2) e3])
-
-(defn stringify-graph [g]
-  (loom/build-graph
-   (map stringify-node (loom/nodes g))
-   (->> g loom/edges (map string-vector))))
-
-(defn pronoun-node []
-  (let [pr "!PRONOUN!"]
-    (hash-map (sha1 pr) pr)))
-
-(defn pronoun-edge [node]
-  [node (pronoun-node) s/has-type])
-
-(defn pronoun-graph [nodes]
-  (->> (map pronoun-edge nodes)
-       (loom/build-graph nodes)))
-
-(def label-correction {s/person-name s/s-name s/org-name s/s-name
-                       s/loc-name s/s-name s/email-addr s/email-addr
-                       s/phone-num s/phone-num s/date-time s/date-time
-                       s/amount s/amount s/time-interval s/time-interval
-                       s/url s/url})
-
-(defn format-value [[e1 e2]]
-  (let [new-label (label-correction e2)]
-    (if (some #{new-label} s/repeated-attr)
-      (vector e1) e1)))
-
-(defn label-edge [edge]
-  {(label-correction (second edge)) (format-value edge)
-   :label (s/attr-entity (second edge))})
 
 (defn label-annotate [label class]
   (when-let [old-class (.ner label)]
@@ -600,41 +333,6 @@
 (defn replace-all [text coll]
   (str/replace text (regex/regex-or coll) ""))
 
-(defn strip-parens [text]
-  (replace-all text ["(" ")"]))
-
-(defn is-fpp? [token]
-  (some #{(str/lower-case (get-text token))}
-        ["i" "me" "my" "mine" "myself" "i'm" "i'll" "i've"]))
-
-(defn char-pos [token]
-  [(.beginPosition token) (.endPosition token)])
-
-(defn char-ends [text coll]
-  (->> text count vector (concat [0] coll)))
-
-(defn subs-vec [text [p1 p2]]
-  (subs text p1 p2))
-
-(defn swap-fpp [author token]
-  (->> token get-text str/lower-case
-       (get {"i" author "me" author "my" (str author "'s")
-             "mine" (str author "'s") "myself" "themselves"
-             "i'm" (str author " is") "i'll" (str author " will")
-             "i've" (str author " has")})))
-
-(defn mesh-fpps [author fpps pieces]
-  (interleave pieces
-              (conj (mapv #(swap-fpp author %) fpps) "")))
-
-(defnc fpp-replace [models author text]
-  (let [fpps (->> text (run-nlp (:token models))
-                  get-tokens (filter is-fpp?))]
-    (->> (mapcat char-pos fpps)
-         (char-ends text) (partition 2)
-         (map #(subs-vec text %))
-         (mesh-fpps author fpps) (str/join ""))))
-
 (defn library-map [text]
   (loop [rem-text text lib-map {}
          attr-map attr-functions]
@@ -645,6 +343,25 @@
                  (-> (map-attr f2 found)
                      (merge lib-map))
                  rmap)))))
+
+(defn boundary-vector [word start]
+  (vector start (+ start (count word))))
+
+(defn last-boundaries [boundaries sentence]
+  (if (nil-or-empty? boundaries)
+    (.get sentence CoreAnnotations$CharacterOffsetBeginAnnotation)
+    (-> boundaries last second)))
+
+(defn boundaries-detect [sentence word]
+  (loop [text (str sentence)
+         boundaries []]
+    (let [pieces (->> word regex/regex-escape re-pattern
+                      (str/split text) first)]
+      (if (not= text pieces)
+        (recur (->> pieces count (+ (count word)) (subs text))
+               (->> pieces count (+ (last-boundaries boundaries sentence))
+                    (boundary-vector word) (conj boundaries)))
+        boundaries))))
 
 (defn token-pos-map [sentence pair]
   (->> pair key (boundaries-detect sentence)
@@ -793,6 +510,41 @@
   (->> relations (remove #(-> % (.getType) (= "_NR")))
        (reduce relation-graph ner-graph)))
 
+(defn is-fpp? [token]
+  (some #{(str/lower-case (get-text token))}
+        ["i" "me" "my" "mine" "myself" "i'm" "i'll" "i've"]))
+
+(defn char-pos [token]
+  [(.beginPosition token) (.endPosition token)])
+
+(defn char-ends [text coll]
+  (->> text count vector (concat [0] coll)))
+
+(defn subs-vec [text [p1 p2]]
+  (subs text p1 p2))
+
+(defn swap-fpp [author token]
+  (->> token get-text str/lower-case
+       (get {"i" author "me" author "my" (str author "'s")
+             "mine" (str author "'s") "myself" "themselves"
+             "i'm" (str author " is") "i'll" (str author " will")
+             "i've" (str author " has")})))
+
+(defn mesh-fpps [author fpps pieces]
+  (interleave pieces
+              (conj (mapv #(swap-fpp author %) fpps) "")))
+
+(defnc fpp-replace [models author text]
+  (let [fpps (->> text (run-nlp (:token models))
+                  get-tokens (filter is-fpp?))]
+    (->> (mapcat char-pos fpps)
+         (char-ends text) (partition 2)
+         (map #(subs-vec text %))
+         (mesh-fpps author fpps) (str/join ""))))
+
+(defn strip-parens [text]
+  (replace-all text ["(" ")"]))
+
 (defn hash-brackets [code text]
   (str "<node " code ">" text "</node>"))
 
@@ -813,66 +565,9 @@
   (->> sent-pair val ((juxt all-ner-graph get-relations))
        (apply relations-graph) add-links))
 
-(defn shorten-node [node]
-  (hash-map (subs (key node) 0 5) (val node)))
-
-(defn shorten-nodes [nodes]
-  (map #(shorten-node (first %)) nodes))
-
-(defn shorten-edge [edge]
-  (conj (map shorten-node (take 2 edge))
-        (third edge)))
-
-(defn strip-nodes [nodes]
-  (->> nodes (apply merge) vals))
-
-(defn strip-edge [edge]
-  (conj (->> (take 2 edge) (map vals) (map first))
-        (third edge)))
-
-(defn strip-graph [g]
-  (loom/build-graph
-   (->> g loom/nodes strip-nodes)
-   (->> g loom/edges (map strip-edge))))
-
-(defn lonely? [g pronoun]
-  (let [edges (loom/out-edges g pronoun)]
-    (and (= (count edges) 1)
-         (= s/has-type (third (first edges))))))
-
-(defn find-pronouns [g]
-  (->> (pronoun-node) (loom/up-nodes g)
-       (filter #(loom/out-edge-label g % s/coref-is))))
-
-(defn find-referent [g pronoun]
-  (second (loom/out-edge-label g pronoun s/coref-is)))
-
-(defn rewrite-edges [g pronoun]
-  (->> (loom/out-edges g pronoun)
-       (remove #(= s/coref-is (third %)))
-       (remove #(= s/has-type (third %)))
-       (map #(slice 1 3 %))
-       (map #(into (vector (find-referent g pronoun)) %))))
-
-(defn rewrite-pronouns [g]
-  (as-> g $
-    (loom/add-edges
-     $ (mapcat #(rewrite-edges g %) (find-pronouns g)))
-    (loom/remove-nodes
-     $ (find-pronouns g))
-    (loom/remove-nodes
-     $ (filter #(lonely? g %)
-               (loom/up-nodes g (pronoun-node))))))
-
 (defnc nlp-graph [parsed-text]
-  (cond->
-      (->> parsed-text number-items
-           (map sentence-graph) loom/merge-graphs)
-    (coreference?)
-    (vector
-     (-> parsed-text get-coref vals coref-graph))
-    (coreference?)
-    loom/merge-graphs))
+  (->> parsed-text number-items
+       (map sentence-graph) loom/merge-graphs))
 
 (defn capitalize-words [text]
   (->> (str/split text #" ")
@@ -906,10 +601,6 @@
           get-sentences nlp-graph)
      (->> sentences get-sentences (map add-hyperlinks))]))
 
-(defn run-nlp-openie [{:keys [ner mention openie] :as models} text]
-  (->> text (run-nlp-ner models) (run-annotate openie)
-       get-sentences nlp-graph))
-
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))
 
@@ -931,7 +622,3 @@
     (when (-> $ (str/split #" ") count (> 1))
       (->> $ capitalize-words (run-nlp-default models)
            nlp-names first))))
-
-(defn openie-sentence [text]
-  (let [models (openie-models-fn)]
-    (run-nlp-openie models text)))
