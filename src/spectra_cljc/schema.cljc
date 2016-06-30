@@ -9,7 +9,7 @@
 (def google-token :google-token)
 (def type-label :label)
 (def date-time :date-time)
-(def time :time)
+(def s-time :time)
 
 (def person :person)
 (def email-addr :email-addr)
@@ -107,7 +107,7 @@
 (def notmatch :notmatch)
 (def strong :strong)
 (def weak :weak)
-(def class :class)
+(def s-class :class)
 (def trainpair :trainpair)
 
 (def test-src 0)
@@ -147,7 +147,7 @@
 (def schema-map {"PERSON" person-name "LOCATION" loc-name
                  "ORGANIZATION" org-name "MONEY" amount
                  "DATETIME" date-time "EMAIL" email-addr
-                 "DATE" date-time "TIME" time
+                 "DATE" date-time "TIME" s-time
                  "PHONE" phone-num "DURATION" duration
                  "ADDRESS" street-addr "EVENT" event-type
                  "ZIPCODE" zipcode "URL" webpage})
@@ -172,7 +172,7 @@
                  loc-name location date-time event
                  street-addr building zipcode location})
 
-(def relation-types {[date-time time] ["EventStart" "EventStop" "EventTime"]
+(def relation-types {[date-time s-time] ["EventStart" "EventStop" "EventTime"]
                      [date-time duration] ["EventDuration"]
                      [date-time person-name] ["EventFeatures" "EventAttend"]
                      [date-time org-name] ["EventOrg"]

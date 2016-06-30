@@ -215,7 +215,7 @@
        first (map vec) (mapv prn)))
 
 (defn train-pair-graph [class id1 id2 match?]
-  (let [match-node {s/type-label s/trainpair s/class class}]
+  (let [match-node {s/type-label s/trainpair s/s-class class}]
     (loom/build-graph
      []
      (if (contains? model/conflicts class)
@@ -337,8 +337,8 @@
 
 (defn fetch-train-pairs [class]
   (let [user (-> :train-user env auth/lookup-user)]
-    (->> ["MATCH (c:" (neo4j/prop-label user s/class)
-          ")<-[:" (neo4j/esc-token s/class)
+    (->> ["MATCH (c:" (neo4j/prop-label user s/s-class)
+          ")<-[:" (neo4j/esc-token s/s-class)
           "]-(p:" (neo4j/prop-label user s/trainpair)
           ") WITH p MATCH (p)<-[r]-(a) WITH collect(["
           "ID(p), ID(a), type(r)]) AS vs RETURN vs"]
