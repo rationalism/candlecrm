@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [crypto.random :as rnd]
             [spectra.async :as async]
+            [spectra.auth :as auth]
             [spectra.common :refer :all]
             [spectra.datetime :as dt]
             [spectra.insert :as insert]
