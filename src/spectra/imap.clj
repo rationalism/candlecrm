@@ -283,8 +283,7 @@
 
 (defn pick-name [header models email]
   (when email
-    (->> header (nlp/run-nlp-default models)
-         nlp/nlp-names (map first)
+    (->> header (nlp/run-nlp-default models) nlp/nlp-names
          (mapcat #(name-locations header %))
          (map (loc-distance header email))
          (sort-by first) first second)))
