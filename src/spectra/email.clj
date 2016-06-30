@@ -19,8 +19,8 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
-(def nlp-threads 1)
-(def batch-size 10)
+(def nlp-threads 6)
+(def batch-size 12)
 
 (defonce nlp-channel (atom nil))
 
