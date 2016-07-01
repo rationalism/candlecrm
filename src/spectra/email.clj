@@ -196,7 +196,8 @@
        first))
 
 (defn link-message [graph message linked-text]
-  (->> linked-text (assoc message s/email-body)
+  (->> (assoc (dissoc message s/email-sent)
+              s/email-body linked-text)
        (loom/replace-node graph message)))
 
 (defn remove-metadata [graph node]
