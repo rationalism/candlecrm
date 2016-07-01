@@ -55,7 +55,7 @@
     (get parsed item) item))
 
 (defn link-items [item]
-  (let [parsed (-> item regex/node-parse text-keys)]
+  (let [parsed (-> item regex/links-parse text-keys)]
     (->> parsed keys (split-many item)
          (map #(swap-item % parsed)))))
 
@@ -71,8 +71,7 @@
 (defn body-link [piece]
   (if (string? piece)
     [add-newlines piece]
-    [util/key-link (:text piece) (:link piece)
-     (-> piece :link :type)]))
+    [util/key-link (:text piece) (:link piece) (:type piece)]))
 
 (defn body-links [item]
   [:p#email-body

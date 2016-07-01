@@ -14,10 +14,13 @@
    {:href "#" :on-click #(u/go-node! id type)}
    text])
 
-(defn key-link [text key]
-  [:a.go-node
-   {:href "#" :on-click #(u/go-key! key)}
-   text])
+(defn key-link [text key type]
+  (condp = type
+    :node [:a.go-node
+           {:href "#" :on-click #(u/go-key! key)}
+           text]
+    :url [:a.go-node
+          {:href key} text]))
 
 (defn set-field! [& args]
   (fn [this]
