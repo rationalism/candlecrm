@@ -287,7 +287,7 @@
 (defn ner-graph [entity]
   (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
     (loom/build-graph [{s/type-label node-type
-                        (-> entity .getType s/schema-map)
+                        (-> entity .getType s/schema-map s/label-correct)
                         (.getExtentString entity)
                         s/link-text (.getExtentString entity)
                         s/hash-code (str "hc" (.hashCode entity))}]

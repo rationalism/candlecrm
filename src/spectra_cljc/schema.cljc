@@ -172,6 +172,11 @@
                  loc-name location date-time event
                  street-addr building zipcode location})
 
+(def label-correct {person-name s-name org-name s-name
+                    loc-name s-name email-addr email-addr
+                    phone-num phone-num date-time date-time
+                    street-addr street-addr zipcode zipcode})
+
 (def relation-types {[date-time s-time] ["EventStart" "EventStop" "EventTime"]
                      [date-time duration] ["EventDuration"]
                      [date-time person-name] ["EventFeatures" "EventAttend"]
