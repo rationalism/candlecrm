@@ -1,6 +1,7 @@
 (ns spectra.corenlp-test
   (:require [clojure.test :refer :all]
             [spectra.common :refer :all]
+            [spectra.datetime :as dt]
             [spectra.loom :as loom]
             [spectra_cljc.schema :as s]
             [clojure.set :as set]
@@ -35,7 +36,7 @@
 (deftest nlp-full
   (testing "all types of entities"
     (let [entities (as-> me-blurb $
-                     (run-nlp-full models "Alyssa Vance" $))]
+                     (run-nlp-full models "Alyssa Vance" (dt/now) $))]
       (is entities))))
 
 (deftest email-name
