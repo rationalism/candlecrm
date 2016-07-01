@@ -221,7 +221,7 @@
 (defn graph-from-id [models id]
   (let [[name body sent] (fetch-body id)
         message {s/type-label s/email :id id s/email-body body
-                 s/email-sent sent}]
+                 s/email-sent (java.util.Date. sent)}]
     (->> [message {s/s-name name} s/email-from]
          vector (loom/build-graph [])
          (make-nlp-chain models message))))
