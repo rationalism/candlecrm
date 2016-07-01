@@ -25,7 +25,7 @@
 (def html-type "text/html")
 (def multi-type "multipart")
 
-(def parse-threads 1)
+(def parse-threads 6)
 (def batch-size 50)
 
 (defonce parse-channel (atom nil))
