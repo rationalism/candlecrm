@@ -6,14 +6,15 @@
 (def unique-exists-vals
   [s/email-addr s/phone-num s/birthday s/gender s/occupation s/org-member
    s/mail-address s/website s/email-subject s/email-body s/email-uid
-   s/email-received s/email-sent s/lat s/lng
-   s/start-time s/stop-time s/s-name s/link-id 
+   s/email-received s/email-sent s/lat s/lng s/date-time
+   s/start-time s/stop-time s/s-name s/street-addr s/zipcode
    ;; Special for Barry's project
    s/vendor-name s/part-name s/catalog-name s/desc1 s/desc2 s/item-cost])
 
 (def obj-types
-  [s/person s/email s/location s/organization
-   s/money s/amount s/event s/hyperlink])
+  [s/person s/email s/location s/organization s/building
+   s/money s/amount s/event s/hyperlink s/event-type s/link-id
+   ])
 
 (defn val-unique [mode user prop]
   (str mode " CONSTRAINT ON (root:"
