@@ -550,18 +550,25 @@
 (defn hash-brackets [code text]
   (str "<node " code ">" text "</node>"))
 
-(defn add-hyperlink [sentence mention]
-  (if (-> mention .getType s/schema-map s/entity-map)
-    (->> mention .getExtentString
-         (hash-brackets (str "hc" (.hashCode mention)))
-         (str/replace-first sentence (.getExtentString mention)))
-    sentence))
+(defn mention-chars [mention]
+  (let [tokens (-> mention .getSentence get-tokens vec)]
+    [(->> mention .getExtentTokenStart (nth tokens) .beginPosition)
+     (->> mention .getExtentTokenEnd dec (nth tokens) .endPosition)]))
 
-(defn add-hyperlinks [sentence]
-  (->> sentence relation-mentions
-       (sort-by #(.getHeadTokenStart %))
-       (reduce add-hyperlink (.toString sentence))
-       (vector (.toString sentence))))
+(defn mention-link [mention]
+  (->> mention .getExtentString
+       (hash-brackets (str "hc" (.hashCode mention)))))
+
+(defn mention-map [mentions]
+  (->> mentions (zipmap (map mention-chars mentions))
+       (sort-by first)))
+
+(defnc add-hyperlinks [text mentions]
+  (let [mmap (mention-map mentions)]
+    (->> mmap (mapcat first) (cons 0) (partition-all 2)
+         (map #(apply (partial subs text) %))
+         (interleave (cons "" (map mention-link mentions)))
+         (str/join ""))))
 
 (defnc sentence-graph [sent-pair]
   (->> sent-pair val ((juxt all-ner-graph get-relations))
@@ -596,12 +603,14 @@
        get-sentences nlp-graph))
 
 (defnc run-nlp-full [models author text]
-  (let [sentences (->> text strip-parens
-                       (fpp-replace models author)
-                       (run-nlp-ner models))]
+  (let [new-text (->> text strip-parens
+                      (fpp-replace models author))
+        sentences (run-nlp-ner models new-text)]
     [(->> sentences (find-all-relations models)
           get-sentences nlp-graph)
-     (->> sentences get-sentences (map add-hyperlinks))]))
+     (->> sentences get-sentences (mapcat relation-mentions)
+          (filter #(-> % .getType s/schema-map s/entity-map))
+          (add-hyperlinks new-text) debug)]))
 
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))

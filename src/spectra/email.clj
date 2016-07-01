@@ -195,13 +195,9 @@
        (reduce append-hyperlink [graph message])
        first))
 
-(defn link-message [[graph message] [orig linked]]
-  (let [new-message (->> #(str/replace-first % orig linked)
-                         (update message s/email-body))]
-    [(loom/replace-node graph message new-message) new-message]))
-
-(defn link-message-all [graph message linked-text]
-  (->> linked-text (reduce link-message [graph message]) first))
+(defn link-message [graph message linked-text]
+  (->> linked-text (assoc message s/email-body)
+       (loom/replace-node graph message)))
 
 (defn remove-metadata [graph node]
   (->> (dissoc node s/link-text s/hash-code)
@@ -218,7 +214,7 @@
                (nlp/run-nlp-full models (author-name chain message)))]
       (when (-> graph loom/nodes empty? not)
         (-> (append-hyperlinks graph message)
-            (link-message-all message linked-text)
+            (link-message message linked-text)
             remove-all-metadata)))))
 
 (defn graph-from-id [models id]
