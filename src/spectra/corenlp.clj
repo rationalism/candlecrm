@@ -610,7 +610,7 @@
           get-sentences nlp-graph)
      (->> sentences get-sentences (mapcat relation-mentions)
           (filter #(-> % .getType s/schema-map s/entity-map))
-          (add-hyperlinks new-text) debug)]))
+          (add-hyperlinks new-text))]))
 
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))
