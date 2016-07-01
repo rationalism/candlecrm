@@ -555,7 +555,7 @@
   (str "<node " code ">" text "</node>"))
 
 (defn url-brackets [url]
-  (str "<url>" text "</url>"))
+  (str "<url>" url "</url>"))
 
 (defn mention-chars [mention]
   (let [tokens (-> mention .getSentence get-tokens vec)]
