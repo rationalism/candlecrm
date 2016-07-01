@@ -554,14 +554,19 @@
 (defn hash-brackets [code text]
   (str "<node " code ">" text "</node>"))
 
+(defn url-brackets [url]
+  (str "<url>" text "</url>"))
+
 (defn mention-chars [mention]
   (let [tokens (-> mention .getSentence get-tokens vec)]
     [(->> mention .getExtentTokenStart (nth tokens) .beginPosition)
      (->> mention .getExtentTokenEnd dec (nth tokens) .endPosition)]))
 
 (defn mention-link [mention]
-  (->> mention .getExtentString
-       (hash-brackets (str "hc" (.hashCode mention)))))
+  (if (-> mention .getType s/schema-map (= s/webpage))
+    (->> mention .getExtentString url-brackets)
+    (->> mention .getExtentString
+         (hash-brackets (str "hc" (.hashCode mention))))))
 
 (defn mention-map [mentions]
   (->> mentions (zipmap (map mention-chars mentions))
@@ -610,6 +615,11 @@
   (->> text (run-nlp-ner models)
        get-sentences nlp-graph))
 
+(defn make-link? [mention]
+  (let [m-type (-> % .getType s/schema-map)]
+    (or (s/entity-map m-type)
+        (= m-type s/webpage))))
+
 (defnc run-nlp-full [models author reftime text]
   (let [new-text (->> text strip-parens
                       (fpp-replace models author))
@@ -617,8 +627,7 @@
     [(->> sentences (find-all-relations models)
           get-sentences (nlp-graph reftime))
      (->> sentences get-sentences (mapcat entity-mentions)
-          (filter #(-> % .getType s/schema-map s/entity-map))
-          (add-hyperlinks new-text))]))
+          (filter make-link?) (add-hyperlinks new-text))]))
 
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))
