@@ -79,7 +79,7 @@
                 :update/user-data {:fn queries/user-data-public
                                    :keys []}
                 :update/key-link {:fn queries/key-link
-                                  :keys [:key]}
+                                  :keys [:key :id]}
                 :update/change-password {:fn auth/set-password!
                                          :keys [:password :confirm]}
                 :update/fetch-node {:fn queries/node-by-id

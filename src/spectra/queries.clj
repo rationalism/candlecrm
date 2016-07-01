@@ -115,11 +115,14 @@
       (merge-if-exists query-map)))
 
 (defn key-link [user query-map]
-  (->> [(str "MATCH (k:" (neo4j/prop-label user s/link-id)
-             ")<-[:" (neo4j/esc-token s/link-id)
-             "]-(l)-[:" (neo4j/esc-token s/link-to)
-             "]->(root) WHERE k." (neo4j/esc-token s/value)
-             " = {key} WITH root, 0 as o" (vals-collect))
+  (->> [(str "MATCH (m:" (neo4j/prop-label user s/email)
+             ")-[:" (neo4j/esc-token s/email-mentions)
+             "]->(h:" (neo4j/prop-label user s/hyperlink)
+             ")-[:" (neo4j/esc-token s/link-id)
+             "]->(l:" (neo4j/prop-label user s/link-id)
+             ") WHERE ID(m) = {id} AND l." (neo4j/esc-token s/value)
+             " = {key} WITH h MATCH (h)-[:" (neo4j/esc-token s/link-to)
+             "]->(root) WITH root, 0 as o" (vals-collect))
         query-map]
        neo4j/cypher-query (mapv mapify-params) first))
 
