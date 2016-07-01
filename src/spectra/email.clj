@@ -38,7 +38,7 @@
    :coref ((nlp/get-coref-fn))})
 
 (defn fetch-body [id]
-  (->> [[s/email-from s/s-name] [s/email-body]]
+  (->> [[s/email-from s/s-name] [s/email-body] [s/email-sent]]
        (mlrecon/fetch-paths id) (map first)))
 
 (defn email-sentences [n]
@@ -208,18 +208,21 @@
        (reduce remove-metadata graph)))
 
 (defn make-nlp-chain [models message chain]
+  (loom/display-graph chain)
   (when (-> message s/email-body nil-or-empty? not)
     (let [[graph linked-text]
-          (->> message s/email-body
-               (nlp/run-nlp-full models (author-name chain message)))]
+          (nlp/run-nlp-full models (author-name chain message)
+                            (s/email-sent message)
+                            (s/email-body message))]
       (when (-> graph loom/nodes empty? not)
         (-> (append-hyperlinks graph message)
             (link-message message linked-text)
             remove-all-metadata)))))
 
 (defn graph-from-id [models id]
-  (let [[name body] (fetch-body id)
-        message {s/type-label s/email :id id s/email-body body}]
+  (let [[name body sent] (fetch-body id)
+        message {s/type-label s/email :id id s/email-body body
+                 s/email-sent sent}]
     (->> [message {s/s-name name} s/email-from]
          vector (loom/build-graph [])
          (make-nlp-chain models message))))

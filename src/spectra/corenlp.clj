@@ -284,11 +284,14 @@
   (zipmap (map inc (range (count items)))
           items))
 
-(defn ner-graph [entity]
+(defn ner-graph [reftime entity]
   (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
     (loom/build-graph [{s/type-label node-type
                         (-> entity .getType s/schema-map s/label-correct)
-                        (.getExtentString entity)
+                        (if (= node-type s/event)
+                          (-> entity .getExtentString
+                              (dt/dates-in-text reftime) first)
+                          (-> entity .getExtentString))
                         s/link-text (.getExtentString entity)
                         s/hash-code (str "hc" (.hashCode entity))}]
                       [])))
@@ -426,8 +429,9 @@
        (->> coll rest (map #(hash-set (first coll) %))
             (concat sets) (recur (rest coll))))))
 
-(defn all-ner-graph [sentence]
-  (->> sentence relation-mentions (map ner-graph)
+(defn all-ner-graph [reftime sentence]
+  (->> sentence relation-mentions
+       (map #(ner-graph reftime %))
        (remove nil?) loom/merge-graphs))
 
 (defn has-rel-candidates? [sentence]
@@ -570,13 +574,17 @@
          (interleave (cons "" (map mention-link mentions)))
          (str/join ""))))
 
-(defnc sentence-graph [sent-pair]
-  (->> sent-pair val ((juxt all-ner-graph get-relations))
+(defnc sentence-graph [reftime sent-pair]
+  (->> sent-pair val ((juxt #(all-ner-graph reftime %) get-relations))
        (apply relations-graph) add-links))
 
-(defnc nlp-graph [parsed-text]
-  (->> parsed-text number-items
-       (map sentence-graph) loom/merge-graphs))
+(defn nlp-graph
+  ([parsed-text]
+   (nlp-graph (dt/now) parsed-text))
+  ([reftime parsed-text]
+   (->> parsed-text number-items
+        (map #(sentence-graph reftime %))
+        loom/merge-graphs)))
 
 (defn capitalize-words [text]
   (->> (str/split text #" ")
@@ -602,12 +610,12 @@
   (->> text (run-nlp-ner models)
        get-sentences nlp-graph))
 
-(defnc run-nlp-full [models author text]
+(defnc run-nlp-full [models author reftime text]
   (let [new-text (->> text strip-parens
                       (fpp-replace models author))
         sentences (run-nlp-ner models new-text)]
     [(->> sentences (find-all-relations models)
-          get-sentences nlp-graph)
+          get-sentences (nlp-graph reftime))
      (->> sentences get-sentences (mapcat relation-mentions)
           (filter #(-> % .getType s/schema-map s/entity-map))
           (add-hyperlinks new-text))]))
