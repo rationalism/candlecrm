@@ -391,14 +391,14 @@
        (.set annotation CoreAnnotations$SentencesAnnotation))
   annotation)
 
-(defn remove-bad-dates [nodes]
-  (remove #(and (-> % entity-type s/schema-map (= s/date-time))
-                (->> % get-tokens (map get-text)
-                     (str/join " ") dt/is-bad-date?))
-          nodes))
+(defn remove-bad-dates [mentions]
+  (remove #(and (-> % .getType s/schema-map (= s/date-time))
+                (or (->> % .getExtentString dt/is-bad-date?)
+                    (->> % .getExtentString dt/dates-in-text empty?)))
+          mentions))
 
 (defn entity-mentions [sentence]
-  (remove-bad-dates (entity-mentions-raw sentence)))
+  (remove-bad-dates (relation-mentions sentence)))
 
 (defn relation-id [relation]
   (mapcat (juxt #(.getHeadTokenStart %)
@@ -410,7 +410,7 @@
     (blank-relation fm sm)))
 
 (defn split-relations [sentence]
-  (let [type-map (->> sentence relation-mentions
+  (let [type-map (->> sentence entity-mentions
                       (group-by #(-> % .getType s/schema-map)))
         rel-keys (keys s/relation-types)]
     (->> rel-keys (map #(map type-map %)) (zipmap rel-keys)
@@ -430,7 +430,7 @@
             (concat sets) (recur (rest coll))))))
 
 (defn all-ner-graph [reftime sentence]
-  (->> sentence relation-mentions
+  (->> sentence entity-mentions
        (map #(ner-graph reftime %))
        (remove nil?) loom/merge-graphs))
 
@@ -438,7 +438,7 @@
   (let [rel-set (->> s/relation-types keys (map set) set)
         rel-map (->> s/relation-types keys (apply concat) distinct
                      (mapv #(vector % %)) (into {}))
-        nodes (->> sentence relation-mentions
+        nodes (->> sentence entity-mentions
                    (map #(.getType %)) (map s/schema-map))]
     (->> (map rel-map nodes) (remove nil?) distinct
          cartesian-product (cset/intersection rel-set) empty?
@@ -616,7 +616,7 @@
         sentences (run-nlp-ner models new-text)]
     [(->> sentences (find-all-relations models)
           get-sentences (nlp-graph reftime))
-     (->> sentences get-sentences (mapcat relation-mentions)
+     (->> sentences get-sentences (mapcat entity-mentions)
           (filter #(-> % .getType s/schema-map s/entity-map))
           (add-hyperlinks new-text))]))
 

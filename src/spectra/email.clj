@@ -68,7 +68,7 @@
 
 (defn mention-display [sentence]
   (->> sentence (.toString) (str "Sentence: ") println)
-  (->> sentence nlp/relation-mentions
+  (->> sentence nlp/entity-mentions
        (map (juxt #(.getValue %) #(.getType %)))
        (map #(str (first %) " (" (second %) ")"))
        add-ids (map #(str (first %) ": " (second %)))
@@ -159,7 +159,7 @@
 
 ;; This weird map is needed to avoid crazy serialization bug
 (defn insert-rels [[sentence rels]]
-  (let [mention-map (->> sentence nlp/relation-mentions
+  (let [mention-map (->> sentence nlp/entity-mentions
                          add-ids (into {}) (repeat (count rels)))]
     (->> (map map-rel mention-map rels)
          (map nlp/set-rel-type)
