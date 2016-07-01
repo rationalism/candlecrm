@@ -208,7 +208,6 @@
        (reduce remove-metadata graph)))
 
 (defn make-nlp-chain [models message chain]
-  (loom/display-graph chain)
   (when (-> message s/email-body nil-or-empty? not)
     (let [[graph linked-text]
           (nlp/run-nlp-full models (author-name chain message)
