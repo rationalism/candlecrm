@@ -616,7 +616,7 @@
        get-sentences nlp-graph))
 
 (defn make-link? [mention]
-  (let [m-type (-> % .getType s/schema-map)]
+  (let [m-type (-> mention .getType s/schema-map)]
     (or (s/entity-map m-type)
         (= m-type s/webpage))))
 
