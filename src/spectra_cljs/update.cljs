@@ -73,8 +73,9 @@
   (send! (node-req id type) (update-node)))
 
 (defn key-req [key]
-  [:update/key-link {:key key}
-   {:id (state/look :current-node :center-node :id)}])
+  [:update/key-link
+   {:id (state/look :current-node :center-node :id)
+    :key key}])
 
 (defn go-key! [key]
   (send! (key-req key) (update-node)))

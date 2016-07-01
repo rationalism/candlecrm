@@ -13,6 +13,7 @@
 (def loc-disp [s/s-name])
 (def event-disp [s/start-time s/stop-time])
 (def money-disp [s/s-name])
+(def addr-disp [s/street-addr])
 
 (defn split-regex [s break]
   (str/split s (-> break regex/regex-escape re-pattern)))
@@ -159,6 +160,11 @@
   [:div
    [:h3.infotitle (str location-name " (Location)")]
    [info-items loc-disp item]])
+
+(defn show-building [building-name item]
+  [:div
+   [:h3.infotitle (str building-name " (Building)")]
+   [info-items addr-disp item]])
 
 (defn show-event [event-name item]
   [:div

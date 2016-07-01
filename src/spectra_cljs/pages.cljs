@@ -120,6 +120,11 @@
    (get-first (:center-node location) s/s-name)
    (:center-node location)])
 
+(defn show-building [building]
+  [node/show-building
+   (get-first (:center-node building) s/street-addr)
+   (:center-node building)])
+
 (defn show-event [event]
   [node/show-event
    (get-first (:center-node event) s/s-name)
@@ -132,7 +137,8 @@
 
 (def node-fn {s/person show-person s/email show-email
               s/organization show-organization s/location show-location
-              s/event show-event s/money show-money})
+              s/event show-event s/money show-money
+              s/building show-building})
 
 (defn node-page [node]
   [(get node-fn (:type node)) node])
