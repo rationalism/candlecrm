@@ -1,5 +1,5 @@
 (ns spectra.queries
-  (:require [clojure.set :as set]
+  (:require [clojure.set :as cset]
             [clojure.string :as str]
             [spectra.common :refer :all]
             [spectra.auth :as auth]
@@ -110,16 +110,19 @@
            (merge {:id id s/type-label type})))))
 
 (defn key-link [user query-map]
-  (->> [(str "MATCH (m:" (neo4j/prop-label user s/email)
-             ")-[:" (neo4j/esc-token s/email-mentions)
-             "]->(h:" (neo4j/prop-label user s/hyperlink)
-             ")-[:" (neo4j/esc-token s/link-id)
-             "]->(l:" (neo4j/prop-label user s/link-id)
-             ") WHERE ID(m) = {id} AND l." (neo4j/esc-token s/value)
-             " = {key} WITH h MATCH (h)-[:" (neo4j/esc-token s/link-to)
-             "]->(root) WITH root, 0 as o" (vals-collect))
-        query-map]
-       neo4j/cypher-query (mapv mlrecon/mapify-params) first))
+  (-> [(str "MATCH (m:" (neo4j/prop-label user s/email)
+            ")-[:" (neo4j/esc-token s/email-mentions)
+            "]->(h:" (neo4j/prop-label user s/hyperlink)
+            ")-[:" (neo4j/esc-token s/link-id)
+            "]->(l:" (neo4j/prop-label user s/link-id)
+            ") WHERE ID(m) = {id} AND l." (neo4j/esc-token s/value)
+            " = {key} WITH h MATCH (h)-[:" (neo4j/esc-token s/link-to)
+            "]->(root) RETURN ID(root), labels(root)")
+       query-map]
+      neo4j/cypher-query first clojure-map
+      (cset/rename-keys {"ID(root)" :id "labels(root)" :type})
+      (update :type #(-> % vec mlrecon/filter-decode-labels second))
+      (#(node-by-id user %))))
 
 (defn email-queue []
   (-> [(str "MATCH (root:" s/email-queue
@@ -150,7 +153,7 @@
              " LIMIT {limit}")
         {:queuebound 275000 :limit 1}]
        neo4j/cypher-query first clojure-map
-       (set/rename-keys {"root" :queue "u" :user})
+       (cset/rename-keys {"root" :queue "u" :user})
        (update :queue queue-data))))
 
 (defn all-scanned [user]
@@ -301,8 +304,8 @@
         {:limit limit}]
        neo4j/cypher-query (map clojure-map)
        (map #(update % "labels(root)" find-user-labels))
-       (map #(set/rename-keys % {"ID(root)" :id
-                                 "labels(root)" s/user}))))
+       (map #(cset/rename-keys % {"ID(root)" :id
+                                  "labels(root)" s/user}))))
 
 (defn users-reset-tokens []
   (->> (str "MATCH (root:" (neo4j/esc-token s/user)
