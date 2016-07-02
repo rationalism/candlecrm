@@ -151,3 +151,6 @@
 
 (defn map-int [coll]
   (map #(Integer/parseInt %) coll))
+
+(defn clojure-map [m]
+  (if m (into {} (java.util.HashMap. m)) {}))

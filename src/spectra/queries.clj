@@ -9,9 +9,6 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
-(defn clojure-map [m]
-  (if m (into {} (java.util.HashMap. m)) {}))
-
 (defn node-attrs [node]
   (merge (.asMap node) (hash-map :id (.id node))))
 

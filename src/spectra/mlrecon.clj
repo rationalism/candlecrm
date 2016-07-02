@@ -262,7 +262,8 @@
 
 (defn mapify-params [m]
   (let [params (-> m vals first)]
-    (if (or (nil? params) (empty? params))
+    (if (or (nil? params) (empty? params)
+            (every? nil? (first params)))
       nil (->> (map #(drop 2 %) params)
                (map #(hash-map
                       (keyword (first %))
@@ -285,8 +286,9 @@
 
 (defn val-clause [n1 n2]
   (let [id-node (if (= n2 1) "root" (str "b" (- n2 2) "a" n1))]
-    (str "collect([ID(" id-node "), type(r), a" n1 "."
-         (neo4j/esc-token s/value)", r]) AS b" n1)))
+    (str "collect([ID(" id-node "), labels(" id-node
+         "), type(r), a" n1 "." (neo4j/esc-token s/value)
+         ", r]) AS b" n1)))
 
 (defn id-clause [n1]
   (str "collect(ID(a" n1 ")) AS b" n1))
@@ -330,8 +332,13 @@
         " " (ret-vals (count paths)))
    {:id id}])
 
-(defn parse-paths [rs]
-  (map (comp vals first) rs))
+(defn parse-paths-general [path-rels]
+  (->> path-rels first clojure-map (map #(apply hash-map %))
+       (mapv mapify-params)))
+
+(defn parse-paths [ks path-rels]
+  (->> path-rels parse-paths-general
+       (mapv #(-> %2 %1 keys vec) ks)))
 
 (defn get-ids-path [path]
   (->> path count inc (range 1)
@@ -339,9 +346,9 @@
        (map #(conj % :id))))
 
 (defn fetch-paths [id paths]
-  (-> (fetch-paths-query id paths)
-      vector neo4j/cypher-combined-tx
-      debug parse-paths first))
+  (->> (fetch-paths-query id paths)
+       vector neo4j/cypher-combined-tx
+       first (parse-paths (map last paths))))
 
 (defn prop-diff [id1 id2 prop]
   (->> (map #(fetch-paths % [[prop]]) [id1 id2])
@@ -353,7 +360,8 @@
   (->> (mapcat get-ids-path paths)
        (fetch-paths-query id) vector
        neo4j/cypher-combined-tx
-       parse-paths (mapcat #(apply concat %))
+       (map #(parse-paths (map last paths) %))
+       (mapcat #(apply concat %))
        (concat [id])))
 
 (defn normalize-pair [pair]
@@ -379,7 +387,8 @@
 (defn fetch-all-paths [paths ids]
   (->> (map #(fetch-paths-query % paths) ids)
        neo4j/cypher-combined-tx
-       parse-paths (zipmap ids)))
+       (map #(parse-paths (map last paths) %))
+       (zipmap ids)))
 
 (defn recon-finished [user class]
   [(str "MATCH (root:" (neo4j/prop-label user class)
