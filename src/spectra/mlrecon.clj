@@ -285,12 +285,12 @@
     (if (params-ok? params)
       nil (process-params params))))
 
-(defn object-params [m]
+(defn object-params [path m]
   (let [params (-> m vals first)]
     (if (params-ok? params)
       nil (->> params (group-by first) vals
                (map process-params) dummy-map
-               (hash-map (-> params first third keyword))))))
+               (hash-map (->> path (drop-last 2) last))))))
 
 (defn one-link [n1 n2 pred]
   (str "[:" (neo4j/esc-token pred)
@@ -351,7 +351,7 @@
 
 (defn choose-process [path m]
   (if (= (last path) :id)
-    (object-params m) (mapify-params m)))
+    (object-params path m) (mapify-params m)))
 
 (defn parse-paths-general [paths path-rels]
   (->> path-rels first clojure-map (map #(apply hash-map %))
