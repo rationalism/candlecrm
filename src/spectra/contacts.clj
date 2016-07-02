@@ -4,6 +4,7 @@
             [spectra.datetime :as dt]
             [spectra.google :as google]
             [spectra.insert :as insert]
+            [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s])
   (:import [com.google.gdata.client Query]
@@ -86,9 +87,23 @@
     s/website (websites contact)
     s/org-member (organizations contact)}))
 
+(defn contact-graph [contact]
+  (let [main-node (contact->person contact)]
+    (loom/build-graph
+     [main-node]
+     (concat
+      (->> contact addresses
+           (map #(vector main-node
+                         {s/type-label s/building s/street-addr %}
+                         s/mail-address)))
+      (->> contact organizations
+           (map #(vector main-node
+                         {s/type-label s/organization s/s-name %}
+                         s/org-member)))))))
+
 (defn batch-insert! [user contacts]
-  (-> (map contact->person contacts)
-      (insert/push-entities! user s/contact-src)))
+  (->> contacts (map contact-graph)
+       (map #(insert/push-graph! % user s/contact-src))))
 
 (defn load-all-contacts! [user]
   (->> user all-contacts (batch-insert! user)))
