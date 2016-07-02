@@ -80,9 +80,22 @@
 (defn merge-if-exists [node query-map]
   (when node (merge node {:type (:type query-map)})))
 
+(def node-paths
+  {s/person [[s/s-name] [s/email-addr] [s/phone-num] [s/org-member]
+             [s/website] [s/email-to s/email-uid :id]]})
+
+(defn strip-path-id [path]
+  (if (= (last path) :id) (drop-last path) path))
+
 (defn node-by-id [user {:keys [id type] :as query-map}]
-  (-> (node-from-id user id type) first
-      (merge-if-exists query-map)))
+  (when (neo4j/node-exists? user id type)
+    (when-let [paths (node-paths type)]
+      (->> paths (map strip-path-id)
+           (mlrecon/fetch-paths-query id) vector
+           neo4j/cypher-combined-tx first
+           (mlrecon/parse-paths-general paths)
+           (map #(dissoc % :id s/type-label)) (apply merge)
+           (merge {:id id s/type-label type})))))
 
 (defn key-link [user query-map]
   (->> [(str "MATCH (m:" (neo4j/prop-label user s/email)

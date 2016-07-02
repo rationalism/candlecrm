@@ -248,32 +248,49 @@
          (mapv #(insert/push-graph! % user s/edit-src)))
     (neo4j/switch-user! user all-ids)))
 
+(defn dummy-map [objects]
+  (zipmap objects (repeat (count objects) 1.0)))
+
 (defn rank-params [[k m]]
   {k (if-let [model (@view-models k)]
        (->> (map clean-link m) accumulate-links
             (classify-links model)
             (zipmap (map first m)))
-       (-> (map first m)
-           (zipmap (repeat (count m) 1.0))))})
+       (dummy-map (map first m)))})
 
 (defn filter-decode-labels [labels]
   (->> labels (filter #(.contains % "_user_"))
        first neo4j/decode-label))
 
+(defn params-ok? [params]
+  (or (nil? params) (empty? params)
+      (every? nil? (first params))))
+
+(defn find-label [params]
+  (-> params first second
+      filter-decode-labels second))
+
+(defn process-params [params]
+  (->> (map #(drop 2 %) params)
+       (map #(hash-map
+              (keyword (first %))
+              (vector (vector (second %) (third %)))))
+       (apply merge-with concat)
+       (map rank-params) (apply merge)
+       (merge {:id (ffirst params)
+               s/type-label (find-label params)})))
+
 (defn mapify-params [m]
   (let [params (-> m vals first)]
-    (if (or (nil? params) (empty? params)
-            (every? nil? (first params)))
-      nil (->> (map #(drop 2 %) params)
-               (map #(hash-map
-                      (keyword (first %))
-                      (vector (vector (second %) (third %)))))
-               (apply merge-with concat)
-               (map rank-params) (apply merge)
-               (merge {:id (ffirst params)
-                       s/type-label (-> params first second
-                                        filter-decode-labels
-                                        second)})))))
+    (if (params-ok? params)
+      nil (process-params params))))
+
+(defn object-params [m]
+  (let [params (-> m vals first)]
+    (if (params-ok? params)
+      nil (->> params (group-by first) vals
+               (map process-params) dummy-map
+               (hash-map (-> params first third keyword))))))
 
 (defn one-link [n1 n2 pred]
   (str "[:" (neo4j/esc-token pred)
@@ -332,16 +349,24 @@
         " " (ret-vals (count paths)))
    {:id id}])
 
-(defn parse-paths-general [path-rels]
-  (->> path-rels first clojure-map (map #(apply hash-map %))
-       (mapv mapify-params)))
+(defn choose-process [path m]
+  (if (= (last path) :id)
+    (object-params m) (mapify-params m)))
 
-(defn parse-paths [ks path-rels]
-  (let [results (parse-paths-general path-rels)
+(defn parse-paths-general [paths path-rels]
+  (->> path-rels first clojure-map (map #(apply hash-map %))
+       (sort-by #(-> % keys first))
+       (mapv choose-process paths)))
+
+(defn parse-paths [paths path-rels]
+  (let [results (parse-paths-general paths path-rels)
         result-map (->> (map #(dissoc % :id s/type-label) results)
                         (map keys) (map first) (zipvec results)
                         (map reverse) (mapv vec) (into {}))]
-    (mapv #(-> % result-map % keys vec) ks)))
+    (mapv #(-> % result-map % keys vec)
+          (mapv #(if (= (last %) :id)
+                   (last (last %)) (last %))
+                paths))))
 
 (defn get-ids-path [path]
   (->> path count inc (range 1)
@@ -351,7 +376,7 @@
 (defn fetch-paths [id paths]
   (->> (fetch-paths-query id paths)
        vector neo4j/cypher-combined-tx
-       first (parse-paths (map last paths))))
+       first (parse-paths paths)))
 
 (defn prop-diff [id1 id2 prop]
   (->> (map #(fetch-paths % [[prop]]) [id1 id2])
@@ -363,7 +388,7 @@
   (->> (mapcat get-ids-path paths)
        (fetch-paths-query id) vector
        neo4j/cypher-combined-tx
-       (map #(parse-paths (map last paths) %))
+       (map #(parse-paths paths %))
        (mapcat #(apply concat %))
        (concat [id])))
 
@@ -390,7 +415,7 @@
 (defn fetch-all-paths [paths ids]
   (->> (map #(fetch-paths-query % paths) ids)
        neo4j/cypher-combined-tx
-       (map #(parse-paths (map last paths) %))
+       (map #(parse-paths paths %))
        (zipmap ids)))
 
 (defn recon-finished [user class]
