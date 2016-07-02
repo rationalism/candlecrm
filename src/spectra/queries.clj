@@ -105,6 +105,7 @@
            (mlrecon/fetch-paths-query id) vector
            neo4j/cypher-combined-tx first
            (mlrecon/parse-paths-general paths)
+           (filter #(not-any? nil? (keys %)))
            (map #(dissoc % :id s/type-label)) (apply merge)
            (merge {:id id s/type-label type})))))
 
