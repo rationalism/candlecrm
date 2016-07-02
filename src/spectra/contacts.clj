@@ -102,7 +102,7 @@
 (defn batch-insert! [user contacts]
   (throw-info! "batch inserting contacts")
   (->> contacts (map contact-graph)
-       (map #(insert/push-graph! % user s/contact-src))))
+       (mapv #(insert/push-graph! % user s/contact-src))))
 
 (defn load-all-contacts! [user]
   (->> user all-contacts (batch-insert! user)))
