@@ -82,7 +82,18 @@
 
 (def node-paths
   {s/person [[s/s-name] [s/email-addr] [s/phone-num] [s/org-member]
-             [s/website] [s/email-to s/email-uid :id]]})
+             [s/website]]
+   s/email [[s/email-subject] [s/email-body] [s/email-sent]
+            [s/email-from s/s-name :id] [s/email-to s/s-name :id]
+            [s/email-replyto s/email-from s/s-name :id]]
+   s/organization [[s/s-name] [s/email-addr] [s/phone-num] [s/website]]
+   s/location [[s/s-name] [s/zipcode]
+               [s/link-to s/email-mentions s/email-subject :id]]
+   s/building [[s/street-addr]
+               [s/link-to s/email-mentions s/email-subject :id]]
+   s/event [[s/s-name] [s/date-time] [s/event-type] [s/website]
+            [s/event-features s/s-name :id]
+            [s/link-to s/email-mentions s/email-subject :id]]})
 
 (defn strip-path-id [path]
   (if (= (last path) :id) (drop-last path) path))
