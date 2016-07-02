@@ -248,6 +248,14 @@
          (mapv #(insert/push-graph! % user s/edit-src)))
     (neo4j/switch-user! user all-ids)))
 
+(defn rank-params [[k m]]
+  {k (if-let [model (@view-models k)]
+       (->> (map clean-link m) accumulate-links
+            (classify-links model)
+            (zipmap (map first m)))
+       (-> (map first m)
+           (zipmap (repeat (count m) 1.0))))})
+
 (defn one-link [n1 n2 pred]
   (str "[:" (neo4j/esc-token pred)
        "]-(b" n2 "a" n1 ")-"))
@@ -282,7 +290,7 @@
               "[:" (-> preds drop-last last
                        neo4j/esc-token))
          (str (->> preds drop-last (link-chain n1))
-              "[:" (-> preds last neo4j/esc-token)))
+              "[r:" (-> preds last neo4j/esc-token)))
        "]-(a" n1 ") "
        (with-clause n1 (last preds))))
 

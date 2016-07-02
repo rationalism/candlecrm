@@ -19,15 +19,6 @@
   (->> labels (filter #(.contains % "_user_"))
        first neo4j/decode-label))
 
-(defn rank-params [[k m]]
-  {k (if-let [model (@mlrecon/view-models k)]
-       (->> (map mlrecon/clean-link m)
-            mlrecon/accumulate-links
-            (mlrecon/classify-links model)
-            (zipmap (map first m)))
-       (-> (map first m)
-           (zipmap (repeat (count m) 1.0))))})
-
 (defn mapify-params [m]
   (let [params (-> m vals first)]
     (if (or (nil? params) (empty? params))
@@ -36,7 +27,7 @@
                       (keyword (first %))
                       (vector (vector (second %) (third %)))))
                (apply merge-with concat)
-               (map rank-params) (apply merge)
+               (map mlrecon/rank-params) (apply merge)
                (merge {:id (ffirst params)
                        s/type-label (-> params first second
                                         filter-decode-labels
