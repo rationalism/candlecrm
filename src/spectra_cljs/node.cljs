@@ -97,15 +97,21 @@
 (defn map-link [item]
   [util/node-link
    (let [text-key (dissoc item :id s/type-label)]
-     (->> text-key vals first (sort-by second >) first))
+     (->> text-key vals first (sort-by second >) ffirst))
    (:id item) (s/type-label item)])
+
+(defn display-item [item]
+  [:span
+   (if (map? item) [map-link item] (str item))])
 
 (defn string-item [item prop]
   [:span
    (cond (some #{prop} s/date-times) [util/date-display item]
          (= prop s/email-body) [body-links (first item)]
-         (map? item) [map-link item]
-         (coll? item) (str/join ", " item)
+         (coll? item)
+         (for [list-member (util/add-ids item)]
+           ^{:key (first list-member)}
+           [display-item (second list-member)])
          :else item) " "
    (when (and item (coll? item) (not (empty? item)))
      [ask-more prop])])

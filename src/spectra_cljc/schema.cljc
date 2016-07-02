@@ -209,7 +209,7 @@
 (def recon-attrs {location s-name event start-time
                   money amount webpage url})
 
-(def date-times [start-time stop-time over-time
+(def date-times [start-time stop-time over-time date-time
                  email-sent email-received])
 
 (def exclude-upload [type-label :id])
