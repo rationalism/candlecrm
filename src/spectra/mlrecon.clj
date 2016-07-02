@@ -337,8 +337,11 @@
        (mapv mapify-params)))
 
 (defn parse-paths [ks path-rels]
-  (->> path-rels parse-paths-general
-       (mapv #(-> %2 %1 keys vec) ks)))
+  (let [results (parse-paths-general path-rels)
+        result-map (->> (map #(dissoc % :id s/type-label) results)
+                        (map keys) (map first) (zipvec results)
+                        (map reverse) (mapv vec) (into {}))]
+    (mapv #(-> % result-map % keys vec) ks)))
 
 (defn get-ids-path [path]
   (->> path count inc (range 1)
