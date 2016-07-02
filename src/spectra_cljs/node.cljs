@@ -11,7 +11,8 @@
 (def email-disp [s/email-sent s/email-body])
 (def org-disp [s/s-name])
 (def loc-disp [s/s-name])
-(def event-disp [s/start-time s/stop-time])
+(def event-disp [s/s-name s/date-time s/event-type s/website
+                 s/event-features s/email-mentions])
 (def money-disp [s/s-name])
 (def addr-disp [s/street-addr])
 
@@ -93,13 +94,21 @@
       1 [see-all attr] 2 [:div] [:div])
     [see-more attr]))
 
+(defn map-link [item]
+  [util/node-link
+   (let [text-key (dissoc item :id s/type-label)]
+     (->> text-key vals first (sort-by second >) first))
+   (:id item) (s/type-label item)])
+
 (defn string-item [item prop]
   [:span
    (cond (some #{prop} s/date-times) [util/date-display item]
          (= prop s/email-body) [body-links (first item)]
+         (map? item) [map-link item]
          (coll? item) (str/join ", " item)
          :else item) " "
-   (when (coll? item) [ask-more prop])])
+   (when (and item (coll? item) (not (empty? item)))
+     [ask-more prop])])
 
 (defn str-item [n k v]
   [:span [:strong (str n ": ")]
@@ -120,7 +129,8 @@
 (defn info-items [attrs item]
   [:div
    (doall
-    (for [attr (util/add-ids attrs)]
+    (for [attr (->> attrs (filter #(contains? item %))
+                    util/add-ids)]
       ^{:key (first attr)}
       [:div.infoitem
        [str-item (-> attr second s/attr-names)

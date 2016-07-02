@@ -142,7 +142,9 @@
                  occupation "Occupation" mail-address "Address"
                  website "Website" org-member "Member of"
                  url "Page address" start-time "Begins at"
-                 stop-time "Ends at" street-addr "Street address"})
+                 stop-time "Ends at" street-addr "Street address"
+                 event-features "Event with"
+                 email-mentions "Related emails"})
 
 (def schema-map {"PERSON" person-name "LOCATION" loc-name
                  "ORGANIZATION" org-name "MONEY" amount
