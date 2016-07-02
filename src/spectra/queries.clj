@@ -15,24 +15,6 @@
 (defn node-attrs [node]
   (merge (.asMap node) (hash-map :id (.id node))))
 
-(defn filter-decode-labels [labels]
-  (->> labels (filter #(.contains % "_user_"))
-       first neo4j/decode-label))
-
-(defn mapify-params [m]
-  (let [params (-> m vals first)]
-    (if (or (nil? params) (empty? params))
-      nil (->> (map #(drop 2 %) params)
-               (map #(hash-map
-                      (keyword (first %))
-                      (vector (vector (second %) (third %)))))
-               (apply merge-with concat)
-               (map mlrecon/rank-params) (apply merge)
-               (merge {:id (ffirst params)
-                       s/type-label (-> params first second
-                                        filter-decode-labels
-                                        second)})))))
-
 (defn vals-collect []
   (str " MATCH (root)-[r]->(v) WITH o, ID(root) as idr,"
        " collect([ID(root), labels(root),"
@@ -46,7 +28,7 @@
              ") WITH root, count(em) as o ORDER BY o DESC"
              " SKIP {start} LIMIT {limit}" (vals-collect))
         query-map]
-       neo4j/cypher-query (mapv mapify-params)))
+       neo4j/cypher-query (mapv mlrecon/mapify-params)))
 
 (defn emails-from-user [user query-map]
   (->> [(str "MATCH (root:" (neo4j/prop-label user s/email)
@@ -56,7 +38,7 @@
              " ORDER BY o DESC SKIP {start} LIMIT {limit}"
              (vals-collect))
         query-map]
-       neo4j/cypher-query (mapv mapify-params)))
+       neo4j/cypher-query (mapv mlrecon/mapify-params)))
 
 (defn emails-linked [user query-map]
   (->> [(str "MATCH (root:" (neo4j/prop-label user s/email)
@@ -69,7 +51,7 @@
              " as o ORDER BY o DESC SKIP {start} LIMIT {limit}"
              (vals-collect))
         (dissoc query-map :link)]
-       neo4j/cypher-query (mapv mapify-params)))
+       neo4j/cypher-query (mapv mlrecon/mapify-params)))
 
 (defn emails-with-dates [user start limit]
   (->> [(str "MATCH (sd:" (neo4j/prop-label user s/email-sent)
@@ -81,7 +63,7 @@
              " as o ORDER BY o DESC SKIP {start} LIMIT {limit}"
              (vals-collect))
         {:start start :limit limit}]
-       neo4j/cypher-query (mapv mapify-params)))
+       neo4j/cypher-query (mapv mlrecon/mapify-params)))
 
 (defn token-keys [m]
   (->> (map #(update % 0 keyword) m)
@@ -96,7 +78,7 @@
              ") WHERE ID(root) = {id} WITH root, 0 as o"
              (vals-collect))
         {:id id}]
-       neo4j/cypher-query (mapv mapify-params)))
+       neo4j/cypher-query (mapv mlrecon/mapify-params)))
 
 (defn merge-if-exists [node query-map]
   (when node (merge node {:type (:type query-map)})))
@@ -115,7 +97,7 @@
              " = {key} WITH h MATCH (h)-[:" (neo4j/esc-token s/link-to)
              "]->(root) WITH root, 0 as o" (vals-collect))
         query-map]
-       neo4j/cypher-query (mapv mapify-params) first))
+       neo4j/cypher-query (mapv mlrecon/mapify-params) first))
 
 (defn email-queue []
   (-> [(str "MATCH (root:" s/email-queue
@@ -189,7 +171,7 @@
              " DESC SKIP {start} LIMIT {limit}"
              (vals-collect))
         query-map]
-       neo4j/cypher-query (mapv mapify-params)))
+       neo4j/cypher-query (mapv mlrecon/mapify-params)))
 
 (defn event-related [user query-map]
   (->> [(str (rel-query user)
@@ -199,7 +181,7 @@
              " SKIP {start} LIMIT {limit}"
              (vals-collect))
         (update query-map :person-id #(Integer/parseInt %))]
-       neo4j/cypher-query (mapv mapify-params)))
+       neo4j/cypher-query (mapv mlrecon/mapify-params)))
 
 (def loc-paths [[s/s-name] [s/has-coord s/lat] [s/has-coord s/lng]])
 
@@ -266,7 +248,7 @@
    {:id id}])
 
 (defn search-row [[r1 r2]]
-  [r1 (-> (comp first #(mapv mapify-params %)
+  [r1 (-> (comp first #(mapv mlrecon/mapify-params %)
                 neo4j/cypher-query
                 search-query)
           (map r2) vec)])

@@ -256,6 +256,24 @@
        (-> (map first m)
            (zipmap (repeat (count m) 1.0))))})
 
+(defn filter-decode-labels [labels]
+  (->> labels (filter #(.contains % "_user_"))
+       first neo4j/decode-label))
+
+(defn mapify-params [m]
+  (let [params (-> m vals first)]
+    (if (or (nil? params) (empty? params))
+      nil (->> (map #(drop 2 %) params)
+               (map #(hash-map
+                      (keyword (first %))
+                      (vector (vector (second %) (third %)))))
+               (apply merge-with concat)
+               (map rank-params) (apply merge)
+               (merge {:id (ffirst params)
+                       s/type-label (-> params first second
+                                        filter-decode-labels
+                                        second)})))))
+
 (defn one-link [n1 n2 pred]
   (str "[:" (neo4j/esc-token pred)
        "]-(b" n2 "a" n1 ")-"))
@@ -266,8 +284,9 @@
        str/join))
 
 (defn val-clause [n1 n2]
-  (str "collect(a" n1 "." (neo4j/esc-token s/value)
-       ") AS b" n1))
+  (let [id-node (if (= n2 1) "root" (str "b" (- n2 2) "a" n1))]
+    (str "collect([ID(" id-node "), type(r), a" n1 "."
+         (neo4j/esc-token s/value)", r]) AS b" n1)))
 
 (defn id-clause [n1]
   (str "collect(ID(a" n1 ")) AS b" n1))
@@ -322,7 +341,7 @@
 (defn fetch-paths [id paths]
   (-> (fetch-paths-query id paths)
       vector neo4j/cypher-combined-tx
-      parse-paths first))
+      debug parse-paths first))
 
 (defn prop-diff [id1 id2 prop]
   (->> (map #(fetch-paths % [[prop]]) [id1 id2])
