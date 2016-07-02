@@ -290,7 +290,7 @@
 
 (defn find-user-labels [labels]
   (when labels
-    (->> labels filter-decode-labels
+    (->> labels mlrecon/filter-decode-labels
          first neo4j/find-by-id)))
 
 (defnp email-for-nlp [limit]
