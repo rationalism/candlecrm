@@ -41,7 +41,7 @@
     (-> queue s/loaded-bottom)))
 
 (defn range-bottom [queue]
-  (max (if (queue-new? queue) (s/loaded-top queue) 275000)
+  (max (if (queue-new? queue) (s/loaded-top queue) 250000)
        (-> queue range-top (- imap/batch-size) inc)))
 
 (defn queue-time-reset! [queue]
@@ -122,13 +122,13 @@
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (when nil (queue-pop!)))
+  (when :nil (queue-pop!)))
 
 (jobs/defjob NewGeocodes [ctx]
   (neo4j/thread-wrap (when nil (geocode/geocode-batch 10))))
 
 (jobs/defjob ProcessRecon [ctx]
-  (when nil (run-recon!)))
+  (when :nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
   (neo4j/thread-wrap (when nil (email/push-email-nlp!))))
