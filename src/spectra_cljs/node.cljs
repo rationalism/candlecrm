@@ -8,7 +8,7 @@
             [spectra_cljs.util :as util]))
 
 (def person-disp [s/s-name s/email-addr s/phone-num s/website])
-(def email-disp [s/email-sent s/email-body])
+(def email-disp [s/email-sent s/email-from s/email-to s/email-body])
 (def org-disp [s/s-name])
 (def loc-disp [s/s-name])
 (def event-disp [s/s-name s/date-time s/event-type s/website
