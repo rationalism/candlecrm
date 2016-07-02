@@ -265,7 +265,7 @@
        (map #(one-link n1 % (nth preds %)))
        str/join))
 
-(defn val-clause [n1]
+(defn val-clause [n1 n2]
   (str "collect(a" n1 "." (neo4j/esc-token s/value)
        ") AS b" n1))
 
@@ -274,12 +274,12 @@
 
 (def special-paths {:id id-clause})
 
-(defn with-clause [n1 pred]
+(defn with-clause [n1 preds]
   (->> [["WITH root"]
         (map #(str "b" %) (range n1))
-        [(if-let [special-fn (special-paths pred)]
+        [(if-let [special-fn (special-paths (last preds))]
            (special-fn n1)
-           (val-clause n1))]]
+           (val-clause n1 (count preds)))]]
        flatten (str/join ", ")))
 
 (defn match-chain [n1 preds]
@@ -292,7 +292,7 @@
          (str (->> preds drop-last (link-chain n1))
               "[r:" (-> preds last neo4j/esc-token)))
        "]-(a" n1 ") "
-       (with-clause n1 (last preds))))
+       (with-clause n1 preds)))
 
 (defn all-paths [paths]
   (->> paths count range
