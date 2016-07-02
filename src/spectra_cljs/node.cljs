@@ -9,12 +9,12 @@
 
 (def person-disp [s/s-name s/email-addr s/phone-num s/website])
 (def email-disp [s/email-sent s/email-from s/email-to s/email-body])
-(def org-disp [s/s-name])
-(def loc-disp [s/s-name])
+(def org-disp [s/s-name s/email-addr s/phone-num s/website])
+(def loc-disp [s/s-name s/zipcode s/email-mentions])
 (def event-disp [s/s-name s/date-time s/event-type s/website
                  s/event-features s/email-mentions])
 (def money-disp [s/s-name])
-(def addr-disp [s/street-addr])
+(def addr-disp [s/street-addr s/email-mentions])
 
 (defn split-regex [s break]
   (str/split s (-> break regex/regex-escape re-pattern)))
