@@ -83,9 +83,7 @@
     s/birthday (birthday contact)
     s/gender (gender contact)
     s/occupation (occupation contact)
-    s/mail-address (addresses contact)
-    s/website (websites contact)
-    s/org-member (organizations contact)}))
+    s/website (websites contact)}))
 
 (defn contact-graph [contact]
   (let [main-node (contact->person contact)]

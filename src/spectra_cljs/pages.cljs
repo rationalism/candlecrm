@@ -111,7 +111,6 @@
 
 (defn show-organization [organization]
   [node/show-organization
-   (-> organization :center-node :name first)
    (get-first (:center-node organization) s/s-name)
    (:center-node organization)])
 

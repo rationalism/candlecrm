@@ -7,9 +7,11 @@
             [spectra_cljs.update :as u]
             [spectra_cljs.util :as util]))
 
-(def person-disp [s/s-name s/email-addr s/phone-num s/website])
+(def person-disp [s/s-name s/email-addr s/phone-num s/website
+                  s/org-member])
 (def email-disp [s/email-sent s/email-from s/email-to s/email-body])
-(def org-disp [s/s-name s/email-addr s/phone-num s/website])
+(def org-disp [s/s-name s/email-addr s/phone-num s/website
+               s/org-member])
 (def loc-disp [s/s-name s/zipcode s/email-mentions])
 (def event-disp [s/s-name s/date-time s/event-type s/website
                  s/event-features s/email-mentions])

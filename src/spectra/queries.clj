@@ -81,12 +81,13 @@
   (when node (merge node {:type (:type query-map)})))
 
 (def node-paths
-  {s/person [[s/s-name] [s/email-addr] [s/phone-num] [s/org-member]
-             [s/website]]
+  {s/person [[s/s-name] [s/email-addr] [s/phone-num]
+             [s/org-member s/s-name :id] [s/website]]
    s/email [[s/email-subject] [s/email-body] [s/email-sent]
             [s/email-from s/s-name :id] [s/email-to s/s-name :id]
             [s/email-replyto s/email-from s/s-name :id]]
-   s/organization [[s/s-name] [s/email-addr] [s/phone-num] [s/website]]
+   s/organization [[s/s-name] [s/email-addr] [s/phone-num] [s/website]
+                   [s/org-member s/s-name :id]]
    s/location [[s/s-name] [s/zipcode]
                [s/link-to s/email-mentions s/email-subject :id]]
    s/building [[s/street-addr]
