@@ -275,7 +275,7 @@
        (map #(hash-map
               (keyword (first %))
               (vector (vector (second %) (third %)))))
-       (apply merge-with concat)
+       (apply merge-with into)
        (map rank-params) (apply merge)
        (merge {:id (ffirst params)
                s/type-label (find-label params)})))

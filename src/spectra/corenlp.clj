@@ -487,7 +487,7 @@
 (defn train-rel-models [sentences]
   (->> sentences (map add-all-goldens)
        (map #(fmap % vector))
-       (apply merge-with concat)
+       (apply merge-with into)
        (fmapl train-extractor)))
 
 (defn prepare-rel-training [models sentences]

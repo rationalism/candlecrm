@@ -24,7 +24,7 @@
     (let [entities (->> wikipedia-blurb (run-nlp-default models) loom/nodes
                         (map #(hash-map (s/type-label %)
                                         (vector (s/link-text %))))
-                        (apply merge-with concat))]
+                        (apply merge-with into))]
       (is (set/subset? wikipedia-people (set (s/person entities))))
       (is (set/subset? wikipedia-locations (set (s/location entities))))))
   (testing "empty set"
