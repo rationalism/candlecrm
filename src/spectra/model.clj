@@ -42,7 +42,7 @@
   (/ (StringUtils/getLevenshteinDistance a b)
      (float (max (count a) (count b)))))
 
-(defn lev [coll1 coll2]
+(defnp lev [coll1 coll2]
   (diff-empty-all
    coll1 coll2
    #(->> (for [x (map str-compare-truncate %1)
@@ -80,7 +80,7 @@
   (vector (count f1)
           (- (count f2) (count f1))))
 
-(defn diff-len-adj [[a] [b]]
+(defnp diff-len-adj [[a] [b]]
   (if (or (not a) (not b))
     [0.0 default-score]
     (let [diff (->> (run-diff a b)
@@ -120,7 +120,7 @@
 (defn lcs-coll [coll]
   (reduce lcs-pair coll))
 
-(defn lcs [coll1 coll2]
+(defnp lcs [coll1 coll2]
   (diff-empty-all
    coll1 coll2 #(->> (concat %1 %2) lcs-coll
                      (max-lcs %1 %2))))
