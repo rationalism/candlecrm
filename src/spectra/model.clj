@@ -126,11 +126,11 @@
                      (max-lcs %1 %2))))
 
 (defn shortest [coll1 coll2]
-  (->> [coll1 coll2] flatten (map first)
+  (->> [coll1 coll2] (apply concat)
        (map count) (apply min)))
 
 (defn longest [coll1 coll2]
-  (->> [coll1 coll2] flatten (map first)
+  (->> [coll1 coll2] (apply concat) (map first)
        (map count) (apply max)))
 
 (defn bag-of-chars [s]
