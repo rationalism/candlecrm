@@ -426,7 +426,7 @@
   ([coll] (cartesian-product coll []))
   ([coll sets]
    (if (empty? coll) (set sets)
-       (->> coll rest (map #(hash-set (first coll) %))
+       (->> coll rest (mapv #(hash-set (first coll) %))
             (concat sets) (recur (rest coll))))))
 
 (defn all-ner-graph [reftime sentence]
