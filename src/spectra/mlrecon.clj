@@ -486,7 +486,7 @@
                 (fetch-all-paths (map first rules)))]
     (->> (map #(pair-map % vs) cs)
          (map #(score-diff rules %))
-         (zipmap cs))))
+         (zipmap cs) doall)))
 
 (defnp conflict-data [user class ids]
   (fetch-all-paths
@@ -501,6 +501,8 @@
          (weka/classify-logit (get @recon-logit class)))))
 
 (defnp score-map [class mo]
+  (throw-info! (str "score-map count: " (count mo)))
+  (throw-info! (str "score-map class: " class))
   (-> (fmap mo (->> class (get @recon-models)
                     (partial weka/classify)))
       (fmap (->> class (get @recon-logit)
