@@ -469,13 +469,13 @@
        (map (juxt #(get % "ID(root)") #(get % "ID(m)")))
        (map sort) distinct))
 
-(defnp pair-map [p m]
+(defn pair-map [p m]
   (map #(get m %) p))
 
-(defnp diff-pair [[p1 p2]]
+(defn diff-pair [[p1 p2]]
   (map #(apply % p2) p1))
 
-(defnp score-diff [rules diff]
+(defn score-diff [rules diff]
   (->> (apply zipvec diff)
        (zipvec (map second rules))
        (map diff-pair) flatten))

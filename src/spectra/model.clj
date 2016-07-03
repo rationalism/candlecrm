@@ -11,12 +11,6 @@
 (def default-score 0.5)
 (def str-compare-max 300)
 
-(defn run-diff [s1 s2]
-  (if (and s1 s2)
-    (let [dmp (DiffMatchPatch. )
-          d (.diffMain dmp s1 s2 true)]
-      (.diffCleanupSemantic dmp d) d) []))
-
 (defn str-compare-truncate [s]
   (let [cs (count s)]
     (if (<= cs (* 3 str-compare-max))
@@ -24,6 +18,13 @@
              (subs s (- (/ cs 2) (/ str-compare-max 2))
                    (+ (/ cs 2) (/ str-compare-max 2)))
              (subs s (- cs str-compare-max) cs)))))
+
+(defn run-diff [s1 s2]
+  (if (and s1 s2)
+    (let [dmp (DiffMatchPatch. )
+          d (.diffMain dmp (str-compare-truncate s1)
+                       (str-compare-truncate s2) true)]
+      (.diffCleanupSemantic dmp d) d) []))
 
 (defn diff-first [[a] [b] f]
   (if (or (not a) (not b))
