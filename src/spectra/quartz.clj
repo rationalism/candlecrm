@@ -122,13 +122,13 @@
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (when nil (queue-pop!)))
+  (when :nil (queue-pop!)))
 
 (jobs/defjob NewGeocodes [ctx]
   (neo4j/thread-wrap (when nil (geocode/geocode-batch 10))))
 
 (jobs/defjob ProcessRecon [ctx]
-  (when nil (run-recon!)))
+  (when :nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
   (neo4j/thread-wrap (when nil (email/push-email-nlp!))))
@@ -209,7 +209,7 @@
                (periodic-trigger 5000 nil "geocode.trigger.1"))
   (qs/schedule @scheduler
                (make-job ProcessRecon "jobs.recon.do.1")
-               (periodic-trigger 5000 nil "recon.trigger.1"))
+               (periodic-trigger 3000 nil "recon.trigger.1"))
   (qs/schedule @scheduler
                (make-job EmailNLP "jobs.nlp.email.1")
                (periodic-trigger 10000 nil "nlp.trigger.1"))
