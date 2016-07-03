@@ -144,8 +144,8 @@
    (-> [(str "MATCH (root)-[:" (neo4j/esc-token s/user-queue)
              "]->(u:" (neo4j/esc-token s/user) ") "
              (if user (str "WHERE ID(u) = " (.id user)) "")
-             " WITH root, u"
-             " MATCH (root)-[:" (neo4j/esc-token s/loaded-bottom)
+             " WHERE u." (neo4j/esc-token s/recon-run) " = false"
+             " WITH root, u MATCH (root)-[:" (neo4j/esc-token s/loaded-bottom)
              "]-(b) WITH root, u, b WHERE b." (neo4j/esc-token s/value)
              " > {queuebound}"
              " MATCH (root)-[:" (neo4j/esc-token s/modified)
