@@ -640,7 +640,7 @@
          (map rest) (mapcat #(map ffirst %)) 
          (map #(vector % class)))))
 
-(defn run-recon! [user class]
+(defnc run-recon! [user class]
   (let [recon-groups (->> class (score-all user)
                           (groups-to-recon class))
         bad-links (->> class model/conflicts
