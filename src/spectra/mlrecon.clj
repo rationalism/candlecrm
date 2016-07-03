@@ -485,8 +485,8 @@
         vs (->> cs flatten distinct
                 (fetch-all-paths (map first rules)))]
     (->> (map #(pair-map % vs) cs)
-         (mapv #(score-diff rules %))
-         (zipmap cs))))
+         (map #(score-diff rules %))
+         (map vec) (zipmap cs))))
 
 (defnp conflict-data [user class ids]
   (fetch-all-paths
