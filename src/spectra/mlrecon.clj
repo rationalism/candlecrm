@@ -418,13 +418,13 @@
        (map #(parse-paths paths %))
        (zipmap ids)))
 
-(defn recon-finished [user class]
-  [(str "MATCH (root:" (neo4j/prop-label user class)
-        ":" (neo4j/esc-token s/norecon)
-        ") SET root:" (neo4j/esc-token s/recon))
-   (str "MATCH (root:" (neo4j/prop-label user class)
-        ":" (neo4j/esc-token s/norecon)
-        ") REMOVE root:" (neo4j/esc-token s/norecon))])
+(defn recon-finished [recon-ids]
+  [[(str "MATCH (root) WHERE ID(root) IN {ids}"
+         " SET root:" (neo4j/esc-token s/recon))
+    {:ids recon-ids}]
+   [(str "MATCH (root) WHERE ID(root) IN {ids}"
+         " REMOVE root:" (neo4j/esc-token s/norecon))
+    {:ids recon-ids}]])
 
 (defn candidate-query [label preds]
   (str "MATCH (root:" label
@@ -641,12 +641,13 @@
          (map #(vector % class)))))
 
 (defnc run-recon! [user class]
-  (let [recon-groups (->> class (score-all user)
+  (let [recon-ids (neo4j/ids-in-class user class)
+        recon-groups (->> class (score-all user)
                           (groups-to-recon class))
         bad-links (->> class model/conflicts
                        (mapcat #(delete-queries user % recon-groups))
                        doall)]
-    (->> (recon-finished user class)
+    (->> (recon-finished recon-ids)
          (concat (doall (mapcat #(merge-all bad-links %)
                                 recon-groups)))
          (neo4j/cypher-combined-tx nil))))
