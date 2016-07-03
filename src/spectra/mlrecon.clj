@@ -144,7 +144,7 @@
           (->> id-set last delete-links vector)
           (map merge-link links)))
 
-(defn merge-all [bad-links id-set]
+(defnp merge-all [bad-links id-set]
   (->> id-set (combined-links bad-links)
        (remove #(= (first %) (second %)))
        (merge-statements id-set)))
@@ -617,7 +617,7 @@
     (apply (partial train-full user class)
            (fetch-train-pairs class))))
 
-(defn groups-to-recon [class score-map]
+(defnp groups-to-recon [class score-map]
   (->> (map #(update % 0 vec) score-map)
        (mapv #(apply conj %)) (map vec)
        (loom/build-graph [])
@@ -630,7 +630,7 @@
         "]->(b) WHERE ID(a) = {id} DETACH DELETE b")
    {:id id}])
 
-(defn delete-queries [user class groups]
+(defnp delete-queries [user class groups]
   (let [values (->> (apply concat groups)
                     (conflict-data user class))]
     (->> (map (fn [g] (map #(vector % (values %))

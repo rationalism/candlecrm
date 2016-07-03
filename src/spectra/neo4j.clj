@@ -268,7 +268,7 @@
         {:id id}]
        cypher-query first vals first))
 
-(defn norecon-ids [user class]
+(defnp norecon-ids [user class]
   (->> [(str "MATCH (root:" (prop-label user class)
              ":" (esc-token s/norecon) ") RETURN ID(root)")]
        cypher-query (mapcat vals)))

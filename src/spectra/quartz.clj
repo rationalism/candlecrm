@@ -97,7 +97,7 @@
   (when params
     (throw-info! "running recon")
     (neo4j/set-property! (first params) s/recon-run true)
-    (apply mlrecon/run-recon! params)
+    (profile :info :recon-run (apply mlrecon/run-recon! params))
     (neo4j/set-property! (first params) s/recon-run false)))
 
 (defn remove-running [jobs]
