@@ -641,7 +641,7 @@
          (map #(vector % class)))))
 
 (defnc run-recon! [user class]
-  (let [recon-ids (neo4j/ids-in-class user class)
+  (let [recon-ids (neo4j/norecon-ids user class)
         recon-groups (->> class (score-all user)
                           (groups-to-recon class))
         bad-links (->> class model/conflicts
