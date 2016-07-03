@@ -485,8 +485,8 @@
         vs (->> cs flatten distinct
                 (fetch-all-paths (map first rules)))]
     (->> (map #(pair-map % vs) cs)
-         (map #(score-diff rules %))
-         (zipmap cs) doall)))
+         (mapv #(score-diff rules %))
+         (zipmap cs))))
 
 (defnp conflict-data [user class ids]
   (fetch-all-paths
@@ -503,6 +503,7 @@
 (defnp score-map [class mo]
   (throw-info! (str "score-map count: " (count mo)))
   (throw-info! (str "score-map class: " class))
+  (throw-info! (str "first map item: ") (first mo))
   (-> (fmap mo (->> class (get @recon-models)
                     (partial weka/classify)))
       (fmap (->> class (get @recon-logit)
