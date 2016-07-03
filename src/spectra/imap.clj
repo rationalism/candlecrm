@@ -26,7 +26,7 @@
 (def multi-type "multipart")
 
 (def parse-threads 6)
-(def batch-size 50)
+(def batch-size 12)
 
 (defonce parse-channel (atom nil))
 

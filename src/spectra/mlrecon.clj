@@ -501,9 +501,6 @@
          (weka/classify-logit (get @recon-logit class)))))
 
 (defnp score-map [class mo]
-  (throw-info! (str "score-map count: " (count mo)))
-  (throw-info! (str "score-map class: " class))
-  (throw-info! (str "first map item: " (first mo)))
   (-> (fmap mo (->> class (get @recon-models)
                     (partial weka/classify)))
       (fmap (->> class (get @recon-logit)
