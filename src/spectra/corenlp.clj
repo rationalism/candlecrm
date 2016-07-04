@@ -443,9 +443,8 @@
         nodes (->> sentence entity-mentions
                    (map #(.getType %)) (map s/schema-map))]
     (->> (map rel-map nodes) (remove nil?) distinct
-         cartesian-product (cset/intersection rel-set) empty?
-         (vector (-> #{s/email-addr} (some nodes) boolean))
-         (every? false?))))
+         cartesian-product (cset/intersection rel-set)
+         empty? not)))
 
 (defn find-relations [models sentence]
   (if (has-rel-candidates? sentence)
