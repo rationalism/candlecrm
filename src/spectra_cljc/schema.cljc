@@ -72,6 +72,10 @@
 (def event-cost :event-cost)
 (def event-time :event-time)
 
+(def number :number)
+(def percent :percent)
+(def ordinal :ordinal)
+
 (def coref-is :coref-is)
 (def has-type :has-type)
 (def pos-map :pos-map)
@@ -143,7 +147,8 @@
                  "PHONE" phone-num "DURATION" duration
                  "ADDRESS" street-addr "EVENT" event-type
                  "ZIPCODE" zipcode "URL" webpage
-                 "SET" frequency})
+                 "SET" frequency "NUMBER" number
+                 "PERCENT" percent "ORDINAL" ordinal})
 
 (def relation-map {"EventStart" start-time "EventStop" stop-time
                    "EventDuration" duration "EventAttend" event-attend
@@ -160,7 +165,8 @@
                    "EventFrequency" frequency})
 
 (def is-attr [start-time stop-time duration event-type frequency
-              event-cost website event-time phone-num age])
+              event-cost website event-time phone-num age
+              number percent ordinal])
 
 (def entity-map {person-name person org-name organization
                  email-addr person phone-num person
@@ -202,7 +208,15 @@
                      [email-addr duration] ["PersonAge" "OrgAge"]
                      [person-name duration] ["PersonAge"]
                      [org-name duration] ["OrgAge"]
-                     })
+                     [person-name number] []
+                     [org-name number] []
+                     [date-time number] []
+                     [person-name percent] []
+                     [org-name percent] []
+                     [date-time percent] []
+                     [person-name ordinal] []
+                     [org-name ordinal] []
+                     [date-time ordinal] []})
 
 (def email-links [email-to email-cc email-bcc
                   email-reply email-replyto email-mentions])
