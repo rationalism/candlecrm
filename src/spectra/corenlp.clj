@@ -651,6 +651,10 @@
     (or (s/entity-map m-type)
         (= m-type s/webpage))))
 
+(defn is-fpp-mention? [author mention]
+  (and (= 0 (.getHeadTokenStart mention))
+       (= author (.getValue mention))))
+
 (defnc run-nlp-full [models author reftime text]
   (let [new-text (->> text strip-parens
                       (fpp-replace models author))
@@ -658,7 +662,7 @@
     [(->> sentences (find-all-relations models)
           get-sentences (nlp-graph reftime))
      (->> sentences get-sentences (mapcat entity-mentions)
-          (filter make-link?)
+          (remove #(is-fpp-mention? author %)) (filter make-link?)
           (add-hyperlinks (run-nlp (:token models) new-text)))]))
 
 (defn fix-punct [text]
