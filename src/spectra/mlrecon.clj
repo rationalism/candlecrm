@@ -373,6 +373,11 @@
        (map #(subvec path 0 %))
        (map #(conj % :id))))
 
+(defn fetch-paths-full [id paths]
+  (->> (fetch-paths-query id paths) vector
+       neo4j/cypher-combined-tx first
+       (parse-paths-general paths)))
+
 (defn fetch-paths [id paths]
   (->> (fetch-paths-query id paths)
        vector neo4j/cypher-combined-tx

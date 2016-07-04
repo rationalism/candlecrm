@@ -103,9 +103,7 @@
   (when (neo4j/node-exists? user id type)
     (when-let [paths (node-paths type)]
       (->> paths (map strip-path-id)
-           (mlrecon/fetch-paths-query id) vector
-           neo4j/cypher-combined-tx first
-           (mlrecon/parse-paths-general paths)
+           (mlrecon/fetch-paths-full id)
            (filter #(not-any? nil? (keys %)))
            (map #(dissoc % :id s/type-label)) (apply merge)
            (merge {:id id s/type-label type})))))

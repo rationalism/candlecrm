@@ -37,9 +37,20 @@
    :relation ((nlp/get-rel-fn))
    :coref ((nlp/get-coref-fn))})
 
+(defn find-name [[names addrs]]
+  (->> (if (->> names vals first empty?) addrs names)
+       vals first (sort-by second >) ffirst))
+
+(defn find-email [data]
+  (->> data (map vals) (map first)
+       (map keys) (map first)))
+
 (defn fetch-body [id]
-  (->> [[s/email-from s/s-name] [s/email-body] [s/email-sent]]
-       (mlrecon/fetch-paths id) (map first)))
+  (->> [[s/email-from s/s-name] [s/email-from s/email-addr]
+        [s/email-body] [s/email-sent]]
+       (mlrecon/fetch-paths-full id)
+       (map #(dissoc % :id s/type-label)) (partition 2)
+       ((switch find-name find-email)) (apply cons)))
 
 (defn email-sentences [n]
   (let [models (nlp-models-fn)]

@@ -154,3 +154,7 @@
 
 (defn clojure-map [m]
   (if m (into {} (java.util.HashMap. m)) {}))
+
+(defn switch [& fns]
+  (fn [coll]
+    (map #(%1 %2) fns coll)))
