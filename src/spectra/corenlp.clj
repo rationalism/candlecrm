@@ -41,6 +41,8 @@
 (defn coreference? []
   (= "true" (env :coreference)))
 
+(def fpp-join " said: ")
+
 (def sentence-annotators ["tokenize" "ssplit"])
 (def token-annotators ["tokenize" "ssplit" "pos" "lemma"])
 (def ner-annotators (concat token-annotators ["ner"]))
@@ -540,13 +542,20 @@
   (interleave pieces
               (conj (mapv #(swap-fpp author %) fpps) "")))
 
+(defn sentence-split [models text]
+  (->> text (run-nlp (:token models))
+       get-sentences))
+
+(defn fpp-merge [author strings]
+  (->> strings rest (map #(str author fpp-join %))
+       (cons (first strings)) (str/join "")))
+
 (defnc fpp-replace [models author text]
-  (let [fpps (->> text (run-nlp (:token models))
-                  get-tokens (filter is-fpp?))]
-    (->> (mapcat char-pos fpps)
-         (char-ends text) (partition 2)
-         (map #(subs-vec text %))
-         (mesh-fpps author fpps) (str/join ""))))
+  (->> text (sentence-split models) (map get-tokens)
+       (map first) (map #(.beginPosition %))
+       (mapcat #(repeat 2 %)) (cons 0)
+       (partition-all 2) (map #(apply subs text %))
+       (fpp-merge author)))
 
 (defn strip-parens [text]
   (replace-all text ["(" ")"]))
@@ -568,15 +577,37 @@
     (->> mention .getExtentString
          (hash-brackets (str "hc" (.hashCode mention))))))
 
-(defn mention-map [mentions]
-  (->> mentions (zipmap (map mention-chars mentions))
-       (sort-by first)))
+(defn switch-val [[param _]]
+  (if (= (type param) Annotation) ""
+      (mention-link param)))
 
-(defnc add-hyperlinks [text mentions]
-  (let [mmap (mention-map mentions)]
-    (->> mmap (mapcat first) (cons 0) (partition-all 2)
-         (map #(apply (partial subs text) %))
-         (interleave (cons "" (map mention-link mentions)))
+(defn mention-map [mentions]
+  (->> mentions (map mention-chars) (zipmap mentions)))
+
+(defn first-token-pos [tokens]
+  (->> tokens first .beginPosition))
+
+(defn end-fpp-pos [tokens]
+  (if (and (-> tokens first .value (= "said"))
+           (-> tokens second .value (= ":")))
+    (-> tokens second .endPosition)
+    (recur (rest tokens))))
+
+(defn sentence-map [sentences]
+  (->> sentences (map get-tokens)
+       (map (juxt first-token-pos end-fpp-pos))
+       (zipmap sentences)))
+
+(defn switch-map [annotation mentions]
+  (->> annotation get-sentences sentence-map
+       (merge (mention-map mentions))
+       (sort-by second)))
+
+(defnc add-hyperlinks [annotation mentions]
+  (let [mmap (switch-map annotation mentions)]
+    (->> mmap (mapcat second) (cons 0) (partition-all 2)
+         (map #(apply (partial subs (.toString annotation)) %))
+         (interleave (cons "" (map switch-val mmap)))
          (str/join ""))))
 
 (defnc sentence-graph [reftime sent-pair]
@@ -627,7 +658,8 @@
     [(->> sentences (find-all-relations models)
           get-sentences (nlp-graph reftime))
      (->> sentences get-sentences (mapcat entity-mentions)
-          (filter make-link?) (add-hyperlinks new-text))]))
+          (filter make-link?)
+          (add-hyperlinks (run-nlp (:token models) new-text)))]))
 
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))
