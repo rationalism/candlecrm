@@ -20,6 +20,7 @@
 (def occupation :occupation)
 (def mail-address :mail-address)
 (def website :website)
+(def age :age)
 
 (def email :email)
 (def email-headers :email_headers)
@@ -61,6 +62,7 @@
 (def start-time :start-time)
 (def stop-time :stop-time)
 (def over-time :over-time)
+(def frequency :frequency)
 (def event-attend :event-attend)
 (def event-features :event-features)
 (def event-org :event-org)
@@ -120,18 +122,6 @@
 
 (def src-features [edit-src nlp-src email-src contact-src])
 
-(def repeated-attr [s-name person-name org-name email-addr phone-num
-                    mail-address website org-member])
-
-(def attr-entity {person-name person org-name organization
-                  email-addr person phone-num person
-                  loc-name location date-time event
-                  amount money birthday person
-                  gender person occupation person
-                  mail-address person website person
-                  org-member person url webpage
-                  time-interval event})
-
 (def attr-names {s-name "Name" amount "Amount"
                  email-addr "Email address" email-subject "Subject"
                  email-to "Email to" email-from "Email from"
@@ -152,7 +142,8 @@
                  "DATE" date-time "TIME" s-time
                  "PHONE" phone-num "DURATION" duration
                  "ADDRESS" street-addr "EVENT" event-type
-                 "ZIPCODE" zipcode "URL" webpage})
+                 "ZIPCODE" zipcode "URL" webpage
+                 "SET" frequency})
 
 (def relation-map {"EventStart" start-time "EventStop" stop-time
                    "EventDuration" duration "EventAttend" event-attend
@@ -164,10 +155,12 @@
                    "OrgBased_In" location "Work_For" org-member
                    "PersonAddr" mail-address "OrgAddr" mail-address
                    "PersonPhone" phone-num "OrgPhone" phone-num
-                   "PersonWebsite" website "OrgWebsite" website})
+                   "PersonWebsite" website "OrgWebsite" website
+                   "PersonAge" age "OrgAge" age
+                   "EventFrequency" frequency})
 
-(def is-attr [start-time stop-time duration event-type
-              event-cost website event-time phone-num])
+(def is-attr [start-time stop-time duration event-type frequency
+              event-cost website event-time phone-num age])
 
 (def entity-map {person-name person org-name organization
                  email-addr person phone-num person
@@ -188,10 +181,11 @@
                      [date-time street-addr] ["EventAddr"]
                      [date-time event-type] ["EventType"]
                      [date-time amount] ["EventCost"]
+                     [date-time frequency] ["EventFrequency"]
                      [person-name loc-name] ["Live_In"]
                      [org-name loc-name] ["OrgBased_In"]
                      [person-name zipcode] ["Live_In"]
-                     [loc-name zipcode] ["Located_In"]
+                     [zipcode loc-name] ["Located_In"]
                      [org-name zipcode] ["OrgBased_In"]
                      [person-name org-name] ["Work_For"]
                      [org-name street-addr] ["OrgAddr"]
@@ -199,7 +193,16 @@
                      [person-name phone-num] ["PersonPhone"]
                      [org-name phone-num] ["OrgPhone"]
                      [person-name webpage] ["PersonWebsite"]
-                     [org-name webpage] ["OrgWebsite"]})
+                     [org-name webpage] ["OrgWebsite"]
+                     [email-addr loc-name] ["Live_In" "OrgBased_In"]
+                     [email-addr zipcode] ["Live_In" "OrgBased_In"]
+                     [email-addr street-addr] ["PersonAddr" "OrgAddr"]
+                     [email-addr phone-num] ["PersonPhone" "OrgPhone"]
+                     [email-addr webpage] ["PersonWebsite" "OrgWebsite"]
+                     [email-addr duration] ["PersonAge" "OrgAge"]
+                     [person-name duration] ["PersonAge"]
+                     [org-name duration] ["OrgAge"]
+                     })
 
 (def person-attrs [s-name email-addr phone-num website])
 
