@@ -590,7 +590,7 @@
 (defn end-fpp-pos [tokens]
   (if (and (-> tokens first .value (= "said"))
            (-> tokens second .value (= ":")))
-    (-> tokens second .endPosition)
+    (-> tokens second .endPosition inc)
     (recur (rest tokens))))
 
 (defn sentence-map [sentences]
