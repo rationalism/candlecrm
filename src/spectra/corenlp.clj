@@ -459,8 +459,8 @@
                        add-heads get-sentences first
                        split-relations cset/map-invert)]
       (->> (compose-maps rel-map (:relation models))
-           (map #(apply rel-annotate %))
-           combine-rels))
+           (remove #(nil? (second %)))
+           (map #(apply rel-annotate %)) combine-rels))
     sentence))
 
 (defn find-all-relations [models doc]
