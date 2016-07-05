@@ -48,6 +48,7 @@
 (def street-addr :street-addr)
 (def zipcode :zipcode)
 (def building :building)
+(def loc-inside :loc-inside)
 
 (def organization :org)
 (def person-name :person-name)
@@ -139,6 +140,8 @@
                  website "Website" org-member "Member of"
                  url "Page address" start-time "Begins at"
                  stop-time "Ends at" street-addr "Street address"
+                 event-begin "Event begins at"
+                 event-end "Event ends at"
                  event-features "Event with"
                  email-mentions "Related emails"})
 
@@ -159,11 +162,11 @@
                    "EventType" event-type "EventCost" event-cost
                    "EventWebsite" website "EventTime" event-time
                    "Live_In" location "Located_In" located-in
+                   "LocInside" loc-inside "PersonAge" age "OrgAge" age
                    "OrgBased_In" location "Work_For" org-member
                    "PersonAddr" mail-address "OrgAddr" mail-address
                    "PersonPhone" phone-num "OrgPhone" phone-num
                    "PersonWebsite" website "OrgWebsite" website
-                   "PersonAge" age "OrgAge" age
                    "EventFrequency" frequency})
 
 (def is-attr [start-time stop-time duration event-type frequency
@@ -195,6 +198,8 @@
                      [person-name zipcode] ["Live_In"]
                      [street-addr loc-name] ["Located_In"]
                      [street-addr zipcode] ["Located_In"]
+                     [loc-name loc-name] ["LocInside"]
+                     [zipcode loc-name] ["LocInside"]
                      [org-name zipcode] ["OrgBased_In"]
                      [person-name org-name] ["Work_For"]
                      [org-name street-addr] ["OrgAddr"]

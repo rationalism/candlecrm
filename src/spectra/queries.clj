@@ -92,7 +92,8 @@
                [s/link-to s/email-mentions s/email-subject :id]]
    s/building [[s/street-addr]
                [s/link-to s/email-mentions s/email-subject :id]]
-   s/event [[s/s-name] [s/date-time] [s/event-type] [s/website]
+   s/event [[s/s-name] [s/date-time] [s/event-begin] [s/event-end]
+            [s/event-type] [s/website]
             [s/event-features s/s-name :id]
             [s/link-to s/email-mentions s/email-subject :id]]})
 
