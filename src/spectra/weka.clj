@@ -158,6 +158,10 @@
   (doto (empty-bayes)
     (.buildClassifier (instances points))))
 
+(defn train-bayes [trainfile]
+  (->> trainfile slurp str/split-lines
+       (map edn/read-string) naive-bayes))
+
 (defn add-text [instances text]
   (.add instances 
         (doto (DenseInstance. 2)
