@@ -225,7 +225,8 @@
   (.originalText annotation))
 
 (defn rel-annotate [sentence rel-model]
-  (.annotateSentence rel-model sentence)
+  (when rel-model
+    (.annotateSentence rel-model sentence))
   sentence)
 
 (defn set-rels [sentence rels]
@@ -459,7 +460,6 @@
                        add-heads get-sentences first
                        split-relations cset/map-invert)]
       (->> (compose-maps rel-map (:relation models))
-           (remove #(nil? (second %)))
            (map #(apply rel-annotate %)) combine-rels))
     sentence))
 
@@ -660,7 +660,7 @@
   (let [new-text (->> text strip-parens
                       (fpp-replace models author))
         sentences (run-nlp-ner models new-text)]
-    [(->> sentences (find-all-relations models)
+    [(->> sentences (find-all-relations models) 
           get-sentences (nlp-graph reftime))
      (->> sentences get-sentences (mapcat entity-mentions)
           (remove #(is-fpp-mention? author %)) (filter make-link?)
