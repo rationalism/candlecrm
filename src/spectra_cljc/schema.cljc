@@ -207,16 +207,7 @@
                      [email-addr webpage] ["PersonWebsite" "OrgWebsite"]
                      [email-addr duration] ["PersonAge" "OrgAge"]
                      [person-name duration] ["PersonAge"]
-                     [org-name duration] ["OrgAge"]
-                     [person-name number] []
-                     [org-name number] []
-                     [date-time number] []
-                     [person-name percent] []
-                     [org-name percent] []
-                     [date-time percent] []
-                     [person-name ordinal] []
-                     [org-name ordinal] []
-                     [date-time ordinal] []})
+                     [org-name duration] ["OrgAge"]})
 
 (def email-links [email-to email-cc email-bcc
                   email-reply email-replyto email-mentions])
