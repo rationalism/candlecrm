@@ -100,7 +100,8 @@
               "ob" "OrgBased_In" "wf" "Work_For" "pa" "PersonAddr"
               "oa" "OrgAddr" "ph" "PersonPhone" "op" "OrgPhone"
               "fr" "EventFrequency" "pg" "PersonAge" "og" "OrgAge"
-              "pw" "PersonWebsite" "ow" "OrgWebsite" "q" :quit "n" :next})
+              "pw" "PersonWebsite" "ow" "OrgWebsite"
+              "in" "LocInside" "q" :quit "n" :next})
 
 (defn translate-codes [s]
   (if (empty? s) nil
