@@ -502,7 +502,7 @@
     (->> rand-gen (repeatedly n)
          (map #(-> max-n (* 0.75) int (+ %)))
          (pmap #(get-message folder %)) (remove nil?)
-         (map get-text) (mapcat #(str/split % #"\r\n"))
+         (map get-text) (mapcat str/split-lines)
          (map #(vector % "b")) (map prn-str)
          (str/join ""))))
 
