@@ -400,7 +400,7 @@
           mentions))
 
 (defn entity-mentions [sentence]
-  (->> sentence relation-mentions))
+  (->> sentence relation-mentions remove-bad-dates))
 
 (defn relation-id [relation]
   (mapcat (juxt #(.getHeadTokenStart %)
