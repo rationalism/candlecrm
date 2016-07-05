@@ -395,12 +395,12 @@
 
 (defn remove-bad-dates [mentions]
   (remove #(and (-> % .getType s/schema-map (= s/date-time))
-                (or (->> % .getExtentString dt/is-bad-date?)
-                    (->> % .getExtentString dt/dates-in-text empty?)))
+                (->> % .getExtentString dt/dates-in-text empty?)
+                #_(->> % .getExtentString dt/is-bad-date?))
           mentions))
 
 (defn entity-mentions [sentence]
-  (remove-bad-dates (relation-mentions sentence)))
+  (->> sentence relation-mentions))
 
 (defn relation-id [relation]
   (mapcat (juxt #(.getHeadTokenStart %)
