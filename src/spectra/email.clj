@@ -99,6 +99,7 @@
               "ti" "EventTime" "li" "Live_In" "lo" "Located_In"
               "ob" "OrgBased_In" "wf" "Work_For" "pa" "PersonAddr"
               "oa" "OrgAddr" "ph" "PersonPhone" "op" "OrgPhone"
+              "fr" "EventFrequency" "pg" "PersonAge" "og" "OrgAge"
               "pw" "PersonWebsite" "ow" "OrgWebsite" "q" :quit "n" :next})
 
 (defn translate-codes [s]
