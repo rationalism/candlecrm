@@ -109,6 +109,13 @@
            (map #(dissoc % :id s/type-label)) (apply merge)
            (merge {:id id s/type-label type})))))
 
+(defn optional-fetch-node [key-result user]
+  (when key-result
+    (-> key-result clojure-map
+        (cset/rename-keys {"ID(root)" :id "labels(root)" :type})
+        (update :type #(-> % vec mlrecon/filter-decode-labels second))
+        (#(node-by-id user %)))))
+
 (defn key-link [user query-map]
   (-> [(str "MATCH (m:" (neo4j/prop-label user s/email)
             ")-[:" (neo4j/esc-token s/email-mentions)
@@ -119,10 +126,8 @@
             " = {key} WITH h MATCH (h)-[:" (neo4j/esc-token s/link-to)
             "]->(root) RETURN ID(root), labels(root)")
        query-map]
-      neo4j/cypher-query first clojure-map
-      (cset/rename-keys {"ID(root)" :id "labels(root)" :type})
-      (update :type #(-> % vec mlrecon/filter-decode-labels second))
-      (#(node-by-id user %))))
+      neo4j/cypher-query first
+      (optional-fetch-node user)))
 
 (defn email-queue []
   (-> [(str "MATCH (root:" s/email-queue
