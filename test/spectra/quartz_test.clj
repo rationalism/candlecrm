@@ -23,7 +23,6 @@
                   println (fn [& x] nil)]
       (add-new-queue! test-user)
       (refresh-queue! test-user)
-      (def q (queries/next-email-queue test-user))
-      (queue-reset! (:queue q)))
+      (queries/next-email-queue test-user))
 
     (auth/delete-user! test-user)))
