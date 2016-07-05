@@ -71,6 +71,8 @@
 (def event-type :event-type)
 (def event-cost :event-cost)
 (def event-time :event-time)
+(def event-begin :event-begin)
+(def event-end :event-end)
 
 (def number :number)
 (def percent :percent)

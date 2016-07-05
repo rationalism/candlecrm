@@ -288,15 +288,21 @@
 
 (defn ner-graph [reftime entity]
   (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
-    (loom/build-graph [{s/type-label node-type
-                        (-> entity .getType s/schema-map s/label-correct)
-                        (if (= node-type s/event)
-                          (-> entity .getExtentString
-                              (dt/dates-in-text reftime) first)
-                          (-> entity .getExtentString))
-                        s/link-text (.getExtentString entity)
-                        s/hash-code (str "hc" (.hashCode entity))}]
-                      [])))
+    (-> {s/type-label node-type}
+        (merge {s/link-text (.getExtentString entity)})
+        (merge {s/hash-code (str "hc" (.hashCode entity))})
+        (merge (if (= node-type s/event)
+                 (let [node-dates (-> entity .getExtentString
+                                      (dt/dates-in-text reftime))]
+                   (condp = (count node-dates)
+                     1 {s/event-begin (first node-dates)}
+                     2 {s/event-begin (first node-dates)
+                        s/event-end (second node-dates)}
+                     (zipmap (repeat s/date-time (count node-dates))
+                             node-dates)))
+                 {(-> entity .getType s/schema-map s/label-correct)
+                  (.getExtentString entity)}))
+        vector (loom/build-graph []))))
 
 (defn add-link [g node]
   (loom/add-edge g [{s/type-label s/hyperlink
@@ -635,11 +641,7 @@
 (defnp sentence-parse [models text]
   (->> (update text 1 strip-parens)
        (apply (partial fpp-replace models))
-       (run-nlp (:ner models))
-       library-annotate-all
-       (run-annotate (:mention models))
-       (run-annotate (:entity models))
-       get-sentences))
+       (run-nlp-ner models) get-sentences))
 
 (defnc run-nlp-default [models text]
   (->> text (run-nlp-ner models)
