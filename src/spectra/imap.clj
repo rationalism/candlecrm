@@ -196,20 +196,11 @@
 (defn chain-lines [chain]
   (-> chain find-top s/email-body))
 
-(defn count-arrows [lines]
-  (->> (map #(re-seq #"^>+" %) lines)
-       (remove nil?)))
-
-(defn count-depth [lines]
-  (let [arrows (count-arrows lines)]
-    (if (or (nil? arrows) (empty? arrows))
-      [0] (->> arrows (map first) (map count)))))
-
 (defn count-min-depth [lines]
-  (->> lines count-depth (apply min)))
+  (->> lines reply/count-depth (apply min)))
 
 (defn count-max-depth [lines]
-  (->> lines count-depth (apply max)))
+  (->> lines reply/count-depth (apply max)))
 
 (defn remove-arrows [num lines]
   (map #(str/replace-first
