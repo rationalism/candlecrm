@@ -158,6 +158,8 @@
   (doto (empty-bayes)
     (.buildClassifier (instances points))))
 
+;; Don't run this from REPL
+;; The printout is huge and will crash Emacs
 (defn train-bayes [trainfile]
   (->> trainfile slurp str/split-lines
        (map edn/read-string) naive-bayes))
