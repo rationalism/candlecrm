@@ -405,10 +405,10 @@
         decode-addr-map 
         (mapcat #(make-headers % (first headers))))))
 
-(defnc full-parse [message models]
-  (-> message first regex/strip-javascript
+(defnc full-parse [[message headers] models]
+  (-> message regex/strip-javascript
       (raw-msg-chain models)
-      (merge-bottom-headers (headers-parse (second message)))
+      (merge-bottom-headers (headers-parse headers))
       infer-email-chain infer-subject))
 
 (defn parse! [models {:keys [message user]}]
