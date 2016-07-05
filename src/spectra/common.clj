@@ -159,5 +159,8 @@
   (fn [coll]
     (map #(%1 %2) fns coll)))
 
-(defn pairmap [fn coll]
+(defn mapvals [fn coll]
   (->> coll (map fn) (zipmap coll)))
+
+(defn mapkeys [fn coll]
+  (zipmap (map fn coll) coll))

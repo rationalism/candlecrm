@@ -63,9 +63,7 @@
 (defn load-thresholds! []
   (let [classes (->> [@recon-models @conflict-models]
                      (map keys) (apply concat))]
-    (->> (map load-curve! classes)
-         (zipmap classes)
-         (reset! recon-logit))))
+    (->> classes (mapvals load-curve!) (reset! recon-logit))))
 
 (defn version-count [class]
   (->> models-dir io/file file-seq
@@ -110,8 +108,7 @@
     (id-map id) id))
 
 (defn id-map [id-set]
-  (zipmap id-set
-          (repeat (count id-set) (last id-set))))
+  (-> id-set last constantly (mapvals id-set)))
 
 (defn swap-ids [id-map l]
   (let [update-f (partial update-id id-map)]
@@ -249,7 +246,7 @@
     (neo4j/switch-user! user all-ids)))
 
 (defn dummy-map [objects]
-  (zipmap objects (repeat (count objects) 1.0)))
+  (-> 1.0 constantly (mapvals objects)))
 
 (defn rank-params [[k m]]
   {k (if-let [model (@view-models k)]
@@ -360,9 +357,10 @@
 
 (defn parse-paths [paths path-rels]
   (let [results (parse-paths-general paths path-rels)
-        result-map (->> (map #(dissoc % :id s/type-label) results)
-                        (map keys) (map first) (zipvec results)
-                        (map reverse) (mapv vec) (into {}))]
+        result-map (->> (mapvals (comp first keys
+                                       #(dissoc % :id s/type-label))
+                                 results)
+                        (into []) (map reverse) (mapv vec) (into {}))]
     (mapv #(-> % result-map % keys vec)
           (mapv #(if (= (last %) :id)
                    (last (last %)) (last %))
@@ -490,7 +488,7 @@
         vs (->> cs flatten distinct
                 (fetch-all-paths (map first rules)))]
     (->> (map #(pair-map % vs) cs)
-         (map #(score-diff rules %))
+         (pmap #(score-diff rules %))
          (map vec) (zipmap cs))))
 
 (defnp conflict-data [user class ids]

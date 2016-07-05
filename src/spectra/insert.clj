@@ -26,7 +26,7 @@
          neo4j/cypher-combined-tx
          (apply concat) (map vals)
          (apply concat) (zipmap fulls)
-         (merge (zipmap emptys (map :id emptys))))))
+         (merge (mapvals :id emptys)))))
 
 (defn prop-cypher [user source id prop val]
   (if (coll? val)

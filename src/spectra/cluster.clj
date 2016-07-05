@@ -51,8 +51,7 @@
                 (filter #(contains? c1 (first %)))
                 seq)]
     (->> (map first candidates) (map c1) distinct (map c2)
-         (map #(map (zipmap (map first candidates)
-                            candidates) %))
+         (map #(map (mapkeys first candidates) %))
          (map #(remove nil? %)) (map sum-score)
          (sort-by second >) first
          (check-best [c1 c2 c3] node))

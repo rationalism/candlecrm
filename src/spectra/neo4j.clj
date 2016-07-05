@@ -279,9 +279,8 @@
 
 (defn switch-user! [user ids]
   (let [id-labels
-        (->> (mapv get-labels ids) 
-             (mapv #(filter (fn [l] (.contains l "user_")) %))
-             (map first) (zipmap ids))]
+        (mapvals (comp first #(filter (fn [l] (.contains l "user_")) %)
+                       get-labels) ids)]
     (mapv #(apply remove-label! %) id-labels)
     (->> (fmap id-labels (partial replace-id user))
          (mapv #(apply add-label! %)))))

@@ -299,8 +299,7 @@
                      1 {s/event-begin (first node-dates)}
                      2 {s/event-begin (first node-dates)
                         s/event-end (second node-dates)}
-                     (zipmap (repeat s/date-time (count node-dates))
-                             node-dates)))
+                     (mapkeys (constantly s/date-time) node-dates)))
                  {(-> entity .getType s/schema-map s/label-correct)
                   (.getExtentString entity)}))
         vector (loom/build-graph []))))
@@ -422,7 +421,7 @@
   (let [type-map (->> sentence entity-mentions
                       (group-by #(-> % .getType s/schema-map)))
         rel-keys (keys s/relation-types)]
-    (->> rel-keys (map #(map type-map %)) (zipmap rel-keys)
+    (->> rel-keys (mapvals #(map type-map %))
          (filter #(not-any? nil? (val %))) (into {})
          (fmapl cross-relations)
          (fmapl #(set-rels (Annotation. sentence) %)))))
@@ -506,8 +505,7 @@
 
 (defnc relation-graph [ner-graph relation]
   (let [rel-type (-> relation .getType s/relation-map)
-        graph-map (zipmap (mapv s/hash-code (loom/nodes ner-graph))
-                          (loom/nodes ner-graph))
+        graph-map (->> ner-graph loom/nodes (mapkeys s/hash-code))
         old-node (->> relation .getEntityMentionArgs
                       first .hashCode (str "hc") graph-map)]
     (if (some #{rel-type} s/is-attr)
@@ -587,7 +585,7 @@
       (mention-link param)))
 
 (defn mention-map [mentions]
-  (->> mentions (map mention-chars) (zipmap mentions)))
+  (mapvals mention-chars mentions))
 
 (defn first-token-pos [tokens]
   (->> tokens first .beginPosition))
@@ -599,9 +597,8 @@
     (recur (rest tokens))))
 
 (defn sentence-map [sentences]
-  (->> sentences (map get-tokens)
-       (map (juxt first-token-pos end-fpp-pos))
-       (zipmap sentences)))
+  (mapvals (comp (juxt first-token-pos end-fpp-pos) get-tokens)
+           sentences))
 
 (defn switch-map [annotation mentions]
   (->> annotation get-sentences sentence-map
