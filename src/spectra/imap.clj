@@ -9,6 +9,7 @@
             [spectra.insert :as insert]
             [spectra.loom :as loom]
             [spectra.regex :as regex]
+            [spectra.reply :as reply]
             [spectra_cljc.schema :as s]
             [spectra.weka :as weka]
             [taoensso.timbre.profiling :as profiling
@@ -493,6 +494,17 @@
     (vector (if (or (nil? message-text) (empty? message-text))
               "(No body)" message-text)
             (headers-fetch message folder))))
+
+(defn train-messages [user n]
+  (let [folder (fetch-imap-folder user)
+        max-n (last-uid folder)
+        rand-gen #(-> max-n (* 0.25) int rand-int)]
+    (->> rand-gen (repeatedly n)
+         (map #(-> max-n (* 0.75) int (+ %)))
+         (pmap #(get-message folder %)) (remove nil?)
+         (map get-text) (mapcat #(str/split % #"\r\n"))
+         (map #(vector % "b")) (map prn-str)
+         (str/join ""))))
 
 (defn insert-raw-range! [user lower upper]
   (let [folder (fetch-imap-folder user)]
