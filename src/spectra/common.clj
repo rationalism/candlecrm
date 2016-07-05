@@ -158,3 +158,6 @@
 (defn switch [& fns]
   (fn [coll]
     (map #(%1 %2) fns coll)))
+
+(defn pairmap [fn coll]
+  (->> coll (map fn) (zipmap coll)))
