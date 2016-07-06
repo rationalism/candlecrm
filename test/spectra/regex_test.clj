@@ -1,5 +1,6 @@
 (ns spectra.regex-test
   (:require [clojure.test :refer :all]
+            [spectra_cljc.schema :as s]
             [spectra.regex :refer :all]))
 
 (def test-name "Joe Smith")
@@ -23,14 +24,14 @@
 
 (deftest email-parse-test
   (testing "Parsing email/name combos"
-    (is (= {:name test-name}
+    (is (= {s/s-name test-name}
            (parse-name-email test-name)))
-    (is (= {:email test-email}
+    (is (= {s/email-addr test-email}
            (parse-name-email test-email)))
-    (is (= {:name test-name :email test-email}
+    (is (= {s/s-name test-name s/email-addr test-email}
            (parse-name-email test-both)))
     (is (= (find-email-people test-email)
-           [{:email-addr [test-email] :label :person}]))))
+           [{s/email-addr [test-email] s/type-label s/person}]))))
 
 (deftest phone-regex-test
   (testing "Parsing phone numbers"
