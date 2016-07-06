@@ -489,6 +489,14 @@
          (map #(vector % "b")) (map prn-str)
          (str/join ""))))
 
+(defn try-parse [user n]
+  (let [folder (fetch-imap-folder user)
+        message (first (fetch-messages folder n n))]
+    (when message
+      (->> message (message-fetch folder)
+           (#(update % 1 str/split-lines))
+           (apply reply/reply-parse (reply/parse-models-fn))))))
+
 (defn insert-raw-range! [user lower upper]
   (let [folder (fetch-imap-folder user)]
     (->> (fetch-messages folder lower upper)

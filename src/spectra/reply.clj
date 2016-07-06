@@ -25,7 +25,7 @@
   (->> lines ((juxt first last)) (map second)
        (vector (str/join "\n" (map first lines)))))
 
-(defn header-ranges [{:keys [sep nlp]} lines]
+(defn header-ranges [{:keys [sep nlp]} headers lines]
   (->> lines count range (zipvec lines)
        (mapvals #(weka/is-header? sep (first %)))
        (into []) (partition-by second)
@@ -34,7 +34,8 @@
        (map reverse) (map vec) (map #(update % 0 vec))
        (map #(update % 1 (partial nlp/run-nlp-default nlp)))
        (remove #(->> % second loom/nodes (map s/type-label)
-                     (some #{s/event})))))
+                     (some #{s/event})))
+       (concat [[0 0] headers])))
 
 (defn body-graph [[header lines]]
   [header lines])
@@ -48,8 +49,8 @@
          (map (fn [b] (update b 1 #(apply subvec lines %))))
          (map body-graph))))
 
-(defn reply-parse [models lines]
-  (let [header-map (header-ranges models lines)]
+(defn reply-parse [models lines headers]
+  (let [header-map (header-ranges models headers lines)]
     (cond (= (count header-map) 0)
           (-> {s/email-body (str/join "\n" lines)}
               (merge {s/type-label s/email})
