@@ -398,17 +398,15 @@
 (defn decode-addr-map [addr-map]
   (fmap addr-map #(map addr-person %)))
 
-(defn headers-parse [headers]
-  (loom/build-graph
-   [(first headers)]
-   (->> (second headers) (apply merge)
-        decode-addr-map 
-        (mapcat #(make-headers % (first headers))))))
+(defn headers-parse [[params nodes]]
+  (->> nodes (apply merge) decode-addr-map 
+       (mapcat #(make-headers % params))
+       (loom/build-graph [params])))
 
 (defnc full-parse [[message headers] models]
   (-> message regex/strip-javascript
       (raw-msg-chain models)
-      (merge-bottom-headers (headers-parse headers))
+      (merge-bottom-headers headers)
       infer-email-chain infer-subject))
 
 (defn parse! [models {:keys [message user]}]
@@ -478,7 +476,7 @@
   (let [message-text (get-text message)]
     (vector (if (or (nil? message-text) (empty? message-text))
               "(No body)" message-text)
-            (headers-fetch message folder))))
+            (headers-parse (headers-fetch message folder)))))
 
 (defn train-messages [user n]
   (let [folder (fetch-imap-folder user)
