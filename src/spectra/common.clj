@@ -87,6 +87,9 @@
 (defn rconj [a b]
   (conj b a))
 
+(defn rcons [a b]
+  (cons b a))
+
 (defn echo [x]
   (println "Echo!") x)
 

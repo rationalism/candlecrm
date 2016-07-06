@@ -59,15 +59,16 @@
                           name-count)]
     (->> (if (and (<= new-email-count 1) (<= new-name-count 1))
            s/email-from s/email-to) vector
-         (concat [center new-node]) (loom/add-edge graph)
-         (cons [center new-email-count new-name-count]))))
+         (concat [center new-node]) vec (loom/add-edge graph)
+         (rcons [center new-email-count new-name-count]))))
 
 (defn from-to-graphs [graphs]
   (if-let [center (center-node graphs)]
-    (->> graphs (mapcat loom/nodes)
+    (->> graphs (mapcat loom/nodes) (remove #(= % center))
          (reduce add-edge-graph
                  [(loom/build-graph [center] []) center 0 0])
-         first) []))
+         first)
+    (loom/build-graph [] [])))
 
 (defn merge-from [graph]
   (let [from-nodes (->> graph loom/edges
