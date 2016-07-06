@@ -444,7 +444,8 @@
   (vector {s/email-received (received-time message)
            s/email-sent (sent-time message)
            s/email-subject (subject message)
-           s/email-uid (get-uid folder message)}
+           s/email-uid (get-uid folder message)
+           s/type-label s/email}
           [(decode-recipients message)
            (decode-sender message)
            (decode-replyto message)]))

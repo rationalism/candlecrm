@@ -134,6 +134,9 @@
                       (map #(assoc % 1 new-node-up))))
       (remove-nodes [old-node])))  
 
+(defn adjust-nodes [g f]
+  (reduce #(replace-node %1 %2 (f %2)) g (nodes g)))
+
 (defn build-graph [nodes edges]
   {:pre [(coll? nodes) (coll? edges)]}
   (-> (graph/digraph) (add-nodes nodes) (add-edges edges)))

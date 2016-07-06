@@ -1,5 +1,6 @@
 (ns spectra.reply
   (:require [clojure.string :as str]
+            [clojure.set :as cset]
             [spectra_cljc.schema :as s]
             [spectra.common :refer :all]
             [spectra.corenlp :as nlp]
@@ -29,8 +30,23 @@
   (->> graph loom/nodes (filter #(= s/hyperlink (s/type-label %)))
        (loom/remove-nodes graph)))
 
+(defn remove-meta [graph]
+  (loom/adjust-nodes graph #(dissoc % s/hash-code s/link-text))) 
+
+(defn rename-dates [graph]
+  (loom/adjust-nodes graph #(cset/rename-keys
+                             % {s/event-begin s/email-sent
+                                s/event-end s/email-sent
+                                s/date-time s/email-sent})))
+
+(defn adjust-labels [graph]
+  (loom/adjust-nodes
+   graph (fn [n] (fmap n #(if (= % s/event)
+                            s/email %)))))
+
 (defn nlp-headers [models text]
-  (->> text (nlp/run-nlp-default models) remove-links))
+  (->> text (nlp/run-nlp-default models) remove-links
+       remove-meta rename-dates adjust-labels))
 
 (defn header-ranges [{:keys [sep nlp]} headers lines]
   (->> lines count range (zipvec lines)
@@ -41,7 +57,7 @@
        (map reverse) (map vec) (map #(update % 0 vec))
        (map #(update % 1 (partial nlp-headers nlp)))
        (filter #(->> % second loom/nodes (map s/type-label)
-                     (some #{s/event})))
+                     (some #{s/email})))
        (cons [[0 0] headers])))
 
 (defn body-graph [[header lines]]
