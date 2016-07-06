@@ -80,10 +80,9 @@
                        first)]
     (if (<= (count from-nodes) 1) graph
         (-> graph (loom/remove-nodes [email-node])
-            (loom/replace-node name-node
-                               (->> email-node s/email-addr
-                                    (hash-map s/email-addr)
-                                    (merge name-node)))))))
+            (loom/replace-node
+             name-node (->> email-node s/email-addr (hash-map s/email-addr)
+                            (merge name-node)))))))
 
 (defn nlp-headers [models text]
   (->> text (map #(nlp/run-nlp-default models %))
