@@ -73,9 +73,9 @@
     (if (= 1 (count addrs))
       (let [found-name (parse-name text (first addrs))]
         (if (>= (count found-name) 3)
-          {:email (first addrs) :name found-name}
-          {:email (first addrs)}))
-      {:name text})))
+          {s/email-addr (first addrs) s/s-name found-name}
+          {s/email-addr (first addrs)}))
+      {s/s-name text})))
 
 (def default-region "US")
 
