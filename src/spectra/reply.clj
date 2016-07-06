@@ -42,4 +42,8 @@
           (-> {s/email-body (str/join "\n" lines)}
               (merge {s/type-label s/email})
               vector (loom/build-graph []))
-          )))
+          (->> lines (map count-depth) (apply max)
+               (* 2) (< (count header-map)))
+          :chain
+          :else
+          :digest)))
