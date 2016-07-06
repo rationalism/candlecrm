@@ -28,7 +28,7 @@
 
 (defn combine-lines [lines]
   (->> lines ((juxt first last)) (map second)
-       (vector (str/join "\n" (map first lines)))))
+       (vector (map first lines))))
 
 (defn remove-links [graph]
   (->> graph loom/nodes (filter #(= s/hyperlink (s/type-label %)))
@@ -49,8 +49,9 @@
                             s/email %)))))
 
 (defn nlp-headers [models text]
-  (->> text (nlp/run-nlp-default models) remove-links
-       remove-meta rename-dates adjust-labels))
+  (->> text (map #(nlp/run-nlp-default models %))
+       (map remove-links) (map remove-meta)
+       #_rename-dates #_adjust-labels))
 
 (defn sig-split [line-groups]
   (let [groups-count (zipvec line-groups (map mode-arrows line-groups))]
