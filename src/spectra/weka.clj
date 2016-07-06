@@ -199,7 +199,7 @@
 
 (defn is-header? [sep-model l]
   (->> (classify-bayes sep-model l)
-       second (< 0.5)))
+       second (< 0.9)))
 
 (defn read-trainset [filename]
   (->> (str/split (slurp filename) #"\n")

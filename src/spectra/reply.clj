@@ -21,9 +21,6 @@
     (if (or (nil? arrows) (empty? arrows))
       [0] (->> arrows (map first) (map count)))))
 
-(defn parse-header [models lines]
-  (->> lines (str/join "\n") (nlp/run-nlp-default models)))
-
 (defn combine-lines [lines]
   (->> lines ((juxt first last)) (map second)
        (vector (str/join "\n" (map first lines)))))
@@ -33,7 +30,7 @@
        (mapvals #(weka/is-header? sep (first %)))
        (into []) (partition-by second)
        (filter #(-> % first second))
-       (map #(map first %)) (map combine-lines) (map reverse)
+       (map #(map first %)) (map combine-lines) (map reverse) debug
        (map #(update % 1 (partial nlp/run-nlp-default nlp)))
        (remove #(->> % second loom/nodes (map s/type-label)
                      (some #{s/event})))))
