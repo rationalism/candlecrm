@@ -4,6 +4,12 @@
             [spectra.corenlp :as nlp]
             [spectra.weka :as weka]))
 
+(defn parse-models-fn []
+  {:sep ((weka/email-sep-model-fn))
+   :nlp {:ner ((nlp/get-ner-fn))
+         :mention ((nlp/get-mention-fn))
+         :entity (nlp/entity-extractor)}})
+
 (defn count-arrows [lines]
   (->> (map #(re-seq #"^>+" %) lines)
        (remove nil?)))
@@ -13,8 +19,9 @@
     (if (or (nil? arrows) (empty? arrows))
       [0] (->> arrows (map first) (map count)))))
 
-(defn header-ranges [sep-model lines]
+(defn header-ranges [{:keys [sep nlp]} lines]
   (->> lines count range (zipvec lines)
-       (mapvals #(weka/is-header? sep-model (first %)))
+       (mapvals #(weka/is-header? sep (first %)))
        (into []) (partition-by second)
-       (filter #(-> % first second)) (map #(map first %))))
+       (filter #(-> % first second)) (map #(map first %))
+       ))

@@ -414,15 +414,9 @@
 (defn parse! [models {:keys [message user]}]
   [(full-parse message models) user s/email-src])
 
-(defn parse-models-fn []
-  {:sep ((weka/email-sep-model-fn))
-   :nlp {:ner ((nlp/get-ner-fn))
-         :mention ((nlp/get-mention-fn))
-         :entity (nlp/entity-extractor)}})
-
 (defn make-parse-pool! []
   (->> {:name "email-parse" :process parse!
-        :param-gen parse-models-fn
+        :param-gen reply/parse-models-fn
         :callback #(apply insert/push-graph! %)
         :num-threads parse-threads}
        async/create-pool!
