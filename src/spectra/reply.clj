@@ -127,18 +127,23 @@
     (->> email (merge {s/email-body (str/join "\n" lines)})
          (loom/replace-node header email))))
 
-(defn split-body [header-map lines]
+(defn maybe-sig-split [mode header-lines]
+  (if (= mode :digest) header-lines
+      (zipvec (map first header-lines)
+              (sig-split (map second header-lines)))))
+
+(defn split-body [mode header-map lines]
   (let [sort-map (sort-by ffirst header-map)
         line-nums (mapcat first sort-map)
         headers (map second sort-map)]
     (->> line-nums rest (rconj (count lines))
          (partition 2) (zipvec headers)
          (map (fn [b] (update b 1 #(apply subvec lines %))))
-         (map body-graph))))
+         (maybe-sig-split mode) (map body-graph))))
 
 (defn reply-parse [models lines headers]
   (let [header-map (header-ranges models headers lines)
         chain-mode (if (->> lines count-depth (apply max)
                             (* 2) (< (count header-map)))
                      :chain :digest)]
-    (->> lines (split-body header-map))))
+    (->> lines (split-body chain-mode header-map))))
