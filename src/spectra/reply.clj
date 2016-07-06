@@ -48,9 +48,11 @@
    graph (fn [n] (fmap n #(if (= % s/event)
                             s/email %)))))
 
+(defn email-nodes [nodes]
+  (filter #(= s/email (s/type-label %)) nodes))
+
 (defn center-node [graphs]
-  (->> graphs (mapcat loom/nodes)
-       (filter #(= s/email (s/type-label %))) first))
+  (->> graphs (mapcat loom/nodes) email-nodes first))
 
 (defn add-edge-graph [[graph center email-count name-count] new-node]
   (let [new-email-count (+ (if (contains? new-node s/email-addr) 1 0)
@@ -71,8 +73,7 @@
     (loom/build-graph [] [])))
 
 (defn merge-from [graph]
-  (let [from-nodes (->> graph loom/edges
-                        (filter #(= s/email-from (third %)))
+  (let [from-nodes (->> (loom/select-edges graph s/email-from)
                         (map second))
         email-node (->> from-nodes (filter #(contains? % s/email-addr))
                         first)
@@ -122,8 +123,7 @@
        (cons [[0 0] headers])))
 
 (defn body-graph [[header lines]]
-  (let [email (->> header loom/nodes
-                   (filter #(= s/email (s/type-label %))) first)]
+  (let [email (->> header loom/nodes email-nodes first)]
     (->> email (merge {s/email-body (str/join "\n" lines)})
          (loom/replace-node header email))))
 
@@ -140,10 +140,39 @@
      graph #(if (= s/email (s/type-label %))
               (merge % {s/email-subject subject}) %))))
 
+(defn to-links [graphs]
+  (map vector
+       (->> graphs rest (map loom/nodes)
+            (map email-nodes) (map first))
+       (->> graphs drop-last (map #(loom/select-edges % s/email-from))
+            (map first) (map second))
+       (-> graphs rest count (repeat s/email-to))))
+
+(defn reply-links [graphs]
+  (map vector
+       (->> graphs rest (map loom/nodes)
+            (map email-nodes) (map first))
+       (->> graphs drop-last (map loom/nodes)
+            (map email-nodes) (map first))
+       (-> graphs rest count (repeat s/email-reply))))
+
+(defn to-digest [to-node graphs]
+  (map vector
+       (->> graphs rest (map loom/nodes)
+            (map email-nodes) (map first))
+       (-> graphs rest count (repeat to-node))
+       (-> graphs rest count (repeat s/email-reply))))
+
 (defn infer-to-from [mode headers graphs]
   (if (= mode :digest)
-    (loom/merge-graphs graphs)
-    (loom/merge-graphs graphs)))
+    (loom/add-edges
+     (loom/merge-graphs graphs)
+     (to-digest (-> graphs first (loom/select-edges s/email-from)
+                    first second)
+                graphs))
+    (-> graphs loom/merge-graphs
+        (loom/add-edges (to-links graphs))
+        (loom/add-edges (reply-links graphs)))))
 
 (defn split-body [mode header-map lines]
   (let [sort-map (sort-by ffirst header-map)
