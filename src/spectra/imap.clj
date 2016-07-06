@@ -494,7 +494,7 @@
         message (first (fetch-messages folder n n))]
     (when message
       (->> message (message-fetch folder)
-           (#(update % 1 str/split-lines))
+           (#(update % 0 str/split-lines))
            (apply reply/reply-parse (reply/parse-models-fn))))))
 
 (defn insert-raw-range! [user lower upper]
