@@ -36,6 +36,18 @@
        (remove #(->> % second loom/nodes (map s/type-label)
                      (some #{s/event})))))
 
+(defn body-graph [[header lines]]
+  [header lines])
+
+(defn split-body [header-map lines]
+  (let [sort-map (sort-by ffirst header-map)
+        line-nums (mapcat first sort-map)
+        headers (map second sort-map)]
+    (->> line-nums rest (rconj (count lines))
+         (partition 2) (zipvec headers)
+         (map (fn [b] (update b 1 #(apply subvec lines %))))
+         (map body-graph))))
+
 (defn reply-parse [models lines]
   (let [header-map (header-ranges models lines)]
     (cond (= (count header-map) 0)
