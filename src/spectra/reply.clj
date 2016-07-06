@@ -140,6 +140,11 @@
      graph #(if (= s/email (s/type-label %))
               (merge % {s/email-subject subject}) %))))
 
+(defn infer-to-from [mode headers graphs]
+  (if (= mode :digest)
+    (loom/merge-graphs graphs)
+    (loom/merge-graphs graphs)))
+
 (defn split-body [mode header-map lines]
   (let [sort-map (sort-by ffirst header-map)
         line-nums (mapcat first sort-map)
@@ -155,4 +160,4 @@
                             (* 2) (< (count header-map)))
                      :chain :digest)]
     (->> lines (split-body chain-mode header-map)
-         infer-subject)))
+         (infer-to-from chain-mode headers) infer-subject)))
