@@ -300,7 +300,7 @@
                      1 {s/event-begin (first node-dates)}
                      2 {s/event-begin (first node-dates)
                         s/event-end (second node-dates)}
-                     (mapkeys (constantly s/date-time) node-dates)))
+                     {s/date-time node-dates}))
                  #{s/person s/organization}
                  (-> entity .getExtentString regex/parse-name-email)
                  {(-> entity .getType s/schema-map s/label-correct)
