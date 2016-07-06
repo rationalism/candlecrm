@@ -69,10 +69,25 @@
                  [(loom/build-graph [center] []) center 0 0])
          first) []))
 
+(defn merge-from [graph]
+  (let [from-nodes (->> graph loom/edges
+                        (filter #(= s/email-from (third %)))
+                        (map second))
+        email-node (->> from-nodes (filter #(contains? % s/email-addr))
+                        first)
+        name-node (->> from-nodes (remove #(contains? % s/email-addr))
+                       first)]
+    (if (<= (count from-nodes) 1) graph
+        (-> graph (loom/remove-nodes [email-node])
+            (loom/replace-node name-node
+                               (->> email-node s/email-addr
+                                    (hash-map s/email-addr)
+                                    (merge name-node)))))))
+
 (defn nlp-headers [models text]
   (->> text (map #(nlp/run-nlp-default models %))
        (map (comp adjust-labels rename-dates remove-meta remove-links))
-       from-to-graphs))
+       from-to-graphs merge-from))
 
 (defn sig-split [line-groups]
   (let [groups-count (zipvec line-groups (map mode-arrows line-groups))]
