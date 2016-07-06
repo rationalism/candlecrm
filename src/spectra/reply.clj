@@ -89,10 +89,16 @@
        (map (comp adjust-labels rename-dates remove-meta remove-links))
        from-to-graphs merge-from))
 
+(defn update-last [sig-map line-groups]
+  (update line-groups (dec (count line-groups))
+          #(update % 0 (constantly (map first (last sig-map))))))
+
 (defn sig-split [line-groups]
-  (let [groups-count (zipvec line-groups (map mode-arrows line-groups))]
-    (->> line-groups last count-arrows (zipvec (last line-groups))
-         (partition-by second) (sort-by #(-> % first second)))))
+  (let [sig-map (->> line-groups last count-arrows (zipvec (last line-groups))
+                     (partition-by second) (sort-by #(-> % first second)))
+        groups-count (->> line-groups (map mode-arrows)
+                          (zipvec line-groups) (update-last sig-map))]
+    ))
 
 (defn header-ranges [{:keys [sep nlp]} headers lines]
   (->> lines count range (zipvec lines)
@@ -107,7 +113,10 @@
        (cons [[0 0] headers])))
 
 (defn body-graph [[header lines]]
-  [header lines])
+  (let [email (->> header loom/nodes
+                   (filter #(= s/email (s/type-label %))) first)]
+    (->> email (merge {s/email-body (str/join "\n" lines)})
+         (loom/replace-node header email))))
 
 (defn split-body [header-map lines]
   (let [sort-map (sort-by ffirst header-map)
@@ -122,4 +131,5 @@
   (let [header-map (header-ranges models headers lines)
         chain-mode (if (->> lines count-depth (apply max)
                             (* 2) (< (count header-map)))
-                     :chain :digest)]))
+                     :chain :digest)]
+    (->> lines (split-body header-map))))
