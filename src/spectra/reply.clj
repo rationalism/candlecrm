@@ -161,7 +161,7 @@
        (->> graphs rest (map loom/nodes)
             (map email-nodes) (map first))
        (-> graphs rest count (repeat to-node))
-       (-> graphs rest count (repeat s/email-reply))))
+       (-> graphs rest count (repeat s/email-to))))
 
 (defn infer-to-from [mode headers graphs]
   (if (= mode :digest)
