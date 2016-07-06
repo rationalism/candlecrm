@@ -30,7 +30,8 @@
        (mapvals #(weka/is-header? sep (first %)))
        (into []) (partition-by second)
        (filter #(-> % first second))
-       (map #(map first %)) (map combine-lines) (map reverse) debug
+       (map #(map first %)) (map combine-lines)
+       (map reverse) (map vec) (map #(update % 0 vec))
        (map #(update % 1 (partial nlp/run-nlp-default nlp)))
        (remove #(->> % second loom/nodes (map s/type-label)
                      (some #{s/event})))))
