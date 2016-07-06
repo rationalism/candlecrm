@@ -48,10 +48,13 @@
    graph (fn [n] (fmap n #(if (= % s/event)
                             s/email %)))))
 
+(defn center-node [graphs]
+  (->> graphs (mapcat loom/nodes)
+       (filter #(= s/email (s/type-label %))) first))
+
 (defn nlp-headers [models text]
   (->> text (map #(nlp/run-nlp-default models %))
-       (map remove-links) (map remove-meta)
-       #_rename-dates #_adjust-labels))
+       (map (comp adjust-labels rename-dates remove-meta remove-links))))
 
 (defn sig-split [line-groups]
   (let [groups-count (zipvec line-groups (map mode-arrows line-groups))]
