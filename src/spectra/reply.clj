@@ -91,14 +91,23 @@
 
 (defn update-last [sig-map line-groups]
   (update line-groups (dec (count line-groups))
-          #(update % 0 (constantly (map first (last sig-map))))))
+          #(update % 0 (constantly (mapv first (last sig-map))))))
+
+(defn sig-add [[low-groups high-groups] new-sig]
+  (let [sig-lines (map first new-sig)
+        arrow-num (-> new-sig first second)
+        new-groups (take-while #(<= (second %) arrow-num)
+                               high-groups)]
+    [(concat low-groups (drop-last new-groups)
+             (update (last new-groups) 0 #(concat % sig-lines)))
+     (drop-while #(<= (second %) arrow-num high-groups))]))
 
 (defn sig-split [line-groups]
   (let [sig-map (->> line-groups last count-arrows (zipvec (last line-groups))
                      (partition-by second) (sort-by #(-> % first second)))
         groups-count (->> line-groups (map mode-arrows)
                           (zipvec line-groups) (update-last sig-map))]
-    ))
+    (reduce sig-add [[] [groups-count]] sig-map)))
 
 (defn header-ranges [{:keys [sep nlp]} headers lines]
   (->> lines count range (zipvec lines)
