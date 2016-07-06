@@ -119,14 +119,7 @@
          (map body-graph))))
 
 (defn reply-parse [models lines headers]
-  (let [header-map (header-ranges models headers lines)]
-    (->> header-map (map second) (mapv loom/display-graph))
-    (cond (= (count header-map) 0)
-          (-> {s/email-body (str/join "\n" lines)}
-              (merge {s/type-label s/email})
-              vector (loom/build-graph []))
-          (->> lines count-depth (apply max)
-               (* 2) (< (count header-map)))
-          :chain
-          :else
-          :digest)))
+  (let [header-map (header-ranges models headers lines)
+        chain-mode (if (->> lines count-depth (apply max)
+                            (* 2) (< (count header-map)))
+                     :chain :digest)]))
