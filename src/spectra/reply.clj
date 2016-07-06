@@ -52,9 +52,27 @@
   (->> graphs (mapcat loom/nodes)
        (filter #(= s/email (s/type-label %))) first))
 
+(defn add-edge-graph [[graph center email-count name-count] new-node]
+  (let [new-email-count (+ (if (contains? new-node s/email-addr) 1 0)
+                           email-count)
+        new-name-count (+ (if (contains? new-node s/s-name) 1 0)
+                          name-count)]
+    (->> (if (and (<= new-email-count 1) (<= new-name-count 1))
+           s/email-from s/email-to) vector
+         (concat [center new-node]) (loom/add-edge graph)
+         (cons [center new-email-count new-name-count]))))
+
+(defn from-to-graphs [graphs]
+  (if-let [center (center-node graphs)]
+    (->> graphs (mapcat loom/nodes)
+         (reduce add-edge-graph
+                 [(loom/build-graph [center] []) center 0 0])
+         first) []))
+
 (defn nlp-headers [models text]
   (->> text (map #(nlp/run-nlp-default models %))
-       (map (comp adjust-labels rename-dates remove-meta remove-links))))
+       (map (comp adjust-labels rename-dates remove-meta remove-links))
+       from-to-graphs))
 
 (defn sig-split [line-groups]
   (let [groups-count (zipvec line-groups (map mode-arrows line-groups))]
