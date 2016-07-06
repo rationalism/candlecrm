@@ -27,8 +27,8 @@
        (sort-by second >) ffirst))
 
 (defn combine-lines [lines]
-  (->> lines ((juxt first last)) (map second)
-       (vector (map first lines))))
+  (->> lines ((juxt first last)) (mapv second)
+       (#(update % 1 inc)) (vector (map first lines))))
 
 (defn remove-links [graph]
   (->> graph loom/nodes (filter #(= s/hyperlink (s/type-label %)))
@@ -38,10 +38,10 @@
   (loom/adjust-nodes graph #(dissoc % s/hash-code s/link-text))) 
 
 (defn rename-dates [graph]
-  (loom/adjust-nodes graph #(cset/rename-keys
-                             % {s/event-begin s/email-sent
-                                s/event-end s/email-sent
-                                s/date-time s/email-sent})))
+  (loom/adjust-nodes
+   graph #(cset/rename-keys
+           % {s/event-begin s/email-sent s/event-end s/email-sent
+              s/date-time s/email-sent})))
 
 (defn adjust-labels [graph]
   (loom/adjust-nodes
