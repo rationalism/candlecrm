@@ -110,10 +110,13 @@
                           (zipvec line-groups) (update-last sig-map))]
     (reduce sig-add [[] [groups-count]] sig-map)))
 
+(defn print-headers [line-pairs]
+  (mapv println line-pairs) line-pairs)
+
 (defn header-ranges [{:keys [sep nlp]} headers lines]
   (->> lines count range (zipvec lines)
-       (mapvals #(weka/is-header? sep (first %)))
-       (into []) (sort-by #(-> % first second))
+       (mapvals #(weka/is-header? sep (first %))) 
+       (into []) (sort-by #(-> % first second)) print-headers
        (partition-by second) (filter #(-> % first second))
        (map #(map first %)) (map combine-lines)
        (map reverse) (map vec) (map #(update % 0 vec))
