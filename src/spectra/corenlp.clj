@@ -292,7 +292,8 @@
     (-> {s/type-label node-type}
         (merge {s/link-text (.getExtentString entity)})
         (merge {s/hash-code (str "hc" (.hashCode entity))})
-        (merge (if (= node-type s/event)
+        (merge (condp some [node-type]
+                 #{s/event}
                  (let [node-dates (-> entity .getExtentString
                                       (dt/dates-in-text reftime))]
                    (condp = (count node-dates)
