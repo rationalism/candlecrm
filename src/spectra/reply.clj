@@ -132,6 +132,14 @@
       (zipvec (map first header-lines)
               (sig-split (map second header-lines)))))
 
+(defn infer-subject [graph]
+  (let [subject (->> graph loom/nodes
+                     (filter #(contains? % s/email-subject))
+                     first s/email-subject)]
+    (loom/adjust-nodes
+     graph #(if (= s/email (s/type-label %))
+              (merge % {s/email-subject subject}) %))))
+
 (defn split-body [mode header-map lines]
   (let [sort-map (sort-by ffirst header-map)
         line-nums (mapcat first sort-map)
@@ -146,4 +154,5 @@
         chain-mode (if (->> lines count-depth (apply max)
                             (* 2) (< (count header-map)))
                      :chain :digest)]
-    (->> lines (split-body chain-mode header-map))))
+    (->> lines (split-body chain-mode header-map)
+         infer-subject)))
