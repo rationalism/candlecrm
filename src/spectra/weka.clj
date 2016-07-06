@@ -198,8 +198,9 @@
          (into []) second)))
 
 (defn is-header? [sep-model l]
+  (println l)
   (->> (classify-bayes sep-model l)
-       second (< 0.9)))
+       second debug (< 0.9)))
 
 (defn read-trainset [filename]
   (->> (str/split (slurp filename) #"\n")

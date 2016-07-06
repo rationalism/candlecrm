@@ -35,3 +35,11 @@
        (map #(update % 1 (partial nlp/run-nlp-default nlp)))
        (remove #(->> % second loom/nodes (map s/type-label)
                      (some #{s/event})))))
+
+(defn reply-parse [models lines]
+  (let [header-map (header-ranges models lines)]
+    (cond (= (count header-map) 0)
+          (-> {s/email-body (str/join "\n" lines)}
+              (merge {s/type-label s/email})
+              vector (loom/build-graph []))
+          )))
