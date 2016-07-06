@@ -178,7 +178,7 @@
   (let [sort-map (sort-by ffirst header-map)
         line-nums (mapcat first sort-map)
         headers (map second sort-map)]
-    (->> line-nums rest (rconj (count lines))
+    (->> line-nums rest vec (rconj (count lines))
          (partition 2) (zipvec headers)
          (map (fn [b] (update b 1 #(apply subvec lines %))))
          (maybe-sig-split mode) (map body-graph))))
