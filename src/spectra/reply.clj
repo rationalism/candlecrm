@@ -48,6 +48,10 @@
   (->> text (nlp/run-nlp-default models) remove-links
        remove-meta rename-dates adjust-labels))
 
+(defn sig-split [line-groups]
+  (->> line-groups last count-arrows (zipvec (last line-groups))
+       (partition-by second) (sort-by #(-> % first second))))
+
 (defn header-ranges [{:keys [sep nlp]} headers lines]
   (->> lines count range (zipvec lines)
        (mapvals #(weka/is-header? sep (first %)))
