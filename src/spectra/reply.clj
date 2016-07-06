@@ -1,7 +1,9 @@
 (ns spectra.reply
   (:require [clojure.string :as str]
+            [spectra_cljc.schema :as s]
             [spectra.common :refer :all]
             [spectra.corenlp :as nlp]
+            [spectra.loom :as loom]
             [spectra.weka :as weka]))
 
 (defn parse-models-fn []
@@ -19,9 +21,19 @@
     (if (or (nil? arrows) (empty? arrows))
       [0] (->> arrows (map first) (map count)))))
 
+(defn parse-header [models lines]
+  (->> lines (str/join "\n") (nlp/run-nlp-default models)))
+
+(defn combine-lines [lines]
+  (->> lines ((juxt first last)) (map second)
+       (vector (str/join "\n" (map first lines)))))
+
 (defn header-ranges [{:keys [sep nlp]} lines]
   (->> lines count range (zipvec lines)
        (mapvals #(weka/is-header? sep (first %)))
        (into []) (partition-by second)
-       (filter #(-> % first second)) (map #(map first %))
-       ))
+       (filter #(-> % first second))
+       (map #(map first %)) (map combine-lines) (map reverse)
+       (map #(update % 1 (partial nlp/run-nlp-default nlp)))
+       (remove #(->> % second loom/nodes (map s/type-label)
+                     (some #{s/event})))))
