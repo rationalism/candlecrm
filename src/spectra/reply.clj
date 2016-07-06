@@ -22,6 +22,10 @@
     (if (or (nil? arrows) (empty? arrows))
       [0] (->> arrows (map first) (map count)))))
 
+(defn mode-arrows [lines]
+  (->> lines count-depth frequencies
+       (sort-by second >) ffirst))
+
 (defn combine-lines [lines]
   (->> lines ((juxt first last)) (map second)
        (vector (str/join "\n" (map first lines)))))
@@ -49,8 +53,9 @@
        remove-meta rename-dates adjust-labels))
 
 (defn sig-split [line-groups]
-  (->> line-groups last count-arrows (zipvec (last line-groups))
-       (partition-by second) (sort-by #(-> % first second))))
+  (let [groups-count (zipvec line-groups (map mode-arrows line-groups))]
+    (->> line-groups last count-arrows (zipvec (last line-groups))
+         (partition-by second) (sort-by #(-> % first second)))))
 
 (defn header-ranges [{:keys [sep nlp]} headers lines]
   (->> lines count range (zipvec lines)
