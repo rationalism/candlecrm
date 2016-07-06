@@ -16,7 +16,7 @@
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [environ "1.0.3"]
-                 [com.taoensso/encore "2.63.0"]
+                 [com.taoensso/encore "2.64.0"]
                  [com.taoensso/timbre "4.5.1"]
                  [buddy "1.0.0"]
                  [com.google.api-client/google-api-client "1.22.0"
@@ -49,7 +49,7 @@
                  [org.neo4j.driver/neo4j-java-driver "1.0.4"]
                  [pandect "0.6.0"]
                  [aysylu/loom "0.6.0"]
-                 [com.taoensso/sente "1.8.1"]
+                 [com.taoensso/sente "1.9.0"]
                  [clojurewerkz/quartzite "2.0.0"]
                  [reagent "0.6.0-rc"]
                  [jayq "2.5.4"]
