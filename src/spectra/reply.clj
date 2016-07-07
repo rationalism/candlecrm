@@ -15,7 +15,8 @@
 
 (defn count-arrows [lines]
   (->> (map #(re-seq #"^(>|\s)+" %) lines)
-       (remove nil?) (map #(map first %))))
+       (map #(if (nil? %) ["" ""] %))
+       (map #(map first %))))
 
 (defn count-depth [lines]
   (let [arrows (count-arrows lines)]
@@ -23,6 +24,10 @@
       [0] (->> arrows (map first)
                (map (fn [l] (filter #(= % \>) l)))
                (map count)))))
+
+(defn arrow-shifts [lines]
+  (->> lines count-depth vec (beam 2) (mapv reverse)
+       (map #(apply - %)) (cons 0)))
 
 (defn mode-arrows [lines]
   (->> lines count-depth frequencies
