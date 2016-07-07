@@ -51,8 +51,10 @@
   (-> traindat-temp slurp edn/read-string))
 
 (defn get-copy-fn [class dir]
-  (let [model (deserialize (str dir "/" class ".dat"))]
-    (fn [] (FilteredClassifier/makeCopy model))))
+  (let [{:keys [bayes forest]}
+        (deserialize (str dir "/" class ".dat"))]
+    (fn [] {:bayes (FilteredClassifier/makeCopy bayes)
+            :forest (RandomForest/makeCopy forest)})))
 
 (defn email-sep-model-fn []
   (get-copy-fn email-sep-key models-dir))
