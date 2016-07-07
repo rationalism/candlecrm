@@ -158,14 +158,6 @@
   (doto (empty-bayes)
     (.buildClassifier (instances points))))
 
-;; Don't run this from REPL
-;; The printout is huge and will crash Emacs
-(defn train-bayes [trainfile]
-  (let [lines (-> trainfile slurp edn/read-string)
-        bayes-model (->> lines (apply concat) naive-bayes)]
-    bayes-model
-    ))
-
 (defn add-text [instances text]
   (.add instances 
         (doto (DenseInstance. 2)
@@ -202,6 +194,19 @@
 (defn is-header? [sep-model l]
   (->> (classify-bayes sep-model l)
        second (< 0.9)))
+
+(defn update-line [model score-line]
+  (update score-line 0
+          #(->> % (classify-bayes model) second)))
+
+;; Don't run this from REPL
+;; The printout is huge and will crash Emacs
+(defn train-bayes [trainfile]
+  (let [lines (-> trainfile slurp edn/read-string)
+        bayes-model (->> lines (apply concat) naive-bayes)
+        score-lines (map #(map (partial update-line bayes-model)
+                               %) lines)]
+    score-lines))
 
 (defn read-trainset [filename]
   (->> (str/split (slurp filename) #"\n")
