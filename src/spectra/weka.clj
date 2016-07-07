@@ -204,9 +204,9 @@
 (defn train-bayes [trainfile]
   (let [lines (-> trainfile slurp edn/read-string)
         bayes-model (->> lines (apply concat) naive-bayes)
-        score-lines (map #(map (partial update-line bayes-model)
-                               %) lines)]
-    score-lines))
+        score-lines (pmap #(mapv (partial update-line bayes-model)
+                                 %) lines)]
+    (map vec score-lines)))
 
 (defn read-trainset [filename]
   (->> (str/split (slurp filename) #"\n")
