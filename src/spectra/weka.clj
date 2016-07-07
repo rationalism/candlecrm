@@ -204,7 +204,9 @@
     (concat tail lines tail)))
 
 (defn collect-lines [lines]
-  [(map first lines) (second (third lines))])
+  (conj (map first lines)
+        (if (= "h" (second (third lines)))
+          1.0 0.0)))
 
 ;; Don't run this from REPL
 ;; The printout is huge and will crash Emacs
@@ -214,8 +216,7 @@
         score-lines (mapv #(mapv (partial update-line bayes-model)
                                  %) lines)]
     (->> score-lines (map tail-zeros) (map vec)
-         (map #(beam 5 %)) (mapcat #(map collect-lines %))
-         doall)))
+         (map #(beam 5 %)) (mapcat #(map collect-lines %)))))
 
 (defn read-trainset [filename]
   (->> (str/split (slurp filename) #"\n")
