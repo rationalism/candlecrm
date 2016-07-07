@@ -178,7 +178,7 @@
     (.setClassIndex 1)
     (add-text text)))
 
-(defnp classify-bayes [bayes text]
+(defnc classify-bayes [bayes text]
   (->> text (test-instances bayes) first
        (.distributionForInstance bayes)
        (into [])))
@@ -206,7 +206,7 @@
         bayes-model (->> lines (apply concat) naive-bayes)
         score-lines (pmap #(mapv (partial update-line bayes-model)
                                  %) lines)]
-    (map vec score-lines)))
+    (mapv vec score-lines)))
 
 (defn read-trainset [filename]
   (->> (str/split (slurp filename) #"\n")
