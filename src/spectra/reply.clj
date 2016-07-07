@@ -104,10 +104,11 @@
      (drop-while #(<= (second %) arrow-num high-groups))]))
 
 (defn sig-split [line-groups]
-  (let [sig-map (->> line-groups last count-arrows (zipvec (last line-groups))
+  (let [sig-map (->> line-groups last count-depth (zipvec (last line-groups))
                      (partition-by second) (sort-by #(-> % first second)))
         groups-count (->> line-groups (map mode-arrows)
-                          (zipvec line-groups) (update-last sig-map))]
+                          (zipvec line-groups) vec
+                          (update-last sig-map))]
     (reduce sig-add [[] [groups-count]] sig-map)))
 
 (defn print-headers [line-pairs]

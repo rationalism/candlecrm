@@ -79,6 +79,8 @@
 (defnp fetch-messages [folder begin end]
   (let [messages (messages-in-range folder begin end)]
     (.fetch folder messages (fetch-profile-all))
+    (println "fetch-messages")
+    (println (into [] messages))
     (into [] messages)))
 
 (defn subject [message]
