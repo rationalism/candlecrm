@@ -186,7 +186,7 @@
          (map (fn [b] (update b 1 #(apply subvec lines %))))
          (maybe-sig-split mode) (map body-graph))))
 
-(defn reply-parse [models lines headers]
+(defn reply-parse [models headers lines]
   (let [header-map (header-ranges models headers lines)
         chain-mode (if (->> lines count-depth (apply max)
                             (* 2) (< (count header-map)))

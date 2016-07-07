@@ -404,10 +404,8 @@
        (loom/build-graph [params])))
 
 (defnc full-parse [[message headers] models]
-  (-> message regex/strip-javascript
-      (raw-msg-chain models)
-      (merge-bottom-headers headers)
-      infer-email-chain infer-subject))
+  (->> message regex/strip-javascript str/split-lines
+       (reply/reply-parse models headers)))
 
 (defn parse! [models {:keys [message user]}]
   [(full-parse message models) user s/email-src])
@@ -495,7 +493,7 @@
         message (first (fetch-messages folder n n))]
     (when message
       (->> message (message-fetch folder)
-           (#(update % 0 str/split-lines))
+           (#(update % 0 str/split-lines)) reverse
            (apply reply/reply-parse (reply/parse-models-fn))))))
 
 (defn insert-raw-range! [user lower upper]
