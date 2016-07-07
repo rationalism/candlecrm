@@ -327,7 +327,7 @@
 [">>" "b"]
 [">> On Thu, Oct 15, 2015 at 8:38 AM, Melanie Heisey <mheisey.nox@gmail.com>" "h"]
 [">> wrote:" "h"]
-[">>" "v"]
+[">>" "b"]
 [">>> Most likely. Thursday night is out for Urbit dinner. Do you have a" "b"]
 [">>> preference for when/where or should we aim around Schelling Cafe?" "b"]
 [">>>" "b"]
