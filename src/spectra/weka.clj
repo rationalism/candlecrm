@@ -204,7 +204,7 @@
     (concat tail lines tail)))
 
 (defn collect-lines [lines]
-  (conj (map first lines)
+  (conj (mapv first lines)
         (if (= "h" (second (third lines)))
           1.0 0.0)))
 
@@ -216,7 +216,7 @@
         score-lines (mapv #(mapv (partial update-line bayes-model)
                                  %) lines)]
     (->> score-lines (map tail-zeros) (map vec)
-         (map #(beam 5 %)) (mapcat #(map collect-lines %)))))
+         (map #(beam 5 %)) (mapcat #(map collect-lines %)) doall)))
 
 (defn read-trainset [filename]
   (->> (str/split (slurp filename) #"\n")
@@ -263,7 +263,7 @@
        (java.util.Random. )
        (into-array Object [(csv-out crossval-temp)])))
     (let [scores (slurp crossval-temp)]
-      (io/delete-file crossval-temp)
+      #_(io/delete-file crossval-temp)
       (->> scores csv/parse-csv rest drop-last
            (map (comp replace-class reverse to-doubles
                       #(update % 1 replace-question)
