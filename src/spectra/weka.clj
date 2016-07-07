@@ -199,6 +199,13 @@
   (update score-line 0
           #(->> % (classify-bayes model) second)))
 
+(defn tail-zeros [lines]
+  (let [tail [[0.0 "b"] [0.0 "b"]]]
+    (concat tail lines tail)))
+
+(defn collect-lines [lines]
+  [(map first lines) (second (third lines))])
+
 ;; Don't run this from REPL
 ;; The printout is huge and will crash Emacs
 (defn train-bayes [trainfile]
@@ -206,7 +213,9 @@
         bayes-model (->> lines (apply concat) naive-bayes)
         score-lines (mapv #(mapv (partial update-line bayes-model)
                                  %) lines)]
-    score-lines))
+    (->> score-lines (map tail-zeros) (map vec)
+         (map #(beam 5 %)) (mapcat #(map collect-lines %))
+         doall)))
 
 (defn read-trainset [filename]
   (->> (str/split (slurp filename) #"\n")
