@@ -3,15 +3,15 @@
    [clojure.string :as str]
    [goog.dom :as dom]
    [cljs.core.async :as async  :refer (<! >! put! chan)]
-   [taoensso.encore :as encore :refer ()]
+   [taoensso.encore :as encore :refer-macros (have have?)]
    [taoensso.timbre :as timbre :refer-macros (tracef debugf infof warnf errorf)]
    [taoensso.sente  :as sente  :refer (cb-success?)]
    [spectra_cljs.ajax-demo :as ajax-demo]
    [spectra_cljc.schema :as s]
    [spectra_cljs.state :as state]
    [spectra_cljs.update :as u])
-   ;; Optional, for Transit encoding:
-   ;;[taoensso.sente.packers.transit :as sente-transit]
+  ;; Optional, for Transit encoding:
+  ;;[taoensso.sente.packers.transit :as sente-transit]
   (:require-macros
    [cljs.core.async.macros :as asyncm :refer (go go-loop)]))
 
@@ -65,10 +65,11 @@
   
   (defmethod event-msg-handler :chsk/state
     [{:as ev-msg :keys [?data]}]
-    (if (?data :first-open?)
-      (do (debugf "Channel socket successfully established!")
-          (chsk-init!))
-      (debugf "Channel socket state change: %s" ?data)))
+    (let [[old-state-map new-state-map] (have vector? ?data)]
+      (if (:first-open? new-state-map)
+        (do (debugf "Channel socket successfully established!")
+            (chsk-init!))
+        (debugf "Channel socket state change: %s" ?data))))
   
   (defmethod event-msg-handler :chsk/recv
     [{:as ev-msg :keys [?data]}]
