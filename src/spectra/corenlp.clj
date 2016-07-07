@@ -221,6 +221,9 @@
 (defn true-case [token]
   (.get token CoreAnnotations$TrueCaseTextAnnotation))
 
+(defn offset-begin [sentence]
+  (.get sentence CoreAnnotations$CharacterOffsetBeginAnnotation))
+
 (defn get-text [annotation]
   (.originalText annotation))
 
@@ -290,11 +293,11 @@
 (defn ner-graph [reftime entity]
   (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
     (-> {s/type-label node-type}
-        (merge {s/link-text (.getExtentString entity)})
+        (merge {s/link-text (mention-text entity)})
         (merge {s/hash-code (str "hc" (.hashCode entity))})
         (merge (condp some [node-type]
                  #{s/event}
-                 (let [node-dates (-> entity .getExtentString
+                 (let [node-dates (-> entity mention-text
                                       (dt/dates-in-text reftime))]
                    (condp = (count node-dates)
                      1 {s/event-begin (first node-dates)}
@@ -302,9 +305,9 @@
                         s/event-end (second node-dates)}
                      {s/date-time node-dates}))
                  #{s/person s/organization}
-                 (-> entity .getExtentString regex/parse-name-email)
+                 (-> entity mention-text regex/parse-name-email)
                  {(-> entity .getType s/schema-map s/label-correct)
-                  (.getExtentString entity)}))
+                  (mention-text entity)}))
         vector (loom/build-graph []))))
 
 (defn add-link [g node]
@@ -365,7 +368,7 @@
 
 (defn last-boundaries [boundaries sentence]
   (if (nil-or-empty? boundaries)
-    (.get sentence CoreAnnotations$CharacterOffsetBeginAnnotation)
+    (offset-begin sentence)
     (-> boundaries last second)))
 
 (defn boundaries-detect [sentence word]
@@ -404,8 +407,8 @@
 
 (defn remove-bad-dates [mentions]
   (remove #(and (-> % .getType s/schema-map (= s/date-time))
-                (->> % .getExtentString dt/dates-in-text empty?)
-                #_(->> % .getExtentString dt/is-bad-date?))
+                (->> % mention-text dt/dates-in-text empty?)
+                #_(->> % mention-text dt/is-bad-date?))
           mentions))
 
 (defn entity-mentions [sentence]
@@ -512,7 +515,7 @@
         old-node (->> relation .getEntityMentionArgs
                       first .hashCode (str "hc") graph-map)]
     (if (some #{rel-type} s/is-attr)
-      (->> relation .getEntityMentionArgs second .getExtentString
+      (->> relation .getEntityMentionArgs second mention-text
            vector (hash-map rel-type) (merge-with concat old-node)
            (loom/replace-node ner-graph old-node))
       (->> relation .getEntityMentionArgs reverse
@@ -577,10 +580,15 @@
     [(->> mention .getExtentTokenStart (nth tokens) .beginPosition)
      (->> mention .getExtentTokenEnd dec (nth tokens) .endPosition)]))
 
+(defn mention-text [mention]
+  (let [offset (-> mention .getSentence offset-begin)]
+    (->> mention mention-chars (map #(- % offset))
+         (apply subs (.toString (.getSentence mention))))))
+
 (defn mention-link [mention]
   (if (-> mention .getType s/schema-map (= s/webpage))
-    (->> mention .getExtentString url-brackets)
-    (->> mention .getExtentString
+    (->> mention mention-text url-brackets)
+    (->> mention mention-text
          (hash-brackets (str "hc" (.hashCode mention))))))
 
 (defn switch-val [[param _]]
@@ -654,7 +662,7 @@
 
 (defn is-fpp-mention? [author mention]
   (and (= 0 (.getHeadTokenStart mention))
-       (= author (.getValue mention))))
+       (= author (mention-text mention))))
 
 (defnc run-nlp-full [models author reftime text]
   (let [new-text (->> text strip-parens

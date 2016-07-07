@@ -80,7 +80,7 @@
 (defn mention-display [sentence]
   (->> sentence (.toString) (str "Sentence: ") println)
   (->> sentence nlp/entity-mentions
-       (map (juxt #(.getValue %) #(.getType %)))
+       (map (juxt #(nlp/mention-text %) #(.getType %)))
        (map #(str (first %) " (" (second %) ")"))
        add-ids (map #(str (first %) ": " (second %)))
        (str/join "\n") println))
