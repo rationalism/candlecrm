@@ -195,6 +195,14 @@
   (->> (classify-bayes sep-model l)
        second (< 0.9)))
 
+(defn add-zeros [probs]
+  (concat [0.0 0.0] (vec probs) [0.0 0.0]))
+
+(defn header-scan [{:keys [bayes forest]} lines]
+  (->> lines (map #(classify-bayes bayes %))
+       (map second) add-zeros (beam 5)
+       (map #(classify forest %))))
+
 (defn update-line [model score-line]
   (update score-line 0
           #(->> % (classify-bayes model) second)))
