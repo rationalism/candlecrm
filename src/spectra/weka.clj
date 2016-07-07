@@ -161,8 +161,10 @@
 ;; Don't run this from REPL
 ;; The printout is huge and will crash Emacs
 (defn train-bayes [trainfile]
-  (->> trainfile slurp str/split-lines
-       (map edn/read-string) naive-bayes))
+  (let [lines (-> trainfile slurp edn/read-string)
+        bayes-model (->> lines (apply concat) naive-bayes)]
+    bayes-model
+    ))
 
 (defn add-text [instances text]
   (.add instances 
