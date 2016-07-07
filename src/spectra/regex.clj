@@ -26,9 +26,14 @@
   (->> (map regex-escape coll)
        (str/join "|") re-pattern))
 
+(defn filter-arrows [text]
+  (-> (str/replace text "<" "")
+      (str/replace ">" "")))
+
 (defn find-email-addrs [text]
   (->> (re-seq email-regex text)
-       (remove #(.contains % "..."))))
+       (remove #(.contains % "..."))
+       (map filter-arrows)))
 
 (defn find-zipcode [text]
   (->> (re-seq zipcode-regex (str text " "))
@@ -59,10 +64,6 @@
 
 (defn one-email? [text]
   (-> text find-email-addrs count (= 1)))
-
-(defn filter-arrows [text]
-  (-> (str/replace text "<" "")
-      (str/replace ">" "")))
 
 (defn parse-name [text email]
   (-> (str/replace text email "")
