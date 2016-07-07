@@ -217,7 +217,7 @@
                                  %) lines)]
     (->> score-lines (map tail-zeros) (map vec)
          (map #(beam 5 %)) (mapcat #(map collect-lines %))
-         forest-curve (hash-map :random)
+         make-forest (hash-map :forest)
          (merge {:bayes bayes-model}))))
 
 (defn read-trainset [filename]
