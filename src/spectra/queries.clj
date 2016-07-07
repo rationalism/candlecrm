@@ -97,14 +97,10 @@
             [s/event-features s/s-name :id]
             [s/link-to s/email-mentions s/email-subject :id]]})
 
-(defn strip-path-id [path]
-  (if (= (last path) :id) (drop-last path) path))
-
 (defn node-by-id [user {:keys [id type] :as query-map}]
   (when (neo4j/node-exists? user id type)
     (when-let [paths (node-paths type)]
-      (->> paths (map strip-path-id)
-           (mlrecon/fetch-paths-full id)
+      (->> paths (mlrecon/fetch-paths-full id) 
            (filter #(not-any? nil? (keys %)))
            (map #(dissoc % :id s/type-label)) (apply merge)
            (merge {:id id s/type-label type})))))
