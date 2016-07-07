@@ -114,9 +114,9 @@
   (mapv println line-pairs) line-pairs)
 
 (defn header-ranges [{:keys [sep nlp]} headers lines]
-  (->> lines count range (zipvec lines)
-       (mapvals #(weka/is-header? sep (first %))) 
-       (into []) (sort-by #(-> % first second)) print-headers
+  (->> lines (weka/header-scan sep)
+       (zipmap (->> lines count range (zipvec lines))) 
+       (into []) (sort-by #(-> % first second))
        (partition-by second) (filter #(-> % first second))
        (map #(map first %)) (map combine-lines)
        (map reverse) (map vec) (map #(update % 0 vec))
