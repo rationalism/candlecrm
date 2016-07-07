@@ -178,9 +178,8 @@
   (if (= mode :digest)
     (loom/add-edges
      (loom/merge-graphs graphs)
-     (to-digest (-> graphs first (loom/select-edges s/email-from)
-                    first second)
-                graphs))
+     (-> graphs first (loom/select-edges s/email-from)
+         first second (to-digest graphs)))
     (-> graphs loom/merge-graphs
         (loom/add-edges (to-links graphs))
         (loom/add-edges (reply-links graphs)))))
