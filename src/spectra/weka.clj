@@ -202,7 +202,7 @@
 
 (defn header-scan [{:keys [bayes forest]} lines]
   (->> lines (map #(classify-bayes bayes %))
-       (map second) add-zeros (beam 5)
+       (map second) add-zeros vec (beam 5)
        (map #(classify forest %))))
 
 (defn update-line [model score-line]
