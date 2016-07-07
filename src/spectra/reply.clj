@@ -15,8 +15,14 @@
 
 (defn count-arrows [lines]
   (->> (map #(re-seq #"^(>|\s)+" %) lines)
-       (map #(if (nil? %) ["" ""] %))
+       (map #(if (nil? %) [""] %))
        (map #(map first %))))
+
+(defn remove-arrows [lines]
+  (->> lines count-arrows (map first) (zipvec lines)
+       (map #(if (nil? (second %)) (first %)
+                 (str/replace-first
+                  (first %) (re-pattern (second %)) "")))))
 
 (defn count-depth [lines]
   (let [arrows (count-arrows lines)]
@@ -135,7 +141,8 @@
 
 (defn body-graph [[header lines]]
   (let [email (->> header loom/nodes email-nodes first)]
-    (->> email (merge {s/email-body (str/join "\n" lines)})
+    (->> lines remove-arrows (str/join "\n")
+         (hash-map s/email-body) (merge email)
          (loom/replace-node header email))))
 
 (defn maybe-sig-split [mode header-lines]
