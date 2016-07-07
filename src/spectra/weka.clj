@@ -179,13 +179,9 @@
     (add-text text)))
 
 (defn classify-bayes [bayes text]
-  (try
-    (->> text (test-instances bayes) first
-         (.distributionForInstance bayes)
-         (into []))
-    (catch Exception e
-      (println "Error: Exception in classify-bayes")
-      (println text))))
+  (->> text (test-instances bayes) first
+       (.distributionForInstance bayes)
+       (into [])))
 
 (defnp classify-logit [model scores]
   (let [point (if (coll? scores) scores [scores])]
@@ -208,9 +204,9 @@
 (defn train-bayes [trainfile]
   (let [lines (-> trainfile slurp edn/read-string)
         bayes-model (->> lines (apply concat) naive-bayes)
-        #_score-lines #_(pmap #(mapv (partial update-line bayes-model)
-                                      %) lines)]
-  bayes-model))
+        score-lines (mapv #(mapv (partial update-line bayes-model)
+                                 %) lines)]
+    score-lines))
 
 (defn read-trainset [filename]
   (->> (str/split (slurp filename) #"\n")
