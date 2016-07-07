@@ -14,13 +14,15 @@
          :entity (nlp/entity-extractor)}})
 
 (defn count-arrows [lines]
-  (->> (map #(re-seq #"^>+" %) lines)
-       (remove nil?)))
+  (->> (map #(re-seq #"^(>|\s)+" %) lines)
+       (remove nil?) (map #(map first %))))
 
 (defn count-depth [lines]
   (let [arrows (count-arrows lines)]
     (if (or (nil? arrows) (empty? arrows))
-      [0] (->> arrows (map first) (map count)))))
+      [0] (->> arrows (map first)
+               (map (fn [l] (filter #(= % \>) l)))
+               (map count)))))
 
 (defn mode-arrows [lines]
   (->> lines count-depth frequencies
