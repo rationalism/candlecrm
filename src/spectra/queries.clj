@@ -84,6 +84,7 @@
   {s/person [[s/s-name] [s/email-addr] [s/phone-num]
              [s/org-member s/s-name :id] [s/website]]
    s/email [[s/email-subject] [s/email-body] [s/email-sent]
+            [s/email-from s/email-addr :id] [s/email-to s/email-addr :id]
             [s/email-from s/s-name :id] [s/email-to s/s-name :id]
             [s/email-replyto s/email-from s/s-name :id]]
    s/organization [[s/s-name] [s/email-addr] [s/phone-num] [s/website]

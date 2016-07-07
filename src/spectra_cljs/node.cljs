@@ -115,7 +115,8 @@
            ^{:key (first list-member)}
            [display-item (second list-member)])
          :else item) " "
-   (when (and item (coll? item) (not (empty? item)))
+   (when (and item (coll? item) (not (empty? item))
+              (> (count item) 1))
      [ask-more prop])])
 
 (defn str-item [n k v]
