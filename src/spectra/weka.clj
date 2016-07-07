@@ -216,7 +216,9 @@
         score-lines (mapv #(mapv (partial update-line bayes-model)
                                  %) lines)]
     (->> score-lines (map tail-zeros) (map vec)
-         (map #(beam 5 %)) (mapcat #(map collect-lines %)) doall)))
+         (map #(beam 5 %)) (mapcat #(map collect-lines %))
+         forest-curve (hash-map :random)
+         (merge {:bayes bayes-model}))))
 
 (defn read-trainset [filename]
   (->> (str/split (slurp filename) #"\n")
