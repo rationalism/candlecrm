@@ -167,3 +167,9 @@
 
 (defn mapkeys [fn coll]
   (zipmap (map fn coll) coll))
+
+(defn beam [n coll]
+  (apply map vector
+         (for [i (range n)]
+           (->> n (- (count coll)) inc (+ i)
+                (subvec coll i)))))
