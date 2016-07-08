@@ -450,6 +450,14 @@
            (decode-sender message)
            (decode-replyto message)]))
 
+(defn html-to-text [html]
+  (-> html (str/replace #"(?i)</tr>" "</tr> br2n ")
+      (str/replace #"(?i)<br[^>]*>" "br2n")
+      (str/replace #"(?i)<p>" "<p> br2n ")
+      (str/replace #"(?i)</p>" "</p> br2n ")
+      Jsoup/parse .text
+      (str/replace #"br2n" "\n")))
+
 (defnp get-text-recursive [message]
   (let [c-type (-> message content-type str/lower-case)]
     (cond
@@ -459,7 +467,7 @@
       (->> message content get-parts
            (mapcat get-text-recursive))
       (.contains c-type html-type)
-      (->> message content Jsoup/parse .text
+      (->> message content html-to-text
            (hash-map :html) vector)
       :else [""])))
 
@@ -494,6 +502,7 @@
   (let [folder (fetch-imap-folder user)
         message (first (fetch-messages folder n n))]
     (when message
+      (def zubat message)
       (->> message (message-fetch folder)
            (#(update % 0 str/split-lines)) reverse
            (apply reply/reply-parse (reply/parse-models-fn))))))
