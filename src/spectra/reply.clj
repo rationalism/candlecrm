@@ -91,14 +91,19 @@
              (update (last new-groups) 0 #(concat % sig-lines)))
      (drop-while #(<= (second %) arrow-num high-groups))]))
 
+(defn sig-groups [line-groups]
+  (let [last-message (last line-groups)
+        depth-lines (regex/count-depth last-message)]
+    (->> depth-lines (zipvec last-message)
+         (drop-while #(< (second %) (apply max depth-lines)))
+         (partition-by second) (sort-by #(-> % first second)))))
+
 (defn sig-split [line-groups]
-  (let [sig-map (->> line-groups last regex/count-depth
-                     (zipvec (last line-groups)) (partition-by second)
-                     (sort-by #(-> % first second)))
+  (let [sig-map (sig-groups line-groups)
         groups-count (->> line-groups (map regex/mode-arrows)
                           (zipvec line-groups) vec
                           (update-last sig-map))]
-    (reduce sig-add [[] [groups-count]] sig-map)))
+    (reduce sig-add [[] groups-count] sig-map)))
 
 (defn print-headers [line-pairs]
   (mapv println line-pairs) line-pairs)
