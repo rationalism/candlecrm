@@ -201,14 +201,18 @@
 (defn add-zeros [probs]
   (concat [0 0] (vec probs) [0 0]))
 
+(defn header-beam [nums]
+  (->> nums add-zeros vec (beam 5)))
+
 (defn header-scan [{:keys [bayes forest]} lines]
-  (->> lines (map #(classify-bayes bayes %))
-       (map second) add-zeros vec (beam 5)
-       (map #(classify forest %)) (map #(>= % 0.5))))
+  (let [arrow-shifts (->> lines regex/arrow-shifts header-beam)]
+    (->> lines (map #(classify-bayes bayes %))
+         (map second) header-beam
+         (map #(classify forest (concat %1 %2)) arrow-shifts)
+         (map #(>= % 0.5)))))
 
 (defn update-line [model score-line]
-  (update score-line 0
-          #(->> % (classify-bayes model) second)))
+  (update score-line 0 #(->> % (classify-bayes model) second)))
 
 (defn tail-zeros [lines]
   (let [tail [[0.0 "b"] [0.0 "b"]]]
@@ -223,8 +227,7 @@
 ;; The printout is huge and will crash Emacs
 (defn train-bayes [trainfile]
   (let [lines (-> trainfile slurp edn/read-string)
-        shift-lines (->> lines (map regex/arrow-shifts)
-                         (map add-zeros) (map #(beam 5 %)))
+        shift-lines (->> lines (map regex/arrow-shifts) (map header-beam))
         bayes-model (->> lines (apply concat) naive-bayes)
         score-lines (mapv #(mapv (partial update-line bayes-model)
                                  %) lines)]
