@@ -53,8 +53,7 @@
        (map #(apply - %)) (cons 0)))
 
 (defn mode-arrows [lines]
-  (->> lines count-depth frequencies
-       (sort-by second >) ffirst))
+  (->> lines count-depth (apply max)))
 
 (defn find-email-addrs [text]
   (->> (re-seq email-regex text)
