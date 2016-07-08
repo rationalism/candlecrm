@@ -18,7 +18,7 @@
     (def test-user (auth/create-user! {:username test-username
                                        :password test-password}))
 
-    (with-redefs [imap/fetch-imap-folder (fn [x] nil)
+    (with-redefs [imap/fetch-imap-folder (fn [& x] nil)
                   imap/last-uid (fn [x] 777777)
                   println (fn [& x] nil)]
       (add-new-queue! test-user)
