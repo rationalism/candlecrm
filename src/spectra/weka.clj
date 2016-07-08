@@ -118,6 +118,7 @@
   (add-points (make-instances points) points))
 
 (defn make-forest [points]
+  (println points)
   (doto (RandomForest. )
     (.setNumTrees num-trees)
     (.buildClassifier (instances points))))
@@ -219,7 +220,7 @@
     (concat tail lines tail)))
 
 (defn collect-lines [shifts lines]
-  (conj (concat shifts (mapv first lines))
+  (conj (->> lines (map first) (concat shifts) vec)
         (if (= "h" (second (third lines)))
           1.0 0.0)))
 
