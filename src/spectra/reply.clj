@@ -89,7 +89,7 @@
                                high-groups)]
     [(concat low-groups (drop-last new-groups)
              (update (last new-groups) 0 #(concat % sig-lines)))
-     (drop-while #(<= (second %) arrow-num high-groups))]))
+     (drop-while #(<= (second %) arrow-num) high-groups)]))
 
 (defn sig-groups [line-groups]
   (let [last-message (last line-groups)
