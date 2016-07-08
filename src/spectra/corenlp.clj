@@ -331,7 +331,7 @@
 (defn label-annotate [label class]
   (when-let [old-class (.ner label)]
     (when (or (some #{old-class} ["O" "NUMBER" "ORDINAL" "PERCENT"])
-              (and (some #{old-class} ["DATE" "TIME"])
+              (and (some #{old-class} ["DATE" "TIME" "ORGANIZATION"])
                    (= class "DATETIME")))
       (.setNER label class)))
   label)

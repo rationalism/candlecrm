@@ -112,7 +112,7 @@
 
 (defn header-ranges [{:keys [sep nlp]} headers lines]
   (->> lines (weka/header-scan sep)
-       (zipmap (->> lines count range (zipvec lines))) 
+       (zipmap (->> lines count range (zipvec lines)))
        (into []) (sort-by #(-> % first second))
        (partition-by second) (filter #(-> % first second))
        (map #(map first %)) (map combine-lines)
@@ -188,5 +188,6 @@
         chain-mode (if (->> lines regex/count-depth (apply max)
                             (* 2) (< (dec (count header-map))))
                      :chain :digest)]
+    (println header-map)
     (->> lines (split-body chain-mode header-map)
          (infer-to-from chain-mode headers) infer-subject)))
