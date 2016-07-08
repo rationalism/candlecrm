@@ -6,6 +6,7 @@
             [environ.core :refer [env]]
             [spectra.common :refer :all]
             [spectra.async :as async]
+            [spectra.regex :as regex]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [weka.classifiers Evaluation]
@@ -198,7 +199,7 @@
        second (< 0.9)))
 
 (defn add-zeros [probs]
-  (concat [0.0 0.0] (vec probs) [0.0 0.0]))
+  (concat [0 0] (vec probs) [0 0]))
 
 (defn header-scan [{:keys [bayes forest]} lines]
   (->> lines (map #(classify-bayes bayes %))
@@ -213,8 +214,8 @@
   (let [tail [[0.0 "b"] [0.0 "b"]]]
     (concat tail lines tail)))
 
-(defn collect-lines [lines]
-  (conj (mapv first lines)
+(defn collect-lines [shifts lines]
+  (conj (concat shifts (mapv first lines))
         (if (= "h" (second (third lines)))
           1.0 0.0)))
 
@@ -222,11 +223,13 @@
 ;; The printout is huge and will crash Emacs
 (defn train-bayes [trainfile]
   (let [lines (-> trainfile slurp edn/read-string)
+        shift-lines (->> lines (map regex/arrow-shifts)
+                         (map add-zeros) (map #(beam 5 %)))
         bayes-model (->> lines (apply concat) naive-bayes)
         score-lines (mapv #(mapv (partial update-line bayes-model)
                                  %) lines)]
-    (->> score-lines (map tail-zeros) (map vec)
-         (map #(beam 5 %)) (mapcat #(map collect-lines %))
+    (->> score-lines (map tail-zeros) (map vec) (map #(beam 5 %))
+         (mapcat #(map collect-lines %1 %2) shift-lines)
          make-forest (hash-map :forest)
          (merge {:bayes bayes-model}))))
 
