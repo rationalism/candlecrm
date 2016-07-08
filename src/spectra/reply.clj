@@ -166,12 +166,20 @@
        (-> graphs rest count (repeat to-node))
        (-> graphs rest count (repeat s/email-to))))
 
+(defn empty-emails [graph]
+  (->> graph loom/nodes (filter #(= s/email (s/type-label %)))
+       (filter #(->> % s/email-body str/trim empty?))))
+
+(defn remove-empty [graph]
+  (loom/remove-nodes graph (empty-emails graph)))
+
 (defn infer-to-from [mode headers graphs]
   (if (= mode :digest)
     (loom/add-edges
-     (loom/merge-graphs graphs)
-     (-> graphs first (loom/select-edges s/email-from)
-         first second (to-digest graphs)))
+     (->> graphs (map remove-empty) loom/merge-graphs)
+     (-> graphs first remove-empty
+         (loom/select-edges s/email-from)
+         first second (to-digest (map remove-empty graphs))))
     (-> graphs loom/merge-graphs
         (loom/add-edges (to-links graphs))
         (loom/add-edges (reply-links graphs)))))
