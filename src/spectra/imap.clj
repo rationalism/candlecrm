@@ -122,17 +122,20 @@
 (defonce inbox (atom nil))
 
 ;; TODO: support IMAP stores other than GMail
-(defn fetch-imap-folder [user]
-  (reset! inbox (if (contains? @imap-lookup user)
-                  (get @imap-lookup user)
-                  (refresh-inbox user)))
-  (when-not (folder-open? @inbox)
-    (try (open-folder-read! @inbox)
-         (catch Exception e
-           (do (reset! inbox (refresh-inbox user))
-               (open-folder-read! @inbox)))))
-  (update-imap-lookup! user @inbox)
-  @inbox)
+(defn fetch-imap-folder
+  ([user] (fetch-imap-folder user false))
+  ([user force-new]
+   (reset! inbox (if (and (not force-new)
+                          (contains? @imap-lookup user))
+                   (get @imap-lookup user)
+                   (refresh-inbox user)))
+   (when-not (folder-open? @inbox)
+     (try (open-folder-read! @inbox)
+          (catch Exception e
+            (do (reset! inbox (refresh-inbox user))
+                (open-folder-read! @inbox)))))
+   (update-imap-lookup! user @inbox)
+   @inbox))
 
 (defnp content [message]
   (.getContent message))

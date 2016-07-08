@@ -65,7 +65,7 @@
        "]->(u:" (neo4j/esc-token s/user)
        ") WHERE ID(u) = " (.id user)
        " SET root.val = "
-       (-> user imap/fetch-imap-folder imap/last-uid str)]
+       (-> user (imap/fetch-imap-folder true) imap/last-uid str)]
       str/join neo4j/cypher-query))
 
 (defn run-insertion! [queue user]
