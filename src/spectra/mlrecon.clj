@@ -487,12 +487,12 @@
        (zipvec (map second rules))
        (map diff-pair) flatten))
 
-(defnp get-diffs [user class cs]
+(defnc get-diffs [user class cs]
   (let [rules (get model/scoring class)
         vs (->> cs flatten distinct
                 (fetch-all-paths (map first rules)))]
     (->> (map #(pair-map % vs) cs)
-         (pmap #(score-diff rules %))
+         (map #(score-diff rules %))
          (map vec) (zipmap cs))))
 
 (defnp conflict-data [user class ids]

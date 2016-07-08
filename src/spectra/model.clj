@@ -43,7 +43,7 @@
   (/ (StringUtils/getLevenshteinDistance a b)
      (float (max (count a) (count b)))))
 
-(defnp lev [coll1 coll2]
+(defnc lev [coll1 coll2]
   (diff-empty-all
    coll1 coll2
    #(->> (for [x (map str-compare-truncate %1)
@@ -99,7 +99,7 @@
              (map count)
              (apply min))))
 
-(defn overlap [a b]
+(defnc overlap [a b]
   (diff-empty
    a b #(/ (->> (concat %1 %2) distinct count
                 (- (+ (count %1) (count %2)))
@@ -121,12 +121,12 @@
 (defn lcs-coll [coll]
   (reduce lcs-pair coll))
 
-(defnp lcs [coll1 coll2]
+(defnc lcs [coll1 coll2]
   (diff-empty-all
    coll1 coll2 #(->> (concat %1 %2) lcs-coll
                      (max-lcs %1 %2))))
 
-(defn shortest [coll1 coll2]
+(defnc shortest [coll1 coll2]
   (->> [coll1 coll2] (apply concat)
        (map count) (apply min)))
 
