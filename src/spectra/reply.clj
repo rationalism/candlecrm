@@ -87,9 +87,10 @@
         arrow-num (-> new-sig first second)
         new-groups (take-while #(<= (second %) arrow-num)
                                high-groups)]
-    [(concat low-groups (drop-last new-groups)
-             (vector (update (last new-groups) 0 #(concat % sig-lines))))
-     (drop-while #(<= (second %) arrow-num) high-groups)]))
+    (if (empty? new-groups) [low-groups high-groups]
+        [(concat low-groups (drop-last new-groups)
+                 (vector (update (last new-groups) 0 #(concat % sig-lines))))
+         (drop-while #(<= (second %) arrow-num) high-groups)])))
 
 (defn sig-groups [line-groups]
   (let [last-message (last line-groups)
@@ -113,7 +114,7 @@
 (defn header-ranges [{:keys [sep nlp]} headers lines]
   (->> lines (weka/header-scan sep)
        (zipmap (->> lines count range (zipvec lines)))
-       (into []) (sort-by #(-> % first second))
+       (into []) (sort-by #(-> % first second)) debug
        (partition-by second) (filter #(-> % first second))
        (map #(map first %)) (map combine-lines)
        (map reverse) (map vec) (map #(update % 0 vec))
@@ -188,6 +189,5 @@
         chain-mode (if (->> lines regex/count-depth (apply max)
                             (* 2) (< (dec (count header-map))))
                      :chain :digest)]
-    (println header-map)
     (->> lines (split-body chain-mode header-map)
          (infer-to-from chain-mode headers) infer-subject)))
