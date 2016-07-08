@@ -227,7 +227,8 @@
 ;; The printout is huge and will crash Emacs
 (defn train-bayes [trainfile]
   (let [lines (-> trainfile slurp edn/read-string)
-        shift-lines (->> lines (map regex/arrow-shifts) (map header-beam))
+        shift-lines (->> lines (map #(map first %))
+                         (map regex/arrow-shifts) (map header-beam))
         bayes-model (->> lines (apply concat) naive-bayes)
         score-lines (mapv #(mapv (partial update-line bayes-model)
                                  %) lines)]
