@@ -507,7 +507,7 @@
            (#(update % 0 str/split-lines)) reverse
            (apply reply/reply-parse (reply/parse-models-fn))))))
 
-(defn insert-raw-range! [user lower upper]
+(defnc insert-raw-range! [user lower upper]
   (let [folder (fetch-imap-folder user)]
     (->> (fetch-messages folder lower upper)
          (pmap #(->> (message-fetch folder %)
