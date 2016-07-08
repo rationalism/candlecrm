@@ -267,6 +267,16 @@
    (RelationMentionFactory. )
    (into-array [sub obj])))
 
+(defn mention-chars [mention]
+  (let [tokens (-> mention .getSentence get-tokens vec)]
+    [(->> mention .getExtentTokenStart (nth tokens) .beginPosition)
+     (->> mention .getExtentTokenEnd dec (nth tokens) .endPosition)]))
+
+(defn mention-text [mention]
+  (let [offset (-> mention .getSentence offset-begin)]
+    (->> mention mention-chars (map #(- % offset))
+         (apply subs (.toString (.getSentence mention))))))
+
 (defn char-token-map [token]
   (zipmap (range (.beginPosition token)
                  (.endPosition token))
@@ -574,16 +584,6 @@
 
 (defn url-brackets [url]
   (str "<url>" url "</url>"))
-
-(defn mention-chars [mention]
-  (let [tokens (-> mention .getSentence get-tokens vec)]
-    [(->> mention .getExtentTokenStart (nth tokens) .beginPosition)
-     (->> mention .getExtentTokenEnd dec (nth tokens) .endPosition)]))
-
-(defn mention-text [mention]
-  (let [offset (-> mention .getSentence offset-begin)]
-    (->> mention mention-chars (map #(- % offset))
-         (apply subs (.toString (.getSentence mention))))))
 
 (defn mention-link [mention]
   (if (-> mention .getType s/schema-map (= s/webpage))

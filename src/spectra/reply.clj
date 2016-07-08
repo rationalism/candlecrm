@@ -5,6 +5,7 @@
             [spectra.common :refer :all]
             [spectra.corenlp :as nlp]
             [spectra.loom :as loom]
+            [spectra.regex :as regex]
             [spectra.weka :as weka]))
 
 (defn parse-models-fn []
@@ -12,32 +13,6 @@
    :nlp {:ner ((nlp/get-ner-fn))
          :mention ((nlp/get-mention-fn))
          :entity (nlp/entity-extractor)}})
-
-(defn count-arrows [lines]
-  (->> (map #(re-seq #"^(>|\s)+" %) lines)
-       (map #(if (nil? %) [""] %))
-       (map #(map first %))))
-
-(defn remove-arrows [lines]
-  (->> lines count-arrows (map first) (zipvec lines)
-       (map #(if (nil? (second %)) (first %)
-                 (str/replace-first
-                  (first %) (re-pattern (second %)) "")))))
-
-(defn count-depth [lines]
-  (let [arrows (count-arrows lines)]
-    (if (or (nil? arrows) (empty? arrows))
-      [0] (->> arrows (map first)
-               (map (fn [l] (filter #(= % \>) l)))
-               (map count)))))
-
-(defn arrow-shifts [lines]
-  (->> lines count-depth vec (beam 2) (mapv reverse)
-       (map #(apply - %)) (cons 0)))
-
-(defn mode-arrows [lines]
-  (->> lines count-depth frequencies
-       (sort-by second >) ffirst))
 
 (defn combine-lines [lines]
   (->> lines ((juxt first last)) (mapv second)
@@ -117,9 +92,10 @@
      (drop-while #(<= (second %) arrow-num high-groups))]))
 
 (defn sig-split [line-groups]
-  (let [sig-map (->> line-groups last count-depth (zipvec (last line-groups))
-                     (partition-by second) (sort-by #(-> % first second)))
-        groups-count (->> line-groups (map mode-arrows)
+  (let [sig-map (->> line-groups last regex/count-depth
+                     (zipvec (last line-groups)) (partition-by second)
+                     (sort-by #(-> % first second)))
+        groups-count (->> line-groups (map regex/mode-arrows)
                           (zipvec line-groups) vec
                           (update-last sig-map))]
     (reduce sig-add [[] [groups-count]] sig-map)))
@@ -141,7 +117,7 @@
 
 (defn body-graph [[header lines]]
   (let [email (->> header loom/nodes email-nodes first)]
-    (->> lines remove-arrows (str/join "\n")
+    (->> lines regex/remove-arrows (str/join "\n")
          (hash-map s/email-body) (merge email)
          (loom/replace-node header email))))
 
@@ -202,7 +178,7 @@
 
 (defn reply-parse [models headers lines]
   (let [header-map (header-ranges models headers lines)
-        chain-mode (if (->> lines count-depth (apply max)
+        chain-mode (if (->> lines regex/count-depth (apply max)
                             (* 2) (< (count header-map)))
                      :chain :digest)]
     (->> lines (split-body chain-mode header-map)

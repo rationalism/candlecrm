@@ -199,10 +199,10 @@
   (-> chain find-top s/email-body))
 
 (defn count-min-depth [lines]
-  (->> lines reply/count-depth (apply min)))
+  (->> lines regex/count-depth (apply min)))
 
 (defn count-max-depth [lines]
-  (->> lines reply/count-depth (apply max)))
+  (->> lines regex/count-depth (apply max)))
 
 (defn remove-arrows [num lines]
   (map #(str/replace-first

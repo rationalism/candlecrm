@@ -30,6 +30,32 @@
   (-> (str/replace text "<" "")
       (str/replace ">" "")))
 
+(defn count-arrows [lines]
+  (->> (map #(re-seq #"^(>|\s)+" %) lines)
+       (map #(if (nil? %) [""] %))
+       (map #(map first %))))
+
+(defn remove-arrows [lines]
+  (->> lines count-arrows (map first) (zipvec lines)
+       (map #(if (nil? (second %)) (first %)
+                 (str/replace-first
+                  (first %) (re-pattern (second %)) "")))))
+
+(defn count-depth [lines]
+  (let [arrows (count-arrows lines)]
+    (if (or (nil? arrows) (empty? arrows))
+      [0] (->> arrows (map first)
+               (map (fn [l] (filter #(= % \>) l)))
+               (map count)))))
+
+(defn arrow-shifts [lines]
+  (->> lines count-depth vec (beam 2) (mapv reverse)
+       (map #(apply - %)) (cons 0)))
+
+(defn mode-arrows [lines]
+  (->> lines count-depth frequencies
+       (sort-by second >) ffirst))
+
 (defn find-email-addrs [text]
   (->> (re-seq email-regex text)
        (remove #(.contains % "..."))
