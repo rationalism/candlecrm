@@ -114,7 +114,7 @@
 (defn header-ranges [{:keys [sep nlp]} headers lines]
   (->> lines (weka/header-scan sep)
        (zipmap (->> lines count range (zipvec lines)))
-       (into []) (sort-by #(-> % first second)) debug
+       (into []) (sort-by #(-> % first second))
        (partition-by second) (filter #(-> % first second))
        (map #(map first %)) (map combine-lines)
        (map reverse) (map vec) (map #(update % 0 vec))
@@ -143,12 +143,13 @@
               (merge % {s/email-subject subject}) %))))
 
 (defn to-links [graphs]
-  (map vector
-       (->> graphs rest (map loom/nodes)
-            (map email-nodes) (map first))
-       (->> graphs drop-last (map #(loom/select-edges % s/email-from))
-            (map first) (map second))
-       (-> graphs rest count (repeat s/email-to))))
+  (remove #(nil? (second %))
+          (map vector
+               (->> graphs rest (map loom/nodes)
+                    (map email-nodes) (map first))
+               (->> graphs drop-last (map #(loom/select-edges % s/email-from))
+                    (map first) (map second))
+               (-> graphs rest count (repeat s/email-to)))))
 
 (defn reply-links [graphs]
   (map vector
