@@ -79,8 +79,6 @@
 (defnp fetch-messages [folder begin end]
   (let [messages (messages-in-range folder begin end)]
     (.fetch folder messages (fetch-profile-all))
-    (println "fetch-messages")
-    (println (into [] messages))
     (into [] messages)))
 
 (defn subject [message]
@@ -502,7 +500,6 @@
   (let [folder (fetch-imap-folder user)
         message (first (fetch-messages folder n n))]
     (when message
-      (def zubat message)
       (->> message (message-fetch folder)
            (#(update % 0 str/split-lines)) reverse
            (apply reply/reply-parse (reply/parse-models-fn))))))
