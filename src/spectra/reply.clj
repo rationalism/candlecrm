@@ -177,9 +177,10 @@
          (maybe-sig-split mode) (map body-graph))))
 
 (defn reply-parse [models headers lines]
+  (mapv println lines)
   (let [header-map (header-ranges models headers lines)
         chain-mode (if (->> lines regex/count-depth (apply max)
-                            (* 2) (< (count header-map)))
+                            (* 2) (< (dec (count header-map))))
                      :chain :digest)]
     (->> lines (split-body chain-mode header-map)
          (infer-to-from chain-mode headers) infer-subject)))
