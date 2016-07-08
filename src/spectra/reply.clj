@@ -83,7 +83,7 @@
           #(update % 0 (constantly (mapv first (last sig-map))))))
 
 (defn sig-add [[low-groups high-groups] new-sig]
-  (let [sig-lines (map first new-sig)
+  (let [sig-lines (mapv first new-sig)
         arrow-num (-> new-sig first second)
         new-groups (take-while #(<= (second %) arrow-num)
                                high-groups)]
