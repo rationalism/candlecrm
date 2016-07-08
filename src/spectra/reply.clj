@@ -103,7 +103,8 @@
         groups-count (->> line-groups (map regex/mode-arrows)
                           (zipvec line-groups) vec
                           (update-last sig-map))]
-    (reduce sig-add [[] groups-count] sig-map)))
+    (->> sig-map (reduce sig-add [[] groups-count])
+         first (partition 2) (mapv first))))
 
 (defn print-headers [line-pairs]
   (mapv println line-pairs) line-pairs)
@@ -182,7 +183,6 @@
          (maybe-sig-split mode) (map body-graph))))
 
 (defn reply-parse [models headers lines]
-  (mapv println lines)
   (let [header-map (header-ranges models headers lines)
         chain-mode (if (->> lines regex/count-depth (apply max)
                             (* 2) (< (dec (count header-map))))
