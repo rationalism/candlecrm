@@ -88,7 +88,7 @@
         new-groups (take-while #(<= (second %) arrow-num)
                                high-groups)]
     [(concat low-groups (drop-last new-groups)
-             (update (last new-groups) 0 #(concat % sig-lines)))
+             (vector (update (last new-groups) 0 #(concat % sig-lines))))
      (drop-while #(<= (second %) arrow-num) high-groups)]))
 
 (defn sig-groups [line-groups]
@@ -99,12 +99,12 @@
          (partition-by second) (sort-by #(-> % first second)))))
 
 (defn sig-split [line-groups]
-  (let [sig-map (sig-groups line-groups)
+  (let [sig-map (->> line-groups sig-groups)
         groups-count (->> line-groups (map regex/mode-arrows)
                           (zipvec line-groups) vec
                           (update-last sig-map))]
-    (->> sig-map (reduce sig-add [[] groups-count])
-         first (partition 2) (mapv first))))
+    (->> sig-map drop-last (reduce sig-add [[] groups-count])
+         (apply concat) (mapv first))))
 
 (defn print-headers [line-pairs]
   (mapv println line-pairs) line-pairs)
