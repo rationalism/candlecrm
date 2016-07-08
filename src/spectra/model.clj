@@ -127,12 +127,16 @@
                      (max-lcs %1 %2))))
 
 (defnc shortest [coll1 coll2]
-  (->> [coll1 coll2] (apply concat)
-       (map count) (apply min)))
+  (if (and (or (nil? coll1) (empty? coll1))
+           (or (nil? coll2) (empty? coll2)))
+    0 (->> [coll1 coll2] (apply concat)
+           (map count) (apply min))))
 
 (defn longest [coll1 coll2]
-  (->> [coll1 coll2] (apply concat) (map first)
-       (map count) (apply max)))
+  (if (and (or (nil? coll1) (empty? coll1))
+           (or (nil? coll2) (empty? coll2)))
+    0 (->> [coll1 coll2] (apply concat) (map first)
+           (map count) (apply max))))
 
 (defn bag-of-chars [s]
   (->> [#"\p{Alpha}" #"\p{Digit}" #"\p{Punct}" #"\p{Space}"]
