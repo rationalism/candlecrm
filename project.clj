@@ -16,7 +16,7 @@
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [environ "1.0.3"]
-                 [com.taoensso/encore "2.64.0"]
+                 [com.taoensso/encore "2.64.1"]
                  [com.taoensso/timbre "4.5.1"]
                  [buddy "1.0.0"]
                  [com.google.api-client/google-api-client "1.22.0"
@@ -65,7 +65,7 @@
                  [org.seleniumhq.selenium/selenium-java "2.53.1"]
                  [com.cemerick/piggieback "0.2.1"
                   :exclusions [com.google.guava/guava]]
-                 [figwheel-sidecar "0.5.4-5"]
+                 [figwheel-sidecar "0.5.4-7"]
                  [org.jsoup/jsoup "1.9.2"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.3"]
