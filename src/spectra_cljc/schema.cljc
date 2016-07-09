@@ -30,6 +30,7 @@
 (def email-from :email-from)
 (def email-replyto :email-replyto)
 (def email-mentions :email-mentions)
+(def email-digest :email-digest)
 
 (def email-subject :subject)
 (def email-body :body)
