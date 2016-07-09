@@ -75,10 +75,10 @@
         (debugf "Channel socket state change: %s" ?data))))
   
   (defmethod event-msg-handler :chsk/recv
-    [{:as ev-msg :keys [ev-id ?ev-data]}]
-    (if (= ev-id :refresh/tables)
+    [{:as ev-msg :keys [?data]}]
+    (if (= ?data [:refresh/tables true])
       (update-tables!)
-      (debugf "Push event from server: %s" ?ev-data)))
+      (debugf "Push event from server: %s" ?data)))
   
   (defmethod event-msg-handler :chsk/handshake
     [{:as ev-msg :keys [?data]}]
