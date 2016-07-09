@@ -40,21 +40,23 @@
          (-> queue s/loaded-top (+ imap/batch-size) inc))
     (-> queue s/loaded-bottom)))
 
-(defn range-bottom [queue]
-  (max (if (queue-new? queue) (s/loaded-top queue) 280000)
+(defn range-bottom [user queue]
+  (max (if (queue-new? queue) (s/loaded-top queue)
+           (imap/archive-load user))
        (-> queue range-top (- imap/batch-size) inc)))
 
 (defn queue-time-reset! [queue]
   (neo4j/update-vals! (:id queue) s/modified
                       (s/modified queue) (dt/now)))
 
-(defn queue-reset! [queue]
+(defn queue-reset! [user queue]
   (queue-time-reset! queue)
   (if (queue-new? queue)
     (neo4j/update-vals! (:id queue) s/loaded-top
                         (s/loaded-top queue) (range-top queue))
     (neo4j/update-vals! (:id queue) s/loaded-bottom
-                        (s/loaded-bottom queue) (range-bottom queue))))
+                        (s/loaded-bottom queue)
+                        (range-bottom user queue))))
 
 (defn refresh-queue! [user]
   (throw-info! "refreshing queue")
@@ -71,14 +73,14 @@
 (defn run-insertion! [queue user]
   (throw-info! "inserting emails")
   (imap/insert-raw-range!
-   user (range-bottom queue) (range-top queue)))
+   user (range-bottom user queue) (range-top queue)))
 
 (defn queue-pop! []
   (neo4j/thread-wrap
    (let [{:keys [queue user]} (queries/next-email-queue)]
      (when queue
        (if (< (queries/nonlp-count user) nonlp-insert-limit)
-         (do (queue-reset! queue) (run-insertion! queue user))
+         (do (queue-reset! user queue) (run-insertion! queue user))
          (queue-time-reset! queue))))))
 
 (defn new-queue-map [top-uid]

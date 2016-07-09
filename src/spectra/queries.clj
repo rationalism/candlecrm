@@ -3,6 +3,7 @@
             [clojure.string :as str]
             [spectra.common :refer :all]
             [spectra.auth :as auth]
+            [spectra.imap :as imap]
             [spectra.mlrecon :as mlrecon] 
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]
@@ -153,7 +154,7 @@
              "]-(m) WITH root, u, b, m "
              " RETURN root, u ORDER BY m." (neo4j/esc-token s/value)
              " LIMIT {limit}")
-        {:queuebound 280000 :limit 1}]
+        {:queuebound (imap/archive-load user) :limit 1}]
        neo4j/cypher-query first clojure-map
        (cset/rename-keys {"root" :queue "u" :user})
        (update :queue queue-data))))
