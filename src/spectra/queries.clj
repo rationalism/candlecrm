@@ -263,11 +263,14 @@
 (defn partial-val-query [user query prop]
   [(str "MATCH (v:" (neo4j/prop-label user prop)
         ")<--(r) WHERE v.val STARTS WITH {query}"
-        " RETURN ID(r)")
+        " RETURN ID(r), labels(r)")
    {:query query}])
 
+(defn find-type [[id labels]]
+  [id (->> labels mlrecon/filter-decode-labels second)])
+
 (defn id-row [[r1 r2]]
-  [r1 (map (comp first vals) r2)])
+  [r1 (->> r2 (map vals) (map vec) (map find-type))])
 
 (defn search-query [id]
   [(str "MATCH (root) WHERE ID(root) = {id}"
@@ -285,13 +288,11 @@
 
 (defn full-search [user query-map]
   (let [query (:query query-map)]
-    (->> s/search-preds
-         (map #(partial-val-query user query %))
-         neo4j/cypher-combined-tx
-         (zipvec s/search-preds) vec
-         (remove #(-> % second empty?))
-         (map (comp include-pred search-row id-row))
-         flatten)))
+    (->> s/search-preds (map #(partial-val-query user query %))
+         neo4j/cypher-combined-tx (zipvec s/search-preds) vec
+         (remove #(-> % second empty?)) (map id-row)
+         (mapcat second) (map #(zipmap [:id :type] %)) 
+         (map #(node-by-id user %)))))
 
 (defn find-user-labels [labels]
   (when labels
