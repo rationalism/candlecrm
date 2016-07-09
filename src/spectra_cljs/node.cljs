@@ -102,9 +102,14 @@
      (->> text-key vals first (sort-by second >) ffirst))
    (:id item) (s/type-label item)])
 
-(defn display-item [item]
+(defn is-last? [item members]
+  (= item (last members)))
+
+(defn display-item [is-last item]
   [:span
-   (if (map? item) [map-link item] (str item))])
+   (if (map? item)
+     [map-link item]
+     (str item (if is-last "" ", ")))])
 
 (defn string-item [item prop]
   [:span
@@ -113,7 +118,8 @@
          (coll? item)
          (for [list-member (util/add-ids item)]
            ^{:key (first list-member)}
-           [display-item (second list-member)])
+           [display-item (is-last? list-member (util/add-ids item))
+            (second list-member)])
          :else item) " "
    (when (and item (coll? item) (not (empty? item))
               (> (count item) 1))
