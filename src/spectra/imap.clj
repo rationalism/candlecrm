@@ -1,6 +1,5 @@
 (ns spectra.imap
   (:require [clojure.string :as str]
-            [spectra.ajax :as ajax]
             [spectra.async :as async]
             [spectra.auth :as auth]
             [spectra.common :refer :all]
@@ -524,7 +523,7 @@
                      (hash-map :user user :message)
                      (@parse-channel)))
          dorun)
-    (ajax/table-refresh! user)))
+    (neo4j/table-refresh! user)))
 
 (defn insert-one-email! [user email-num]
   (insert-raw-range! user email-num email-num))

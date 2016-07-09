@@ -9,6 +9,10 @@
 
 (defonce conn (atom nil))
 (def ^:dynamic *session* nil)
+(defonce ajax-send! (atom nil))
+
+(defn table-refresh! [user]
+  (@ajax-send! (.id user) [:refresh/tables true]))
 
 (defn user-label [user]
   (str "user_" (.id user)))

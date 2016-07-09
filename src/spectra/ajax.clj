@@ -38,6 +38,8 @@
   (def chsk-send!                    send-fn) ; ChannelSocket's send API fn
   (def connected-uids                connected-uids)) ; Watchable, read-only atom
 
+(reset! neo4j/ajax-send! chsk-send!)
+
 (defn login!
   "Here's where you'll add your server-side login/auth procedure (Friend, etc.).
   In our simplified example we'll just always successfully authenticate the user
@@ -99,9 +101,6 @@
        (when ?reply-fn (?reply-fn (no-reply event)))))))
 
 ;;;; Example: broadcast server>user
-
-(defn table-refresh! [user]
-  (chsk-send! (.id user) [:refresh/tables true]))
 
 ;; As an example of push notifications, we'll setup a server loop to broadcast
 ;; an event to _all_ possible user-ids every 10 seconds:
