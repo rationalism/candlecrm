@@ -160,11 +160,12 @@
        (-> graphs rest count (repeat s/email-reply))))
 
 (defn to-digest [to-node graphs]
-  (map vector
-       (->> graphs rest (map loom/nodes)
-            (map email-nodes) (map first))
-       (-> graphs rest count (repeat to-node))
-       (-> graphs rest count (repeat s/email-to))))
+  (let [nodes (->> graphs rest (map loom/nodes)
+                   (map email-nodes) (map first)
+                   (remove nil?))]
+    (map vector nodes
+         (-> nodes count (repeat to-node))
+         (-> nodes count (repeat s/email-to)))))
 
 (defn empty-emails [graph]
   (->> graph loom/nodes (filter #(= s/email (s/type-label %)))
