@@ -123,11 +123,15 @@
                      (some #{s/email})))
        (cons [[0 0] headers])))
 
-(defn body-graph [[header lines]]
+(defn add-digest [mode m]
+  (if (= mode :digest)
+    (merge m {s/email-digest true}) m))
+
+(defn body-graph [mode [header lines]]
   (let [email (->> header loom/nodes email-nodes first)]
     (->> lines regex/remove-arrows (str/join "\n")
-         (hash-map s/email-body) (merge email)
-         (loom/replace-node header email))))
+         (hash-map s/email-body) (add-digest mode)
+         (merge email) (loom/replace-node header email))))
 
 (defn maybe-sig-split [mode header-lines]
   (if (= mode :digest) header-lines
@@ -197,8 +201,8 @@
       (->> line-nums rest vec (rconj (count lines))
            (partition 2) (zipvec headers)
            (map (fn [b] (update b 1 #(apply subvec lines %))))
-           (maybe-sig-split mode) (map body-graph))
-      (->> [(first headers) lines] body-graph vector))))
+           (maybe-sig-split mode) (map #(body-graph mode)))
+      (->> [(first headers) lines] (body-graph mode) vector))))
 
 (defn reply-parse [models headers lines]
   (let [header-map (header-ranges models headers lines)
