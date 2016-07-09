@@ -5,6 +5,7 @@
             [clojure.java.io :as io]
             [environ.core :refer [env]]
             [spectra.common :refer :all]
+            [spectra.ajax :as ajax]
             [spectra.auth :as auth]
             [spectra.cluster :as cluster]
             [spectra.compare :as compare]
@@ -657,4 +658,5 @@
     (->> (recon-finished recon-ids)
          (concat (doall (mapcat #(merge-all bad-links %)
                                 recon-groups)))
-         (neo4j/cypher-combined-tx nil))))
+         (neo4j/cypher-combined-tx nil))
+    (ajax/table-refresh! user)))

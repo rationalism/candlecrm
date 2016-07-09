@@ -25,8 +25,8 @@
 (let [rand-chsk-type :auto
       {:keys [chsk ch-recv send-fn state]}
       (sente/make-channel-socket! "/chsk" ; Note the same URL as before
-        {:type   rand-chsk-type
-         :packer packer})]
+                                  {:type   rand-chsk-type
+                                   :packer packer})]
   (def chsk       chsk)
   (def ch-chsk    ch-recv) ; ChannelSocket's receive channel
   (def chsk-send! send-fn) ; ChannelSocket's send API fn
@@ -42,10 +42,13 @@
 ;; alternatives include a simple `case`/`cond`/`condp` against event-ids, or
 ;;`core.match` against events.
 
+(defn update-tables! []
+  (u/update-emails!)
+  (u/update-people!))
+
 ;; This fills in initial email values
 (defn chsk-init! []
-  (u/update-emails!)
-  (u/update-people!)
+  (update-tables!)
   (u/update-user!)
   (u/fetch-ranks! s/event)
   (u/fetch-ranks! s/location))
@@ -72,8 +75,10 @@
         (debugf "Channel socket state change: %s" ?data))))
   
   (defmethod event-msg-handler :chsk/recv
-    [{:as ev-msg :keys [?data]}]
-    (debugf "Push event from server: %s" ?data))
+    [{:as ev-msg :keys [ev-id ?ev-data]}]
+    (if (= ev-id :refresh/tables)
+      (update-tables!)
+      (debugf "Push event from server: %s" ?ev-data)))
   
   (defmethod event-msg-handler :chsk/handshake
     [{:as ev-msg :keys [?data]}]

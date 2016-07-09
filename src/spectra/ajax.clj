@@ -100,6 +100,9 @@
 
 ;;;; Example: broadcast server>user
 
+(defn table-refresh! [user]
+  (chsk-send! (.id user) [:refresh/tables true]))
+
 ;; As an example of push notifications, we'll setup a server loop to broadcast
 ;; an event to _all_ possible user-ids every 10 seconds:
 (defn start-broadcaster! []
