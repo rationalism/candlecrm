@@ -106,7 +106,7 @@
                           (zipvec line-groups) vec
                           (update-last sig-map))]
     (->> sig-map drop-last (reduce sig-add [[] groups-count])
-         (apply concat) (mapv first))))
+         (apply concat) (mapv first) (map vec))))
 
 (defn print-headers [line-pairs]
   (mapv println line-pairs) line-pairs)
