@@ -27,7 +27,7 @@
   (sente/make-channel-socket!
    sente-web-server-adapter
    {:packer packer
-    :user-id-fn (fn [ring-req] (:client-id ring-req))}))
+    :user-id-fn (fn [ring-req] (-> ring-req :identity .id))}))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
