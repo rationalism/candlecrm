@@ -17,6 +17,21 @@
                               s/event-features s/email-mentions]
                      s/building [s/street-addr s/email-mentions]})
 
+(def title-field {s/person [s/s-name s/email-addr "(No name)"]
+                  s/email [s/email-subject "(No subject)"]
+                  s/organization [s/s-name s/email-addr "(No name)"]
+                  s/location [s/s-name "(No name)"]
+                  s/building [s/street-addr "(No address)"]
+                  s/event [s/s-name "(No name)"]})
+
+(defn get-title [node]
+  (let [fields (-> node :center-node s/type-label title-field)]
+    (loop [f fields]
+      (cond (= 1 (count f)) (first f)
+            (util/get-first (:center-node node) (first f))
+            (util/get-first (:center-node node) (first f))
+            :else (recur (rest fields))))))
+
 (defn split-regex [s break]
   (str/split s (-> break regex/regex-escape re-pattern)))
 
@@ -170,7 +185,7 @@
       [table/email-table [:current-node s/email-from] s/email-from
        (partial u/update-emails-person! s/email-from)]])])
 
-(defn show-node [node-name item]
+(defn show-node [node-name item aux?]
   [:div
    [:h3.infotitle
     (str node-name " (" (-> item s/type-label type-name) ") ")
@@ -179,5 +194,5 @@
     [:a {:href "#" :on-click delete-entity-switch}
      "(Delete)"]]
    [info-items (-> item s/type-label display-fields) item]
-   [node-aux node-name item]])
+   (when aux? [node-aux node-name item])])
 

@@ -15,7 +15,7 @@
 (defn person-link [person attr]
   [util/node-link
    (if-let [name (util/get-first person attr)]
-     name "(No name listed)")
+     name "(No name)")
    (person :id) s/person])
 
 (defn new-entity-switch [type]

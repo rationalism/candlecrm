@@ -97,23 +97,9 @@
   [:div
    [table/email-table [:email-rows] :email u/update-emails!]])
 
-(def title-field {s/person [s/s-name s/email-addr "(No name)"]
-                  s/email [s/email-subject "(No subject)"]
-                  s/organization [s/s-name s/email-addr "(No name)"]
-                  s/location [s/s-name "(No name)"]
-                  s/building [s/street-addr "(No address)"]
-                  s/event [s/s-name "(No name)"]})
-
-(defn get-title [node]
-  (let [fields (-> node :center-node s/type-label title-field)]
-    (loop [f fields]
-      (cond (= 1 (count f)) (first f)
-            (get-first (:center-node node) (first f))
-            (get-first (:center-node node) (first f))
-            :else (recur (rest fields))))))
-
 (defn show-node [node]
-  [node/show-node (get-title node) (:center-node node)])
+  [node/show-node (node/get-title node)
+   (:center-node node) true])
 
 (defn main-page []
   [:div

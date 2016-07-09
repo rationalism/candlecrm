@@ -18,15 +18,15 @@
 
 (defn result-row [res]
   [:div [:hr]
-   [:ul
-    (for [id-param (add-ids res)]
-      ^{:key (first id-param)}
-      [:li (str (second id-param))])
-    [:li [node-link "Link to result" (:id res) (s/type-label res)]]]])
+   [:h3.infotitle (str "Result #" (inc (first res)))]
+   [node/show-node (node/get-title {:center-node (second res)})
+    (second res) false]
+   [:p [node-link (str "Link to " (node/get-title {:center-node (second res)}))
+        (:id (second res)) (s/type-label (second res))]]])
 
 (defn search-results []
   [:div
    [:h2 "Search Results"]
    (for [id-res (-> :search-results state/look add-ids)]
      ^{:key (first id-res)}
-     [result-row (second id-res)])])
+     [result-row id-res])])
