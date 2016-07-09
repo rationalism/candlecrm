@@ -14,7 +14,7 @@
 (def obj-types
   [s/person s/email s/location s/organization s/building
    s/money s/amount s/event s/hyperlink s/event-type s/link-id
-   ])
+   s/email-digest])
 
 (defn val-unique [mode user prop]
   (str mode " CONSTRAINT ON (root:"
