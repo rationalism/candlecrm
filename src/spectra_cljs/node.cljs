@@ -71,6 +71,12 @@
         (when (> (dec (count n)) (first ln))
           [:br])]))])
 
+(defn is-last? [item members]
+  (= item (last members)))
+
+(defn last-append [is-last text]
+  (if is-last text (str text ", ")))
+
 (defn body-link [piece]
   (if (string? piece)
     [add-newlines piece]
@@ -99,17 +105,15 @@
 (defn map-link [item]
   [util/node-link
    (let [text-key (dissoc item :id s/type-label)]
-     (->> text-key vals first (sort-by second >) ffirst))
+     (->> text-key vals first (sort-by second >)
+          ffirst))
    (:id item) (s/type-label item)])
-
-(defn is-last? [item members]
-  (= item (last members)))
 
 (defn display-item [is-last item]
   [:span
    (if (map? item)
-     [map-link item]
-     (str item (if is-last "" ", ")))])
+     [map-link item] (str item))
+   (last-append is-last "")])
 
 (defn string-item [item prop]
   [:span
