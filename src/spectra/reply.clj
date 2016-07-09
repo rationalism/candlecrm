@@ -201,7 +201,7 @@
       (->> line-nums rest vec (rconj (count lines))
            (partition 2) (zipvec headers)
            (map (fn [b] (update b 1 #(apply subvec lines %))))
-           (maybe-sig-split mode) (map #(body-graph mode)))
+           (maybe-sig-split mode) (map #(body-graph mode %)))
       (->> [(first headers) lines] (body-graph mode) vector))))
 
 (defn reply-parse [models headers lines]
