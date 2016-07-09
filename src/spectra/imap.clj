@@ -8,6 +8,7 @@
             [spectra.google :as google]
             [spectra.insert :as insert]
             [spectra.loom :as loom]
+            [spectra.neo4j :as neo4j]
             [spectra.regex :as regex]
             [spectra.reply :as reply]
             [spectra_cljc.schema :as s]
