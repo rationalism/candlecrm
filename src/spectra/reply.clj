@@ -22,6 +22,12 @@
   (->> graph loom/nodes (filter #(= s/hyperlink (s/type-label %)))
        (loom/remove-nodes graph)))
 
+(defn remove-bad-dates [graph]
+  (->> graph loom/nodes
+       (filter #(= s/date-time (s/type-label %)))
+       (sort-by #(->> % s/link-text count) >) rest
+       (loom/remove-nodes graph)))
+
 (defn remove-meta [graph]
   (loom/adjust-nodes graph #(dissoc % s/hash-code s/link-text))) 
 
@@ -75,7 +81,8 @@
 
 (defn nlp-headers [models text]
   (->> text (map #(nlp/run-nlp-default models %))
-       (map (comp adjust-labels rename-dates remove-meta remove-links))
+       (map (comp adjust-labels rename-dates remove-meta
+                  remove-links remove-bad-dates))
        from-to-graphs merge-from))
 
 (defn update-last [sig-map line-groups]
