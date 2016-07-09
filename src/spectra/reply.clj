@@ -167,9 +167,13 @@
          (-> nodes count (repeat to-node))
          (-> nodes count (repeat s/email-to)))))
 
+(defn body-empty? [body]
+  (->> body str/trim (filter #(Character/isLetter %))
+       count (>= 20)))
+
 (defn empty-emails [graph]
   (->> graph loom/nodes (filter #(= s/email (s/type-label %)))
-       (filter #(->> % s/email-body str/trim empty?))))
+       (filter #(->> % s/email-body body-empty?))))
 
 (defn remove-empty [graph]
   (loom/remove-nodes graph (empty-emails graph)))
