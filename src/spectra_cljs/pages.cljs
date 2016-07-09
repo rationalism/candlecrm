@@ -97,50 +97,23 @@
   [:div
    [table/email-table [:email-rows] :email u/update-emails!]])
 
-(defn show-person [person]
-  [node/show-person
-   (when-let [name (get-first (:center-node person) s/s-name)]
-     name)
-   (get-first (:center-node person) s/email-addr)
-   (:center-node person)])
+(def title-field {s/person [s/s-name s/email-addr "(No name)"]
+                  s/email [s/email-subject "(No subject)"]
+                  s/organization [s/s-name s/email-addr "(No name)"]
+                  s/location [s/s-name "(No name)"]
+                  s/building [s/street-addr "(No address)"]
+                  s/event [s/s-name "(No name)"]})
 
-(defn show-email [email]
-  [node/show-email 
-   (get-first (:center-node email) s/email-subject)
-   (:center-node email)])
+(defn get-title [node]
+  (let [fields (-> node :center-node s/type-label title-field)]
+    (loop [f fields]
+      (cond (= 1 (count f)) (first f)
+            (get-first (:center-node node) (first f))
+            (get-first (:center-node node) (first f))
+            :else (recur (rest fields))))))
 
-(defn show-organization [organization]
-  [node/show-organization
-   (get-first (:center-node organization) s/s-name)
-   (:center-node organization)])
-
-(defn show-location [location]
-  [node/show-location
-   (get-first (:center-node location) s/s-name)
-   (:center-node location)])
-
-(defn show-building [building]
-  [node/show-building
-   (get-first (:center-node building) s/street-addr)
-   (:center-node building)])
-
-(defn show-event [event]
-  [node/show-event
-   (get-first (:center-node event) s/s-name)
-   (:center-node event)])
-
-(defn show-money [money]
-  [node/show-money
-   (get-first (:center-node money) s/s-name)
-   (:center-node money)])
-
-(def node-fn {s/person show-person s/email show-email
-              s/organization show-organization s/location show-location
-              s/event show-event s/money show-money
-              s/building show-building})
-
-(defn node-page [node]
-  [(get node-fn (:type node)) node])
+(defn show-node [node]
+  [node/show-node (get-title node) (:center-node node)])
 
 (defn main-page []
   [:div
@@ -150,7 +123,7 @@
      3 [:div#tab3.tab-show [calendar]]
      4 [:div#tab4.tab-show [locations]]
      5 [:div#tab5.tab-show [my-account]]
-     6 [node-page (state/look :current-node)]
+     6 [show-node (state/look :current-node)]
      7 (edit/add-form)
      8 (edit/edit-form)
      9 [search/search-results]

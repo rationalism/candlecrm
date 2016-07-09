@@ -1,6 +1,7 @@
 (ns spectra_cljs.search
   (:require [clojure.string :as str]
             [spectra_cljc.schema :as s]
+            [spectra_cljs.node :as node]
             [spectra_cljs.state :as state]
             [spectra_cljs.update :as u]
             [spectra_cljs.util :refer [set-field! add-ids node-link]]))

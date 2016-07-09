@@ -7,16 +7,15 @@
             [spectra_cljs.update :as u]
             [spectra_cljs.util :as util]))
 
-(def person-disp [s/s-name s/email-addr s/phone-num s/website
-                  s/org-member])
-(def email-disp [s/email-sent s/email-from s/email-to s/email-body])
-(def org-disp [s/s-name s/email-addr s/phone-num s/website
-               s/org-member])
-(def loc-disp [s/s-name s/zipcode s/email-mentions])
-(def event-disp [s/s-name s/date-time s/event-type s/website
-                 s/event-features s/email-mentions])
-(def money-disp [s/s-name])
-(def addr-disp [s/street-addr s/email-mentions])
+(def display-fields {s/person [s/s-name s/email-addr s/phone-num s/website
+                               s/org-member]
+                     s/email [s/email-sent s/email-from s/email-to s/email-body]
+                     s/organization [s/s-name s/email-addr s/phone-num s/website
+                                     s/org-member]
+                     s/location [s/s-name s/zipcode s/email-mentions]
+                     s/event [s/s-name s/date-time s/event-type s/website
+                              s/event-features s/email-mentions]
+                     s/building [s/street-addr s/email-mentions]})
 
 (defn split-regex [s break]
   (str/split s (-> break regex/regex-escape re-pattern)))
@@ -156,50 +155,29 @@
         (second attr)
         (filtered-list (second attr) item)]]))])
 
-(defn show-person [person-name email-addr item]
-  (let [disp-name (if person-name person-name email-addr)]
-    [:div
-     [:h3.infotitle
-      (str (if person-name person-name "(No name listed)")
-           " (Person) ")
-      [:a {:href "#" :on-click #(edit-entity-switch s/person)}
-       "(Edit)"]" "
-      [:a {:href "#" :on-click delete-entity-switch}
-       "(Delete)"]]
-     [info-items person-disp item]
-     [:h3.infotitle (str "Emails to " disp-name)]
-     [table/email-table [:current-node s/email-to] s/email-to
-      (partial u/update-emails-person! s/email-to)]
-     [:h3.infotitle (str "Emails from " disp-name)]
-     [table/email-table [:current-node s/email-from] s/email-from
-      (partial u/update-emails-person! s/email-from)]]))
+(def type-name {s/person "Person" s/email "Email"
+                s/organization "Organization" s/location "Location"
+                s/event "Event" s/building "Building"})
 
-(defn show-email [email-name item]
+(defn node-aux [node-name item]
   [:div
-   [:h3.infotitle (str email-name " (Email)")]
-   [info-items email-disp item]])
+   (when (-> item s/type-label (= s/person))
+     [:div
+      [:h3.infotitle (str "Emails to " node-name)]
+      [table/email-table [:current-node s/email-to] s/email-to
+       (partial u/update-emails-person! s/email-to)]
+      [:h3.infotitle (str "Emails from " node-name)]
+      [table/email-table [:current-node s/email-from] s/email-from
+       (partial u/update-emails-person! s/email-from)]])])
 
-(defn show-organization [organization-name item]
+(defn show-node [node-name item]
   [:div
-   [:h3.infotitle (str organization-name " (Organization)")]
-   [info-items org-disp item]])
+   [:h3.infotitle
+    (str node-name " (" (-> item s/type-label type-name) ") ")
+    [:a {:href "#" :on-click #(edit-entity-switch (s/type-label item))}
+     "(Edit)"]" "
+    [:a {:href "#" :on-click delete-entity-switch}
+     "(Delete)"]]
+   [info-items (-> item s/type-label display-fields) item]
+   [node-aux node-name item]])
 
-(defn show-location [location-name item]
-  [:div
-   [:h3.infotitle (str location-name " (Location)")]
-   [info-items loc-disp item]])
-
-(defn show-building [building-name item]
-  [:div
-   [:h3.infotitle (str building-name " (Building)")]
-   [info-items addr-disp item]])
-
-(defn show-event [event-name item]
-  [:div
-   [:h3.infotitle (str event-name " (Event)")]
-   [info-items event-disp item]])
-
-(defn show-money [money-name item]
-  [:div
-   [:h3.infotitle (str money-name " (Finance)")]
-   [info-items money-disp item]])
