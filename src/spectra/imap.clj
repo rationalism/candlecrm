@@ -28,6 +28,7 @@
 
 (def parse-threads 6)
 (def batch-size 12)
+(def archive-size 2000)
 
 (defonce parse-channel (atom nil))
 
@@ -142,6 +143,14 @@
 
 (defnp content-type [message]
   (.getContentType message))
+
+(defn min-zero [n]
+  (if (< n 0) 0 n))
+
+(defn archive-load [user]
+  (if (not user) 0
+      (if-let [f (fetch-imap-folder user)]
+        (-> f last-uid (- archive-size) min-zero) 0)))
 
 (defnp get-parts [multipart]
   (map #(.getBodyPart multipart %)
