@@ -25,7 +25,7 @@
 
 (defn remove-bad-dates [graph]
   (->> graph loom/nodes
-       (filter #(= s/date-time (s/type-label %)))
+       (filter #(= s/email (s/type-label %)))
        (sort-by #(->> % s/link-text count) >) rest
        (loom/remove-nodes graph)))
 
@@ -52,7 +52,8 @@
   (filter #(= s/email (s/type-label %)) nodes))
 
 (defn center-node [graphs]
-  (->> graphs (mapcat loom/nodes) email-nodes first))
+  (->> graphs (mapcat loom/nodes) email-nodes
+       (sort-by #(-> % s/link-text count) >) first))
 
 (defn add-edge-graph [[graph center email-count name-count] new-node]
   (let [new-email-count (+ (if (contains? new-node s/email-addr) 1 0)
@@ -87,9 +88,8 @@
 
 (defn nlp-headers [models text]
   (->> text (map #(nlp/run-nlp-default models %))
-       (map (comp adjust-labels rename-dates remove-meta
-                  remove-links remove-bad-dates))
-       from-to-graphs merge-from))
+       (map (comp adjust-labels rename-dates remove-links))
+       from-to-graphs remove-bad-dates merge-from remove-meta))
 
 (defn update-last [sig-map line-groups]
   (update line-groups (dec (count line-groups))
@@ -131,7 +131,7 @@
        (partition-by second) (filter #(-> % first second))
        (map #(map first %)) (map combine-lines)
        (map reverse) (map vec) (map #(update % 0 vec))
-       (map #(update % 1 (partial nlp-headers nlp)))
+       (map #(update % 1 (partial nlp-headers nlp))) 
        (filter #(->> % second loom/nodes (map s/type-label)
                      (some #{s/email})))
        (cons [[0 0] headers])))
