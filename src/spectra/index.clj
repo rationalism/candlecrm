@@ -37,9 +37,9 @@
 (defn drop-constraints! [user]
   (neo4j/thread-wrap
    (->> (map #(val-unique "DROP" user %) unique-exists-vals)
-        neo4j/cypher-combined-tx)
+        (neo4j/cypher-combined-tx :retry))
    (->> (map #(val-exists "DROP" user %) unique-exists-vals)
-        neo4j/cypher-combined-tx)))
+        (neo4j/cypher-combined-tx :retry))))
 
 (defn delete-with-prop [user prop]
   (str "MATCH (root:" (neo4j/prop-label user prop)
@@ -48,6 +48,6 @@
 (defn delete-all! [user]
   (neo4j/thread-wrap
    (->> (map #(delete-with-prop user %) unique-exists-vals)
-        neo4j/cypher-combined-tx)
+        (neo4j/cypher-combined-tx :retry))
    (->> (map #(delete-with-prop user %) obj-types)
-        neo4j/cypher-combined-tx)))
+        (neo4j/cypher-combined-tx :retry))))
