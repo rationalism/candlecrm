@@ -33,6 +33,9 @@
                    s/user {s/email-addr username})]
     user))
 
+(defn get-me []
+  (lookup-user (env :test-acct-email)))
+
 (defn find-user [email password]
   (when-let [user (lookup-user email)]
     (when (->> "pwd-hash" (.get user) (.asObject)

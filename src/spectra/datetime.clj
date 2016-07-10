@@ -42,7 +42,6 @@
          (not= (first parsed-date) (second parsed-date)))))
 
 (defn parse-dates-raw [text reference]
-  (throw-info! text)
   (CalendarSource/setBaseDate reference)
   (.parse (Parser. ) text))
 
