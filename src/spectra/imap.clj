@@ -431,6 +431,15 @@
        async/create-pool!
        (reset! parse-channel)))
 
+(defn scroll-emails [user f]
+  (let [userinbox (fetch-imap-folder user)]
+    (loop [i (last-uid userinbox)]
+      (println "Email number: " i)
+      (when-let [m (get-message userinbox i)]
+        (println "Parsing message number: " i)
+        (f user m i))
+      (recur (dec i)))))
+
 (defnc get-recipients [message field]
   (.getRecipients message field))
 
