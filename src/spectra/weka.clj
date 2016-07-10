@@ -204,8 +204,14 @@
 (defn header-beam [nums]
   (->> nums add-zeros vec (beam 5)))
 
+(defn arrow-zeros [arrows]
+  (concat [0] (vec arrows) [0 0 0]))
+
+(defn arrow-beam [arrows]
+  (->> arrows arrow-zeros vec (beam 5)))
+
 (defn header-scan [{:keys [bayes forest]} lines]
-  (let [arrow-shifts (->> lines regex/arrow-shifts header-beam)]
+  (let [arrow-shifts (->> lines regex/arrow-shifts arrow-beam)]
     (->> lines (map #(classify-bayes bayes %))
          (map second) header-beam
          (map #(classify forest (concat %1 %2)) arrow-shifts)
@@ -228,7 +234,7 @@
 (defn train-bayes [trainfile]
   (let [lines (-> trainfile slurp edn/read-string)
         shift-lines (->> lines (map #(map first %))
-                         (map regex/arrow-shifts) (map header-beam))
+                         (map regex/arrow-shifts) (map arrow-beam))
         bayes-model (->> lines (apply concat) naive-bayes)
         score-lines (mapv #(mapv (partial update-line bayes-model)
                                  %) lines)]
