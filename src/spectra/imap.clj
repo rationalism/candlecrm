@@ -433,7 +433,7 @@
 
 (defn scroll-emails [user f]
   (let [userinbox (fetch-imap-folder user)]
-    (loop [i (last-uid userinbox)]
+    (loop [i 283400#_(last-uid userinbox)]
       (println "Email number: " i)
       (when-let [m (get-message userinbox i)]
         (println "Parsing message number: " i)
