@@ -101,6 +101,7 @@
                   (run! neo4j/delete-class!))
              (neo4j/delete-id! (.id user)) :success
              (catch Exception e
+               (Thread/sleep 100)
                (throw-warn! "Deletion of user " (.id user) " interrupted")
                (throw-warn! "Retrying deletion") nil))]
     succeeded (recur user)))
