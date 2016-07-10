@@ -99,7 +99,8 @@
                    s/top-uid s/modified]
                   (map #(neo4j/prop-label user %))
                   (run! neo4j/delete-class!))
-             (neo4j/delete-id! (.id user)) :success
+             (neo4j/delete-id! (.id user))
+             :success
              (catch Exception e
                (Thread/sleep 100)
                (throw-warn! "Deletion of user " (.id user) " interrupted")
