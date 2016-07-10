@@ -70,3 +70,7 @@ a.new-link {
 a#pass-reset-link {
     margin-left: 1em;
 }
+
+div.prev-next {
+    float: right;
+}
