@@ -36,27 +36,36 @@
    :parse ((nlp/get-parse-fn))
    :entity (nlp/entity-extractor)
    :relation ((nlp/get-rel-fn))
-   :coref ((nlp/get-coref-fn))})
+   :coref ((nlp/get-coref-fn))
+   :sep ((weka/email-sep-model-fn))})
 
 (defn find-name [[names addrs]]
   (->> (if (->> names vals first empty?) addrs names)
-       vals first (sort-by second >) ffirst))
+       vals first (sort-by second >) ffirst vector))
 
 (defn find-email [data]
   (->> data (map vals) (map first)
-       (map keys) (map first)))
+       (map keys) (mapv first)))
 
 (defn fetch-body [id]
   (->> [[s/email-from s/s-name] [s/email-from s/email-addr]
-        [s/email-body] [s/email-sent]]
-       (mlrecon/fetch-paths-full id)
-       (map #(dissoc % :id s/type-label)) (partition 2)
-       ((switch find-name find-email)) (apply cons)))
+        [s/email-body] [s/email-sent] [s/email-digest]]
+       (mlrecon/fetch-paths-full id) 
+       (map #(dissoc % :id s/type-label)) (partition-all 2)
+       ((switch find-name find-email
+                #(-> % first keys first nil? not vector)))
+       (apply concat)))
+
+(defn clean-email [sep [author body sent-date is-digest?]]
+  (if is-digest?
+    (->> body str/split-lines (reply/header-dates sep)
+         (conj [author body]))
+    [author body []]))
 
 (defn email-sentences [n]
   (let [models (nlp-models-fn)]
-    (->> (queries/email-for-nlp n)
-         (map :id) (map fetch-body) (map drop-last) (map vec)
+    (->> (queries/email-for-nlp n) (map :id) (map fetch-body)
+         (map #(clean-email (:sep models) %))
          distinct (pmap #(nlp/sentence-parse models %))
          (apply concat) shuffle vec)))
 

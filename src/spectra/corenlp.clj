@@ -429,7 +429,7 @@
 (defn entity-mentions [sentence]
   (->> sentence relation-mentions remove-bad-dates))
 
-(defn clean-sentences [sentences to-remove]
+(defn clean-sentences [to-remove sentences]
   (->> sentences (mapvals relation-mentions)
        (fmapl remove-bad-dates)
        (fmapl #(filter-mentions to-remove %))
@@ -660,10 +660,10 @@
        (run-annotate (:mention models))
        (run-annotate (:entity models))))
 
-(defnp sentence-parse [models text]
-  (->> (update text 1 strip-parens)
-       (apply (partial fpp-replace models))
-       (run-nlp-ner models) get-sentences))
+(defnp sentence-parse [models [author text clean-dates]]
+  (->> text strip-parens (fpp-replace models author)
+       (run-nlp-ner models) get-sentences
+       (clean-sentences clean-dates)))
 
 (defnc run-nlp-default [models text]
   (->> text (run-nlp-ner models)
