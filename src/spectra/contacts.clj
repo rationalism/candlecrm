@@ -101,8 +101,8 @@
 
 (defn batch-insert! [user contacts]
   (throw-info! "batch inserting contacts")
-  (->> contacts (map contact-graph)
-       (mapv #(insert/push-graph! % user s/contact-src))))
+  (->> contacts (map contact-graph) loom/merge-graphs
+       (#(insert/push-graph! % user s/contact-src))))
 
 (defn load-all-contacts! [user]
   (->> user all-contacts (batch-insert! user)))
