@@ -426,9 +426,6 @@
                 #_(->> % mention-text dt/is-bad-date?))
           mentions))
 
-(defn entity-mentions [sentence]
-  (->> sentence relation-mentions remove-bad-dates))
-
 (defn clean-sentences [to-remove sentences]
   (->> sentences (mapvals relation-mentions)
        (fmapl remove-bad-dates)
@@ -448,7 +445,7 @@
     (blank-relation fm sm)))
 
 (defn split-relations [sentence]
-  (let [type-map (->> sentence entity-mentions
+  (let [type-map (->> sentence relation-mentions
                       (group-by #(-> % .getType s/schema-map)))
         rel-keys (keys s/relation-types)]
     (->> rel-keys (mapvals #(map type-map %))
@@ -468,7 +465,7 @@
             (concat sets) (recur (rest coll))))))
 
 (defn all-ner-graph [reftime sentence]
-  (->> sentence entity-mentions
+  (->> sentence relation-mentions
        (map #(ner-graph reftime %))
        (remove nil?) loom/merge-graphs))
 
@@ -476,7 +473,7 @@
   (let [rel-set (->> s/relation-types keys (map set) set)
         rel-map (->> s/relation-types keys (apply concat) distinct
                      (mapv #(vector % %)) (into {}))
-        nodes (->> sentence entity-mentions
+        nodes (->> sentence relation-mentions
                    (map #(.getType %)) (map s/schema-map))]
     (->> (map rel-map nodes) (remove nil?) distinct
          cartesian-product (cset/intersection rel-set)
@@ -684,7 +681,7 @@
                        get-sentences (clean-sentences clean-dates))]
     [(->> sentences (find-all-relations models) 
           get-sentences (nlp-graph reftime))
-     (->> sentences (mapcat entity-mentions)
+     (->> sentences (mapcat relation-mentions)
           (remove #(is-fpp-mention? author %)) (filter make-link?)
           (add-hyperlinks (run-nlp (:token models) new-text)))]))
 
