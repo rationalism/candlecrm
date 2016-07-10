@@ -43,8 +43,10 @@
 ;;`core.match` against events.
 
 (defn update-tables! []
+  (state/set! [:loading] true)
   (u/update-emails!)
-  (u/update-people!))
+  (u/update-people!)
+  (state/set! [:loading] false))
 
 ;; This fills in initial email values
 (defn chsk-init! []

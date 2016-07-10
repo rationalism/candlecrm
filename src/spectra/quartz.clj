@@ -227,7 +227,6 @@
 
 (defn delete-user! [user]
   (stop!)
-  (Thread/sleep 5000)
   (auth/delete-user! user)
   (start!))
 

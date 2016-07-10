@@ -26,7 +26,8 @@
     :search ""
     :search-results nil
     :delete-account {}
-    :change-pwd {}}))
+    :change-pwd {}
+    :loading false}))
 
 (defn look [& args]
   (get-in @a args))
