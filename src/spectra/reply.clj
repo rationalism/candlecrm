@@ -140,11 +140,16 @@
   (if (= mode :digest)
     (merge m {s/email-digest true}) m))
 
+(defn body-empty? [body]
+  (->> body str/trim (filter #(Character/isLetter %))
+       count (>= 0)))
+
 (defn body-graph [mode [header lines]]
-  (let [email (->> header loom/nodes email-nodes first)]
-    (->> lines regex/remove-arrows (str/join "\n")
-         (hash-map s/email-body) (add-digest mode)
-         (merge email) (loom/replace-node header email))))
+  (let [email (->> header loom/nodes email-nodes first)
+        text (->> lines regex/remove-arrows (str/join "\n"))]
+    (when (not (body-empty? text))
+      (->> text (hash-map s/email-body) (add-digest mode)
+           (merge email) (loom/replace-node header email)))))
 
 (defn maybe-sig-split [mode header-lines]
   (if (= mode :digest) header-lines
@@ -184,10 +189,6 @@
          (-> nodes count (repeat to-node))
          (-> nodes count (repeat s/email-to)))))
 
-(defn body-empty? [body]
-  (->> body str/trim (filter #(Character/isLetter %))
-       count (>= 20)))
-
 (defn empty-emails [graph]
   (->> graph loom/nodes (filter #(= s/email (s/type-label %)))
        (filter #(->> % s/email-body body-empty?))))
@@ -222,5 +223,5 @@
         chain-mode (if (->> lines regex/count-depth (apply max)
                             (* 2) (< (dec (count header-map))))
                      :chain :digest)]
-    (->> lines (split-body chain-mode header-map)
+    (->> lines (split-body chain-mode header-map) (remove nil?)
          (infer-to-from chain-mode headers) infer-subject)))
