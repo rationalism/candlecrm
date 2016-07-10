@@ -31,7 +31,7 @@
 
 (defn header-dates [sep lines]
   (->> lines (weka/header-scan sep) (zipvec lines)
-       (filter second) debug (map first) (str/join "\n")
+       (filter second) (map first) (str/join "\n")
        dt/find-dates))
 
 (defn remove-meta [graph]
