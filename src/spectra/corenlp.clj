@@ -426,14 +426,14 @@
                 #_(->> % mention-text dt/is-bad-date?))
           mentions))
 
+(defn filter-mentions [texts mentions]
+  (remove #(some #{(mention-text %)} texts) mentions))
+
 (defn clean-sentences [to-remove sentences]
   (->> sentences (mapvals relation-mentions)
        (fmapl remove-bad-dates)
        (fmapl #(filter-mentions to-remove %))
        (into []) (map #(set-mentions (first %) (second %)))))
-
-(defn filter-mentions [texts mentions]
-  (remove #(some #{(mention-text %)} texts) mentions))
 
 (defn relation-id [relation]
   (mapcat (juxt #(.getHeadTokenStart %)
