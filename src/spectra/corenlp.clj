@@ -218,6 +218,11 @@
 (defn relation-mentions [sentence]
   (.get sentence MachineReadingAnnotations$EntityMentionsAnnotation))
 
+(defn set-mentions [sentence mentions]
+  (.set sentence MachineReadingAnnotations$EntityMentionsAnnotation
+        mentions)
+  sentence)
+
 (defn true-case [token]
   (.get token CoreAnnotations$TrueCaseTextAnnotation))
 
@@ -423,6 +428,15 @@
 
 (defn entity-mentions [sentence]
   (->> sentence relation-mentions remove-bad-dates))
+
+(defn clean-sentences [sentences to-remove]
+  (->> sentences (mapvals relation-mentions)
+       (fmapl remove-bad-dates)
+       (fmapl #(filter-mentions to-remove %))
+       (into []) (map #(set-mentions (first %) (second %)))))
+
+(defn filter-mentions [texts mentions]
+  (remove #(some #{(mention-text %)} texts) mentions))
 
 (defn relation-id [relation]
   (mapcat (juxt #(.getHeadTokenStart %)
