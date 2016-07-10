@@ -44,7 +44,7 @@
 
 (defn update-tables! []
   (state/set! [:loading] true)
-  (js/setTimeout (state/set! [:loading] false) 500)
+  (js/setTimeout #(state/set! [:loading] false) 500)
   (u/update-emails!)
   (u/update-people!))
 
