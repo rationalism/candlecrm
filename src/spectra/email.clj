@@ -236,6 +236,7 @@
     (let [[graph linked-text]
           (nlp/run-nlp-full models (author-name chain message)
                             (s/email-sent message)
+                            (s/email-digest message)
                             (s/email-body message))]
       (when (-> graph loom/nodes empty? not)
         (-> (append-hyperlinks graph message)
@@ -243,9 +244,13 @@
             remove-all-metadata)))))
 
 (defn graph-from-id [models id]
-  (let [[name body sent] (fetch-body id)
+  (let [[name body sent is-digest?] (fetch-body id)
         message {s/type-label s/email :id id s/email-body body
-                 s/email-sent (java.util.Date. sent)}]
+                 s/email-sent (java.util.Date. sent)
+                 s/email-digest
+                 (if (not is-digest?) []
+                     (->> body str/split-lines
+                          (reply/header-dates (:sep models))))}]
     (->> [message {s/s-name name} s/email-from]
          vector (loom/build-graph [])
          (make-nlp-chain models message))))

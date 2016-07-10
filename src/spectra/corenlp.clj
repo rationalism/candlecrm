@@ -493,8 +493,7 @@
     sentence))
 
 (defn find-all-relations [models doc]
-  (->> doc get-sentences
-       (map #(find-relations models %))
+  (->> doc (map #(find-relations models %))
        make-doc))
 
 (defn gold-rel-map [sentence]
@@ -678,13 +677,14 @@
   (and (= 0 (.getHeadTokenStart mention))
        (= author (mention-text mention))))
 
-(defnc run-nlp-full [models author reftime text]
+(defnc run-nlp-full [models author reftime clean-dates text]
   (let [new-text (->> text strip-parens
                       (fpp-replace models author))
-        sentences (run-nlp-ner models new-text)]
+        sentences (->> new-text (run-nlp-ner models)
+                       get-sentences (clean-sentences clean-dates))]
     [(->> sentences (find-all-relations models) 
           get-sentences (nlp-graph reftime))
-     (->> sentences get-sentences (mapcat entity-mentions)
+     (->> sentences (mapcat entity-mentions)
           (remove #(is-fpp-mention? author %)) (filter make-link?)
           (add-hyperlinks (run-nlp (:token models) new-text)))]))
 
