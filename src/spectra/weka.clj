@@ -118,7 +118,6 @@
   (add-points (make-instances points) points))
 
 (defn make-forest [points]
-  (println points)
   (doto (RandomForest. )
     (.setNumTrees num-trees)
     (.buildClassifier (instances points))))
