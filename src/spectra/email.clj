@@ -14,6 +14,7 @@
             [spectra.corenlp :as nlp]
             [spectra.queries :as queries]
             [spectra.regex :as regex]
+            [spectra.reply :as reply]
             [spectra.weka :as weka]
             [spectra_cljc.schema :as s]
             [taoensso.timbre.profiling :as profiling

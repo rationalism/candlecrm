@@ -4,6 +4,7 @@
             [spectra_cljc.schema :as s]
             [spectra.common :refer :all]
             [spectra.corenlp :as nlp]
+            [spectra.datetime :as dt]
             [spectra.loom :as loom]
             [spectra.regex :as regex]
             [spectra.weka :as weka]))
@@ -27,6 +28,11 @@
        (filter #(= s/date-time (s/type-label %)))
        (sort-by #(->> % s/link-text count) >) rest
        (loom/remove-nodes graph)))
+
+(defn header-dates [sep lines]
+  (->> lines (weka/header-scan sep) (zipvec lines)
+       (filter second) (map first) (str/join "\n")
+       dt/find-dates))
 
 (defn remove-meta [graph]
   (loom/adjust-nodes graph #(dissoc % s/hash-code s/link-text))) 
