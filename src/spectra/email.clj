@@ -271,10 +271,10 @@
         " REMOVE root:" (neo4j/esc-token s/nonlp))
    {:id id}])
 
-(defn run-email-nlp! [models {:keys [id] :as email}]
+(defn run-email-nlp! [models {:keys [id user]}]
   (if-let [graph (graph-from-id models id)]
     (insert/push-graph!
-     graph (s/user email) s/nlp-src
+     graph user s/nlp-src
      (conj (delete-email-body id) (remove-nonlp id)))
     (-> id remove-nonlp neo4j/cypher-query)))
 
