@@ -526,11 +526,10 @@
        ids1 ", " ids2 "] RETURN a, b"))
 
 (defn find-conflicts [user class feature expected]
-  (->> (find-candidates user class)
-       (get-diffs user class)
+  (->> (find-candidates user class) (get-diffs user class)
        (remove #(-> % second (nth feature) (= expected)))
-       (into {}) (score-map class)
-       (into []) (sort-by second >)))
+       (into {}) (score-map class) (into [])
+       (sort-by second >)))
 
 (defn log2 [x]
   (/ (Math/log x) (Math/log 2)))
@@ -604,6 +603,9 @@
 
 (defonce traindata (atom [[] []]))
 
+(defn even-atom! [class]
+  (swap! traindata #(even-conflict class %)))
+
 (defn add-pos [pair]
   (swap! traindata
          (fn [t] (update t 0 #(cons pair %)))))
@@ -621,6 +623,7 @@
               (recur (rest candidates)))
       "n" (do (add-neg (first candidates))
               (recur (rest candidates)))
+      "s" (recur (rest candidates))
       "q" nil
       (do (println "Error: Invalid input, trying again")
           (recur candidates)))))
