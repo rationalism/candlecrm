@@ -602,6 +602,7 @@
          (map #(map candidate-map %)))))
 
 (defonce traindata (atom [[] []]))
+(defonce recon-pairs (atom []))
 
 (defn even-atom! [class]
   (swap! traindata #(even-conflict class %)))
@@ -614,19 +615,20 @@
   (swap! traindata
          (fn [t] (update t 1 #(cons pair %)))))
 
-(defn gather-train [candidates]
-  (println "New candidate:")
-  (println (training-query (first candidates)))
-  (let [resp (read-line)]
-    (condp = resp
-      "p" (do (add-pos (first candidates))
-              (recur (rest candidates)))
-      "n" (do (add-neg (first candidates))
-              (recur (rest candidates)))
-      "s" (recur (rest candidates))
-      "q" nil
-      (do (println "Error: Invalid input, trying again")
-          (recur candidates)))))
+(defn gather-train []
+  (loop [candidates @recon-pairs]
+    (println "New candidate:")
+    (println (training-query (first candidates)))
+    (let [resp (read-line)]
+      (condp = resp
+        "p" (do (add-pos (first candidates))
+                (recur (rest candidates)))
+        "n" (do (add-neg (first candidates))
+                (recur (rest candidates)))
+        "s" (recur (rest candidates))
+        "q" nil
+        (do (println "Error: Invalid input, trying again")
+            (recur candidates))))))
 
 (defn append-scores [[pos neg]]
   [(->> (map vec pos) (map #(conj % 1.0)))
@@ -647,6 +649,14 @@
 (defn train-atom [user class]
   (let [[pos-cs neg-cs] @traindata]
     (train-full user class pos-cs neg-cs)))
+
+(defn train-iterate [user class]
+  (gather-train)
+  (let [new-model (train-atom user class)]
+    (write-forest class new-model))
+  (load-models!)
+  (reset! recon-pairs (candidate-sample user class 500))
+  (recur user class))
 
 (defn train-database [class]
   (let [user (-> :train-user env auth/lookup-user)]
