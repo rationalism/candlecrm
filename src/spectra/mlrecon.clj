@@ -516,7 +516,7 @@
                  (partial weka/classify-logit)))))
 
 (defn score-all [user class]
-  (->> (find-candidates user class)
+  (->> (find-candidates user class) 
        (get-diffs user class)
        (score-map class)
        (into [])))
