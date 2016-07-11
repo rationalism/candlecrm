@@ -68,8 +68,10 @@
 (defn version-count [class]
   (->> models-dir io/file file-seq
        rest (map #(.getCanonicalPath %))
-       (map #(str/split % #"/")) (map last)
-       (filter #(.contains % ".dat"))
+       (map #(str/split % #"/"))
+       (filter #(= (dec (count %))
+                   (count (str/split models-dir #"/"))))
+       (map last) (filter #(.contains % ".dat"))
        (remove #(.contains % "-curve"))
        (map #(str/split % #"\.")) (map first)
        (filter #(.contains % (str (name class) "-")))
@@ -641,6 +643,10 @@
 (defn train-full [user class pos-cs neg-cs]
   (let [f (train-forest user class pos-cs neg-cs)]
     [f (-> (weka/load-traindat) weka/forest-curve)]))
+
+(defn train-atom [user class]
+  (let [[pos-cs neg-cs] @traindata]
+    (train-full user class pos-cs neg-cs)))
 
 (defn train-database [class]
   (let [user (-> :train-user env auth/lookup-user)]

@@ -45,7 +45,9 @@
   (deserialize-stream (FileInputStream. filename)))
 
 (defn save-traindat [traindat]
-  (spit traindat-temp (vec traindat))
+  (->> traindat (map vec) (mapv prn-str)
+       (str/join " ") (#(str "[" % "]"))
+       (spit traindat-temp))
   traindat)
 
 (defn load-traindat []
@@ -288,7 +290,7 @@
        (java.util.Random. )
        (into-array Object [(csv-out crossval-temp)])))
     (let [scores (slurp crossval-temp)]
-      #_(io/delete-file crossval-temp)
+      (io/delete-file crossval-temp)
       (->> scores csv/parse-csv rest drop-last
            (map (comp replace-class reverse to-doubles
                       #(update % 1 replace-question)
