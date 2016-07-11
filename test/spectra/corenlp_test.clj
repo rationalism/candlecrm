@@ -35,8 +35,8 @@
 
 (deftest nlp-full
   (testing "all types of entities"
-    (let [entities (as-> me-blurb $
-                     (run-nlp-full models "Alyssa Vance" (dt/now) $))]
+    (let [entities (run-nlp-full models "Alyssa Vance" (dt/now)
+                                 [] me-blurb)]
       (is entities))))
 
 (deftest email-name
