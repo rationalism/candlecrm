@@ -559,8 +559,7 @@
         total (->> samples (map second) (apply +))]
     (->> (reduce (partial sample-one n total)
                  [0.0 []] samples)
-         second (mapv first) (mapv vec)
-         sample-display)))
+         second (mapv first) (mapv vec))))
 
 (defn split-neg-pos [freqs]
   [(remove #(<= (second (first %)) 0.95) freqs)
