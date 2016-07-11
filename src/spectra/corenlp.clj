@@ -650,7 +650,7 @@
        (map str/capitalize)
        (str/join " ")))
 
-(defnc run-nlp-ner [models text]
+(defnp run-nlp-ner [models text]
   (->> text (run-nlp (:ner models))
        library-annotate-all
        (run-annotate (:mention models))

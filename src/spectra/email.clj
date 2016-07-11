@@ -29,7 +29,7 @@
   (-> (loom/out-edge-label chain message s/email-from)
       second (.get (name s/s-name))))
 
-(defn nlp-models-fn []
+(defnp nlp-models-fn []
   {:ner ((nlp/get-ner-fn))
    :mention ((nlp/get-mention-fn))
    :token ((nlp/get-tokenize-fn))
@@ -47,7 +47,7 @@
   (->> data (map vals) (map first)
        (map keys) (mapv first)))
 
-(defn fetch-body [id]
+(defnp fetch-body [id]
   (->> [[s/email-from s/s-name] [s/email-from s/email-addr]
         [s/email-body] [s/email-sent] [s/email-digest]]
        (mlrecon/fetch-paths-full id) 
@@ -56,7 +56,7 @@
                 #(-> % first keys first nil? not vector)))
        (apply concat)))
 
-(defn clean-email [sep [author body sent-date is-digest?]]
+(defnp clean-email [sep [author body sent-date is-digest?]]
   (if is-digest?
     (->> body str/split-lines (reply/header-dates sep)
          (conj [author body]))
@@ -64,9 +64,9 @@
 
 (defn email-sentences [n]
   (let [models (nlp-models-fn)]
-    (->> (queries/email-for-nlp n) (map :id) (map fetch-body)
-         (map #(clean-email (:sep models) %))
-         distinct (pmap #(nlp/sentence-parse models %))
+    (->> (queries/email-for-nlp n) (map :id) (mapv fetch-body)
+         (mapv #(clean-email (:sep models) %))
+         distinct (mapv #(nlp/sentence-parse models %))
          (apply concat) shuffle vec)))
 
 (defn date-sentence? [sentence]

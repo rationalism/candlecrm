@@ -7,7 +7,9 @@
             [spectra.datetime :as dt]
             [spectra.loom :as loom]
             [spectra.regex :as regex]
-            [spectra.weka :as weka]))
+            [spectra.weka :as weka]
+            [taoensso.timbre.profiling :as profiling
+             :refer (pspy pspy* profile defnp p p*)]))
 
 (defn parse-models-fn []
   {:sep ((weka/email-sep-model-fn))
@@ -29,7 +31,7 @@
        (sort-by #(->> % s/link-text count) >) rest
        (loom/remove-nodes graph)))
 
-(defn header-dates [sep lines]
+(defnp header-dates [sep lines]
   (->> lines (weka/header-scan sep) (zipvec lines)
        (filter second) (map first) (str/join "\n")
        dt/find-dates))

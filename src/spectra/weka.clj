@@ -168,7 +168,8 @@
         (doto (DenseInstance. 2)
           (.setDataset instances)
           (.setValue 0 text)
-          (.setClassMissing))))
+          (.setClassMissing)))
+  instances)
 
 (defn test-attributes [bayes]
   (doto (FastVector. )
@@ -177,13 +178,13 @@
     (add-element (-> bayes (.getClassifier)
                      (.getHeader) (.classAttribute)))))
 
-(defn test-instances [bayes text]
+(defnp test-instances [bayes text]
   (doto (Instances. "test set"
                     (test-attributes bayes) 1)
     (.setClassIndex 1)
     (add-text text)))
 
-(defn classify-bayes [bayes text]
+(defnp classify-bayes [bayes text]
   (->> text (test-instances bayes) first
        (.distributionForInstance bayes)
        (into [])))
@@ -212,11 +213,11 @@
 (defn arrow-beam [arrows]
   (->> arrows arrow-zeros vec (beam 5)))
 
-(defn header-scan [{:keys [bayes forest]} lines]
+(defnp header-scan [{:keys [bayes forest]} lines]
   (let [arrow-shifts (->> lines regex/arrow-shifts arrow-beam)]
-    (->> lines (map #(classify-bayes bayes %))
+    (->> lines (mapv #(classify-bayes bayes %))
          (map second) header-beam
-         (map #(classify forest (concat %1 %2)) arrow-shifts)
+         (mapv #(classify forest (concat %1 %2)) arrow-shifts)
          (map #(>= % 0.5)))))
 
 (defn update-line [model score-line]
