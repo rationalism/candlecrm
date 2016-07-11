@@ -603,6 +603,29 @@
     (->> (old-model-points user class n)
          (map #(map candidate-map %)))))
 
+(defonce traindata (atom [[] []]))
+
+(defn add-pos [pair]
+  (swap! traindata
+         (fn [t] (update t 0 #(cons pair %)))))
+
+(defn add-neg [pair]
+  (swap! traindata
+         (fn [t] (update t 1 #(cons pair %)))))
+
+(defn gather-train [candidates]
+  (println "New candidate:")
+  (println (training-query (first candidates)))
+  (let [resp (read-line)]
+    (condp = resp
+      "p" (do (add-pos (first candidates))
+              (recur (rest candidates)))
+      "n" (do (add-neg (first candidates))
+              (recur (rest candidates)))
+      "q" nil
+      (do (println "Error: Invalid input, trying again")
+          (recur candidates)))))
+
 (defn append-scores [[pos neg]]
   [(->> (map vec pos) (map #(conj % 1.0)))
    (->> (map vec neg) (map #(conj % 0.0)))])

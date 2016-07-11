@@ -156,7 +156,7 @@
   {s/s-name s/person s/email-addr s/person})
 
 (def conflicts
-  {s/email [s/email-body s/email-subject s/email-sent]
+  {#_s/email #_[s/email-body s/email-subject s/email-sent]
    s/person []
    s/location []
    s/event []})
