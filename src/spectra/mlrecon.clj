@@ -528,11 +528,9 @@
 (defn find-conflicts [user class feature expected]
   (->> (find-candidates user class)
        (get-diffs user class)
-       (remove #(-> % second (nth feature)
-                    (= expected)))
+       (remove #(-> % second (nth feature) (= expected)))
        (into {}) (score-map class)
-       (into []) (map #(update % 0 training-query))
-       (sort-by second >)))
+       (into []) (sort-by second >)))
 
 (defn log2 [x]
   (/ (Math/log x) (Math/log 2)))
