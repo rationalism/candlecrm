@@ -36,7 +36,8 @@
             RelationMention RelationMentionFactory
             MachineReadingAnnotations$EntityMentionsAnnotation
             MachineReadingAnnotations$RelationMentionsAnnotation]
-           [java.util Properties] [java.util.logging Level]))
+           [java.util Properties] [java.util.logging Level]
+           [org.ahocorasick.trie Trie]))
 
 (defn coreference? []
   (= "true" (env :coreference)))
@@ -400,19 +401,35 @@
                     (boundary-vector word) (conj boundaries)))
         boundaries))))
 
-(defn token-pos-map [sentence char-map pair]
-  (->> pair key (boundaries-detect sentence)
-       (map #(assoc % 1 (dec (second %))))
+(defn emit-vec [offset emit]
+  (->> emit ((juxt #(.getStart %) #(.getEnd %)))
+       (mapv #(+ % offset)) (vector (.getKeyword emit))))
+
+(defn emit-map [emits sentence]
+  (->> emits (map #(emit-vec (offset-begin sentence) %))
+       (group-by first) (fmapl #(map second %))))
+
+(defn trie-boundaries [sentence words]
+  (-> #(.addKeyword %1 %2)
+      (reduce (.removeOverlaps (Trie/builder)) words)
+      .build (.parseText (.toString sentence))
+      (emit-map sentence)))
+
+(defn token-pos-map [char-map pair]
+  (->> pair key (map #(assoc % 1 (dec (second %))))
        (map #(token-boundaries (first %) (second %) char-map))
        (mapcat #(range (first %) (inc (second %))))
        (map #(hash-map % (val pair)))
        (apply merge)))
 
+(defn boundaries-map [sentence type-map]
+  (let [boundaries (->> type-map keys (trie-boundaries sentence))]
+    (zipmap (map boundaries (keys type-map)) (vals type-map))))
+
 (defn class-map [sentence]
   (let [char-map (sentence-token-map sentence)]
-    (->> sentence (.toString) library-map
-         (map #(token-pos-map sentence char-map %))
-         (apply merge) debug)))
+    (->> sentence (.toString) library-map (boundaries-map sentence)
+         (map #(token-pos-map char-map %)) (apply merge))))
 
 (defn number-junk? [sentence]
   (let [c (-> sentence .toString count)]
