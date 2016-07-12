@@ -289,21 +289,21 @@
                   (dec (.index token)))))
 
 (defn token-boundaries [bottom top token-map]
-  (vector (nth token-map bottom) (nth token-map top)))
+  (vector (token-map bottom) (token-map top)))
 
 (defn normalize-map [token-map]
   (if (or (not token-map) (empty? token-map)) []
-      (let [n (->> token-map keys (apply max))]
-        (loop [token-vec [] i 0]
-          (if (= i n) token-vec
+      (let [ks (keys token-map) b (apply min ks) e (apply max ks)]
+        (loop [token-vec [] i b]
+          (if (> i e) token-vec
               (recur (conj token-vec
-                           (if (contains? token-map i)
-                             (token-map i) (last token-vec)))
+                           [i (if (contains? token-map i)
+                                (token-map i) (second (last token-vec)))])
                      (inc i)))))))
 
 (defn sentence-token-map [sentence]
   (->> (get-tokens sentence) (map char-token-map)
-       (apply merge) normalize-map))
+       (apply merge) normalize-map (into {})))
 
 (defn number-items [items]
   (zipmap (map inc (range (count items)))
@@ -413,7 +413,7 @@
   (let [char-map (sentence-token-map sentence)]
     (->> sentence (.toString) library-map
          (map #(token-pos-map sentence char-map %))
-         (apply merge))))
+         (apply merge) debug)))
 
 (defn number-junk? [sentence]
   (let [c (-> sentence .toString count)]
