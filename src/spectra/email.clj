@@ -67,7 +67,7 @@
     (->> (queries/email-for-nlp n) (map :id) (map fetch-body)
          (map #(clean-email (:sep models) %))
          (pmap #(nlp/sentence-parse models %))
-         (apply concat) vec shuffle vec)))
+         (apply concat) shuffle vec)))
 
 (defn date-sentence? [sentence]
   (->> sentence nlp/all-ner-graph loom/nodes

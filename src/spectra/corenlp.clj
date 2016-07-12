@@ -289,16 +289,21 @@
                   (dec (.index token)))))
 
 (defn token-boundaries [bottom top token-map]
-  (let [sort-keys (-> token-map keys sort)]
-    (vector (->> sort-keys (drop-while #(< % bottom))
-                 first (get token-map))
-            (->> sort-keys reverse (drop-while #(> % top))
-                 first (get token-map)))))
+  (vector (nth token-map bottom) (nth token-map top)))
 
-(defn sentence-char-map [sentence]
-  (->> (get-tokens sentence)
-       (map char-token-map)
-       (apply merge)))
+(defn normalize-map [token-map]
+  (if (or (not token-map) (empty? token-map)) []
+      (let [n (->> token-map keys (apply max))]
+        (loop [token-vec [] i 0]
+          (if (= i n) token-vec
+              (recur (conj token-vec
+                           (if (contains? token-map i)
+                             (token-map i) (last token-vec)))
+                     (inc i)))))))
+
+(defn sentence-token-map [sentence]
+  (->> (get-tokens sentence) (map char-token-map)
+       (apply merge) normalize-map))
 
 (defn number-items [items]
   (zipmap (map inc (range (count items)))
@@ -396,19 +401,19 @@
                     (boundary-vector word) (conj boundaries)))
         boundaries))))
 
-(defn token-pos-map [sentence pair]
+(defn token-pos-map [sentence char-map pair]
   (->> pair key (boundaries-detect sentence)
        (map #(assoc % 1 (dec (second %))))
-       (map #(token-boundaries (first %) (second %)
-                               (sentence-char-map sentence)))
+       (map #(token-boundaries (first %) (second %) char-map))
        (mapcat #(range (first %) (inc (second %))))
        (map #(hash-map % (val pair)))
        (apply merge)))
 
 (defn class-map [sentence]
-  (->> sentence (.toString) library-map
-       (map #(token-pos-map sentence %))
-       (apply merge)))
+  (let [char-map (sentence-token-map sentence)]
+    (->> sentence (.toString) library-map
+         (map #(token-pos-map sentence char-map %))
+         (apply merge))))
 
 (defn number-junk? [sentence]
   (let [c (-> sentence .toString count)]
