@@ -67,7 +67,8 @@
                   :exclusions [com.google.guava/guava]]
                  [figwheel-sidecar "0.5.4-7"]
                  [org.jsoup/jsoup "1.9.2"]
-                 [cc.mallet/mallet "2.0.8"]]
+                 [cc.mallet/mallet "2.0.8"]
+                 [org.ahocorasick/ahocorasick "0.3.0"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.3"]
             [lein-kibit "0.1.2"
