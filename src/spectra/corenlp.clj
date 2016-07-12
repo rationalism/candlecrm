@@ -297,8 +297,8 @@
         (loop [token-vec [] i b]
           (if (> i e) token-vec
               (recur (conj token-vec
-                           [i (if (contains? token-map i)
-                                (token-map i) (second (last token-vec)))])
+                           [i (if-let [t (token-map i)] t
+                                      (second (last token-vec)))])
                      (inc i)))))))
 
 (defn sentence-token-map [sentence]
@@ -306,8 +306,7 @@
        (apply merge) normalize-map (into {})))
 
 (defn number-items [items]
-  (zipmap (map inc (range (count items)))
-          items))
+  (zipmap (map inc (range (count items))) items))
 
 (defn ner-graph [reftime entity]
   (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
