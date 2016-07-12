@@ -6,18 +6,19 @@
             [environ.core :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
-  (:import [cc.mallet.classify NaiveBayesTrainer]
+  (:import [cc.mallet.classify MaxEntTrainer NaiveBayesTrainer]
            [cc.mallet.pipe Target2Label CharSequence2TokenSequence
             TokenSequenceLowercase TokenSequence2FeatureSequence
-            FeatureSequence2FeatureVector SerialPipes]
+            FeatureSequence2FeatureVector SerialPipes
+            TokenSequenceNGrams]
            [cc.mallet.pipe.iterator ArrayDataAndTargetIterator]
            [cc.mallet.types InstanceList]))
 
 (defn pipe []
   (SerialPipes.
-   [(Target2Label.) (CharSequence2TokenSequence.
-                     "[^\\s:.@]+")
-    (TokenSequenceLowercase.) (TokenSequence2FeatureSequence.)
+   [(Target2Label.) (CharSequence2TokenSequence. "[^\\s:.@]+")
+    (TokenSequenceLowercase.)
+    (TokenSequence2FeatureSequence.)
     (FeatureSequence2FeatureVector.)]))
 
 (defn average [coll]
@@ -40,7 +41,8 @@
 
 (defn make-bayes [trainfile]
   (let [[train test] (file-instances trainfile)]
-    (-> (NaiveBayesTrainer.) (.train train))))
+    (-> (MaxEntTrainer.) (.train train)
+        (.getAccuracy test))))
 
 (defn vector-probs [n v]
   (->> n range (map #(.valueAtLocation v %))))
