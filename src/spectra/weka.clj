@@ -10,7 +10,8 @@
             [spectra.regex :as regex]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
-  (:import [weka.classifiers Evaluation]
+  (:import [java.io File]
+           [weka.classifiers Evaluation]
            [weka.classifiers.bayes NaiveBayes]
            [weka.classifiers.evaluation.output.prediction CSV HTML]
            [weka.classifiers.functions Logistic]
