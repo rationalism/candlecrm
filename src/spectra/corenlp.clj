@@ -147,11 +147,10 @@
 (def rel-sentences (atom []))
 
 (defn save-rels [filename]
-  (weka/serialize @rel-sentences filename))
+  (serialize @rel-sentences filename))
 
 (defn load-rels [filename]
-  (->> filename weka/deserialize
-       (reset! rel-sentences)))
+  (->> filename deserialize (reset! rel-sentences)))
 
 (defn types-from-dirnames [dirnames]
   (->> (str/split (last dirnames) #"_")

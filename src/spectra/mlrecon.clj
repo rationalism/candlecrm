@@ -43,8 +43,7 @@
    (new-model! class models-dir place))
   ([class dir place]
    (->> (str dir "/" (name class) ".dat")
-        weka/deserialize
-        (swap! place assoc class))))
+        deserialize (swap! place assoc class))))
 
 (defn load-models! []
   (reset! recon-models {})
@@ -57,7 +56,7 @@
        (mapv #(new-model! % views-dir view-models))))
 
 (defn load-curve! [class]
-  (weka/deserialize
+  (deserialize
    (str models-dir "/" (name class) "-curve.dat")))
 
 (defn load-thresholds! []
@@ -91,7 +90,7 @@
            (map #(apply str %)) (mapv io/delete-file)))
     (->> (zipvec stem [".dat" "-curve.dat"])
          (map #(apply str %)) (zipvec forest)
-         (mapv #(apply weka/serialize %)))))
+         (mapv #(apply serialize %)))))
 
 (defn strip-link-map [m]
   (fmap m (fn [k]

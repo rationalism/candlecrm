@@ -11,14 +11,7 @@
             TokenSequenceLowercase TokenSequence2FeatureSequence
             FeatureSequence2FeatureVector SerialPipes]
            [cc.mallet.pipe.iterator ArrayDataAndTargetIterator]
-           [cc.mallet.types InstanceList]
-           [java.io File FileInputStream FileOutputStream
-            ObjectInputStream ObjectOutputStream]))
-
-(defn serialize [forest filename]
-  (-> (FileOutputStream. filename)
-      ObjectOutputStream. 
-      (.writeObject forest)))
+           [cc.mallet.types InstanceList]))
 
 (defn pipe []
   (SerialPipes.

@@ -20,9 +20,7 @@
            [weka.core.converters TextDirectoryLoader]
            [weka.core.tokenizers WordTokenizer]
            [weka.filters Filter]
-           [weka.filters.unsupervised.attribute StringToWordVector]
-           [java.io File FileInputStream FileOutputStream
-            ObjectInputStream ObjectOutputStream]))
+           [weka.filters.unsupervised.attribute StringToWordVector]))
 
 (def num-trees 200)
 (def crossval-folds 10)
@@ -32,17 +30,6 @@
 (def email-sep-key "emailbreak")
 (def traindat-temp "/tmp/traindat.txt")
 (def crossval-temp "/tmp/crossval.csv")
-
-(defn serialize [forest filename]
-  (-> (FileOutputStream. filename)
-      ObjectOutputStream. 
-      (.writeObject forest)))
-
-(defn deserialize-stream [stream]
-  (.readObject (ObjectInputStream. stream)))
-
-(defn deserialize [filename]
-  (deserialize-stream (FileInputStream. filename)))
 
 (defn save-traindat [traindat]
   (->> traindat (map vec) (mapv prn-str)

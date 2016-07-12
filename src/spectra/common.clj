@@ -7,7 +7,9 @@
              :refer (log trace info warn error fatal report
                          spy get-env log-env)]
             [taoensso.timbre.appenders.core :as appenders])
-  (:import [java.util Date]))
+  (:import [java.util Date]
+           [java.io File FileInputStream FileOutputStream
+            ObjectInputStream ObjectOutputStream]))
 
 ;; Common library functions. Shouldn't depend on anything else.
 
@@ -173,3 +175,14 @@
          (for [i (range n)]
            (->> n (- (count coll)) inc (+ i)
                 (subvec coll i)))))
+
+(defn serialize [obj filename]
+  (-> (FileOutputStream. filename)
+      ObjectOutputStream. 
+      (.writeObject obj)))
+
+(defn deserialize-stream [stream]
+  (.readObject (ObjectInputStream. stream)))
+
+(defn deserialize [filename]
+  (deserialize-stream (FileInputStream. filename)))

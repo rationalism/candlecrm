@@ -21,7 +21,7 @@
 
 (defn load-date-model! []
   (->> bad-date-file (str models-dir "/")
-       weka/deserialize (reset! bad-date-model)))
+       deserialize (reset! bad-date-model)))
 
 (load-date-model!)
 
