@@ -18,15 +18,6 @@
     (is (> 0.01 (classify forest [0.0 0.0 0.0])))
     (is (< 0.99 (classify forest [1.0 1.0 1.0])))))
 
-(deftest bayes-text
-  (testing "Naive Bayes classifier on strings"
-    (def train-set [["The Jose Dog" "intro"] ["is a very" "para"]
-                    ["furry fluffy doggy" "para"]])
-    (def nb (naive-bayes train-set))
-    
-    (is (> 0.01 (first (classify-bayes nb "furry fluffy doggy"))))
-    (is (< 0.99 (first (classify-bayes nb "The Jose Dog"))))))
-
 (deftest logit-test
   (testing "Test of logistic regression classifier"
     (def l (make-logit [[0.0 "f"] [0.5 "f"] [1.0 "t"] [1.5 "t"]]))

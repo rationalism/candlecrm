@@ -9,7 +9,7 @@
                  [clj-time "0.12.0"]
                  [clj-http "3.1.0"
                   :exclusions [commons-io]]
-                 [http-kit "2.1.19"]
+                 [http-kit "2.2.0"]
                  [ring/ring-core "1.5.0"]
                  [ring/ring-devel "1.5.0"]
                  [ring/ring-defaults "0.2.1"]
@@ -17,7 +17,7 @@
                  [hiccup "1.0.5"]
                  [environ "1.0.3"]
                  [com.taoensso/encore "2.64.1"]
-                 [com.taoensso/timbre "4.5.1"]
+                 [com.taoensso/timbre "4.6.0"]
                  [buddy "1.0.0"]
                  [com.google.api-client/google-api-client "1.22.0"
                   :exclusions [com.fasterxml.jackson.core/jackson-core]]
