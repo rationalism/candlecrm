@@ -6,6 +6,7 @@
             [environ.core :refer [env]]
             [spectra.common :refer :all]
             [spectra.async :as async]
+            [spectra.mallet :as mallet]
             [spectra.regex :as regex]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -202,13 +203,14 @@
 
 (defnp header-scan [{:keys [bayes forest]} lines]
   (let [arrow-shifts (->> lines regex/arrow-shifts arrow-beam)]
-    (->> lines (mapv #(classify-bayes bayes %))
-         (map second) header-beam
+    (->> lines (mallet/classify-bayes bayes) (map second) header-beam
          (mapv #(classify forest (concat %1 %2)) arrow-shifts)
          (map #(>= % 0.5)))))
 
-(defn update-line [model score-line]
-  (update score-line 0 #(->> % (classify-bayes model) second)))
+(defn update-lines [model score-lines]
+  (zipvec (->> score-lines (map first)
+               (mallet/classify-bayes model) (map second))
+          (map second score-lines)))
 
 (defn tail-zeros [lines]
   (let [tail [[0.0 "b"] [0.0 "b"]]]
@@ -225,9 +227,8 @@
   (let [lines (-> trainfile slurp edn/read-string)
         shift-lines (->> lines (map #(map first %))
                          (map regex/arrow-shifts) (map arrow-beam))
-        bayes-model (->> lines (apply concat) naive-bayes)
-        score-lines (mapv #(mapv (partial update-line bayes-model)
-                                 %) lines)]
+        bayes-model (mallet/make-bayes trainfile)
+        score-lines (mapv #(update-lines bayes-model %) lines)]
     (->> score-lines (map tail-zeros) (map vec) (map #(beam 5 %))
          (mapcat #(map collect-lines %1 %2) shift-lines)
          make-forest (hash-map :forest)

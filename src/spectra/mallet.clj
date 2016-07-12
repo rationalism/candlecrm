@@ -32,7 +32,7 @@
                     (map first lines) (map second lines))))))
 
 (defn split-instances [instances]
-  (->> [0.9 0.1] double-array
+  (->> [0.99 0.01] double-array
        (.split instances (java.util.Random.))))
 
 (defn file-instances [filename]
@@ -41,13 +41,13 @@
 
 (defn make-bayes [trainfile]
   (let [[train test] (file-instances trainfile)]
-    (-> (MaxEntTrainer.) (.train train)
-        (.getAccuracy test))))
+    (-> (MaxEntTrainer.) (.train train))))
 
 (defn vector-probs [n v]
   (->> n range (map #(.valueAtLocation v %))))
 
 (defn classify-bayes [model lines]
-  (->> lines (make-instances (.getInstancePipe model))
+  (->> lines (map #(vector % "b"))
+       (make-instances (.getInstancePipe model))
        (.classify model) (map #(.getLabeling %))
        (map #(vector-probs (-> model .getLabelAlphabet .size) %))))
