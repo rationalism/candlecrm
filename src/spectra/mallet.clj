@@ -11,7 +11,8 @@
             TokenSequenceLowercase TokenSequence2FeatureSequence
             FeatureSequence2FeatureVector SerialPipes
             TokenSequenceNGrams]
-           [cc.mallet.pipe.iterator ArrayDataAndTargetIterator]
+           [cc.mallet.pipe.iterator ArrayIterator
+            ArrayDataAndTargetIterator]
            [cc.mallet.types InstanceList]))
 
 (defn pipe []
@@ -24,12 +25,16 @@
 (defn average [coll]
   (/ (apply + coll) (count coll)))
 
-(defn make-instances
-  ([lines] (make-instances (pipe) lines))
-  ([pipe lines]
-   (doto (InstanceList. pipe)
-     (.addThruPipe (ArrayDataAndTargetIterator.
-                    (map first lines) (map second lines))))))
+(defn make-instances [model lines]
+  (doto (InstanceList. (.getInstancePipe model))
+    (.addThruPipe (->> model .getLabelAlphabet .toArray first
+                       (repeat (count lines))
+                       (ArrayDataAndTargetIterator. lines)))))
+
+(defn train-instances [lines]
+  (doto (InstanceList. (pipe))
+    (.addThruPipe (ArrayDataAndTargetIterator.
+                   (map first lines) (map second lines)))))
 
 (defn split-instances [instances]
   (->> [0.99 0.01] double-array
@@ -37,17 +42,16 @@
 
 (defn file-instances [filename]
   (->> filename slurp edn/read-string (apply concat)
-       make-instances split-instances))
+       train-instances split-instances))
 
 (defn make-bayes [train-data]
-  (let [[train test] (->> train-data make-instances split-instances)]
+  (let [[train test] (->> train-data train-instances split-instances)]
     (-> (MaxEntTrainer.) (.train train))))
 
 (defn vector-probs [n v]
   (->> n range (map #(.valueAtLocation v %))))
 
 (defn classify-bayes [model lines]
-  (->> lines (map #(vector % "intro"))
-       (make-instances (.getInstancePipe model))
+  (->> lines (make-instances model)
        (.classify model) (map #(.getLabeling %))
        (map #(vector-probs (-> model .getLabelAlphabet .size) %))))
