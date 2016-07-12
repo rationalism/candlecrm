@@ -382,25 +382,6 @@
                      (merge lib-map))
                  rmap)))))
 
-(defn boundary-vector [word start]
-  (vector start (+ start (count word))))
-
-(defn last-boundaries [boundaries sentence]
-  (if (nil-or-empty? boundaries)
-    (offset-begin sentence)
-    (-> boundaries last second)))
-
-(defn boundaries-detect [sentence word]
-  (loop [text (str sentence)
-         boundaries []]
-    (let [pieces (->> word regex/regex-escape re-pattern
-                      (str/split text) first)]
-      (if (not= text pieces)
-        (recur (->> pieces count (+ (count word)) (subs text))
-               (->> pieces count (+ (last-boundaries boundaries sentence))
-                    (boundary-vector word) (conj boundaries)))
-        boundaries))))
-
 (defn emit-vec [offset emit]
   (->> emit ((juxt #(.getStart %) #(.getEnd %)))
        (mapv #(+ % offset)) (vector (.getKeyword emit))))
