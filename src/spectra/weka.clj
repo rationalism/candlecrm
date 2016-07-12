@@ -228,7 +228,7 @@
   (let [lines (-> trainfile slurp edn/read-string)
         shift-lines (->> lines (map #(map first %))
                          (map regex/arrow-shifts) (map arrow-beam))
-        bayes-model (mallet/make-bayes trainfile)
+        bayes-model (mallet/make-bayes (apply concat lines))
         score-lines (mapv #(update-lines bayes-model %) lines)]
     (->> score-lines (map tail-zeros) (map vec) (map #(beam 5 %))
          (mapcat #(map collect-lines %1 %2) shift-lines)

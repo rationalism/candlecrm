@@ -8,5 +8,5 @@
                     ["furry fluffy doggy" "para"]])
     (def nb (make-bayes train-set))
     
-    (is (> 0.01 (first (classify-bayes nb "furry fluffy doggy"))))
-    (is (< 0.99 (first (classify-bayes nb "The Jose Dog"))))))
+    (is (> 0.4 (ffirst (classify-bayes nb ["furry fluffy doggy"]))))
+    (is (< 0.6 (ffirst (classify-bayes nb ["The Jose Dog"]))))))

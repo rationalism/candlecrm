@@ -39,15 +39,15 @@
   (->> filename slurp edn/read-string (apply concat)
        make-instances split-instances))
 
-(defn make-bayes [trainfile]
-  (let [[train test] (file-instances trainfile)]
+(defn make-bayes [train-data]
+  (let [[train test] (->> train-data make-instances split-instances)]
     (-> (MaxEntTrainer.) (.train train))))
 
 (defn vector-probs [n v]
   (->> n range (map #(.valueAtLocation v %))))
 
 (defn classify-bayes [model lines]
-  (->> lines (map #(vector % "b"))
+  (->> lines (map #(vector % "intro"))
        (make-instances (.getInstancePipe model))
        (.classify model) (map #(.getLabeling %))
        (map #(vector-probs (-> model .getLabelAlphabet .size) %))))
