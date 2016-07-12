@@ -15,7 +15,8 @@
 
 (defn pipe []
   (SerialPipes.
-   [(Target2Label.) (CharSequence2TokenSequence. "\\S+")
+   [(Target2Label.) (CharSequence2TokenSequence.
+                     "[^\\s:.@]+")
     (TokenSequenceLowercase.) (TokenSequence2FeatureSequence.)
     (FeatureSequence2FeatureVector.)]))
 
