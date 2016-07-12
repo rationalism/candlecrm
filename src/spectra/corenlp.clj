@@ -145,7 +145,7 @@
                              (apply str) (str dir "/")))
         models))
 
-(def rel-sentences (atom []))
+(defonce rel-sentences (atom []))
 
 (defn save-rels [filename]
   (serialize @rel-sentences filename))
