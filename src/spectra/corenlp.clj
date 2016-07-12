@@ -410,8 +410,15 @@
        (map #(token-pos-map sentence %))
        (apply merge)))
 
+(defn number-junk? [sentence]
+  (let [c (-> sentence .toString count)]
+    (and (> c 2000) (->> sentence .toString
+                         (filter #(Character/isDigit %))
+                         count (< (* c 0.25))))))
+
 (defn library-annotate [sentence]
-  (sentence-annotate sentence (class-map sentence)))
+  (if (number-junk? sentence) sentence
+      (sentence-annotate sentence (class-map sentence))))
 
 (defnp library-annotate-all [annotation]
   (->> (get-sentences annotation)
