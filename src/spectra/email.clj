@@ -66,7 +66,7 @@
   (let [models (nlp-models-fn)]
     (->> (queries/email-for-nlp n) (map :id) (mapv fetch-body)
          (mapv #(clean-email (:sep models) %))
-         distinct (mapv #(nlp/sentence-parse models %))
+         distinct (pmap #(nlp/sentence-parse models %))
          (apply concat) shuffle vec)))
 
 (defn date-sentence? [sentence]
