@@ -45,7 +45,7 @@
 (defn get-copy-fn [class dir]
   (let [{:keys [bayes forest]}
         (deserialize (str dir "/" class ".dat"))]
-    (fn [] {:bayes (FilteredClassifier/makeCopy bayes)
+    (fn [] {:bayes bayes
             :forest (RandomForest/makeCopy forest)})))
 
 (defn email-sep-model-fn []
