@@ -186,10 +186,6 @@
          (.distributionForInstance model)
          (into []) second)))
 
-(defn is-header? [sep-model l]
-  (->> (classify-bayes sep-model l)
-       second (< 0.9)))
-
 (defn add-zeros [probs]
   (concat [0 0] (vec probs) [0 0]))
 
@@ -207,6 +203,9 @@
     (->> lines (mallet/classify-bayes bayes) (map second) header-beam
          (mapv #(classify forest (concat %1 %2)) arrow-shifts)
          (map #(>= % 0.5)))))
+
+(defn is-header? [sep-model l]
+  (first (header-scan sep-model [l])))
 
 (defn update-lines [model score-lines]
   (zipvec (->> score-lines (map first)

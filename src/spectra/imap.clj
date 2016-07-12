@@ -324,14 +324,14 @@
   (if (or (nil? lines) (empty? lines))
     0 (loop [cnt 0]
         (cond (= cnt (count lines)) (count lines)
-              (weka/is-header? (:bayes sep-model) (nth lines cnt)) cnt
+              (weka/is-header? sep-model (nth lines cnt)) cnt
               :else (recur (inc cnt))))))
 
 (defn first-body [sep-model lines]
   (if (or (nil? lines) (empty? lines))
     0 (loop [cnt 0]
         (cond (= cnt (count lines)) (count lines)
-              (not (weka/is-header? (:bayes sep-model) (nth lines cnt))) cnt
+              (not (weka/is-header? sep-model (nth lines cnt))) cnt
               :else (recur (inc cnt))))))
 
 (defn find-end-header [marks sep-model lines]
