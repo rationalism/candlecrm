@@ -123,9 +123,6 @@
     (->> sig-map drop-last (reduce sig-add [[] groups-count])
          (apply concat) (mapv first) (map vec))))
 
-(defn print-headers [line-pairs]
-  (mapv println line-pairs) line-pairs)
-
 (defn header-ranges [{:keys [sep nlp]} headers lines]
   (->> lines (weka/header-scan sep)
        (zipmap (->> lines count range (zipvec lines)))
@@ -221,11 +218,13 @@
       (->> [(first headers) lines] (body-graph mode) vector))))
 
 (defn reply-parse [models headers lines]
+  (mapv println lines)
   (let [header-map (header-ranges models headers lines)
         chain-mode (if (->> lines regex/count-depth (apply max)
                             (* 2) (< (dec (count header-map))))
                      :chain :digest)
         graphs (->> lines (split-body chain-mode header-map)
                     (remove nil?))]
+    (mapv println header-map)
     (if (empty? graphs) (loom/build-graph [] [])
         (->> graphs (infer-to-from chain-mode headers) infer-subject))))
