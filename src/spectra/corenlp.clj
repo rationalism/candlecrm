@@ -397,8 +397,7 @@
       (emit-map sentence)))
 
 (defn token-pos-map [char-map pair]
-  (->> pair key (map #(assoc % 1 (dec (second %))))
-       (map #(token-boundaries (first %) (second %) char-map))
+  (->> pair key (map #(token-boundaries (first %) (second %) char-map))
        (mapcat #(range (first %) (inc (second %))))
        (map #(hash-map % (val pair)))
        (apply merge)))
