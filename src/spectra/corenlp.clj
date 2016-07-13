@@ -309,6 +309,10 @@
 (defn number-items [items]
   (zipmap (map inc (range (count items))) items))
 
+(defn default-entity [entity]
+  {(-> entity .getType s/schema-map s/label-correct)
+   (mention-text entity)})
+
 (defn ner-graph [reftime entity]
   (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
     (-> {s/type-label node-type}
@@ -324,9 +328,11 @@
                         s/event-end (second node-dates)}
                      {s/date-time node-dates}))
                  #{s/person s/organization}
-                 (-> entity mention-text regex/parse-name-email)
-                 {(-> entity .getType s/schema-map s/label-correct)
-                  (mention-text entity)}))
+                 (if (some #{(-> entity .getType s/schema-map)}
+                           [s/person-name s/email-addr])
+                   (-> entity mention-text regex/parse-name-email)
+                   (default-entity entity))
+                 (default-entity entity)))
         vector (loom/build-graph []))))
 
 (defn add-link [g node]
