@@ -60,8 +60,11 @@
 (defn now []
   (Date. ))
 
+(defn add-ms [date ms]
+  (-> date .getTime (+ ms) (Date.)))
+
 (defn future-ms [ms]
-  (-> (now) (.getTime) (+ ms) (Date.)))
+  (add-ms (now) ms))
 
 (defn dates-in-text
   ([text] (dates-in-text text (now)))

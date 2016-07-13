@@ -122,14 +122,20 @@
     (->> sig-map drop-last (reduce sig-add [[] groups-count])
          (apply concat) (mapv first) (map vec))))
 
+(def day-ms (* 24 3600 1000))
+
 (defn graph-date [graph]
-  (->> graph loom/nodes email-nodes first s/email-sent))
+  (->> graph loom/nodes email-nodes first
+       s/email-sent .getTime))
 
 (defn filter-bad-dates [graphs]
   (loop [old-graphs graphs new-graphs []]
     (if (empty? old-graphs) new-graphs
         (recur (rest old-graphs)
-               (rest old-graphs)))))
+               (if (when-let [ng (second (last new-graphs))]
+                     (>= (graph-date (second (first old-graphs)))
+                         (+ day-ms (graph-date ng))))
+                 new-graphs (conj new-graphs (first old-graphs)))))))
 
 (defn header-ranges [{:keys [sep nlp]} headers lines]
   (->> lines (weka/header-scan sep)
@@ -141,7 +147,7 @@
        (map #(update % 1 (partial nlp-headers nlp))) 
        (filter #(->> % second loom/nodes (map s/type-label)
                      (some #{s/email})))
-       (cons [[0 0] headers])))
+       (cons [[0 0] headers]) filter-bad-dates))
 
 (defn add-digest [mode m]
   (if (= mode :digest)
