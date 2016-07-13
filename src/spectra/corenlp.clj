@@ -32,8 +32,8 @@
             BasicRelationExtractor BasicRelationFeatureFactory
             GenericDataSetReader MachineReading]
            [edu.stanford.nlp.ie.machinereading.structure
-            EntityMentionFactory ExtractionObject
-            RelationMention RelationMentionFactory
+            EntityMentionFactory EntityMention ExtractionObject
+            RelationMention RelationMentionFactory Span
             MachineReadingAnnotations$EntityMentionsAnnotation
             MachineReadingAnnotations$RelationMentionsAnnotation]
            [java.util Properties] [java.util.logging Level]
@@ -448,13 +448,33 @@
 (defn remove-bad-numbers [mentions]
   (remove is-bad-number? mentions))
 
+(defn make-mention [mention n]
+  (let [factory (EntityMentionFactory. )]
+    (.constructEntityMention
+     factory (EntityMention/makeUniqueId)
+     (.getSentence mention) (Span. n (inc n))
+     (Span. n (inc n)) (.getType mention) nil nil)))
+
+(defn split-mention [mention]
+  (when (some #{(-> mention .getType s/schema-map)} s/no-whitespace)
+    (let [words (-> mention mention-text (str/split #"\s"))]
+      (when (> (count words) 1)
+        (let [factory (EntityMentionFactory. )]
+          (->> mention ((juxt #(.getHeadTokenStart %)
+                              #(.getHeadTokenEnd %)))
+               (apply range) (mapv #(make-mention mention %))))))))
+
+(defn split-multiples [mentions]
+  (mapcat #(if-let [split (split-mention %)]
+             split (vector %)) mentions))
+
 (defn filter-mentions [texts mentions]
   (remove #(some #{(mention-text %)} texts) mentions))
 
 (defn clean-sentences [to-remove sentences]
   (->> sentences (mapvals relation-mentions)
        (fmapl remove-bad-dates) (fmapl remove-bad-numbers)
-       (fmapl #(filter-mentions to-remove %))
+       (fmapl split-multiples) (fmapl #(filter-mentions to-remove %))
        (into []) (map #(set-mentions (first %) (second %)))))
 
 (defn relation-id [relation]
@@ -703,7 +723,7 @@
                        get-sentences (clean-sentences clean-dates))]
     [(->> sentences (find-all-relations models) 
           get-sentences (nlp-graph reftime))
-     (->> sentences (mapcat relation-mentions) debug
+     (->> sentences (mapcat relation-mentions)
           (remove #(is-fpp-mention? author %)) (filter make-link?)
           (add-hyperlinks (run-nlp (:token models) new-text)))]))
 

@@ -156,6 +156,8 @@
                  "SET" frequency "NUMBER" number
                  "PERCENT" percent "ORDINAL" ordinal})
 
+(def no-whitespace [email-addr webpage zipcode])
+
 (def relation-map {"EventStart" start-time "EventStop" stop-time
                    "EventDuration" duration "EventAttend" event-attend
                    "EventFeatures" event-features "EventOrg" event-org
