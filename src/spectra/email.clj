@@ -125,12 +125,16 @@
                     (repeat (inc (apply - s3)) (abbr-map s2)))))
         (abbr-map s))))
 
-(defn translate-rels [s]
+(defn translate-rels [sentence s]
   (let [codes (str/split s #" ")]
     (if (= 3 (count codes))
-      (let [[c1 c2 c3] codes rel (rel-map c3)]
-        (when rel
-          [(Integer/parseInt c1) (Integer/parseInt c2) rel]))
+      (let [[c1 c2 c3] codes rel (rel-map c3)
+            ms (->> sentence nlp/relation-mentions vec)
+            i1 (Integer/parseInt c1) i2 (Integer/parseInt c2)]
+        (when (and rel (->> [i1 i2] (map #(nth ms %))
+                            (map #(.getType %)) (map s/schema-map)
+                            s/relation-types (some #{rel})))
+          [i1 i2 rel]))
       (when (= 1 (count codes))
         (-> codes first rel-map)))))
 
@@ -167,7 +171,7 @@
    (display-sentence sentence []))
   ([sentence rels]
    (println "Enter codes:")
-   (let [resp (translate-rels (read-line))]
+   (let [resp (translate-rels sentence (read-line))]
      (condp = resp
        nil (do (println "Error: Try again")
                (recur sentence rels))
