@@ -629,7 +629,7 @@
        (fpp-merge author)))
 
 (defn strip-parens [text]
-  (replace-all text ["(" ")"]))
+  (replace-all text ["(" ")" "<" ">"]))
 
 (defn hash-brackets [code text]
   (str "<node " code ">" text "</node>"))
