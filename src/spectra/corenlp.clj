@@ -439,12 +439,21 @@
                     (->> % mention-text dt/is-bad-date?)))
           mentions))
 
+(defn is-bad-number? [mention]
+  (if (-> mention .getType s/schema-map (not= s/number)) false
+      (try (Double/parseDouble (mention-text mention)) false
+           (catch Exception e
+             true))))
+
+(defn remove-bad-numbers [mentions]
+  (remove is-bad-number? mentions))
+
 (defn filter-mentions [texts mentions]
   (remove #(some #{(mention-text %)} texts) mentions))
 
 (defn clean-sentences [to-remove sentences]
   (->> sentences (mapvals relation-mentions)
-       (fmapl remove-bad-dates)
+       (fmapl remove-bad-dates) (fmapl remove-bad-numbers)
        (fmapl #(filter-mentions to-remove %))
        (into []) (map #(set-mentions (first %) (second %)))))
 
@@ -694,7 +703,7 @@
                        get-sentences (clean-sentences clean-dates))]
     [(->> sentences (find-all-relations models) 
           get-sentences (nlp-graph reftime))
-     (->> sentences (mapcat relation-mentions) 
+     (->> sentences (mapcat relation-mentions) debug
           (remove #(is-fpp-mention? author %)) (filter make-link?)
           (add-hyperlinks (run-nlp (:token models) new-text)))]))
 
