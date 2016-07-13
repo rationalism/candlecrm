@@ -188,7 +188,7 @@
                      [date-time duration] ["EventDuration"]
                      [date-time person-name] ["EventFeatures" "EventAttend"]
                      [date-time org-name] ["EventOrg"]
-                     [date-time location] ["EventLocation"]
+                     [date-time loc-name] ["EventLocation"]
                      [date-time webpage] ["EventWebsite"]
                      [date-time street-addr] ["EventAddr"]
                      [date-time event-type] ["EventType"]
