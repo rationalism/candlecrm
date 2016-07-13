@@ -5,10 +5,10 @@
   (:import [com.google.i18n.phonenumbers PhoneNumberUtil]))
 
 ;; Taken from http://stackoverflow.com/questions/201323/using-a-regular-expression-to-validate-an-email-address
-(def email-regex #"[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*")
+(def email-regex #"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*")
 
 ;; Find source for this
-(def url-regex #"[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?")
+(def url-regex #"^[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?")
 
 (def zipcode-regex #"\s[0-9]{5}(?:-[0-9]{4})?\D")
 (def state-regex #"\s(AL|Alabama|AK|Alaska|AZ|Arizona|AR|Arkansas|CA|California|CO|Colorado|CT|Connecticut|DE|Delaware|FL|Florida|GA|Georgia|HI|Hawaii|ID|Idaho|IL|Illinois|IN|Indiana|IA|Iowa|KS|Kansas|KY|Kentucky|LA|Louisiana|ME|Maine|MD|Maryland|MA|Massachusetts|MI|Michigan|MN|Minnesota|MS|Mississippi|MO|Missouri|MT|Montana|NE|Nebraska|NV|Nevada|NH|New Hampshire|NJ|New Jersey|NM|New Mexico|NY|New York|NC|North Carolina|ND|North Dakota|OH|Ohio|OK|Oklahoma|OR|Oregon|PA|Pennsylvania|RI|Rhode Island|SC|South Carolina|SD|South Dakota|TN|Tennessee|TX|Texas|UT|Utah|VT|Vermont|VA|Virginia|WA|Washington|WV|West Virginia|WI|Wisconsin|WY|Wyoming)+\W")
@@ -56,9 +56,9 @@
   (->> lines count-depth (apply max)))
 
 (defn find-email-addrs [text]
-  (->> (re-seq email-regex text)
-       (remove #(.contains % "..."))
-       (map filter-arrows)))
+  (->> (str/split text #"\s") (map filter-arrows)
+       (mapcat #(re-seq email-regex %))
+       (remove #(.contains % "..."))))
 
 (defn find-zipcode [text]
   (->> (re-seq zipcode-regex (str text " "))
@@ -70,7 +70,8 @@
        (every? nil?) not))
 
 (defn find-urls [text]
-  (map first (re-seq url-regex text)))
+  (->> (str/split text #"\s") (mapcat #(re-seq url-regex %))
+       (map first) (remove #(.contains % "..."))))
 
 (defn strip-javascript [text]
   (str/replace text javascript-regex ""))
