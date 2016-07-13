@@ -22,8 +22,8 @@
   (let [fulls (remove #(contains? % :id) (loom/nodes g))
         emptys (filter #(contains? % :id) (loom/nodes g))]
     (->> (map s/type-label fulls)
-         (map #(create-cypher user %))
-         neo4j/cypher-combined-tx
+         (map #(create-cypher user %)) debug
+         neo4j/cypher-combined-tx 
          (apply concat) (map vals)
          (apply concat) (zipmap fulls)
          (merge (mapvals :id emptys)))))
