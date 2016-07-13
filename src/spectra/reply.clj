@@ -25,9 +25,11 @@
   (->> graph loom/nodes (filter #(= s/hyperlink (s/type-label %)))
        (loom/remove-nodes graph)))
 
+(defn email-nodes [nodes]
+  (filter #(= s/email (s/type-label %)) nodes))
+
 (defn remove-bad-dates [graph]
-  (->> graph loom/nodes
-       (filter #(= s/email (s/type-label %)))
+  (->> graph loom/nodes email-nodes
        (sort-by #(->> % s/link-text count) >) rest
        (loom/remove-nodes graph)))
 
@@ -49,9 +51,6 @@
   (loom/adjust-nodes
    graph (fn [n] (fmap n #(if (= % s/event)
                             s/email %)))))
-
-(defn email-nodes [nodes]
-  (filter #(= s/email (s/type-label %)) nodes))
 
 (defn center-node [graphs]
   (->> graphs (mapcat loom/nodes) email-nodes
@@ -122,6 +121,15 @@
                           (update-last sig-map))]
     (->> sig-map drop-last (reduce sig-add [[] groups-count])
          (apply concat) (mapv first) (map vec))))
+
+(defn graph-date [graph]
+  (->> graph loom/nodes email-nodes first s/email-sent))
+
+(defn filter-bad-dates [graphs]
+  (loop [old-graphs graphs new-graphs []]
+    (if (empty? old-graphs) new-graphs
+        (recur (rest old-graphs)
+               (rest old-graphs)))))
 
 (defn header-ranges [{:keys [sep nlp]} headers lines]
   (->> lines (weka/header-scan sep)
