@@ -694,7 +694,7 @@
                        get-sentences (clean-sentences clean-dates))]
     [(->> sentences (find-all-relations models) 
           get-sentences (nlp-graph reftime))
-     (->> sentences (mapcat relation-mentions)
+     (->> sentences (mapcat relation-mentions) 
           (remove #(is-fpp-mention? author %)) (filter make-link?)
           (add-hyperlinks (run-nlp (:token models) new-text)))]))
 
