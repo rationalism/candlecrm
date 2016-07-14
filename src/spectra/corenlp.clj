@@ -181,10 +181,10 @@
   (.annotate pipeline annotation)
   annotation)
 
-(defnc get-tokens [words]
+(defn get-tokens [words]
   (.get words CoreAnnotations$TokensAnnotation))
 
-(defnc get-sentences [parsed-text]
+(defn get-sentences [parsed-text]
   (.get parsed-text CoreAnnotations$SentencesAnnotation))
 
 (defn get-lemma [token]
@@ -340,7 +340,7 @@
                      s/link-id (s/hash-code node)}
                     node s/link-to]))
 
-(defnc add-links [g]
+(defn add-links [g]
   (reduce add-link g (loom/nodes g)))
 
 (defn label-annotate [label class]
@@ -571,7 +571,7 @@
        (map get-sentences) (map first)
        make-doc add-heads get-sentences))
 
-(defnc relation-graph [ner-graph relation]
+(defn relation-graph [ner-graph relation]
   (let [rel-type (-> relation .getType s/relation-map)
         graph-map (->> ner-graph loom/nodes (mapkeys s/hash-code))
         old-node (->> relation .getEntityMentionArgs
@@ -585,7 +585,7 @@
            (cons rel-type) reverse vec vector
            (loom/add-edges ner-graph)))))
 
-(defnc relations-graph [ner-graph relations]
+(defn relations-graph [ner-graph relations]
   (->> relations (remove #(-> % (.getType) (= "_NR")))
        (reduce relation-graph ner-graph)))
 
@@ -621,7 +621,7 @@
   (->> strings rest (map #(str author fpp-join %))
        (cons (first strings)) (str/join "")))
 
-(defnc fpp-replace [models author text]
+(defn fpp-replace [models author text]
   (->> text (sentence-split models) (map get-tokens)
        (map first) (map #(.beginPosition %))
        (mapcat #(repeat 2 %)) (cons 0)
@@ -668,14 +668,14 @@
        (merge (mention-map mentions))
        (sort-by second)))
 
-(defnc add-hyperlinks [annotation mentions]
+(defn add-hyperlinks [annotation mentions]
   (let [mmap (switch-map annotation mentions)]
     (->> mmap (mapcat second) (cons 0) (partition-all 2)
          (map #(apply (partial subs (.toString annotation)) %))
          (interleave (cons "" (map switch-val mmap)))
          (str/join ""))))
 
-(defnc sentence-graph [reftime sent-pair]
+(defn sentence-graph [reftime sent-pair]
   (->> sent-pair val ((juxt #(all-ner-graph reftime %) get-relations))
        (apply relations-graph) add-links))
 

@@ -440,7 +440,7 @@
         (f user m i))
       (recur (dec i)))))
 
-(defnc get-recipients [message field]
+(defn get-recipients [message field]
   (.getRecipients message field))
 
 (defn decode-recipients [message]
