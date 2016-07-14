@@ -37,7 +37,7 @@
 
 (defmacro thread-wrap [& body]
   `(binding [*session* (get-session)]
-     (let [retval# ~(add-try-catch "thread-wrap" [] body)]
+     (let [retval# ~@body]
        (.close *session*)
        retval#)))
 
@@ -131,7 +131,7 @@
 (defnp start-tx []
   (.beginTransaction *session*))
 
-(defn cypher-combined-tx-recur [retry queries]
+(defnc cypher-combined-tx-recur [retry queries]
   #_(dump-queries queries)
   (let [tx (start-tx)]
     (try (let [resp (->> (map cypher-statement queries)

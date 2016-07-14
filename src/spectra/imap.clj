@@ -29,7 +29,7 @@
 
 (def parse-threads 6)
 (def batch-size 12)
-(def archive-size 25000)
+(def archive-size 2500)
 
 (defonce parse-channel (atom nil))
 
@@ -433,7 +433,7 @@
 
 (defn scroll-emails [user f]
   (let [userinbox (fetch-imap-folder user)]
-    (loop [i 283400#_(last-uid userinbox)]
+    (loop [i (last-uid userinbox)]
       (println "Email number: " i)
       (when-let [m (get-message userinbox i)]
         (println "Parsing message number: " i)

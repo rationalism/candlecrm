@@ -472,7 +472,7 @@
   (remove #(some #{(mention-text %)} texts) mentions))
 
 (defn clean-sentences [to-remove sentences]
-  (->> sentences (mapvals relation-mentions)
+  (->> sentences (mapvals relation-mentions) 
        (fmapl remove-bad-dates) (fmapl remove-bad-numbers)
        (fmapl split-multiples) (fmapl #(filter-mentions to-remove %))
        (into []) (map #(set-mentions (first %) (second %)))))

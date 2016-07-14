@@ -18,7 +18,7 @@
        ":" (neo4j/esc-token s/norecon)
        ") RETURN ID(root)"))
 
-(defnp insert-nodes! [g user]
+(defnc insert-nodes! [g user]
   (let [fulls (remove #(contains? % :id) (loom/nodes g))
         emptys (filter #(contains? % :id) (loom/nodes g))]
     (->> (map s/type-label fulls)
@@ -39,7 +39,7 @@
              " {src" source ": {cnt}}]->(b)")
         {:id id :v (catch-dates val) :cnt 1}]])))
 
-(defn id-pair-cypher [id-pair user source]
+(defnc id-pair-cypher [id-pair user source]
   (->> (apply dissoc (key id-pair) s/exclude-upload)
        (mapcat #(prop-cypher user source (val id-pair)
                              (key %) (val %)))))
@@ -60,7 +60,7 @@
           "]->(b)")
      {:id1 id1 :id2 id2}]))
 
-(defn edge-cypher [[e1 e2 e3] id-map]
+(defnc edge-cypher [[e1 e2 e3] id-map]
   (link-cypher (id-map e1) (id-map e2) e3))
 
 (defn add-label-query [label ids]
@@ -69,7 +69,7 @@
            (neo4j/esc-token label))
       {:ids ids}]] []))
 
-(defn add-process-labels [id-map]
+(defnc add-process-labels [id-map]
   (->> (remove #(-> % first :id) id-map)
        (group-by #(-> % first s/type-label))
        (compose-maps preprocess-labels)
