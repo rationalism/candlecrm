@@ -148,13 +148,14 @@
              (if user (str "WHERE ID(u) = " (.id user)) "")
              " WHERE u." (neo4j/esc-token s/recon-run) " = false"
              " WITH root, u MATCH (root)-[:" (neo4j/esc-token s/loaded-bottom)
-             "]-(b) WITH root, u, b WHERE b." (neo4j/esc-token s/value)
-             " > {queuebound}"
+             "]-(b) WITH root, u, b MATCH (root)-[:" (neo4j/esc-token s/loaded-top)
+             "]-(t) WHERE t." (neo4j/esc-token s/value)
+             " - b." (neo4j/esc-token s/value) " < {queuebound}"
              " MATCH (root)-[:" (neo4j/esc-token s/modified)
-             "]-(m) WITH root, u, b, m "
+             "]-(m) WITH root, u, m "
              " RETURN root, u ORDER BY m." (neo4j/esc-token s/value)
              " LIMIT {limit}")
-        {:queuebound (imap/archive-load user) :limit 1}]
+        {:queuebound imap/archive-size :limit 1}] 
        neo4j/cypher-query first clojure-map
        (cset/rename-keys {"root" :queue "u" :user})
        (update :queue queue-data))))
