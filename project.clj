@@ -32,7 +32,7 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.1-SNAPSHOT"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1-SNAPSHOT"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.4.4"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.4.5"]
                  [org.deeplearning4j/deeplearning4j-core "0.4.0"
                   :exclusions [com.fasterxml.jackson.core/jackson-core
                                org.apache.commons/commons-compress
