@@ -47,6 +47,11 @@
            % {s/event-begin s/email-sent s/event-end s/email-sent
               s/date-time s/email-sent})))
 
+(defn filter-dates [graph]
+  (->> graph loom/nodes email-nodes
+       (remove #(-> % s/email-sent type (= java.util.Date)))
+       (loom/remove-nodes graph)))
+
 (defn adjust-labels [graph]
   (loom/adjust-nodes
    graph (fn [n] (fmap n #(if (= % s/event)
@@ -88,8 +93,8 @@
                             (merge name-node)))))))
 
 (defn nlp-headers [models text]
-  (->> text (map #(nlp/run-nlp-default models %))
-       (map (comp adjust-labels rename-dates remove-links))
+  (->> text (map #(nlp/run-nlp-default models %)) 
+       (map (comp filter-dates adjust-labels rename-dates remove-links))
        from-to-graphs remove-bad-dates merge-from remove-meta))
 
 (defn update-last [sig-map line-groups]
@@ -124,7 +129,7 @@
 
 (def day-ms (* 24 3600 1000))
 
-(defnc graph-date [graph]
+(defn graph-date [graph]
   (->> graph loom/nodes email-nodes first
        s/email-sent .getTime))
 
