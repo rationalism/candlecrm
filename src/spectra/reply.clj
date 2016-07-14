@@ -124,7 +124,7 @@
 
 (def day-ms (* 24 3600 1000))
 
-(defn graph-date [graph]
+(defnc graph-date [graph]
   (->> graph loom/nodes email-nodes first
        s/email-sent .getTime))
 

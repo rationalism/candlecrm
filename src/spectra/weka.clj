@@ -49,7 +49,8 @@
             :forest (RandomForest/makeCopy forest)})))
 
 (defn email-sep-model-fn []
-  (get-copy-fn email-sep-key models-dir))
+  (let [model-file (str models-dir "/" email-sep-key ".dat")]
+    (fn [] (deserialize model-file))))
 
 (defn attr-gen [n]
   (Attribute. (str "attr" n)))

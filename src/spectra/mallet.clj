@@ -25,7 +25,7 @@
 (defn average [coll]
   (/ (apply + coll) (count coll)))
 
-(defn make-instances [model lines]
+(defnc make-instances [model lines]
   (doto (InstanceList. (.getInstancePipe model))
     (.addThruPipe (->> model .getLabelAlphabet .toArray first
                        (repeat (count lines))
