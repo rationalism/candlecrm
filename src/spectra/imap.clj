@@ -416,7 +416,7 @@
        (mapcat #(make-headers % params))
        (loom/build-graph [params])))
 
-(defn full-parse [[message headers] models]
+(defnc full-parse [[message headers] models]
   (->> message regex/strip-javascript str/split-lines
        (reply/reply-parse models headers)))
 
