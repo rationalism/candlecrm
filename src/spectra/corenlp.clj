@@ -419,9 +419,9 @@
 
 (defn number-junk? [sentence]
   (let [c (-> sentence .toString count)]
-    (and (> c 2000) (->> sentence .toString
-                         (filter #(Character/isDigit %))
-                         count (< (* c 0.25))))))
+    (and (> c 500) (->> sentence .toString
+                        (filter #(Character/isDigit %))
+                        count (< (* c 0.4))))))
 
 (defn library-annotate [sentence]
   (if (number-junk? sentence) sentence
@@ -699,6 +699,8 @@
        (run-annotate (:entity models))))
 
 (defnp sentence-parse [models [author text clean-dates]]
+  (throw-info! author)
+  (throw-info! (subs text (max 0 (- (count text) 1000)) (count text)))
   (->> text strip-parens (fpp-replace models author)
        (run-nlp-ner models) get-sentences
        (clean-sentences clean-dates)))
