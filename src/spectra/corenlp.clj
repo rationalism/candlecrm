@@ -472,7 +472,7 @@
   (remove #(some #{(mention-text %)} texts) mentions))
 
 (defn clean-sentences [to-remove sentences]
-  (->> sentences (mapvals relation-mentions) 
+  (->> sentences (mapvals relation-mentions)
        (fmapl remove-bad-dates) (fmapl remove-bad-numbers)
        (fmapl split-multiples) (fmapl #(filter-mentions to-remove %))
        (into []) (map #(set-mentions (first %) (second %)))))
@@ -699,8 +699,6 @@
        (run-annotate (:entity models))))
 
 (defnp sentence-parse [models [author text clean-dates]]
-  (throw-info! author)
-  (throw-info! (subs text (max 0 (- (count text) 1000)) (count text)))
   (->> text strip-parens (fpp-replace models author)
        (run-nlp-ner models) get-sentences
        (clean-sentences clean-dates)))
@@ -714,9 +712,15 @@
     (or (s/entity-map m-type)
         (= m-type s/webpage))))
 
+(defn fpp-pos [sentence]
+  (->> sentence get-tokens (mapv #(.originalText %)) (beam 2)
+       (map #(str/join "" %)) (map #(str " " % " "))
+       number-items (filter #(-> % second (= fpp-join)))
+       ffirst))
+
 (defn is-fpp-mention? [author mention]
-  (and (= 0 (.getHeadTokenStart mention))
-       (= author (mention-text mention))))
+  (and (< (.getHeadTokenStart mention) (fpp-pos (.getSentence mention)))
+       (.contains author (mention-text mention))))
 
 (defnc run-nlp-full [models author reftime clean-dates text]
   (let [new-text (->> text strip-parens
