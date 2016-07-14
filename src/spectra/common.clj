@@ -65,7 +65,7 @@
           (->> [~@(print-params params)]
                (concat [(str "Error thrown in function: "
                              (name '~fn-name))
-                        (str "Error message: " e#)])
+                        (str "Error message: " (pr-str e#))])
                (str/join "\n") throw-error!)
           nil)))
 
