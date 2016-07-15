@@ -78,7 +78,9 @@
 (defn queue-pop! []
   (neo4j/thread-wrap
    (let [{:keys [queue user]} (queries/next-email-queue)]
-     (when queue
+     (when (and queue (or (not @imap/empty-flag)
+                          (empty? @imap/message-queue)))
+       (reset! imap/empty-flag false)
        (if (< (queries/nonlp-count user) nonlp-insert-limit)
          (do (queue-reset! user queue) (run-insertion! queue user))
          (queue-time-reset! queue))))))
@@ -102,7 +104,7 @@
     (mlrecon/run-recon! user class)
     (neo4j/set-property! user s/recon-run false)
     (when (= class s/email)
-      (neo4j/set-property! user s/email-overload false))))
+      (swap! imap/overload-locked difference #{user}))))
 
 (defn remove-running [jobs]
   (let [running-ids (queries/users-recon-running)]

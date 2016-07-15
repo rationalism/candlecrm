@@ -1,5 +1,6 @@
 (ns spectra.imap
   (:require [clojure.string :as str]
+            [clojure.set :as cset]
             [spectra.async :as async]
             [spectra.auth :as auth]
             [spectra.common :refer :all]
@@ -32,6 +33,9 @@
 (def archive-size 25000)
 
 (defonce parse-channel (atom nil))
+(defonce overload-locked (atom #{}))
+(defonce message-queue (atom #{}))
+(defonce empty-flag (atom false))
 
 (def email-domains [".com" ".edu" ".org" ".net"])
 (def email-name-blacklist ["linkedin.com"])
@@ -416,15 +420,22 @@
        (mapcat #(make-headers % params))
        (loom/build-graph [params])))
 
+(defn graph-uid [graph]
+  (->> graph loom/nodes reply/email-nodes first
+       s/email-uid))
+
+(defn queue-graph [graph]
+  (swap! message-queue difference #{(graph-uid graph)}))
+
 (defn maybe-load [user graph]
-  (if (neo4j/get-property user s/email-overload)
+  (if (contains? @overload-locked user)
     (do (Thread/sleep 300) (recur user graph))
     (if (->> graph loom/nodes
              (filter #(= (s/type-label %) s/email))
              count (> 5)) graph
-        (do (neo4j/set-property! user s/email-overload true)
-            (neo4j/set-property! user s/email-lock true)
-            graph))))
+        (do (swap! overload-locked union #{user})
+            (reset! empty-flag true)
+            (queue-graph graph) graph))))
 
 (defn full-parse [[message headers] models user]
   (->> message regex/strip-javascript str/split-lines
@@ -537,14 +548,17 @@
            (#(update % 0 str/split-lines)) reverse
            (apply reply/reply-parse (reply/parse-models-fn))))))
 
+(defn add-queue [folder messages]
+  (->> messages (map #(get-uid folder %)) (into #{})
+       (swap! message-queue cset/union)))
+
 (defnc insert-raw-range! [user lower upper]
   (let [folder (fetch-imap-folder user)]
-    (->> (fetch-messages folder lower upper)
+    (->> (fetch-messages folder lower upper) (add-queue folder)
          (pmap #(->> (message-fetch folder %)
                      (hash-map :user user :message)
                      (@parse-channel)))
          dorun)
-    (neo4j/set-property! user s/email-lock false)
     (neo4j/table-refresh! user)))
 
 (defn insert-one-email! [user email-num]

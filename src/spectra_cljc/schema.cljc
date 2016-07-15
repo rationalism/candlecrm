@@ -109,8 +109,6 @@
 (def recon :recon)
 (def norecon :norecon)
 (def recon-run :recon-run)
-(def email-overload :email-overload)
-(def email-lock :email-lock)
 (def index-run :index-run)
 (def nonlp :nonlp)
 (def nogeocode :nogeocode)
