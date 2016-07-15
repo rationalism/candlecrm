@@ -4,6 +4,7 @@
             [clj-time.coerce :as coerce]
             [clj-time.format :as format]
             [spectra.common :refer :all]
+            [spectra.mallet :as mallet]
             [spectra.model :as model]
             [spectra.weka :as weka]
             [environ.core :refer [env]]
@@ -45,9 +46,13 @@
   (CalendarSource/setBaseDate reference)
   (.parse (Parser. ) text))
 
+(defn spit-dates [dates]
+  (mapv #(spit "/home/alyssa/alldates.txt" (str (.getText %) "\n")
+               :append true) dates) dates)
+
 (defn parse-dates [text reference]
   (try
-    (->> (parse-dates-raw text reference)
+    (->> (parse-dates-raw text reference) spit-dates
          #_(remove #(-> % (.getText) is-bad-date?)))
     (catch java.lang.NullPointerException e
       (do (throw-info! (str "Date parse error on: " text))
@@ -104,8 +109,11 @@
   (->> (Date. value) coerce/from-date
        (format/unparse formatter)))
 
+(defn file-slurp [filename]
+  (str/split (slurp filename) #"\n"))
+
 (defn file-train [filename]
-  (->> (str/split (slurp filename) #"\n")
+  (->> filename file-slurp
        (map bad-model-features) (mapv vec)))
 
 (defn train-bad-model [goodfile badfile]
@@ -113,3 +121,7 @@
        (concat (map #(conj % 1.0) (file-train goodfile)))
        weka/make-forest))
 
+(defn train-date-model [goodfile badfile]
+  (->> (map #(vector % "b") (file-slurp badfile))
+       (concat (map #(vector % "g") (file-slurp goodfile)))
+       mallet/make-bayes))

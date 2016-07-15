@@ -47,7 +47,7 @@
                    (map second lines)))))
 
 (defn split-instances [instances]
-  (->> [0.999 0.001] double-array
+  (->> [0.9 0.1] double-array
        (.split instances (java.util.Random.))))
 
 (defn file-instances [filename]
@@ -56,7 +56,8 @@
 
 (defn make-bayes [train-data]
   (let [[train test] (->> train-data train-instances split-instances)]
-    (-> (MaxEntTrainer.) (.train train))))
+    (-> (MaxEntTrainer.) (.train train)
+        (.getAccuracy test))))
 
 (defn vector-probs [n v]
   (->> n range (map #(.valueAtLocation v %))))
