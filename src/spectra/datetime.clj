@@ -37,6 +37,10 @@
        (weka/classify @bad-date-model)
        (> bad-date-threshold)))
 
+(defn is-good-date? [text]
+  (let [{:keys [bayes forest]} @bad-date-model]
+    (->> text vector )))
+
 (defn interval? [natty-date]
   (let [parsed-date (-> natty-date (.getDates) vec)]
     (and (= 2 (count parsed-date))
@@ -127,8 +131,8 @@
        weka/make-forest))
 
 (defn line-scores [bmodel lines]
-  (->> lines (mallet/classify-bayes bmodel)
-       (zipvec (map bad-model-features lines))
+  (->> lines (mallet/classify-bayes bmodel) (map second)
+       (map vector) (zipvec (map bad-model-features lines))
        (map #(apply concat %)) (map vec)))
 
 (defn zero-lines [lines]
