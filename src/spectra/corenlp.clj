@@ -436,7 +436,7 @@
 (defn remove-bad-dates [mentions]
   (remove #(and (-> % .getType s/schema-map (= s/date-time))
                 (or (->> % mention-text dt/dates-in-text empty?)
-                    (->> % mention-text dt/is-bad-date?)))
+                    (->> % mention-text dt/is-good-date? not)))
           mentions))
 
 (defn is-bad-number? [mention]

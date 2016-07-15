@@ -18,7 +18,7 @@
 
 (def models-dir (str (env :home-dir) "resources/models"))
 (def bad-date-file "baddates.dat")
-(def bad-date-threshold 0.9)
+(def bad-date-threshold 0.5)
 
 (defn load-date-model! []
   (->> bad-date-file (str models-dir "/")
@@ -32,14 +32,11 @@
            (model/count-tokens text)
            (model/cap-ratio text)]))
 
-(defn is-bad-date? [text]
-  (->> text bad-model-features
-       (weka/classify @bad-date-model)
-       (> bad-date-threshold)))
-
 (defn is-good-date? [text]
   (let [{:keys [bayes forest]} @bad-date-model]
-    (->> text vector )))
+    (->> text vector (mallet/classify-bayes bayes) first
+         second (conj (vec (bad-model-features text)))
+         (weka/classify forest) (< 0.5))))
 
 (defn interval? [natty-date]
   (let [parsed-date (-> natty-date (.getDates) vec)]
@@ -57,7 +54,7 @@
 (defn parse-dates [text reference]
   (try
     (->> (parse-dates-raw text reference) spit-dates
-         #_(remove #(-> % (.getText) is-bad-date?)))
+         #_(filter #(-> % (.getText) is-good-date?)))
     (catch java.lang.NullPointerException e
       (do (throw-info! (str "Date parse error on: " text))
           []))))
