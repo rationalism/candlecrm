@@ -104,7 +104,7 @@
     (mlrecon/run-recon! user class)
     (neo4j/set-property! user s/recon-run false)
     (when (= class s/email)
-      (swap! imap/overload-locked difference #{user}))))
+      (swap! imap/overload-locked cset/difference #{user}))))
 
 (defn remove-running [jobs]
   (let [running-ids (queries/users-recon-running)]
