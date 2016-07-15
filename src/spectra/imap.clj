@@ -550,7 +550,7 @@
 
 (defn add-queue [folder messages]
   (->> messages (map #(get-uid folder %)) (into #{})
-       (swap! message-queue cset/union)))
+       (swap! message-queue cset/union)) messages)
 
 (defnc insert-raw-range! [user lower upper]
   (let [folder (fetch-imap-folder user)]
