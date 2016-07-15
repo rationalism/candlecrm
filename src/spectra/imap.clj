@@ -421,8 +421,8 @@
        (loom/build-graph [params])))
 
 (defn graph-uid [graph]
-  (->> graph loom/nodes reply/email-nodes first
-       s/email-uid))
+  (->> graph loom/nodes reply/email-nodes
+       (map s/email-uid) (remove nil?) first))
 
 (defn queue-graph [graph]
   (swap! message-queue difference #{(graph-uid graph)}))
