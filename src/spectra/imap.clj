@@ -421,7 +421,7 @@
     (do (Thread/sleep 1000) (recur user graph))
     (if (->> graph loom/nodes
              (filter #(= (s/type-label %) s/email))
-             count (> 10)) graph
+             count (> 5)) graph
         (do (neo4j/set-property! user s/email-overload true)
             graph))))
 
