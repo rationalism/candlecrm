@@ -148,6 +148,7 @@
              (if user (str "WHERE ID(u) = " (.id user)) "")
              " WHERE u." (neo4j/esc-token s/recon-run) " = false"
              " AND u." (neo4j/esc-token s/email-lock) " = false"
+             " AND u." (neo4j/esc-token s/email-overload) " = false"
              " WITH root, u MATCH (root)-[:" (neo4j/esc-token s/loaded-bottom)
              "]-(b) WITH root, u, b MATCH (root)-[:" (neo4j/esc-token s/loaded-top)
              "]-(t) WHERE t." (neo4j/esc-token s/value)
