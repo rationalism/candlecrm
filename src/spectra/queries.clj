@@ -256,7 +256,7 @@
 (defnp norecon-count-all []
   (->> (str "MATCH (root:" (neo4j/esc-token s/norecon)
             ") RETURN labels(root), count(*)")
-       neo4j/cypher-query (map vals)
+       neo4j/cypher-query (map vals) 
        (map recon-count-expand)
        flatten (apply merge-with +)
        (map vec) (map reverse)

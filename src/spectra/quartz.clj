@@ -113,10 +113,10 @@
 
 (defn run-recon! []
   (neo4j/thread-wrap
-   (->> (queries/norecon-count-all) (map second)
+   (->> (queries/norecon-count-all) (map second) 
         (filter #(some #{(second %)}
                        (keys @mlrecon/recon-models)))
-        remove-running
+        remove-running 
         (map #(vector (neo4j/find-by-id
                        (first %)) (second %)))
         first maybe-run-recon!)))
