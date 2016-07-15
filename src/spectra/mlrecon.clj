@@ -486,7 +486,7 @@
 (defn score-diff [rules diff]
   (->> (apply zipvec diff)
        (zipvec (map second rules))
-       (map diff-pair) flatten))
+       (pmap diff-pair) flatten))
 
 (defn get-diffs [user class cs]
   (let [rules (get model/scoring class)
