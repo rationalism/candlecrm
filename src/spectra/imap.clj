@@ -421,6 +421,7 @@
        (loom/build-graph [params])))
 
 (defn graph-uid [graph]
+  {:post [(integer? %)]}
   (->> graph loom/nodes reply/email-nodes
        (map s/email-uid) (remove nil?) first))
 

@@ -236,7 +236,12 @@
            (maybe-sig-split mode) (map #(body-graph mode %)))
       (->> [(first headers) lines] (body-graph mode) vector))))
 
+(defn graph-valid? [graph]
+  (and (->> graph loom/nodes (filter nil?) empty?)
+       (->> graph loom/nodes (mapcat vals) (filter nil?) empty?)))
+
 (defn reply-parse [models headers lines]
+  {:post [(graph-valid? %)]}
   (let [header-map (header-ranges models headers lines)
         chain-mode (if (->> lines regex/count-depth (apply max)
                             (* 2) (< (dec (count header-map))))
