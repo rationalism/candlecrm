@@ -108,6 +108,9 @@
   (let [running-ids (queries/users-recon-running)]
     (remove #(some #{(first %)} running-ids) jobs)))
 
+(defn debug-info [x]
+  (mapv throw-info! x) x)
+
 (defn run-recon! []
   (neo4j/thread-wrap
    (->> (queries/norecon-count-all) (map second)
