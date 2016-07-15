@@ -416,12 +416,12 @@
        (mapcat #(make-headers % params))
        (loom/build-graph [params])))
 
-(defn full-parse [[message headers] models]
+(defn full-parse [[message headers] models user]
   (->> message regex/strip-javascript str/split-lines
        (reply/reply-parse models headers)))
 
 (defn parse! [models {:keys [message user]}]
-  [(full-parse message models) user s/email-src])
+  [(full-parse message models user) user s/email-src])
 
 (defn make-parse-pool! []
   (->> {:name "email-parse" :process parse!

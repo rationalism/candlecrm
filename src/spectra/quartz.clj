@@ -100,7 +100,9 @@
     (throw-info! "running recon")
     (neo4j/set-property! (first params) s/recon-run true)
     (apply mlrecon/run-recon! params)
-    (neo4j/set-property! (first params) s/recon-run false)))
+    (neo4j/set-property! (first params) s/recon-run false)
+    (when (= (second params) s/email)
+      (neo4j/set-property! (first params) s/email-overload false))))
 
 (defn remove-running [jobs]
   (let [running-ids (queries/users-recon-running)]
