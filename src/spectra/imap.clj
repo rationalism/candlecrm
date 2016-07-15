@@ -416,9 +416,19 @@
        (mapcat #(make-headers % params))
        (loom/build-graph [params])))
 
+(defn maybe-load [user graph]
+  (if (neo4j/get-property user s/email-overload)
+    (do (Thread/sleep 1000) (recur user graph))
+    (if (->> graph loom/nodes
+             (filter #(= (s/type-label %) s/email))
+             count (> 10)) graph
+        (do (neo4j/set-property! user s/email-overload true)
+            graph))))
+
 (defn full-parse [[message headers] models user]
   (->> message regex/strip-javascript str/split-lines
-       (reply/reply-parse models headers)))
+       (reply/reply-parse models headers)
+       (maybe-load user)))
 
 (defn parse! [models {:keys [message user]}]
   [(full-parse message models user) user s/email-src])
