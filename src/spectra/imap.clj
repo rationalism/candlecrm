@@ -432,10 +432,11 @@
     (do (Thread/sleep 300) (recur user graph))
     (if (->> graph loom/nodes
              (filter #(= (s/type-label %) s/email))
-             count (> 5)) graph
-        (do (swap! overload-locked cset/union #{user})
-            (reset! empty-flag true)
-            (queue-graph graph) graph))))
+             count (> 5))
+      (do (queue-graph graph) graph)
+      (do (swap! overload-locked cset/union #{user})
+          (reset! empty-flag true)
+          (queue-graph graph) graph))))
 
 (defn full-parse [[message headers] models user]
   (->> message regex/strip-javascript str/split-lines
