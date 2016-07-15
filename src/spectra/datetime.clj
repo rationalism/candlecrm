@@ -113,15 +113,36 @@
   (str/split (slurp filename) #"\n"))
 
 (defn file-train [filename]
-  (->> filename file-slurp
-       (map bad-model-features) (mapv vec)))
+  (->> filename file-slurp (map bad-model-features) (mapv vec)))
+
+(defn zero-lines [lines]
+  (map #(conj % 0.0) lines))
+
+(defn one-lines [lines]
+  (map #(conj % 1.0) lines))
 
 (defn train-bad-model [goodfile badfile]
-  (->> (map #(conj % 0.0) (file-train badfile))
-       (concat (map #(conj % 1.0) (file-train goodfile)))
+  (->> [badfile goodfile] (map file-train)
+       ((switch zero-lines one-lines)) (apply concat)
        weka/make-forest))
 
+(defn line-scores [bmodel lines]
+  (->> lines (mallet/classify-bayes bmodel)
+       (zipvec (map bad-model-features lines))
+       (map #(apply concat %)) (map vec)))
+
+(defn zero-lines [lines]
+  (map #(conj % 0.0) lines))
+
+(defn one-lines [lines]
+  (map #(conj % 1.0) lines))
+
 (defn train-date-model [goodfile badfile]
-  (->> (map #(vector % "b") (file-slurp badfile))
-       (concat (map #(vector % "g") (file-slurp goodfile)))
-       mallet/make-bayes))
+  (let [gdata (file-slurp goodfile) bdata (file-slurp badfile)
+        bmodel (->> (map #(vector % "b") bdata)
+                    (concat (map #(vector % "g") gdata))
+                    mallet/make-bayes)]
+    (->> [bdata gdata] (map #(line-scores bmodel %))
+         ((switch zero-lines one-lines)) (apply concat)
+         weka/make-forest (hash-map :forest)
+         (merge {:bayes bmodel}))))

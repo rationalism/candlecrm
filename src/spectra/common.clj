@@ -186,3 +186,6 @@
 
 (defn deserialize [filename]
   (deserialize-stream (FileInputStream. filename)))
+
+(defn average [coll]
+  (/ (apply + coll) (count coll)))

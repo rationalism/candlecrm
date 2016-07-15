@@ -23,9 +23,6 @@
     (TokenSequence2FeatureSequence.)
     (FeatureSequence2FeatureVector.)]))
 
-(defn average [coll]
-  (/ (apply + coll) (count coll)))
-
 (defn add-token [sequence token]
   (.add sequence token) sequence)
 
@@ -47,7 +44,7 @@
                    (map second lines)))))
 
 (defn split-instances [instances]
-  (->> [0.9 0.1] double-array
+  (->> [0.999 0.001] double-array
        (.split instances (java.util.Random.))))
 
 (defn file-instances [filename]
@@ -56,8 +53,7 @@
 
 (defn make-bayes [train-data]
   (let [[train test] (->> train-data train-instances split-instances)]
-    (-> (MaxEntTrainer.) (.train train)
-        (.getAccuracy test))))
+    (-> (MaxEntTrainer.) (.train train))))
 
 (defn vector-probs [n v]
   (->> n range (map #(.valueAtLocation v %))))
