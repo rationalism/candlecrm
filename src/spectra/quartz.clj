@@ -95,14 +95,14 @@
       first neo4j/find-by-id
       (neo4j/create-edge! user s/user-queue)))
 
-(defn maybe-run-recon! [params]
-  (when params
+(defn maybe-run-recon! [[user class]]
+  (when user
     (throw-info! "running recon")
-    (neo4j/set-property! (first params) s/recon-run true)
-    (apply mlrecon/run-recon! params)
-    (neo4j/set-property! (first params) s/recon-run false)
-    (when (= (second params) s/email)
-      (neo4j/set-property! (first params) s/email-overload false))))
+    (neo4j/set-property! user s/recon-run true)
+    (mlrecon/run-recon! user class)
+    (neo4j/set-property! user s/recon-run false)
+    (when (= class s/email)
+      (neo4j/set-property! user s/email-overload false))))
 
 (defn remove-running [jobs]
   (let [running-ids (queries/users-recon-running)]
@@ -129,13 +129,13 @@
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (when :nil (queue-pop!)))
+  (when nil (queue-pop!)))
 
 (jobs/defjob NewGeocodes [ctx]
   (neo4j/thread-wrap (when nil (geocode/geocode-batch 10))))
 
 (jobs/defjob ProcessRecon [ctx]
-  (when :nil (run-recon!)))
+  (when nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
   (neo4j/thread-wrap (when nil (email/push-email-nlp!))))
