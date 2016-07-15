@@ -59,11 +59,12 @@
              (neo4j/esc-token s/pwd-hash) ": {pwdhash}, "
              (neo4j/esc-token s/recon-run) ": {reconrun}, "
              (neo4j/esc-token s/email-overload) ": {overload}, "
+             (neo4j/esc-token s/email-lock) ": {lock}, "
              (neo4j/esc-token s/index-run) ": {indexrun}})"
              " RETURN u")
         {:email email-addr :pwdhash pwd-hash
          :reconrun false :indexrun false
-         :overload false}]
+         :overload false :lock false}]
        neo4j/cypher-query first vals first))
 
 (defn user-person [email]

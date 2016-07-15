@@ -418,11 +418,12 @@
 
 (defn maybe-load [user graph]
   (if (neo4j/get-property user s/email-overload)
-    (do (Thread/sleep 1000) (recur user graph))
+    (do (Thread/sleep 300) (recur user graph))
     (if (->> graph loom/nodes
              (filter #(= (s/type-label %) s/email))
              count (> 5)) graph
         (do (neo4j/set-property! user s/email-overload true)
+            (neo4j/set-property! user s/email-lock true)
             graph))))
 
 (defn full-parse [[message headers] models user]
@@ -543,6 +544,7 @@
                      (hash-map :user user :message)
                      (@parse-channel)))
          dorun)
+    (neo4j/set-property! user s/email-lock false)
     (neo4j/table-refresh! user)))
 
 (defn insert-one-email! [user email-num]
