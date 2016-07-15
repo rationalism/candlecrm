@@ -425,7 +425,7 @@
        (map s/email-uid) (remove nil?) first))
 
 (defn queue-graph [graph]
-  (swap! message-queue difference #{(graph-uid graph)}))
+  (swap! message-queue cset/difference #{(graph-uid graph)}))
 
 (defn maybe-load [user graph]
   (if (contains? @overload-locked user)
@@ -433,7 +433,7 @@
     (if (->> graph loom/nodes
              (filter #(= (s/type-label %) s/email))
              count (> 5)) graph
-        (do (swap! overload-locked union #{user})
+        (do (swap! overload-locked cset/union #{user})
             (reset! empty-flag true)
             (queue-graph graph) graph))))
 
