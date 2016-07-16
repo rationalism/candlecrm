@@ -88,8 +88,6 @@
 
 (def pronoun-parts ["PRP" "PRP$"])
 
-(def models-dir (str (env :home-dir) "resources/models"))
-(def rel-model-dir (str models-dir "/relations"))
 (def bad-relation-threshold 0.9)
 
 (defn make-default-pipeline [annotators]
@@ -164,7 +162,9 @@
        (into {})))
 
 (defn get-rel-fn []
-  (fn [] (deserialize-rel-models rel-model-dir)))
+  (let [models-dir (str (env :home-dir) "resources/models")
+        rel-model-dir (str models-dir "/relations")]
+    (fn [] (deserialize-rel-models rel-model-dir))))
 
 ;; Use this like a pipeline, as prep for relation extractor
 (defn entity-extractor []

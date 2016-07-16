@@ -28,7 +28,6 @@
 (def crossval-folds 10)
 (def num-threads 4)
 (def token-delims " \r\n\t.,@;&_/:\"()?!\\>=")
-(def models-dir (str (env :home-dir) "resources/models"))
 (def email-sep-key "emailbreak")
 (def traindat-temp "/tmp/traindat.txt")
 (def crossval-temp "/tmp/crossval.csv")
@@ -49,7 +48,8 @@
             :forest (RandomForest/makeCopy forest)})))
 
 (defn email-sep-model-fn []
-  (get-copy-fn email-sep-key models-dir))
+  (let [models-dir (str (env :home-dir) "resources/models")]
+    (get-copy-fn email-sep-key models-dir)))
 
 (defn attr-gen [n]
   (Attribute. (str "attr" n)))

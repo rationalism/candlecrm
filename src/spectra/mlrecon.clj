@@ -22,42 +22,43 @@
 
 (def model-rollover 0)
 
-(def models-dir (str (env :home-dir) "resources/models"))
-(def views-dir (str models-dir "/views"))
-(def recon-logs (env :recon-log-file))
-
 (defonce recon-models (atom {}))
 (defonce conflict-models (atom {}))
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
 
+(defn models-dir []
+  (str (env :home-dir) "resources/models"))
+
 (defn dump-recon-log [items]
-  (spit recon-logs "BEGIN RECON LOG DUMP\n\n" :append true)
-  (run! #(spit recon-logs
-               (str (pr-str %) "\n\n") :append true)
-        items)
-  items)
+  (let [recon-logs (env :recon-log-file)]
+    (spit recon-logs "BEGIN RECON LOG DUMP\n\n" :append true)
+    (run! #(spit recon-logs
+                 (str (pr-str %) "\n\n") :append true)
+          items)
+    items))
 
 (defn new-model!
   ([class place]
-   (new-model! class models-dir place))
+   (new-model! class (models-dir) place))
   ([class dir place]
    (->> (str dir "/" (name class) ".dat")
         deserialize (swap! place assoc class))))
 
 (defn load-models! []
-  (reset! recon-models {})
-  (reset! conflict-models {})
-  (->> model/conflicts keys
-       (mapv #(new-model! % recon-models)))
-  (->> model/conflicts vals flatten
-       (mapv #(new-model! % conflict-models)))
-  (->> model/views keys
-       (mapv #(new-model! % views-dir view-models))))
+  (let [views-dir (str (models-dir) "/views")]
+    (reset! recon-models {})
+    (reset! conflict-models {})
+    (->> model/conflicts keys
+         (mapv #(new-model! % recon-models)))
+    (->> model/conflicts vals flatten
+         (mapv #(new-model! % conflict-models)))
+    (->> model/views keys
+         (mapv #(new-model! % views-dir view-models)))))
 
 (defn load-curve! [class]
   (deserialize
-   (str models-dir "/" (name class) "-curve.dat")))
+   (str (models-dir) "/" (name class) "-curve.dat")))
 
 (defn load-thresholds! []
   (let [classes (->> [@recon-models @conflict-models]
@@ -65,11 +66,11 @@
     (->> classes (mapvals load-curve!) (reset! recon-logit))))
 
 (defn version-count [class]
-  (->> models-dir io/file file-seq
+  (->> (models-dir) io/file file-seq
        rest (map #(.getCanonicalPath %))
        (map #(str/split % #"/"))
        (filter #(= (dec (count %))
-                   (count (str/split models-dir #"/"))))
+                   (count (str/split (models-dir) #"/"))))
        (map last) (filter #(.contains % ".dat"))
        (remove #(.contains % "-curve"))
        (map #(str/split % #"\.")) (map first)
@@ -80,7 +81,7 @@
 
 (defn write-forest [class forest]
   (let [version (version-count class)
-        stem (->> class name (str models-dir "/") (repeat 2))]
+        stem (->> class name (str (models-dir) "/") (repeat 2))]
     (when (> version 1)
       (->> (zipvec stem [".dat" (str "-" version ".dat")])
            (map #(apply str %)) (map io/file) (apply io/copy))
