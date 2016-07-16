@@ -21,9 +21,13 @@
 
 (def encryption {:alg :rsa-oaep :enc :a192gcm})
 (def hash-alg {:alg :bcrypt+blake2b-512})
-(def pubkey (keys/public-key "pubkey.pem"))
-(def privkey (keys/private-key "privkey.pem" (env :privkey-pwd)))
+(defonce pubkey (atom nil))
+(defonce privkey (atom nil))
 (def exp-hours 3)
+
+(defn load-keys! []
+  (reset! pubkey (keys/public-key "pubkey.pem"))
+  (reset! privkey (keys/private-key "privkey.pem" (env :privkey-pwd))))
 
 (defn hash-pwd [password]
   (hashers/encrypt password hash-alg))
@@ -44,14 +48,14 @@
 
 (defnc user-from-token [token]
   (when token
-    (-> token (jwt/decrypt privkey encryption)
+    (-> token (jwt/decrypt @privkey encryption)
         :user :id neo4j/find-by-id)))
 
 (defn make-token [user]
   {:token
    (jwt/encrypt {:user {:id (.id user)}
                  :exp (-> exp-hours hours from-now)}
-                pubkey encryption)})
+                @pubkey encryption)})
 
 (defn user-vertex! [email-addr pwd-hash]
   (->> [(str "CREATE (u:" (neo4j/esc-token s/user) " {"

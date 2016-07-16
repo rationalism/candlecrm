@@ -111,6 +111,7 @@
 
 (defn app-init! []
   (log-setup!)
+  (auth/load-keys!)
   (neo4j/graph-connect!)
   (neo4j/reset-session!)
   (sendgrid/init-server!)
