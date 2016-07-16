@@ -247,5 +247,5 @@
                      :chain :digest)
         graphs (->> lines (split-body chain-mode header-map)
                     (remove nil?))]
-    (if (empty? graphs) (loom/build-graph [] [])
+    (if (empty? lines) (first graphs)
         (->> graphs (infer-to-from chain-mode headers) infer-subject))))
