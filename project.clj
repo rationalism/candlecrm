@@ -29,8 +29,8 @@
                  [com.google.http-client/google-http-client-jackson "1.22.0"]
                  [com.sun.mail/javax.mail "1.5.5"]
                  [de.jollyday/jollyday "0.4.7"]
-                 [edu.stanford.nlp/stanford-corenlp "3.6.1-SNAPSHOT"]
-                 [edu.stanford.nlp/stanford-corenlp "3.6.1-SNAPSHOT"
+                 [edu.stanford.nlp/stanford-corenlp "3.6.1"]
+                 [edu.stanford.nlp/stanford-corenlp "3.6.1"
                   :classifier "models"]
                  [com.googlecode.libphonenumber/libphonenumber "7.4.5"]
                  [org.deeplearning4j/deeplearning4j-core "0.4.0"
