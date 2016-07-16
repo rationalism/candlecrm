@@ -110,5 +110,5 @@
                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
   :main spectra.web
   :jvm-opts ["-Xmx8g" "-XX:-OmitStackTraceInFastThrow"]
-  :uberjar {:aot :all}
+  :profiles {:uberjar {:aot :all}}
   :uberjar-name "spectra-standalone.jar")
