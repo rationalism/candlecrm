@@ -22,7 +22,8 @@
             [environ.core :refer [env]]
             [clojure.tools.nrepl.server :as nrepl-server]
             [cider.nrepl :refer (cider-nrepl-handler)])
-  (:use [org.httpkit.server :only [run-server]]))
+  (:use [org.httpkit.server :only [run-server]])
+  (:gen-class))
 
 (defn in-dev? []
   (= (env :in-dev) "true"))
