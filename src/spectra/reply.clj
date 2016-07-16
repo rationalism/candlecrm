@@ -165,9 +165,8 @@
 (defn body-graph [mode [header lines]]
   (let [email (->> header loom/nodes email-nodes first)
         text (->> lines regex/remove-arrows (str/join "\n"))]
-    (when (not (body-empty? text))
-      (->> text (hash-map s/email-body) (add-digest mode)
-           (merge email) (loom/replace-node header email)))))
+    (->> text (hash-map s/email-body) (add-digest mode)
+         (merge email) (loom/replace-node header email))))
 
 (defn maybe-sig-split [mode header-lines]
   (if (= mode :digest) header-lines
