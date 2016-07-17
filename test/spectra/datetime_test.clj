@@ -2,6 +2,12 @@
   (:require [clojure.test :refer :all]
             [spectra.datetime :refer :all]))
 
+(defn date-model [f]
+  (load-date-model!)
+  (f) nil)
+
+(use-fixtures :once date-model)
+
 (def empty-test "This string doesn't have a date in it")
 (def two-test "The day was December 12th, 1990. The next day would be December 13th, 1990.")
 
