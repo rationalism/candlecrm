@@ -1,6 +1,7 @@
 (ns spectra.ajax-test
   (:require [clojure.test :refer :all]
-            [spectra.ajax :refer :all]))
+            [spectra.ajax :refer :all]
+            [spectra.neo4j :as neo4j]))
 
 (defn graph-ready [f]
   (neo4j/graph-connect!)
