@@ -41,9 +41,11 @@
        (.close *session*)
        retval#)))
 
+(defn close-session! []
+  (when *session* (.close *session*)))
+
 (defn reset-session! []
-  (when *session*
-    (.close *session*))
+  (close-session!)
   (def ^:dynamic *session* (get-session)))
 
 (defn esc-token [token]

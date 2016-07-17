@@ -1,6 +1,10 @@
 (ns spectra.async-test
   (:require [clojure.test :refer :all]
-            [spectra.async :refer :all]))
+            [spectra.async :refer :all]
+            [spectra.neo4j :as neo4j]))
+
+(neo4j/graph-connect!)
+(neo4j/get-session)
 
 (deftest pool-test
   (testing "Creating and deleting a thread pool"
@@ -13,3 +17,5 @@
     (Thread/sleep 100)
     (is (= @sum 145))
     (delete-pool! "sum")))
+
+(neo4j/close-session!)

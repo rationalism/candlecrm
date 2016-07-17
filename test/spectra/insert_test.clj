@@ -6,6 +6,9 @@
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]))
 
+(neo4j/graph-connect!)
+(neo4j/get-session)
+
 (def test-username "someemail@foo.com")
 (def test-password "notarealpassword")
 (def alt-email "adummyemail@foo.com")
@@ -63,3 +66,5 @@
              count (= 0)))
     
     (auth/delete-user! (auth/lookup-user test-username))))
+
+(neo4j/close-session!)

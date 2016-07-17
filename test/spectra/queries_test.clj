@@ -6,6 +6,9 @@
             [spectra_cljc.schema :as s]
             [spectra.queries :refer :all]))
 
+(neo4j/graph-connect!)
+(neo4j/get-session)
+
 (def test-username "someemail@foo.com")
 (def test-password "notarealpassword")
 
@@ -136,3 +139,5 @@
 (deftest email-nlp-test
   (testing "Search for emails for NLP"
     (is (email-for-nlp 1))))
+
+(neo4j/close-session!)
