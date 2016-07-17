@@ -42,7 +42,8 @@
        retval#)))
 
 (defn close-session! []
-  (when *session* (.close *session*)))
+  (when *session* (.close *session*))
+  (def ^:dynamic *session nil))
 
 (defn reset-session! []
   (close-session!)
