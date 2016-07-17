@@ -162,8 +162,8 @@
        (into {})))
 
 (defn get-rel-fn []
-  (let [models-dir (str (env :home-dir) "resources/models")
-        rel-model-dir (str models-dir "/relations")]
+  (let [models-dir "models/relations"
+        rel-model-dir (io/resource models-dir)]
     (fn [] (deserialize-rel-models rel-model-dir))))
 
 ;; Use this like a pipeline, as prep for relation extractor

@@ -43,12 +43,13 @@
 
 (defn get-copy-fn [class dir]
   (let [{:keys [bayes forest]}
-        (deserialize (str dir "/" class ".dat"))]
+        (->> (str dir "/" class ".dat")
+             io/resource io/file deserialize)]
     (fn [] {:bayes bayes
             :forest (RandomForest/makeCopy forest)})))
 
 (defn email-sep-model-fn []
-  (let [models-dir (str (env :home-dir) "resources/models")]
+  (let [models-dir "models"]
     (get-copy-fn email-sep-key models-dir)))
 
 (defn attr-gen [n]

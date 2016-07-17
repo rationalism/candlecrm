@@ -1,5 +1,6 @@
 (ns spectra.datetime
   (:require [clojure.string :as str]
+            [clojure.java.io :as io]
             [clj-time.core :as ctime]
             [clj-time.coerce :as coerce]
             [clj-time.format :as format]
@@ -19,10 +20,9 @@
 (def bad-date-threshold 0.5)
 
 (defn load-date-model! []
-  (let [models-dir (str (env :home-dir) "resources/models")
-        bad-date-file "baddates.dat"]
+  (let [models-dir "models" bad-date-file "baddates.dat"]
     (->> bad-date-file (str models-dir "/")
-         deserialize (reset! bad-date-model))))
+         io/resource io/file deserialize (reset! bad-date-model))))
 
 (defn bad-model-features [text]
   (concat (model/bag-of-chars text)

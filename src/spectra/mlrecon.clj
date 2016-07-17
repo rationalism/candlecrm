@@ -28,7 +28,7 @@
 (defonce view-models (atom {}))
 
 (defn models-dir []
-  (str (env :home-dir) "resources/models"))
+  "models")
 
 (defn dump-recon-log [items]
   (let [recon-logs (env :recon-log-file)]
@@ -43,7 +43,8 @@
    (new-model! class (models-dir) place))
   ([class dir place]
    (->> (str dir "/" (name class) ".dat")
-        deserialize (swap! place assoc class))))
+        io/resource io/file deserialize
+        (swap! place assoc class))))
 
 (defn load-models! []
   (let [views-dir (str (models-dir) "/views")]
@@ -57,8 +58,8 @@
          (mapv #(new-model! % views-dir view-models)))))
 
 (defn load-curve! [class]
-  (deserialize
-   (str (models-dir) "/" (name class) "-curve.dat")))
+  (->> (str (models-dir) "/" (name class) "-curve.dat")
+       io/resource io/file deserialize))
 
 (defn load-thresholds! []
   (let [classes (->> [@recon-models @conflict-models]
@@ -66,7 +67,7 @@
     (->> classes (mapvals load-curve!) (reset! recon-logit))))
 
 (defn version-count [class]
-  (->> (models-dir) io/file file-seq
+  (->> (models-dir) io/resource io/file file-seq
        rest (map #(.getCanonicalPath %))
        (map #(str/split % #"/"))
        (filter #(= (dec (count %))
