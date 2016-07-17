@@ -97,24 +97,24 @@
                            :output-dir "resources/public/js/dev/main"
                            :output-to "resources/public/js/dev/main.js"
                            :optimizations :none
-                           :pretty-print true
-                           :jar false}}
+                           :pretty-print true}
+                :jar false}
                :login
                {:source-paths ["src/spectra_login"]
                 :compiler {:main "spectra_login.login"
                            :asset-path "/js/login"
                            :output-dir "resources/public/js/login"
                            :output-to "resources/public/js/login.js"
-                           :optimizations :simple
-                           :jar true}}
+                           :optimizations :simple}
+                :jar true}
                :prod
                {:source-paths ["src/spectra_cljs" "src/spectra_cljc"]
                 :compiler {:main "spectra_cljs.init"
                            :asset-path "/js/main"
                            :output-dir "resources/public/js/main"
                            :output-to "resources/public/js/main.js"
-                           :optimizations :simple
-                           :jar true}}}}
+                           :optimizations :simple}
+                :jar true}}}
   :repl-options {:init (do (set! *print-length* 60) (-main))
                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
   :main spectra.web
