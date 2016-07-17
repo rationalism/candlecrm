@@ -75,7 +75,8 @@
                  [org.jsoup/jsoup "1.9.2"]
                  [cc.mallet/mallet "2.0.8"
                   :exclusions [org.hamcrest/hamcrest-core]]
-                 [org.ahocorasick/ahocorasick "0.3.0"]]
+                 [org.ahocorasick/ahocorasick "0.3.0"]
+                 [cpath-clj "0.1.2"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.3"]
             [lein-kibit "0.1.2"

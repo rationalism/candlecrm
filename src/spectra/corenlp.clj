@@ -8,6 +8,7 @@
             [spectra_cljc.schema :as s]
             [spectra.regex :as regex]
             [spectra.weka :as weka]
+            [cpath-clj.core :as cp]
             [spectra.environ :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
@@ -156,7 +157,7 @@
        (mapv keyword)))
 
 (defn deserialize-rel-models [dir]
-  (->> dir file-seq rest (map #(.getCanonicalPath %))
+  (->> dir cp/resources (map #(.getCanonicalPath %))
        (map (juxt #(str/split % #"/") rel-from-file))
        (map #(update % 0 types-from-dirnames))
        (into {})))
@@ -164,7 +165,7 @@
 (defn get-rel-fn []
   (let [models-dir "models/relations"
         rel-model-dir (io/resource models-dir)]
-    (fn [] (deserialize-rel-models rel-model-dir))))
+    (fn [] (deserialize-rel-models models-dir))))
 
 ;; Use this like a pipeline, as prep for relation extractor
 (defn entity-extractor []
