@@ -120,4 +120,5 @@
   :main spectra.web
   :jvm-opts ["-Xmx8g" "-XX:-OmitStackTraceInFastThrow"]
   :profiles {:uberjar {:aot :all}}
-  :uberjar-name "spectra-standalone.jar")
+  :uberjar-name "spectra-standalone.jar"
+  :hooks [leiningen.cljsbuild])
