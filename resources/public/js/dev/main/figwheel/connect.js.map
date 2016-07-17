@@ -1,1 +1,1 @@
-{"version":3,"file":"\/home\/alyssa\/clojure\/spectra\/resources\/public\/js\/dev\/main\/figwheel\/connect.js","sources":["connect.cljs&rel=1468796708364"],"lineCount":9,"mappings":";AAAA;;;;;AACA,gCAAA,2CAAA,uEAAA,mCAAA,6DAAA,lPAACA","names":["figwheel.client\/start"]}
+{"version":3,"file":"\/home\/alyssa\/clojure\/spectra\/resources\/public\/js\/dev\/main\/figwheel\/connect.js","sources":["connect.cljs&rel=1468797469899"],"lineCount":9,"mappings":";AAAA;;;;;AACA,gCAAA,2CAAA,uEAAA,2CAAA,6DAAA,1PAACA","names":["figwheel.client\/start"]}
