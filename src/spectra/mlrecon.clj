@@ -43,7 +43,7 @@
    (new-model! class (models-dir) place))
   ([class dir place]
    (->> (str dir "/" (name class) ".dat")
-        io/resource io/file deserialize
+        io/resource deserialize
         (swap! place assoc class))))
 
 (defn load-models! []
@@ -59,7 +59,7 @@
 
 (defn load-curve! [class]
   (->> (str (models-dir) "/" (name class) "-curve.dat")
-       io/resource io/file deserialize))
+       io/resource deserialize))
 
 (defn load-thresholds! []
   (let [classes (->> [@recon-models @conflict-models]
@@ -67,7 +67,7 @@
     (->> classes (mapvals load-curve!) (reset! recon-logit))))
 
 (defn version-count [class]
-  (->> (models-dir) io/resource io/file file-seq
+  (->> (models-dir) io/resource file-seq
        rest (map #(.getCanonicalPath %))
        (map #(str/split % #"/"))
        (filter #(= (dec (count %))

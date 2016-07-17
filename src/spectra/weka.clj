@@ -44,7 +44,7 @@
 (defn get-copy-fn [class dir]
   (let [{:keys [bayes forest]}
         (->> (str dir "/" class ".dat")
-             io/resource io/file deserialize)]
+             io/resource deserialize)]
     (fn [] {:bayes bayes
             :forest (RandomForest/makeCopy forest)})))
 

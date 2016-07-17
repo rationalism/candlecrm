@@ -156,7 +156,7 @@
        (mapv keyword)))
 
 (defn deserialize-rel-models [dir]
-  (->> dir io/file file-seq rest (map #(.getCanonicalPath %))
+  (->> dir file-seq rest (map #(.getCanonicalPath %))
        (map (juxt #(str/split % #"/") rel-from-file))
        (map #(update % 0 types-from-dirnames))
        (into {})))

@@ -9,23 +9,23 @@ goog.require('jayq.core');
 goog.require('spectra_cljs.util');
 goog.require('clojure.string');
 spectra_cljs.calendar.cal_adjust = (function spectra_cljs$calendar$cal_adjust(var_args){
-var args7265 = [];
-var len__27348__auto___7268 = arguments.length;
-var i__27349__auto___7269 = (0);
+var args8807 = [];
+var len__7322__auto___8810 = arguments.length;
+var i__7323__auto___8811 = (0);
 while(true){
-if((i__27349__auto___7269 < len__27348__auto___7268)){
-args7265.push((arguments[i__27349__auto___7269]));
+if((i__7323__auto___8811 < len__7322__auto___8810)){
+args8807.push((arguments[i__7323__auto___8811]));
 
-var G__7270 = (i__27349__auto___7269 + (1));
-i__27349__auto___7269 = G__7270;
+var G__8812 = (i__7323__auto___8811 + (1));
+i__7323__auto___8811 = G__8812;
 continue;
 } else {
 }
 break;
 }
 
-var G__7267 = args7265.length;
-switch (G__7267) {
+var G__8809 = args8807.length;
+switch (G__8809) {
 case 1:
 return spectra_cljs.calendar.cal_adjust.cljs$core$IFn$_invoke$arity$1((arguments[(0)]));
 
@@ -35,7 +35,7 @@ return spectra_cljs.calendar.cal_adjust.cljs$core$IFn$_invoke$arity$2((arguments
 
 break;
 default:
-throw (new Error([cljs.core.str("Invalid arity: "),cljs.core.str(args7265.length)].join('')));
+throw (new Error([cljs.core.str("Invalid arity: "),cljs.core.str(args8807.length)].join('')));
 
 }
 });
@@ -91,4 +91,4 @@ spectra_cljs.calendar.calendar_box = (function spectra_cljs$calendar$calendar_bo
 return reagent.core.create_class.call(null,new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null,"component-did-mount","component-did-mount",-1126910518),spectra_cljs.calendar.cal_add_BANG_,new cljs.core.Keyword(null,"component-did-update","component-did-update",-1468549173),spectra_cljs.calendar.cal_render_BANG_,new cljs.core.Keyword(null,"display-name","display-name",694513143),"calendar-tab",new cljs.core.Keyword(null,"reagent-render","reagent-render",-985383853),spectra_cljs.calendar.cal_html], null));
 });
 
-//# sourceMappingURL=calendar.js.map?rel=1468744497851
+//# sourceMappingURL=calendar.js.map

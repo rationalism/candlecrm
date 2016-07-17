@@ -22,7 +22,7 @@
 (defn load-date-model! []
   (let [models-dir "models" bad-date-file "baddates.dat"]
     (->> bad-date-file (str models-dir "/")
-         io/resource io/file deserialize (reset! bad-date-model))))
+         io/resource deserialize (reset! bad-date-model))))
 
 (defn bad-model-features [text]
   (concat (model/bag-of-chars text)

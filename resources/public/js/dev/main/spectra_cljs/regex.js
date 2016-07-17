@@ -32,9 +32,9 @@ spectra_cljs.regex.links_parse = (function spectra_cljs$regex$links_parse(text){
 return cljs.core.apply.call(null,cljs.core.concat,cljs.core.juxt.call(null,spectra_cljs.regex.node_parse,spectra_cljs.regex.url_parse).call(null,text));
 });
 spectra_cljs.regex.regex_escape = (function spectra_cljs$regex$regex_escape(text){
-return clojure.string.replace.call(null,text,spectra_cljs.regex.esc_char_regex,(function (p1__7078_SHARP_){
-return [cljs.core.str("\\"),cljs.core.str(p1__7078_SHARP_)].join('');
+return clojure.string.replace.call(null,text,spectra_cljs.regex.esc_char_regex,(function (p1__8620_SHARP_){
+return [cljs.core.str("\\"),cljs.core.str(p1__8620_SHARP_)].join('');
 }));
 });
 
-//# sourceMappingURL=regex.js.map?rel=1468744497609
+//# sourceMappingURL=regex.js.map

@@ -12,8 +12,8 @@ spectra_cljs.update.people_req = (function spectra_cljs$update$people_req(){
 return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword("pages","fetch-people","pages/fetch-people",-507430857),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"start","start",-355208981),spectra_cljs.state.person_pos.call(null),new cljs.core.Keyword(null,"limit","limit",-1355822363),spectra_cljs.state.look.call(null,new cljs.core.Keyword(null,"page-lengths","page-lengths",-746189067),new cljs.core.Keyword(null,"people","people",1443537404))], null)], null);
 });
 spectra_cljs.update.update_people_BANG_ = (function spectra_cljs$update$update_people_BANG_(){
-return spectra_cljs.update.send_BANG_.call(null,spectra_cljs.update.people_req.call(null),(function (p1__7048_SHARP_){
-return spectra_cljs.state.set_BANG_.call(null,new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"people-rows","people-rows",1287247959)], null),p1__7048_SHARP_);
+return spectra_cljs.update.send_BANG_.call(null,spectra_cljs.update.people_req.call(null),(function (p1__8590_SHARP_){
+return spectra_cljs.state.set_BANG_.call(null,new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"people-rows","people-rows",1287247959)], null),p1__8590_SHARP_);
 }));
 });
 spectra_cljs.update.prev_fetch_BANG_ = (function spectra_cljs$update$prev_fetch_BANG_(counter,update_fn){
@@ -41,8 +41,8 @@ spectra_cljs.update.email_person_req = (function spectra_cljs$update$email_perso
 return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword("pages","person-emails","pages/person-emails",-1657230398),new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null,"person-id","person-id",1251942696),spectra_cljs.state.look.call(null,new cljs.core.Keyword(null,"current-node","current-node",-814308842),new cljs.core.Keyword(null,"center-node","center-node",1511034476),new cljs.core.Keyword(null,"id","id",-1388402092)),new cljs.core.Keyword(null,"link","link",-1769163468),link_type,new cljs.core.Keyword(null,"start","start",-355208981),spectra_cljs.state.email_person_pos.call(null,link_type),new cljs.core.Keyword(null,"limit","limit",-1355822363),spectra_cljs.state.look.call(null,new cljs.core.Keyword(null,"page-lengths","page-lengths",-746189067),new cljs.core.Keyword(null,"email","email",1415816706))], null)], null);
 });
 spectra_cljs.update.update_emails_BANG_ = (function spectra_cljs$update$update_emails_BANG_(){
-return spectra_cljs.update.send_BANG_.call(null,spectra_cljs.update.email_req.call(null),(function (p1__7049_SHARP_){
-return spectra_cljs.state.set_BANG_.call(null,new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"email-rows","email-rows",1852197731)], null),p1__7049_SHARP_);
+return spectra_cljs.update.send_BANG_.call(null,spectra_cljs.update.email_req.call(null),(function (p1__8591_SHARP_){
+return spectra_cljs.state.set_BANG_.call(null,new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"email-rows","email-rows",1852197731)], null),p1__8591_SHARP_);
 }));
 });
 spectra_cljs.update.email_callback = (function spectra_cljs$update$email_callback(link_type){
@@ -56,8 +56,8 @@ spectra_cljs.update.update_emails_person_BANG_ = (function spectra_cljs$update$u
 return spectra_cljs.update.send_BANG_.call(null,spectra_cljs.update.email_person_req.call(null,link_type),spectra_cljs.update.email_callback.call(null,link_type));
 });
 spectra_cljs.update.update_user_BANG_ = (function spectra_cljs$update$update_user_BANG_(){
-return spectra_cljs.update.send_BANG_.call(null,new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword("update","user-data","update/user-data",1908960917)], null),(function (p1__7050_SHARP_){
-return spectra_cljs.state.set_BANG_.call(null,new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"user","user",1532431356)], null),p1__7050_SHARP_);
+return spectra_cljs.update.send_BANG_.call(null,new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword("update","user-data","update/user-data",1908960917)], null),(function (p1__8592_SHARP_){
+return spectra_cljs.state.set_BANG_.call(null,new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"user","user",1532431356)], null),p1__8592_SHARP_);
 }));
 });
 spectra_cljs.update.node_req = (function spectra_cljs$update$node_req(id,type){
@@ -131,12 +131,12 @@ spectra_cljs.update.cal_events = (function spectra_cljs$update$cal_events(person
 return spectra_cljs.update.send_BANG_.call(null,spectra_cljs.update.person_event_req.call(null,person_id),spectra_cljs.update.update_cal_rows_BANG_);
 });
 spectra_cljs.update.rel_switch = (function spectra_cljs$update$rel_switch(person_id,rel_type){
-var pred__7054 = cljs.core._EQ_;
-var expr__7055 = rel_type;
-if(cljs.core.truth_(pred__7054.call(null,spectra_cljc.schema.event,expr__7055))){
+var pred__8596 = cljs.core._EQ_;
+var expr__8597 = rel_type;
+if(cljs.core.truth_(pred__8596.call(null,spectra_cljc.schema.event,expr__8597))){
 return spectra_cljs.update.cal_events.call(null,person_id);
 } else {
-if(cljs.core.truth_(pred__7054.call(null,spectra_cljc.schema.location,expr__7055))){
+if(cljs.core.truth_(pred__8596.call(null,spectra_cljc.schema.location,expr__8597))){
 return spectra_cljs.update.map_markers.call(null,person_id);
 } else {
 return null;
@@ -144,10 +144,10 @@ return null;
 }
 });
 spectra_cljs.update.strip_ids = (function spectra_cljs$update$strip_ids(m){
-return cljs.core.reduce.call(null,(function (p1__7057_SHARP_,p2__7058_SHARP_){
-return cljs.core.update.call(null,p1__7057_SHARP_,p2__7058_SHARP_,cljs.core.vals);
-}),m,cljs.core.remove.call(null,(function (p1__7059_SHARP_){
-return cljs.core._EQ_.call(null,p1__7059_SHARP_,spectra_cljc.schema.type_label);
+return cljs.core.reduce.call(null,(function (p1__8599_SHARP_,p2__8600_SHARP_){
+return cljs.core.update.call(null,p1__8599_SHARP_,p2__8600_SHARP_,cljs.core.vals);
+}),m,cljs.core.remove.call(null,(function (p1__8601_SHARP_){
+return cljs.core._EQ_.call(null,p1__8601_SHARP_,spectra_cljc.schema.type_label);
 }),cljs.core.keys.call(null,m)));
 });
 spectra_cljs.update.add_req = (function spectra_cljs$update$add_req(){
@@ -212,4 +212,4 @@ spectra_cljs.update.change_password_BANG_ = (function spectra_cljs$update$change
 return spectra_cljs.update.send_BANG_.call(null,spectra_cljs.update.change_pwd_req.call(null),spectra_cljs.update.confirm_changed);
 });
 
-//# sourceMappingURL=update.js.map?rel=1468744497556
+//# sourceMappingURL=update.js.map

@@ -1,5 +1,6 @@
 (ns spectra.common
   (:require [clojure.string :as str]
+            [clojure.java.io :as io]
             [pandect.algo.sha1 :as sha1]
             [taoensso.encore :as enc]
             [spectra.environ :refer [env]]
@@ -183,8 +184,8 @@
 (defn deserialize-stream [stream]
   (.readObject (ObjectInputStream. stream)))
 
-(defn deserialize [filename]
-  (deserialize-stream (FileInputStream. filename)))
+(defn deserialize [resource]
+  (->> resource io/input-stream deserialize-stream))
 
 (defn average [coll]
   (/ (apply + coll) (count coll)))

@@ -137,4 +137,4 @@ spectra_cljc.schema.desc2 = new cljs.core.Keyword(null,"desc2","desc2",195457821
 spectra_cljc.schema.row_id = new cljs.core.Keyword(null,"rowid","rowid",1291879834);
 spectra_cljc.schema.item_cost = new cljs.core.Keyword(null,"cost","cost",-1094861735);
 
-//# sourceMappingURL=schema.js.map?rel=1468744496974
+//# sourceMappingURL=schema.js.map
