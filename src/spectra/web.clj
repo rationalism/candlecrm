@@ -155,7 +155,7 @@
                              (str/replace "-" ".")) v)))
 
 (defn set-properties! []
-  (when-let [prop-file (env :prop-file)]
+  (when-let [prop-file (environ/env :prop-file)]
     (let [system (System/getProperties)]
       (->> prop-file slurp edn/read-string vals first
            (into []) (mapv set-property!)))))
