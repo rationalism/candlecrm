@@ -2,10 +2,19 @@
   (:require [clojure.test :refer :all]
             [clojure.string :as str]
             [spectra.auth :as auth]
-            [spectra.common :as com]
+            [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]
             [spectra.sendgrid :as sendgrid]
             [spectra.pages :refer :all]))
+
+(defn graph-ready [f]
+  (neo4j/graph-connect!)
+  (neo4j/reset-session!)
+  (auth/load-keys!)
+  (f)
+  (neo4j/close-session!))
+
+(use-fixtures :once graph-ready)
 
 (def test-username "someemail@foo.com")
 (def test-password "notarealpassword")
