@@ -15,6 +15,7 @@
   (:require-macros
    [cljs.core.async.macros :as asyncm :refer (go go-loop)]))
 
+
 ;;;; Packer (client<->server serializtion format) config
 
 ;; (def packer (sente-transit/get-flexi-packer :edn)) ; Experimental, needs Transit dep

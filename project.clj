@@ -20,7 +20,8 @@
                  [com.taoensso/timbre "4.6.0"]
                  [buddy "1.0.0"]
                  [com.google.api-client/google-api-client "1.22.0"
-                  :exclusions [com.fasterxml.jackson.core/jackson-core]]
+                  :exclusions [com.fasterxml.jackson.core/jackson-core
+                               com.google.guava/guava-jdk5]]
                  [com.google.gdata/core "1.47.1"
                   :exclusions [com.google.code.findbugs/jsr305
                                com.google.guava/guava]]
@@ -92,7 +93,8 @@
              :exclusions [org.clojure/clojure]]
             [lein-ancient "0.6.10"]
             [lein-cloverage "1.0.6"
-             :exclusions [org.clojure/clojure]]]
+             :exclusions [org.clojure/clojure]]
+            [lein-asset-minifier "0.3.0"]]
   :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
   :resource-paths ["config" "resources"]
   :source-paths ["src"]
@@ -113,7 +115,7 @@
                            :asset-path "/js/login"
                            :output-dir "resources/public/js/login"
                            :output-to "resources/public/js/login.js"
-                           :optimizations :none}
+                           :optimizations :simple}
                 :jar true}
                :prod
                {:source-paths ["src/spectra_cljs" "src/spectra_cljc"]
@@ -121,7 +123,7 @@
                            :asset-path "/js/main"
                            :output-dir "resources/public/js/main"
                            :output-to "resources/public/js/main.js"
-                           :optimizations :none}
+                           :optimizations :whitespace}
                 :jar true}}}
   :repl-options {:init (do (set! *print-length* 60) (-main))
                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
@@ -129,4 +131,8 @@
   :jvm-opts ["-Xmx8g" "-XX:-OmitStackTraceInFastThrow"]
   :profiles {:uberjar {:aot :all}}
   :uberjar-name "spectra-standalone.jar"
-  :prep-tasks ["compile" ["cljsbuild" "once"]])
+  :prep-tasks ["compile" ["cljsbuild" "once"]]
+  :minify-assets {:assets
+                  {"resources/public/js/main.min.js"
+                   ["resources/public/js/main"
+                    "resources/public/js/main.js"]}})
