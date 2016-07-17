@@ -5,8 +5,14 @@
             [spectra.insert :as insert]
             [spectra_cljc.schema :as s]))
 
-(graph-connect!)
-(get-session)
+(defn graph-ready [f]
+  (graph-connect!)
+  (reset-session!)
+  (auth/load-keys!)
+  (f)
+  (close-session!))
+
+(use-fixtures :once graph-ready)
 
 (def test-username "someemail@foo.com")
 (def test-password "notarealpassword")
@@ -108,4 +114,3 @@
     (-> "CONSTRAINT ON ( book:Book ) ASSERT exists(book.isbn)"
         drop-constraint cypher-query)))
 
-(neo4j/close-session!)
