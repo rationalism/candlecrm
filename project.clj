@@ -100,7 +100,7 @@
   :cljsbuild {:builds
               {:dev
                {:source-paths ["src/spectra_cljs" "src/spectra_cljc"]
-                :figwheel {:websocket-url "wss://localhost:3450/figwheel-ws"}
+                :figwheel {:websocket-url "wss://www.candlecrm.com:3450/figwheel-ws"}
                 :compiler {:main "spectra_cljs.init"
                            :asset-path "/js/dev/main"
                            :output-dir "resources/public/js/dev/main"
