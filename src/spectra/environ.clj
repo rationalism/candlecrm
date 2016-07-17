@@ -5,8 +5,6 @@
 
 ;; Shamelessly stolen from https://github.com/weavejester/environ/blob/master/environ/src/spectra.environ.clj, so env variables can be changed at runtime.
 
-(defonce env nil)
-
 (defn keywordize [s]
   (-> (str/lower-case s)
       (str/replace "_" "-")
