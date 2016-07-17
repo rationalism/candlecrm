@@ -26,3 +26,4 @@ pom.xml
 /src/spectra/#*
 /logs
 /maven_repo
+/certs
