@@ -72,8 +72,9 @@
           (include-js "https://code.highcharts.com/highcharts.js")
           (include-js "/js/libs/moment.min.js")
           (include-js "/js/libs/fullcalendar-2.8.0/fullcalendar.js")
-          (include-js "/js/main.js")]))
-          ;[:script "google.maps.core.main();"]]))
+          (if (in-dev?)
+            (include-js "/js/dev/main.js")
+            (include-js "/js/main.js"))]))
 
 (defn signup-form [flash]
   [:div {:class "row"}

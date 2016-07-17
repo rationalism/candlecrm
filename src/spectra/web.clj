@@ -27,9 +27,6 @@
   (:use [org.httpkit.server :only [run-server]])
   (:gen-class))
 
-(defn in-dev? []
-  (= (environ/env :in-dev) "true"))
-
 (defn logout [req]
   {:status 302
    :headers {"Location" "/"}

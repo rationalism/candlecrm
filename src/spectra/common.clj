@@ -188,3 +188,6 @@
 
 (defn average [coll]
   (/ (apply + coll) (count coll)))
+
+(defn in-dev? []
+  (= (env :in-dev) "true"))
