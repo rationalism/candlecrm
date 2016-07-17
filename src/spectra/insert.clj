@@ -5,7 +5,7 @@
             [spectra.loom :as loom]
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]
-            [environ.core :refer [env]]
+            [spectra.environ :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 

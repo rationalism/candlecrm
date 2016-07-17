@@ -1,6 +1,6 @@
 (ns spectra.selenium
   (:require [clojure.string :as str]
-            [environ.core :refer [env]]
+            [spectra.environ :refer [env]]
             [spectra.common :refer :all]
             [spectra.neo4j :as neo4j])
   (:import [org.openqa.selenium.firefox FirefoxDriver FirefoxProfile]

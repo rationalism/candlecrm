@@ -8,7 +8,7 @@
             [spectra.neo4j :as neo4j]
             [spectra.queries :as queries]
             [spectra_cljc.schema :as s]
-            [environ.core :refer [env]])
+            [spectra.environ :refer [env]])
   (:import [com.google.maps GeoApiContext GeocodingApi]))
 
 (defn make-context []

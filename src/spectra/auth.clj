@@ -1,6 +1,6 @@
 (ns spectra.auth
   (:require [clojure.string :as str]
-            [environ.core :refer [env]]
+            [spectra.environ :refer [env]]
             [spectra.common :refer :all]
             [spectra.datetime :as dt]
             [spectra.google :as google]

@@ -3,7 +3,7 @@
             [clojure.string :as str]
             [spectra.common :refer :all]
             [spectra_cljc.schema :as s]
-            [environ.core :refer [env]]
+            [spectra.environ :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [cc.mallet.classify MaxEntTrainer NaiveBayesTrainer]

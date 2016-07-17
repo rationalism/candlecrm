@@ -3,7 +3,7 @@
             [clojure.edn :as edn]
             [clojure.string :as str]
             [clojure.java.io :as io]
-            [environ.core :refer [env]]
+            [spectra.environ :refer [env]]
             [spectra.common :refer :all]
             [spectra.auth :as auth]
             [spectra.cluster :as cluster]
@@ -14,7 +14,7 @@
             [spectra.neo4j :as neo4j]
             [spectra.weka :as weka]
             [spectra_cljc.schema :as s]
-            [environ.core :refer [env]]
+            [spectra.environ :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [org.bitbucket.cowwoc.diffmatchpatch DiffMatchPatch

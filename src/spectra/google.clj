@@ -1,5 +1,5 @@
 (ns spectra.google
-  (:require [environ.core :refer [env]]
+  (:require [spectra.environ :refer [env]]
             [clj-http.client :as client]
             [spectra.common :refer :all]
             [spectra.neo4j :as neo4j]

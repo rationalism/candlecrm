@@ -8,7 +8,7 @@
             [spectra_cljc.schema :as s]
             [spectra.regex :as regex]
             [spectra.weka :as weka]
-            [environ.core :refer [env]]
+            [spectra.environ :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [edu.stanford.nlp.pipeline Annotation StanfordCoreNLP]

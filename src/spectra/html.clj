@@ -1,5 +1,5 @@
 (ns spectra.html
-  (:require [environ.core :refer [env]]
+  (:require [spectra.environ :refer [env]]
             [hiccup.core :refer :all]
             [hiccup.page :refer :all]
             [spectra.common :refer :all]

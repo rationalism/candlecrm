@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]
             [pandect.algo.sha1 :as sha1]
             [taoensso.encore :as enc]
-            [environ.core :refer [env]]
+            [spectra.environ :refer [env]]
             [taoensso.timbre :as timbre
              :refer (log trace info warn error fatal report
                          spy get-env log-env)]

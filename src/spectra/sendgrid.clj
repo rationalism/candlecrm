@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]
             [spectra.common :refer :all]
             [spectra_cljc.schema :as s]
-            [environ.core :refer [env]])
+            [spectra.environ :refer [env]])
   (:import [com.sendgrid SendGrid SendGrid$Email]))
 
 (def sg-server (atom nil))

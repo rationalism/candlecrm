@@ -1,6 +1,6 @@
 (ns spectra.deepnet
   (:require [clojure.java.io :as io]
-            [environ.core :refer [env]]
+            [spectra.environ :refer [env]]
             [spectra.common :refer :all]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])

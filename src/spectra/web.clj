@@ -21,14 +21,14 @@
             [spectra.pages :as pages]
             [spectra.quartz :as quartz]
             [spectra.sendgrid :as sendgrid]
-            [environ.core :refer [env]]
+            [spectra.environ :as environ]
             [clojure.tools.nrepl.server :as nrepl-server]
             [cider.nrepl :refer (cider-nrepl-handler)])
   (:use [org.httpkit.server :only [run-server]])
   (:gen-class))
 
 (defn in-dev? []
-  (= (env :in-dev) "true"))
+  (= (environ/env :in-dev) "true"))
 
 (defn logout [req]
   {:status 302
@@ -113,6 +113,7 @@
       (wrap-defaults (middleware-config))))
 
 (defn app-init! []
+  (environ/set-env!)
   (log-setup!)
   (auth/load-keys!)
   (neo4j/graph-connect!)

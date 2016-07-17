@@ -7,7 +7,7 @@
             [spectra.mallet :as mallet]
             [spectra.model :as model]
             [spectra.weka :as weka]
-            [environ.core :refer [env]]
+            [spectra.environ :refer [env]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [com.joestelmach.natty CalendarSource Parser]
