@@ -150,7 +150,8 @@
 
 (defn set-property! [[k v]]
   (let [system (System/getProperties)]
-    (.setProperty system (str/replace (name k) "-" "_") v)))
+    (.setProperty system (-> k name str/lower-case
+                             (str/replace "-" ".")) v)))
 
 (defn set-properties! []
   (when-let [prop-file (env :prop-file)]
