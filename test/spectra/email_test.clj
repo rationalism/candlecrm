@@ -6,7 +6,7 @@
             [spectra.email :refer :all]))
 
 (defn date-model [f]
-  (load-date-model!)
+  (dt/load-date-model!)
   (f) nil)
 
 (use-fixtures :once date-model)
