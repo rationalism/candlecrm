@@ -5,6 +5,12 @@
             [spectra_cljc.schema :as s]
             [spectra.email :refer :all]))
 
+(defn date-model [f]
+  (load-date-model!)
+  (f) nil)
+
+(use-fixtures :once date-model)
+
 (def nlp-models (nlp-models-fn))
 
 (def test-body "Hello. My name is Alyssa Vance. My email address is alyssamvance@gmail.com; my phone number is 203-850-2427; and my website is rationalconspiracy.com. You can meet me in San Francisco, California on Tuesday at 3:30 PM.")
