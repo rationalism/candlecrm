@@ -32,6 +32,9 @@
 (defn graph-connect! []
   (reset! conn (get-graph)))
 
+(defn graph-close! []
+  (reset! conn nil))
+
 (defnc get-session []
   (.session @conn))
 
@@ -43,7 +46,7 @@
 
 (defn close-session! []
   (when *session* (.close *session*))
-  (def ^:dynamic *session nil))
+  (def ^:dynamic *session* nil))
 
 (defn reset-session! []
   (close-session!)
