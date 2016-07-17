@@ -3,8 +3,13 @@
             [spectra.async :refer :all]
             [spectra.neo4j :as neo4j]))
 
-(neo4j/graph-connect!)
-(neo4j/get-session)
+(defn graph-ready [f]
+  (neo4j/graph-connect!)
+  (neo4j/get-session)
+  (f)
+  (neo4j/close-session!))
+
+(use-fixtures :once graph-ready)
 
 (deftest pool-test
   (testing "Creating and deleting a thread pool"
@@ -18,4 +23,3 @@
     (is (= @sum 145))
     (delete-pool! "sum")))
 
-(neo4j/close-session!)

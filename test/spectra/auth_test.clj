@@ -4,8 +4,13 @@
             [spectra.neo4j :as neo4j]
             [spectra_cljc.schema :as s]))
 
-(neo4j/graph-connect!)
-(neo4j/get-session)
+(defn graph-ready [f]
+  (neo4j/graph-connect!)
+  (neo4j/get-session)
+  (f)
+  (neo4j/close-session!))
+
+(use-fixtures :once graph-ready)
 
 (def test-username "someemail@foo.com")
 (def test-password "notarealpassword")
@@ -36,5 +41,3 @@
   (testing "New user and password checks"
     (is (not (password-check test-password test-password)))
     (is (not (new-user-check test-username test-password test-password)))))
-
-(neo4j/close-session!)
