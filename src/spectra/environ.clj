@@ -39,7 +39,7 @@
                  [(sanitize-key k) (sanitize-val k v)])))))
 
 (defn set-env! []
-  (defonce env
+  (def env
     (merge
      (read-env-file ".lein-env")
      (read-env-file (io/resource ".boot-env"))
