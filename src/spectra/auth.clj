@@ -26,8 +26,9 @@
 (def exp-hours 3)
 
 (defn load-keys! []
-  (reset! pubkey (keys/public-key "pubkey.pem"))
-  (reset! privkey (keys/private-key "privkey.pem" (env :privkey-pwd))))
+  (reset! pubkey (keys/public-key (str (env :ssl-dir) "pubkey.pem")))
+  (reset! privkey (keys/private-key (str (env :ssl-dir) "privkey.pem")
+                                    (env :privkey-pwd))))
 
 (defn hash-pwd [password]
   (hashers/encrypt password hash-alg))
