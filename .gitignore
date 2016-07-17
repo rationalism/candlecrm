@@ -15,6 +15,7 @@ pom.xml
 /profiles.clj
 /profiles.clj~
 /java_props.clj
+/java_props.clj~
 /test-cert*
 /test_p*
 /client_s*
