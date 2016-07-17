@@ -31,7 +31,7 @@
   "models")
 
 (defn dump-recon-log [items]
-  (let [recon-logs (env :recon-log-file)]
+  (let [recon-logs (str (env :log-dir) (env :recon-log-file))]
     (spit recon-logs "BEGIN RECON LOG DUMP\n\n" :append true)
     (run! #(spit recon-logs
                  (str (pr-str %) "\n\n") :append true)

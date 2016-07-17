@@ -70,10 +70,10 @@
        (into-array Object) (Values/parameters)))
 
 (defn dump-queries [queries]
-  (spit (env :cypher-log-file) "BEGIN TRANSACTION\n\n" :append true)
-  (run! #(spit (env :cypher-log-file)
-               (str % "\n\n") :append true)
-        queries))
+  (let [logfile (str (env :log-dir) (env :cypher-log-file))]
+    (spit logfile "BEGIN TRANSACTION\n\n" :append true)
+    (run! #(spit logfile (str % "\n\n") :append true)
+          queries)))
 
 (defn tquery
   ([query] (.run *session* query))
