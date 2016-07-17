@@ -156,7 +156,7 @@
   (when-let [prop-file (env :prop-file)]
     (let [system (System/getProperties)]
       (->> prop-file slurp edn/read-string vals first
-           (into []) (mapv set-property)))))
+           (into []) (mapv set-property!)))))
 
 (defn -main [& args]
   (set-properties!) (app-init!)
