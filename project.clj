@@ -93,8 +93,7 @@
              :exclusions [org.clojure/clojure]]
             [lein-ancient "0.6.10"]
             [lein-cloverage "1.0.6"
-             :exclusions [org.clojure/clojure]]
-            [lein-asset-minifier "0.3.0"]]
+             :exclusions [org.clojure/clojure]]]
   :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
   :resource-paths ["config" "resources"]
   :source-paths ["src"]
@@ -131,8 +130,4 @@
   :jvm-opts ["-Xmx8g" "-XX:-OmitStackTraceInFastThrow"]
   :profiles {:uberjar {:aot :all}}
   :uberjar-name "spectra-standalone.jar"
-  :prep-tasks ["compile" ["cljsbuild" "once"]]
-  :minify-assets {:assets
-                  {"resources/public/js/main.min.js"
-                   ["resources/public/js/main"
-                    "resources/public/js/main.js"]}})
+  :prep-tasks ["compile" ["cljsbuild" "once"]])
