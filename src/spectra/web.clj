@@ -5,6 +5,8 @@
             [ring.util.response :as resp]
             [ring.middleware.defaults :refer :all]
             [clojure.java.io :as io]
+            [clojure.edn :as edn]
+            [clojure.string :as str]
             [spectra_cljc.schema :as s]
             [spectra.common :refer :all]
             [spectra.ajax :as ajax]
@@ -146,8 +148,18 @@
           (ajax/restart-ajax!)))
       (handler request))))
 
+(defn set-property! [[k v]]
+  (let [system (System/getProperties)]
+    (.setProperty system (str/replace (name k) "-" "_") v)))
+
+(defn set-properties! []
+  (when-let [prop-file (env :prop-file)]
+    (let [system (System/getProperties)]
+      (->> prop-file slurp edn/read-string vals first
+           (into []) (mapv set-property)))))
+
 (defn -main [& args]
-  (app-init!)
+  (set-properties!) (app-init!)
   (let [handler (if (in-dev?)
                   (wrap-reload #'secure-app)
                   secure-app)]
