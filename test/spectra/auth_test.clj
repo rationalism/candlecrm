@@ -7,6 +7,7 @@
 (defn graph-ready [f]
   (neo4j/graph-connect!)
   (neo4j/reset-session!)
+  (load-keys!)
   (f)
   (neo4j/close-session!))
 
