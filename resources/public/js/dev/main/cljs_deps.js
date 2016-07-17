@@ -55,3 +55,12 @@ goog.addDependency("../taoensso/sente.js", ['taoensso.sente'], ['cljs.core', 'ta
 goog.addDependency("../spectra_cljs/ajax_demo.js", ['spectra_cljs.ajax_demo'], ['cljs.core', 'taoensso.sente', 'taoensso.timbre', 'clojure.string']);
 goog.addDependency("../spectra_cljs/ajax.js", ['spectra_cljs.ajax'], ['goog.dom', 'spectra_cljs.state', 'cljs.core', 'cljs.core.async', 'spectra_cljs.update', 'spectra_cljc.schema', 'taoensso.sente', 'taoensso.timbre', 'spectra_cljs.ajax_demo', 'clojure.string', 'taoensso.encore']);
 goog.addDependency("../spectra_cljs/init.js", ['spectra_cljs.init'], ['goog.dom', 'cljs.core', 'spectra_cljs.pages', 'clojure.string', 'goog.events', 'spectra_cljs.ajax']);
+goog.addDependency("../figwheel/client/utils.js", ['figwheel.client.utils'], ['goog.userAgent.product', 'cljs.core', 'clojure.string']);
+goog.addDependency("../figwheel/client/file_reloading.js", ['figwheel.client.file_reloading'], ['goog.string', 'goog.net.jsloader', 'goog.Uri', 'cljs.core', 'goog.object', 'cljs.core.async', 'clojure.set', 'figwheel.client.utils', 'clojure.string']);
+goog.addDependency("../cljs/spec/impl/gen.js", ['cljs.spec.impl.gen'], ['cljs.core']);
+goog.addDependency("../cljs/spec.js", ['cljs.spec'], ['cljs.core', 'goog.object', 'cljs.spec.impl.gen', 'clojure.string', 'clojure.walk']);
+goog.addDependency("../cljs/repl.js", ['cljs.repl'], ['cljs.core', 'cljs.spec']);
+goog.addDependency("../figwheel/client/socket.js", ['figwheel.client.socket'], ['cljs.core', 'figwheel.client.utils', 'cljs.reader']);
+goog.addDependency("../figwheel/client/heads_up.js", ['figwheel.client.heads_up'], ['goog.dom', 'goog.string', 'cljs.core', 'goog.dom.dataset', 'goog.object', 'cljs.core.async', 'cljs.pprint', 'figwheel.client.socket', 'clojure.string']);
+goog.addDependency("../figwheel/client.js", ['figwheel.client'], ['goog.userAgent.product', 'goog.Uri', 'cljs.core', 'goog.object', 'cljs.core.async', 'figwheel.client.file_reloading', 'figwheel.client.utils', 'cljs.repl', 'figwheel.client.heads_up', 'figwheel.client.socket', 'clojure.string', 'cljs.reader']);
+goog.addDependency("../figwheel/connect.js", ['figwheel.connect'], ['spectra_cljs.init', 'cljs.core', 'figwheel.client', 'figwheel.client.utils']);

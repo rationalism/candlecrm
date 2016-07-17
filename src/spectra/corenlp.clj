@@ -152,19 +152,15 @@
 (defn load-rels [filename]
   (->> filename deserialize (reset! rel-sentences)))
 
-(defn types-from-dirnames [dirnames]
-  (->> (str/split (last dirnames) #"_")
-       (mapv keyword)))
+(defn read-file-pair [[k v]]
+  {(mapv keyword (-> k (subs 1) (str/split #"_")))
+   (-> v first .toString rel-from-file)})
 
 (defn deserialize-rel-models [dir]
-  (->> dir cp/resources (map #(.getCanonicalPath %))
-       (map (juxt #(str/split % #"/") rel-from-file))
-       (map #(update % 0 types-from-dirnames))
-       (into {})))
+  (->> dir cp/resources (map read-file-pair) (apply merge)))
 
 (defn get-rel-fn []
-  (let [models-dir "models/relations"
-        rel-model-dir (io/resource models-dir)]
+  (let [models-dir "models/relations"]
     (fn [] (deserialize-rel-models models-dir))))
 
 ;; Use this like a pipeline, as prep for relation extractor
