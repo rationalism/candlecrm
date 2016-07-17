@@ -120,7 +120,7 @@
                            :asset-path "/js/main"
                            :output-dir "resources/public/js/main"
                            :output-to "resources/public/js/main.js"
-                           :optimizations :simple}
+                           :optimizations :none}
                 :jar true}}}
   :repl-options {:init (do (set! *print-length* 60) (-main))
                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}

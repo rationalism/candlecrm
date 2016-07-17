@@ -22,7 +22,6 @@
 
 ;;;; Client-side setup
 
-
 (let [rand-chsk-type :auto
       {:keys [chsk ch-recv send-fn state]}
       (sente/make-channel-socket! "/chsk" ; Note the same URL as before
