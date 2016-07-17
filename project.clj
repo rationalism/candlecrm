@@ -34,22 +34,27 @@
                   :classifier "models"]
                  [com.googlecode.libphonenumber/libphonenumber "7.4.5"]
                  [org.deeplearning4j/deeplearning4j-core "0.4.0"
-                  :exclusions [com.fasterxml.jackson.core/jackson-core
+                  :exclusions [com.google.guava/guava org.json/json
                                org.apache.commons/commons-compress
-                               com.google.guava/guava org.json/json]]
+                               com.fasterxml.jackson.core/jackson-core
+                               org.projectlombok/lombok]]
                  [org.deeplearning4j/deeplearning4j-nlp "0.4.0"
                   :uberjar-merge-with {#"\.properties$" [slurp str spit]
                                        "reference.conf" [slurp str spit]}
-                  :exclusions [com.google.code.findbugs/jsr305
-                               com.google.guava/guava
+                  :exclusions [com.google.guava/guava
+                               com.google.code.findbugs/jsr305
+                               org.eclipse.jetty/jetty-util
                                com.fasterxml.jackson.core/jackson-core]]
                  [org.nd4j/nd4j-x86 "0.4-rc3.8"
-                  :exclusions [org.bytedeco/javacpp com.google.guava/guava]]
+                  :exclusions [com.google.guava/guava junit
+                               org.bytedeco/javacpp]]
                  [com.joestelmach/natty "0.12"]
                  [org.neo4j.driver/neo4j-java-driver "1.0.4"]
                  [pandect "0.6.0"]
-                 [aysylu/loom "0.6.0"]
-                 [com.taoensso/sente "1.9.0"]
+                 [aysylu/loom "0.6.0"
+                  :exclusions [org.clojure/data.priority-map]]
+                 [com.taoensso/sente "1.9.0"
+                  :exclusions [org.clojure/tools.reader]]
                  [clojurewerkz/quartzite "2.0.0"]
                  [reagent "0.6.0-rc"]
                  [jayq "2.5.4"]
@@ -59,7 +64,8 @@
                  [clojure-csv/clojure-csv "2.0.2"]
                  [org.apache.commons/commons-lang3 "3.4"]
                  [com.sendgrid/sendgrid-java "2.2.2"]
-                 [reagent-forms "0.5.24"]
+                 [reagent-forms "0.5.24"
+                  :exclusions [com.google.guava/guava]]
                  [org.apache.commons/commons-math3 "3.6.1"]
                  [org.bitbucket.cowwoc/diff-match-patch "1.1"]
                  [org.seleniumhq.selenium/selenium-java "2.53.1"]
@@ -67,7 +73,8 @@
                   :exclusions [com.google.guava/guava]]
                  [figwheel-sidecar "0.5.4-7"]
                  [org.jsoup/jsoup "1.9.2"]
-                 [cc.mallet/mallet "2.0.8"]
+                 [cc.mallet/mallet "2.0.8"
+                  :exclusions [org.hamcrest/hamcrest-core]]
                  [org.ahocorasick/ahocorasick "0.3.0"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.3"]
