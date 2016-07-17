@@ -40,3 +40,4 @@
 
 ;; initialize the HTML page in unobtrusive way
 (set! (.-onload js/window) init)
+

@@ -7,11 +7,11 @@ goog.require('spectra_cljs.ajax');
 goog.require('spectra_cljs.pages');
 goog.require('clojure.string');
 spectra_cljs.init.init = (function spectra_cljs$init$init(){
-if(cljs.core.truth_((function (){var and__26809__auto__ = document;
-if(cljs.core.truth_(and__26809__auto__)){
+if(cljs.core.truth_((function (){var and__6235__auto__ = document;
+if(cljs.core.truth_(and__6235__auto__)){
 return document.getElementById;
 } else {
-return and__26809__auto__;
+return and__6235__auto__;
 }
 })())){
 cljs.core.enable_console_print_BANG_.call(null);
@@ -25,4 +25,4 @@ return null;
 });
 window.onload = spectra_cljs.init.init;
 
-//# sourceMappingURL=init.js.map?rel=1468744503490
+//# sourceMappingURL=init.js.map

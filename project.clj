@@ -112,7 +112,7 @@
                            :asset-path "/js/login"
                            :output-dir "resources/public/js/login"
                            :output-to "resources/public/js/login.js"
-                           :optimizations :simple}
+                           :optimizations :none}
                 :jar true}
                :prod
                {:source-paths ["src/spectra_cljs" "src/spectra_cljc"]
