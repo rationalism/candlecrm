@@ -1,5 +1,6 @@
 (ns spectra.mlrecon-test
   (:require [clojure.test :refer :all]
+            [spectra.ajax :as ajax]
             [spectra.auth :as auth]
             [spectra.insert :as insert]
             [spectra.loom :as loom]
@@ -11,6 +12,7 @@
   (neo4j/graph-connect!)
   (neo4j/reset-session!)
   (auth/load-keys!)
+  (reset! neo4j/ajax-send! ajax/chsk-send!)
   (f)
   (neo4j/close-session!))
 
