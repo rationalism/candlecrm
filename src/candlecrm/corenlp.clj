@@ -279,6 +279,10 @@
     (->> mention mention-chars (map #(- % offset))
          (apply subs (.toString (.getSentence mention))))))
 
+(defn mention-hash [mention]
+  (-> (.hashCode mention) (str (mention-text mention))
+      sha1 (subs 0 10)))
+
 (defn char-token-map [token]
   (zipmap (range (.beginPosition token)
                  (.endPosition token))
@@ -314,7 +318,7 @@
   (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
     (-> {s/type-label node-type}
         (merge {s/link-text (mention-text entity)})
-        (merge {s/hash-code (str "hc" (.hashCode entity))})
+        (merge {s/hash-code (str "hc" (mention-hash entity))})
         (merge (condp some [node-type]
                  #{s/event}
                  (let [node-dates (-> entity mention-text
@@ -572,13 +576,13 @@
   (let [rel-type (-> relation .getType s/relation-map)
         graph-map (->> ner-graph loom/nodes (mapkeys s/hash-code))
         old-node (->> relation .getEntityMentionArgs
-                      first .hashCode (str "hc") graph-map)]
+                      first mention-hash (str "hc") graph-map)]
     (if (some #{rel-type} s/is-attr)
       (->> relation .getEntityMentionArgs second mention-text
            vector (hash-map rel-type) (merge-with concat old-node)
            (loom/replace-node ner-graph old-node))
       (->> relation .getEntityMentionArgs reverse
-           (map #(str "hc" (.hashCode %))) (map graph-map)
+           (map #(str "hc" (mention-hash %))) (map graph-map)
            (cons rel-type) reverse vec vector
            (loom/add-edges ner-graph)))))
 
@@ -638,7 +642,7 @@
   (if (-> mention .getType s/schema-map (= s/webpage))
     (->> mention mention-text url-brackets)
     (->> mention mention-text
-         (hash-brackets (str "hc" (.hashCode mention))))))
+         (hash-brackets (str "hc" (mention-hash mention))))))
 
 (defn switch-val [[param _]]
   (if (= (type param) Annotation) ""
