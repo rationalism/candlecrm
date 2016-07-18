@@ -173,7 +173,8 @@
    s/location
    [s/s-name s/zipcode]
    #_s/event
-   #_[s/start-time s/stop-time]})
+   #_[s/start-time s/stop-time s/event-begin
+      s/event-end s/website]})
 
 (def scoring
   {s/email
@@ -206,8 +207,15 @@
      [s/loc-inside s/s-name] [overlap lcs lev shortest]
      [s/link-to s/link-id] [overlap]]]
    s/event
-   [[[s/start-time] [is-eq abs]]
-    [[s/stop-time] [is-eq abs]]]
+   [[[s/start-time] [is-eq lcs lev shortest]]
+    [[s/stop-time] [is-eq lcs lev shortest]
+     [s/event-begin] [is-eq abs]
+     [s/event-end] [is-eq abs]
+     [s/duration] [is-eq lcs lev shortest]
+     [s/frequency] [is-eq lcs lev shortest]
+     [s/website] [overlap]
+     [s/event-features s/s-name] [overlap lcs lev len-and-diff]
+     [s/event-org s/s-name] [overlap lcs lev len-and-diff]]]
    s/email-body
    [[[s/email-body] [(count-regex #"\s+") (count-regex #">")
                      (count-regex #"\n|\r")
