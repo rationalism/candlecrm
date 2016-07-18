@@ -25,9 +25,12 @@
 
 (defonce nlp-channel (atom nil))
 
+(defn str-check [author]
+  (if (string? author) author "Nobody"))
+
 (defn author-name [chain message]
   (-> (loom/out-edge-label chain message s/email-from)
-      second s/s-name))
+      second s/s-name str-check))
 
 (defnp nlp-models-fn []
   {:ner ((nlp/get-ner-fn))
