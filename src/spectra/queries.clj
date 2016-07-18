@@ -82,7 +82,7 @@
   (when node (merge node {:type (:type query-map)})))
 
 (def node-paths
-  {s/person [[s/s-name] [s/email-addr] [s/phone-num]
+  {s/person [[s/s-name] [s/email-addr] [s/phone-num] [s/birthday]
              [s/org-member s/s-name :id] [s/website]]
    s/email [[s/email-subject] [s/email-body] [s/email-sent]
             [s/email-from s/email-addr :id] [s/email-to s/email-addr :id]

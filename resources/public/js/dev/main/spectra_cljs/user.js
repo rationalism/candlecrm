@@ -20,4 +20,4 @@ return spectra_cljs.state.set_BANG_.call(null,new cljs.core.PersistentVector(nul
 })], null),"Close account"], null)], null),(cljs.core.truth_(spectra_cljs.state.look.call(null,new cljs.core.Keyword(null,"delete-account","delete-account",725157341),new cljs.core.Keyword(null,"confirm-box","confirm-box",855647343)))?new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [spectra_cljs.user.confirm_box], null):null)], null);
 });
 
-//# sourceMappingURL=user.js.map?rel=1468803654718
+//# sourceMappingURL=user.js.map?rel=1468804319884

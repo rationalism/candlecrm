@@ -37,13 +37,13 @@ return marker;
 spectra_cljs.map.wipe_markers = (function spectra_cljs$map$wipe_markers(markers){
 return cljs.core.clj__GT_js.call(null,cljs.core.remove.call(null,cljs.core.nil_QMARK_,cljs.core.map.call(null,(function (){
 return cljs.core.constantly.call(null,null);
-}),cljs.core.map.call(null,(function (p1__25049_SHARP_){
-return p1__25049_SHARP_.setMap(null);
+}),cljs.core.map.call(null,(function (p1__26969_SHARP_){
+return p1__26969_SHARP_.setMap(null);
 }),markers))));
 });
 spectra_cljs.map.new_markers = (function spectra_cljs$map$new_markers(markers){
-return cljs.core.clj__GT_js.call(null,cljs.core.map.call(null,spectra_cljs.map.map_marker,cljs.core.map.call(null,(function (p1__25050_SHARP_){
-return cljs.core.assoc.call(null,p1__25050_SHARP_,new cljs.core.Keyword(null,"map","map",1371690461),spectra_cljs.state.look.call(null,new cljs.core.Keyword(null,"map-obj","map-obj",-1129422030)));
+return cljs.core.clj__GT_js.call(null,cljs.core.map.call(null,spectra_cljs.map.map_marker,cljs.core.map.call(null,(function (p1__26970_SHARP_){
+return cljs.core.assoc.call(null,p1__26970_SHARP_,new cljs.core.Keyword(null,"map","map",1371690461),spectra_cljs.state.look.call(null,new cljs.core.Keyword(null,"map-obj","map-obj",-1129422030)));
 }),spectra_cljs.state.look.call(null,new cljs.core.Keyword(null,"map-markers","map-markers",-1522832471),new cljs.core.Keyword(null,"data","data",-232669377)))));
 });
 spectra_cljs.map.markers_update = (function spectra_cljs$map$markers_update(){
@@ -81,4 +81,4 @@ spectra_cljs.map.map_box = (function spectra_cljs$map$map_box(){
 return reagent.core.create_class.call(null,new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null,"reagent-render","reagent-render",-985383853),spectra_cljs.map.location_html,new cljs.core.Keyword(null,"component-did-mount","component-did-mount",-1126910518),spectra_cljs.map.map_did_mount,new cljs.core.Keyword(null,"component-did-update","component-did-update",-1468549173),spectra_cljs.map.resize_map], null));
 });
 
-//# sourceMappingURL=map.js.map?rel=1468803654537
+//# sourceMappingURL=map.js.map?rel=1468804319721

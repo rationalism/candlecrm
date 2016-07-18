@@ -8,12 +8,13 @@
             [spectra_cljs.util :as util]))
 
 (def display-fields {s/person [s/s-name s/email-addr s/phone-num s/website
-                               s/org-member]
+                               s/org-member s/birthday]
                      s/email [s/email-sent s/email-from s/email-to s/email-body]
                      s/organization [s/s-name s/email-addr s/phone-num s/website
                                      s/org-member]
                      s/location [s/s-name s/zipcode s/email-mentions]
                      s/event [s/s-name s/date-time s/event-type s/website
+                              s/event-begin s/event-end
                               s/event-features s/email-mentions]
                      s/building [s/street-addr s/located-in s/email-mentions
                                  s/event-org s/mail-address s/has-coord]

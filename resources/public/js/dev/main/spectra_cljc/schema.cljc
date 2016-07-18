@@ -227,7 +227,8 @@
                   email-reply email-replyto email-mentions])
 
 (def date-times [start-time stop-time over-time date-time
-                 email-sent email-received])
+                 email-sent email-received birthday
+                 event-begin event-end])
 
 (def exclude-upload [type-label :id])
 
