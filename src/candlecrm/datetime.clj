@@ -51,7 +51,7 @@
 
 (defn parse-dates [text reference]
   (try
-    (->> (parse-dates-raw text reference) spit-dates
+    (->> (parse-dates-raw text reference)
          #_(filter #(-> % (.getText) is-good-date?)))
     (catch java.lang.NullPointerException e
       (do (throw-info! (str "Date parse error on: " text))
