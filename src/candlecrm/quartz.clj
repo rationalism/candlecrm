@@ -137,7 +137,7 @@
   (neo4j/thread-wrap (when :nil (geocode/geocode-batch 10))))
 
 (jobs/defjob ProcessRecon [ctx]
-  (when nil (run-recon!)))
+  (when :nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
   (neo4j/thread-wrap (when :nil (email/push-email-nlp!))))

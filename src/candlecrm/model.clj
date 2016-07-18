@@ -170,10 +170,10 @@
    s/tool
    [s/part-name s/catalog-name s/desc1
     s/desc2 s/item-cost]
-   s/location
-   [s/s-name]
-   s/event
-   [s/start-time s/stop-time]})
+   #_s/location
+   #_[s/s-name]
+   #_s/event
+   #_[s/start-time s/stop-time]})
 
 (def scoring
   {s/email
