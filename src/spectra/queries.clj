@@ -212,11 +212,14 @@
         (update query-map :person-id #(Integer/parseInt %))]
        neo4j/cypher-query (mapv mlrecon/mapify-params)))
 
-(def loc-paths [[s/s-name] [s/has-coord s/lat] [s/has-coord s/lng]])
+(def loc-paths [[s/street-addr] [s/located-in s/s-name] [s/located-in s/zipcode]
+                [s/has-coord s/lat] [s/has-coord s/lng]])
 
-(defn update-lat-lon [m]
-  (-> (update m s/lat first)
-      (update s/lng first)))
+(defn normalize-loc [[addrs locs zips lats lngs]]
+  {s/lat (first lats) s/lng (first lngs)
+   s/s-name [(str (str/join " " addrs) ", "
+                  (str/join " " locs) " "
+                  (str/join " " zips))]})
 
 (defn loc-related [user query-map]
   (->> [(str (rel-query user)
@@ -227,10 +230,8 @@
              " RETURN ID(ev) SKIP {start} LIMIT {limit}")
         (update query-map :person-id #(Integer/parseInt %))]
        neo4j/cypher-query (map vals) (mapv first)
-       (mlrecon/fetch-all-paths loc-paths)
-       (fmapl #(zipmap (map last loc-paths) %))
-       (map #(merge (val %) {:id (key %) :label s/location}))
-       (map update-lat-lon)))
+       (mlrecon/fetch-all-paths loc-paths) (fmapl normalize-loc)
+       (map #(merge (val %) {:id (key %) :label s/building}))))
 
 (defn bare-locations [limit]
   (-> [(str "MATCH (root:" (neo4j/esc-token s/nogeocode)
