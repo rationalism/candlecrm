@@ -8,7 +8,7 @@
    s/mail-address s/website s/email-subject s/email-body s/email-uid
    s/email-received s/email-sent s/lat s/lng s/date-time
    s/start-time s/stop-time s/s-name s/street-addr s/zipcode
-   s/event-begin s/event-end
+   s/event-begin s/event-end s/event-cost s/frequency s/duration
    ;; Special for Barry's project
    s/vendor-name s/part-name s/catalog-name s/desc1 s/desc2 s/item-cost])
 
