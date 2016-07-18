@@ -5,9 +5,7 @@
             [candlecrm_cljs.update :as u]))
 
 (defn get-first [node attr]
-  (->> (get node attr) (into [])
-       (sort-by second >)
-       ffirst))
+  (u/get-first node attr))
 
 (defn node-link [text id type]
   [:a.go-node

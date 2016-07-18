@@ -5,6 +5,11 @@
 
 (def timeout timeout)
 
+(defn get-first [node attr]
+  (->> (get node attr) (into [])
+       (sort-by second >)
+       ffirst))
+
 (defn send! [req update-fn]
   ((state/look :ajax-chan) req 5000 update-fn))
 
@@ -104,7 +109,9 @@
    (assoc (rel-map s/building) :person-id person-id)])
 
 (defn normalize-cal [cal]
-  (-> cal (set/rename-keys {s/event-begin :start s/event-end :end})
+  (-> (assoc cal :start (get-first cal s/event-begin))
+      (assoc :end (get-first cal s/event-end))
+      (dissoc s/event-begin s/event-end)
       (assoc :title (str (:id cal)))))
 
 (defn update-cal-rows! [new-rows]
