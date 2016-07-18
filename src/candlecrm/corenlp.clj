@@ -715,7 +715,7 @@
        number-items (filter #(-> % second (= fpp-join)))
        ffirst))
 
-(defn is-fpp-mention? [author mention]
+(defnc is-fpp-mention? [author mention]
   (and (< (.getHeadTokenStart mention) (fpp-pos (.getSentence mention)))
        (.contains author (mention-text mention))))
 
