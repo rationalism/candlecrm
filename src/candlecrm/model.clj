@@ -172,9 +172,9 @@
     s/desc2 s/item-cost]
    s/location
    [s/s-name s/zipcode]
-   #_s/event
-   #_[s/start-time s/stop-time s/event-begin
-      s/event-end s/website]})
+   s/event
+   [s/start-time s/stop-time s/event-begin
+    s/event-end s/website]})
 
 (def scoring
   {s/email

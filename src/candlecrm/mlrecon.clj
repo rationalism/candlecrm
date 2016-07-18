@@ -73,6 +73,7 @@
        (filter #(= (dec (count %)) 1))
        (map last) (filter #(.contains % ".dat"))
        (remove #(.contains % "-curve"))
+       (remove #(.contains % "-scorer"))
        (map #(str/split % #"\.")) (map first)
        (filter #(.contains % (str (name class) "-")))
        (map #(str/split % #"-")) (map last)
