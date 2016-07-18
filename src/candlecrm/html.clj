@@ -37,7 +37,7 @@
   [:div#page-header {:class "pure-g"}
    [:div {:class "pure-u-1-12"}]
    [:div {:class "pure-u-5-6"}
-    [:h1 "Spectra"]]])
+    [:h1 "CandleCRM"]]])
 
 (defn footer-box []
   [:div#page-footer {:class "pure-g"}
@@ -47,7 +47,7 @@
 
 (defn base-template [& content]
   (html5 {:lang "en"}
-         [:head [:title "Spectra"]
+         [:head [:title "CandleCRM"]
           (pure-css) (viewport)
           (include-css "/css/main.css")]
          [:body
@@ -59,7 +59,7 @@
 
 (defn app-template [& content]
   (html5 {:lang "en"}
-         [:head [:title "Spectra"]
+         [:head [:title "CandleCRM"]
           (pure-css) (viewport)
           (include-css "/css/fullcalendar.min.css")
           (include-css "/css/main.css")]

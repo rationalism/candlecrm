@@ -133,7 +133,7 @@
     :else (password-check password confirm)))
 
 (defn pwd-reset-email [token]
-  (->> ["Hello. You have requested a password reset on Spectra."
+  (->> ["Hello. You have requested a password reset on CandleCRM."
         ""
         "To reset your password, just follow this link:"
         ""
