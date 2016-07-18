@@ -101,7 +101,8 @@
    s/event [[s/s-name] [s/date-time] [s/event-begin] [s/event-end]
             [s/event-type] [s/website]
             [s/event-features s/s-name :id]
-            [s/link-to s/email-mentions s/email-subject :id]]})
+            [s/link-to s/email-mentions s/email-subject :id]]
+   s/geocode [[s/lat] [s/lng] [s/has-coord s/street-addr :id]]})
 
 (defn node-by-id [user {:keys [id type] :as query-map}]
   (when (neo4j/node-exists? user id type)
