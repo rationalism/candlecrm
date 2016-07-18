@@ -8,11 +8,12 @@
             [candlecrm_cljs.util :as util]))
 
 (def display-fields {s/person [s/s-name s/email-addr s/phone-num s/website
-                               s/org-member s/birthday]
+                               s/org-member s/birthday s/location s/mail-address]
                      s/email [s/email-sent s/email-from s/email-to s/email-body]
                      s/organization [s/s-name s/email-addr s/phone-num s/website
                                      s/org-member]
-                     s/location [s/s-name s/zipcode s/email-mentions]
+                     s/location [s/s-name s/zipcode s/email-mentions
+                                 s/loc-inside s/located-in s/location]
                      s/event [s/s-name s/date-time s/event-type s/website
                               s/event-begin s/event-end
                               s/event-features s/email-mentions]
@@ -143,22 +144,21 @@
            [display-item (is-last? list-member (util/add-ids item))
             (second list-member)])
          :else item) " "
-   (when (and item (coll? item) (not (empty? item))
-              (> (count item) 1))
-     [ask-more prop])])
+   [ask-more prop]])
 
 (defn str-item [n k v]
   [:span [:strong (str n ": ")]
    [string-item v k]])
 
-(defn get-filter-limit [attr]
-  (if-let [filter-level (state/look :prop-filters attr)]
-    (condp = filter-level
-      1 -0.3333 2 -1.0 -9999.0)
-    0.3333))
+(defn get-filter-limit [attr item]
+  (let [max-val (->> (get item attr) vals (apply max) (+ -0.01))]
+    (if-let [filter-level (state/look :prop-filters attr)]
+      (condp = filter-level
+        1 (min -0.3333 max-val) 2 -1.0 -9999.0)
+      (min 0.3333 max-val))))
 
 (defn filtered-list [attr item]
-  (let [limit (get-filter-limit attr)]
+  (let [limit (get-filter-limit attr item)]
     (->> attr (get item)
          (filter #(-> % second (> limit)))
          (sort-by second >) (map first))))
