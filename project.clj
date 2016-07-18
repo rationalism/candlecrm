@@ -99,9 +99,9 @@
   :source-paths ["src"]
   :cljsbuild {:builds
               {:dev
-               {:source-paths ["src/spectra_cljs" "src/spectra_cljc"]
+               {:source-paths ["src/candlecrm_cljs" "src/candlecrm_cljc"]
                 :figwheel {:websocket-url "wss://www.candlecrm.com:3450/figwheel-ws"}
-                :compiler {:main "spectra_cljs.init"
+                :compiler {:main "candlecrm_cljs.init"
                            :asset-path "/js/dev/main"
                            :output-dir "resources/public/js/dev/main"
                            :output-to "resources/public/js/dev/main.js"
@@ -109,16 +109,16 @@
                            :pretty-print true}
                 :jar false}
                :login
-               {:source-paths ["src/spectra_login"]
-                :compiler {:main "spectra_login.login"
+               {:source-paths ["src/candlecrm_login"]
+                :compiler {:main "candlecrm_login.login"
                            :asset-path "/js/login"
                            :output-dir "resources/public/js/login"
                            :output-to "resources/public/js/login.js"
                            :optimizations :simple}
                 :jar true}
                :prod
-               {:source-paths ["src/spectra_cljs" "src/spectra_cljc"]
-                :compiler {:main "spectra_cljs.init"
+               {:source-paths ["src/candlecrm_cljs" "src/candlecrm_cljc"]
+                :compiler {:main "candlecrm_cljs.init"
                            :asset-path "/js/main"
                            :output-dir "resources/public/js/main"
                            :output-to "resources/public/js/main.js"
@@ -129,5 +129,5 @@
   :main spectra.web
   :jvm-opts ["-Xmx8g" "-XX:-OmitStackTraceInFastThrow"]
   :profiles {:uberjar {:aot :all}}
-  :uberjar-name "spectra-standalone.jar"
+  :uberjar-name "candlecrm-standalone.jar"
   :prep-tasks ["compile" ["cljsbuild" "once"]])
