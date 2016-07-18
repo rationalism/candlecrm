@@ -131,16 +131,16 @@
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
-  (when nil (queue-pop!)))
+  (when :nil (queue-pop!)))
 
 (jobs/defjob NewGeocodes [ctx]
-  (neo4j/thread-wrap (when nil (geocode/geocode-batch 10))))
+  (neo4j/thread-wrap (when :nil (geocode/geocode-batch 10))))
 
 (jobs/defjob ProcessRecon [ctx]
-  (when nil (run-recon!)))
+  (when :nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
-  (neo4j/thread-wrap (when nil (email/push-email-nlp!))))
+  (neo4j/thread-wrap (when :nil (email/push-email-nlp!))))
 
 (jobs/defjob EmailRefresh [ctx]
   (neo4j/thread-wrap
