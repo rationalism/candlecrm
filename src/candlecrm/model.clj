@@ -160,7 +160,8 @@
    s/person []
    s/location []
    s/event []
-   s/building []})
+   s/building []
+   s/organization []})
 
 (def candidates
   {s/email
@@ -168,6 +169,9 @@
     s/email-received s/email-sent]
    s/person
    [s/s-name s/email-addr s/phone-num]
+   s/organization 
+   [s/s-name s/email-addr s/phone-num
+    s/website]
    s/tool
    [s/part-name s/catalog-name s/desc1
     s/desc2 s/item-cost]
@@ -223,6 +227,14 @@
    [[[s/street-addr] [is-eq lcs lev shortest]]
     [[s/located-in s/zipcode] [is-eq lcs lev shortest]]
     [[s/located-in s/s-name] [is-eq lcs lev shortest]]]
+   s/organization
+   [[[s/s-name] [overlap lcs lev len-and-diff]]
+    [[s/website] [overlap]]
+    [[s/email-addr] [overlap is-eq shortest]]
+    [[s/phone-num] [overlap is-eq]]
+    [[s/email-from s/email-sent] [overlap is-eq]]
+    [[s/email-to s/email-sent] [overlap is-eq]]
+    [[s/link-to s/has-link s/email-sent] [is-eq]]]
    s/email-body
    [[[s/email-body] [(count-regex #"\s+") (count-regex #">")
                      (count-regex #"\n|\r")

@@ -240,7 +240,7 @@
 
 (defn bare-locations [limit]
   (-> [(str "MATCH (root:" (neo4j/esc-token s/nogeocode)
-            ":" (neo4j/esc-token s/norecon)
+            ":" (neo4j/esc-token s/recon)
             ") WHERE NOT (root)-[:" (neo4j/esc-token s/has-coord)
             "]->() RETURN root LIMIT {limit}")
        {:limit limit}]
