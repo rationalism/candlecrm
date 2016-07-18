@@ -220,7 +220,7 @@
 
 (defn loc-related [user query-map]
   (->> [(str (rel-query user)
-             (neo4j/prop-label user s/location)
+             (neo4j/prop-label user s/building)
              ")-[:" (neo4j/esc-token s/has-coord)
              "]->(g:" (neo4j/prop-label user s/geocode)
              ") WHERE ID(root) = {`person-id`}"

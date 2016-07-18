@@ -53,7 +53,7 @@
   (update-tables!)
   (u/update-user!)
   (u/fetch-ranks! s/event)
-  (u/fetch-ranks! s/location))
+  (u/fetch-ranks! s/building))
 
 (defmulti event-msg-handler :id) ; Dispatch on event-id
 

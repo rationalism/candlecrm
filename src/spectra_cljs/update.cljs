@@ -101,7 +101,7 @@
 
 (defn person-place-req [person-id]
   [:pages/person-places
-   (assoc (rel-map s/location) :person-id person-id)])
+   (assoc (rel-map s/building) :person-id person-id)])
 
 (defn normalize-cal [cal]
   (-> cal (set/rename-keys {s/event-begin :start s/event-end :end})
@@ -131,7 +131,7 @@
 (defn rel-switch [person-id rel-type]
   (condp = rel-type
     s/event (cal-events person-id)
-    s/location (map-markers person-id)
+    s/building (map-markers person-id)
     nil))
 
 (defn strip-ids [m]

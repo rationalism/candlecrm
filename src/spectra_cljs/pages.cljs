@@ -42,14 +42,12 @@
 
 (defn calendar []
   [:div#calendar
-   [people-ranks s/event]
-   [:br]
+   [people-ranks s/event] [:br]
    [calendar/calendar-box]])
 
 (defn locations []
   [:div#locations
-   [people-ranks s/location]
-   [:br]
+   [people-ranks s/building] [:br]
    [map/map-box]])
 
 (defn filter-display [attrs]
