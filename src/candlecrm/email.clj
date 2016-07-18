@@ -28,7 +28,7 @@
 (defn author-name [chain message]
   {:post [(string? %)]}
   (-> (loom/out-edge-label chain message s/email-from)
-      second (.get (name s/s-name))))
+      second s/s-name))
 
 (defnp nlp-models-fn []
   {:ner ((nlp/get-ner-fn))
