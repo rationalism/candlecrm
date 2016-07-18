@@ -16,14 +16,16 @@
                      s/event [s/s-name s/date-time s/event-type s/website
                               s/event-features s/email-mentions]
                      s/building [s/street-addr s/located-in s/email-mentions
-                                 s/event-org s/mail-address s/has-coord]})
+                                 s/event-org s/mail-address s/has-coord]
+                     s/geocode [s/lat s/lng s/has-coord]})
 
 (def title-field {s/person [s/s-name s/email-addr "(No name)"]
                   s/email [s/email-subject "(No subject)"]
                   s/organization [s/s-name s/email-addr "(No name)"]
                   s/location [s/s-name "(No name)"]
                   s/building [s/street-addr "(No address)"]
-                  s/event [s/s-name "(No name)"]})
+                  s/event [s/s-name "(No name)"]
+                  s/geocode ["Coordinate pair"]})
 
 (defn get-title [node]
   (let [fields (-> node :center-node s/type-label title-field)]
@@ -173,7 +175,8 @@
 
 (def type-name {s/person "Person" s/email "Email"
                 s/organization "Organization" s/location "Location"
-                s/event "Event" s/building "Building"})
+                s/event "Event" s/building "Building"
+                s/geocode "Coordinates"})
 
 (defn node-aux [node-name item]
   [:div

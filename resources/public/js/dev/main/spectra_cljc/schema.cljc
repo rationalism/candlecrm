@@ -144,7 +144,8 @@
                  event-begin "Event begins at" event-end "Event ends at"
                  event-features "Event with" email-mentions "Related emails"
                  event-org "Events here by" located-in "Located in"
-                 has-coord "Coordinates"})
+                 has-coord "Coordinates" lat "Latitude" lng "Longitude"
+                 geocode "Coordinates"})
 
 (def schema-map {"PERSON" person-name "LOCATION" loc-name
                  "ORGANIZATION" org-name "MONEY" amount
