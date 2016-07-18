@@ -23,6 +23,7 @@ pom.xml
 /out
 /resources/public/js/login
 /resources/public/js/main
+/resources/public/js/dev
 /src/candlecrm/.*
 /src/candlecrm/#*
 /logs
