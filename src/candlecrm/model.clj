@@ -159,7 +159,8 @@
   {s/email [s/email-body s/email-subject s/email-sent]
    s/person []
    s/location []
-   s/event []})
+   s/event []
+   s/building []})
 
 (def candidates
   {s/email
