@@ -26,7 +26,6 @@
 (defonce nlp-channel (atom nil))
 
 (defn author-name [chain message]
-  {:post [(string? %)]}
   (-> (loom/out-edge-label chain message s/email-from)
       second s/s-name))
 

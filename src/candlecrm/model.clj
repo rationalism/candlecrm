@@ -170,8 +170,8 @@
    s/tool
    [s/part-name s/catalog-name s/desc1
     s/desc2 s/item-cost]
-   #_s/location
-   #_[s/s-name]
+   s/location
+   [s/s-name s/zipcode]
    #_s/event
    #_[s/start-time s/stop-time]})
 
@@ -200,7 +200,10 @@
     [[s/desc2] [is-eq lcs lev]]
     [[s/item-cost] [is-eq abs]]]
    s/location
-   [[[s/s-name] [is-eq lcs lev shortest]]]
+   [[[s/s-name] [is-eq lcs lev shortest]
+     [s/zipcode] [is-eq lcs lev shortest]
+     [s/loc-inside s/s-name] [overlap lcs lev shortest]
+     [s/link-to s/link-id] [overlap]]]
    s/event
    [[[s/start-time] [is-eq abs]]
     [[s/stop-time] [is-eq abs]]]
