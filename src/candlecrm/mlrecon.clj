@@ -15,6 +15,7 @@
             [candlecrm.weka :as weka]
             [candlecrm_cljc.schema :as s]
             [candlecrm.environ :refer [env]]
+            [cpath-clj.core :as cp]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [org.bitbucket.cowwoc.diffmatchpatch DiffMatchPatch
@@ -67,11 +68,9 @@
     (->> classes (mapvals load-curve!) (reset! recon-logit))))
 
 (defn version-count [class]
-  (->> (models-dir) io/resource file-seq
-       rest (map #(.getCanonicalPath %))
+  (->> (models-dir) cp/resources keys
        (map #(str/split % #"/"))
-       (filter #(= (dec (count %))
-                   (count (str/split (models-dir) #"/"))))
+       (filter #(= (dec (count %)) 1))
        (map last) (filter #(.contains % ".dat"))
        (remove #(.contains % "-curve"))
        (map #(str/split % #"\.")) (map first)
@@ -82,7 +81,8 @@
 
 (defn write-forest [class forest]
   (let [version (version-count class)
-        stem (->> class name (str (models-dir) "/") (repeat 2))]
+        write-dir (->> (models-dir) io/resource .getPath)
+        stem (->> class name (str write-dir "/") (repeat 2))]
     (when (> version 1)
       (->> (zipvec stem [".dat" (str "-" version ".dat")])
            (map #(apply str %)) (map io/file) (apply io/copy))
