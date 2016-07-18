@@ -43,10 +43,13 @@
 ;;`core.match` against events.
 
 (defn update-tables! []
-  (state/set! [:loading] true)
-  (js/setTimeout #(state/set! [:loading] false) 500)
-  (u/update-emails!)
-  (u/update-people!))
+  (when (not (state/look :loading))
+    (state/set! [:loading] true)
+    (js/setTimeout #(state/set! [:loading] false) 2000)
+    (u/update-emails!)
+    (u/update-people!)
+    (u/fetch-ranks! s/event)
+    (u/fetch-ranks! s/building)))
 
 ;; This fills in initial email values
 (defn chsk-init! []
