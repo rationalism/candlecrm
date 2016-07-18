@@ -104,7 +104,7 @@
    (assoc (rel-map s/location) :person-id person-id)])
 
 (defn normalize-cal [cal]
-  (-> cal (set/rename-keys {s/start-time :start})
+  (-> cal (set/rename-keys {s/event-begin :start s/event-end :end})
       (assoc :title (str (:id cal)))))
 
 (defn update-cal-rows! [new-rows]

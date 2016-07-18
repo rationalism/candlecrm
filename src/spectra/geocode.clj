@@ -25,12 +25,15 @@
    s/type-label s/geocode})
 
 (defn fetch-geocode [s]
-  (-> @context
-      (GeocodingApi/geocode s)
+  (-> @context (GeocodingApi/geocode s)
       (.await) first))
 
+(defn full-location [[addr loc zip]]
+  (str (first addr) ", " (str/join " " loc)
+       (str/join " " zip)))
+
 (defn geocode-str [s]
-  (when-let [geocode (fetch-geocode s)]
+  (when-let [geocode (-> s full-location fetch-geocode)]
     (-> geocode .geometry .location map-latlng)))
 
 (defn remove-geo-label [id]
@@ -48,7 +51,9 @@
 (defn geocode-batch [limit]
   (->> (queries/bare-locations limit)
        (map #(vector [(->> % (.labels) queries/find-user-labels)
-                      (.id %)] (.id %))) (into {}) 
-       (fmapl (comp geocode-str ffirst
-                    #(mlrecon/fetch-paths % [[s/s-name]])))
+                      (.id %)] (.id %))) (into {})
+       (fmapl (comp geocode-str
+                    #(mlrecon/fetch-paths
+                      % [[s/street-addr] [s/located-in s/s-name]
+                         [s/located-in s/zipcode]])))
        (mapv insert-graph)))

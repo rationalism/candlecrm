@@ -14,40 +14,40 @@ return spectra_cljs.update.go_node_BANG_.call(null,id,type);
 })], null),text], null);
 });
 spectra_cljs.util.key_link = (function spectra_cljs$util$key_link(text,key,type){
-var pred__8607 = cljs.core._EQ_;
-var expr__8608 = type;
-if(cljs.core.truth_(pred__8607.call(null,new cljs.core.Keyword(null,"node","node",581201198),expr__8608))){
-return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"a.go-node","a.go-node",2024259760),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"href","href",-793805698),"#",new cljs.core.Keyword(null,"on-click","on-click",1632826543),((function (pred__8607,expr__8608){
+var pred__12923 = cljs.core._EQ_;
+var expr__12924 = type;
+if(cljs.core.truth_(pred__12923.call(null,new cljs.core.Keyword(null,"node","node",581201198),expr__12924))){
+return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"a.go-node","a.go-node",2024259760),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"href","href",-793805698),"#",new cljs.core.Keyword(null,"on-click","on-click",1632826543),((function (pred__12923,expr__12924){
 return (function (){
 return spectra_cljs.update.go_key_BANG_.call(null,key);
-});})(pred__8607,expr__8608))
+});})(pred__12923,expr__12924))
 ], null),text], null);
 } else {
-if(cljs.core.truth_(pred__8607.call(null,new cljs.core.Keyword(null,"url","url",276297046),expr__8608))){
+if(cljs.core.truth_(pred__12923.call(null,new cljs.core.Keyword(null,"url","url",276297046),expr__12924))){
 return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"a.go-node","a.go-node",2024259760),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"href","href",-793805698),key], null),text], null);
 } else {
-throw (new Error([cljs.core.str("No matching clause: "),cljs.core.str(expr__8608)].join('')));
+throw (new Error([cljs.core.str("No matching clause: "),cljs.core.str(expr__12924)].join('')));
 }
 }
 });
 spectra_cljs.util.set_field_BANG_ = (function spectra_cljs$util$set_field_BANG_(var_args){
-var args__7329__auto__ = [];
-var len__7322__auto___8611 = arguments.length;
-var i__7323__auto___8612 = (0);
+var args__27470__auto__ = [];
+var len__27467__auto___12927 = arguments.length;
+var i__27468__auto___12928 = (0);
 while(true){
-if((i__7323__auto___8612 < len__7322__auto___8611)){
-args__7329__auto__.push((arguments[i__7323__auto___8612]));
+if((i__27468__auto___12928 < len__27467__auto___12927)){
+args__27470__auto__.push((arguments[i__27468__auto___12928]));
 
-var G__8613 = (i__7323__auto___8612 + (1));
-i__7323__auto___8612 = G__8613;
+var G__12929 = (i__27468__auto___12928 + (1));
+i__27468__auto___12928 = G__12929;
 continue;
 } else {
 }
 break;
 }
 
-var argseq__7330__auto__ = ((((0) < args__7329__auto__.length))?(new cljs.core.IndexedSeq(args__7329__auto__.slice((0)),(0),null)):null);
-return spectra_cljs.util.set_field_BANG_.cljs$core$IFn$_invoke$arity$variadic(argseq__7330__auto__);
+var argseq__27471__auto__ = ((((0) < args__27470__auto__.length))?(new cljs.core.IndexedSeq(args__27470__auto__.slice((0)),(0),null)):null);
+return spectra_cljs.util.set_field_BANG_.cljs$core$IFn$_invoke$arity$variadic(argseq__27471__auto__);
 });
 
 spectra_cljs.util.set_field_BANG_.cljs$core$IFn$_invoke$arity$variadic = (function (args){
@@ -58,8 +58,8 @@ return spectra_cljs.state.set_BANG_.call(null,args,this$.target.value);
 
 spectra_cljs.util.set_field_BANG_.cljs$lang$maxFixedArity = (0);
 
-spectra_cljs.util.set_field_BANG_.cljs$lang$applyTo = (function (seq8610){
-return spectra_cljs.util.set_field_BANG_.cljs$core$IFn$_invoke$arity$variadic(cljs.core.seq.call(null,seq8610));
+spectra_cljs.util.set_field_BANG_.cljs$lang$applyTo = (function (seq12926){
+return spectra_cljs.util.set_field_BANG_.cljs$core$IFn$_invoke$arity$variadic(cljs.core.seq.call(null,seq12926));
 });
 
 spectra_cljs.util.add_ids = (function spectra_cljs$util$add_ids(coll){
@@ -72,4 +72,4 @@ spectra_cljs.util.date_display = (function spectra_cljs$util$date_display(item){
 return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"span","span",1394872991),spectra_cljs.util.format_date.call(null,((cljs.core.coll_QMARK_.call(null,item))?cljs.core.first.call(null,item):item))], null);
 });
 
-//# sourceMappingURL=util.js.map
+//# sourceMappingURL=util.js.map?rel=1468799095538
