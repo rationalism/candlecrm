@@ -126,7 +126,7 @@
                 :jar true}}}
   :repl-options {:init (do (set! *print-length* 60) (-main))
                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
-  :main spectra.web
+  :main candlecrm.web
   :jvm-opts ["-Xmx8g" "-XX:-OmitStackTraceInFastThrow"]
   :profiles {:uberjar {:aot :all}}
   :uberjar-name "candlecrm-standalone.jar"
