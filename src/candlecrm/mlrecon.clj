@@ -655,7 +655,7 @@
   (gather-train)
   (let [new-model (train-atom user class)]
     (write-forest class new-model))
-  (load-models!)
+  (load-models!) (load-thresholds!)
   (reset! recon-pairs (candidate-sample user class 500))
   (recur user class))
 
