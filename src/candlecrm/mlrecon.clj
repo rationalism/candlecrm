@@ -628,6 +628,7 @@
         "n" (do (add-neg (first candidates))
                 (recur (rest candidates)))
         "s" (recur (rest candidates))
+        "l" (/ 1 0) ; Intentional exception to quit
         "q" nil
         (do (println "Error: Invalid input, trying again")
             (recur candidates))))))
