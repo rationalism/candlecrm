@@ -202,6 +202,7 @@
    s/location
    [[[s/s-name] [is-eq lcs lev shortest]
      [s/zipcode] [is-eq lcs lev shortest]
+     [s/located-in s/street-addr] [is-eq lcs lev shortest]
      [s/loc-inside s/s-name] [overlap lcs lev shortest]
      [s/link-to s/link-id] [overlap]]]
    s/event
