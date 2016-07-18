@@ -23,8 +23,8 @@ pom.xml
 /out
 /resources/public/js/login
 /resources/public/js/main
-/src/spectra/.*
-/src/spectra/#*
+/src/candlecrm/.*
+/src/candlecrm/#*
 /logs
 /maven_repo
 /certs
