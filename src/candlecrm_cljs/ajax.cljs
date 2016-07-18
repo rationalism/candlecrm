@@ -45,7 +45,7 @@
 (defn update-tables! []
   (when (not (state/look :loading))
     (state/set! [:loading] true)
-    (js/setTimeout #(state/set! [:loading] false) 2000)
+    (js/setTimeout #(state/set! [:loading] false) 1000)
     (u/update-emails!)
     (u/update-people!)
     (u/fetch-ranks! s/event)
