@@ -9,14 +9,14 @@ spectra_cljs.state.a = reagent.core.atom.call(null,cljs.core.PersistentHashMap.f
 }
 spectra_cljs.state.look = (function spectra_cljs$state$look(var_args){
 var args__27470__auto__ = [];
-var len__27467__auto___17506 = arguments.length;
-var i__27468__auto___17507 = (0);
+var len__27467__auto___23416 = arguments.length;
+var i__27468__auto___23417 = (0);
 while(true){
-if((i__27468__auto___17507 < len__27467__auto___17506)){
-args__27470__auto__.push((arguments[i__27468__auto___17507]));
+if((i__27468__auto___23417 < len__27467__auto___23416)){
+args__27470__auto__.push((arguments[i__27468__auto___23417]));
 
-var G__17508 = (i__27468__auto___17507 + (1));
-i__27468__auto___17507 = G__17508;
+var G__23418 = (i__27468__auto___23417 + (1));
+i__27468__auto___23417 = G__23418;
 continue;
 } else {
 }
@@ -33,8 +33,8 @@ return cljs.core.get_in.call(null,cljs.core.deref.call(null,spectra_cljs.state.a
 
 spectra_cljs.state.look.cljs$lang$maxFixedArity = (0);
 
-spectra_cljs.state.look.cljs$lang$applyTo = (function (seq17505){
-return spectra_cljs.state.look.cljs$core$IFn$_invoke$arity$variadic(cljs.core.seq.call(null,seq17505));
+spectra_cljs.state.look.cljs$lang$applyTo = (function (seq23415){
+return spectra_cljs.state.look.cljs$core$IFn$_invoke$arity$variadic(cljs.core.seq.call(null,seq23415));
 });
 
 spectra_cljs.state.person_pos = (function spectra_cljs$state$person_pos(){
@@ -48,14 +48,14 @@ return (spectra_cljs.state.look.call(null,new cljs.core.Keyword(null,"counters",
 });
 spectra_cljs.state.update_BANG_ = (function spectra_cljs$state$update_BANG_(var_args){
 var args__27470__auto__ = [];
-var len__27467__auto___17510 = arguments.length;
-var i__27468__auto___17511 = (0);
+var len__27467__auto___23420 = arguments.length;
+var i__27468__auto___23421 = (0);
 while(true){
-if((i__27468__auto___17511 < len__27467__auto___17510)){
-args__27470__auto__.push((arguments[i__27468__auto___17511]));
+if((i__27468__auto___23421 < len__27467__auto___23420)){
+args__27470__auto__.push((arguments[i__27468__auto___23421]));
 
-var G__17512 = (i__27468__auto___17511 + (1));
-i__27468__auto___17511 = G__17512;
+var G__23422 = (i__27468__auto___23421 + (1));
+i__27468__auto___23421 = G__23422;
 continue;
 } else {
 }
@@ -72,12 +72,12 @@ return cljs.core.apply.call(null,cljs.core.partial.call(null,cljs.core.swap_BANG
 
 spectra_cljs.state.update_BANG_.cljs$lang$maxFixedArity = (0);
 
-spectra_cljs.state.update_BANG_.cljs$lang$applyTo = (function (seq17509){
-return spectra_cljs.state.update_BANG_.cljs$core$IFn$_invoke$arity$variadic(cljs.core.seq.call(null,seq17509));
+spectra_cljs.state.update_BANG_.cljs$lang$applyTo = (function (seq23419){
+return spectra_cljs.state.update_BANG_.cljs$core$IFn$_invoke$arity$variadic(cljs.core.seq.call(null,seq23419));
 });
 
 spectra_cljs.state.set_BANG_ = (function spectra_cljs$state$set_BANG_(loc,val){
 return cljs.core.apply.call(null,cljs.core.partial.call(null,cljs.core.swap_BANG_,spectra_cljs.state.a,cljs.core.update_in),loc,new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [cljs.core.constantly.call(null,val)], null));
 });
 
-//# sourceMappingURL=state.js.map?rel=1468801589286
+//# sourceMappingURL=state.js.map?rel=1468803196407

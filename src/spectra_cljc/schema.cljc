@@ -137,14 +137,14 @@
                  date-time "Time" email-received "Email received"
                  email-sent "Email sent" phone-num "Phone number"
                  birthday "Birthday" gender "Gender"
-                 occupation "Occupation" mail-address "Address"
+                 occupation "Occupation" mail-address "Mailing address of"
                  website "Website" org-member "Member of"
                  url "Page address" start-time "Begins at"
                  stop-time "Ends at" street-addr "Street address"
-                 event-begin "Event begins at"
-                 event-end "Event ends at"
-                 event-features "Event with"
-                 email-mentions "Related emails"})
+                 event-begin "Event begins at" event-end "Event ends at"
+                 event-features "Event with" email-mentions "Related emails"
+                 event-org "Events here by" located-in "Located in"
+                 has-coord "Coordinates"})
 
 (def schema-map {"PERSON" person-name "LOCATION" loc-name
                  "ORGANIZATION" org-name "MONEY" amount

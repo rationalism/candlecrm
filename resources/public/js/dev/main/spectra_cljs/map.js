@@ -10,7 +10,7 @@ goog.require('spectra_cljs.util');
 goog.require('clojure.string');
 spectra_cljs.map.event_info_window = (function spectra_cljs$map$event_info_window(){
 var marker = spectra_cljs.state.look.call(null,new cljs.core.Keyword(null,"map-markers","map-markers",-1522832471),new cljs.core.Keyword(null,"clicked","clicked",114423720));
-return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"div#markerinfo>h3","div#markerinfo>h3",285287813),new cljs.core.PersistentVector(null, 4, 5, cljs.core.PersistentVector.EMPTY_NODE, [spectra_cljs.util.node_link,new cljs.core.Keyword(null,"title","title",636505583).cljs$core$IFn$_invoke$arity$1(marker),new cljs.core.Keyword(null,"id","id",-1388402092).cljs$core$IFn$_invoke$arity$1(marker),spectra_cljc.schema.location], null)], null);
+return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"div#markerinfo>h3","div#markerinfo>h3",285287813),new cljs.core.PersistentVector(null, 4, 5, cljs.core.PersistentVector.EMPTY_NODE, [spectra_cljs.util.node_link,new cljs.core.Keyword(null,"title","title",636505583).cljs$core$IFn$_invoke$arity$1(marker),new cljs.core.Keyword(null,"id","id",-1388402092).cljs$core$IFn$_invoke$arity$1(marker),spectra_cljc.schema.building], null)], null);
 });
 spectra_cljs.map.render_window = (function spectra_cljs$map$render_window(){
 return reagent.core.render.call(null,new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [spectra_cljs.map.event_info_window], null),goog.dom.getElement("window-info"));
@@ -37,13 +37,13 @@ return marker;
 spectra_cljs.map.wipe_markers = (function spectra_cljs$map$wipe_markers(markers){
 return cljs.core.clj__GT_js.call(null,cljs.core.remove.call(null,cljs.core.nil_QMARK_,cljs.core.map.call(null,(function (){
 return cljs.core.constantly.call(null,null);
-}),cljs.core.map.call(null,(function (p1__17632_SHARP_){
-return p1__17632_SHARP_.setMap(null);
+}),cljs.core.map.call(null,(function (p1__23542_SHARP_){
+return p1__23542_SHARP_.setMap(null);
 }),markers))));
 });
 spectra_cljs.map.new_markers = (function spectra_cljs$map$new_markers(markers){
-return cljs.core.clj__GT_js.call(null,cljs.core.map.call(null,spectra_cljs.map.map_marker,cljs.core.map.call(null,(function (p1__17633_SHARP_){
-return cljs.core.assoc.call(null,p1__17633_SHARP_,new cljs.core.Keyword(null,"map","map",1371690461),spectra_cljs.state.look.call(null,new cljs.core.Keyword(null,"map-obj","map-obj",-1129422030)));
+return cljs.core.clj__GT_js.call(null,cljs.core.map.call(null,spectra_cljs.map.map_marker,cljs.core.map.call(null,(function (p1__23543_SHARP_){
+return cljs.core.assoc.call(null,p1__23543_SHARP_,new cljs.core.Keyword(null,"map","map",1371690461),spectra_cljs.state.look.call(null,new cljs.core.Keyword(null,"map-obj","map-obj",-1129422030)));
 }),spectra_cljs.state.look.call(null,new cljs.core.Keyword(null,"map-markers","map-markers",-1522832471),new cljs.core.Keyword(null,"data","data",-232669377)))));
 });
 spectra_cljs.map.markers_update = (function spectra_cljs$map$markers_update(){
@@ -81,4 +81,4 @@ spectra_cljs.map.map_box = (function spectra_cljs$map$map_box(){
 return reagent.core.create_class.call(null,new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null,"reagent-render","reagent-render",-985383853),spectra_cljs.map.location_html,new cljs.core.Keyword(null,"component-did-mount","component-did-mount",-1126910518),spectra_cljs.map.map_did_mount,new cljs.core.Keyword(null,"component-did-update","component-did-update",-1468549173),spectra_cljs.map.resize_map], null));
 });
 
-//# sourceMappingURL=map.js.map?rel=1468801589439
+//# sourceMappingURL=map.js.map?rel=1468803196583

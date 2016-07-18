@@ -21,25 +21,25 @@ spectra_cljs.search.result_row = (function spectra_cljs$search$result_row(res){
 return new cljs.core.PersistentVector(null, 5, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"div","div",1057191632),new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"hr","hr",1377740067)], null),new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"h3.infotitle","h3.infotitle",1224264902),[cljs.core.str("Result #"),cljs.core.str((cljs.core.first.call(null,res) + (1)))].join('')], null),new cljs.core.PersistentVector(null, 4, 5, cljs.core.PersistentVector.EMPTY_NODE, [spectra_cljs.node.show_node,spectra_cljs.node.get_title.call(null,new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"center-node","center-node",1511034476),cljs.core.second.call(null,res)], null)),cljs.core.second.call(null,res),false], null),new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"p","p",151049309),new cljs.core.PersistentVector(null, 4, 5, cljs.core.PersistentVector.EMPTY_NODE, [spectra_cljs.util.node_link,[cljs.core.str("Link to "),cljs.core.str(spectra_cljs.node.get_title.call(null,new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"center-node","center-node",1511034476),cljs.core.second.call(null,res)], null)))].join(''),new cljs.core.Keyword(null,"id","id",-1388402092).cljs$core$IFn$_invoke$arity$1(cljs.core.second.call(null,res)),spectra_cljc.schema.type_label.call(null,cljs.core.second.call(null,res))], null)], null)], null);
 });
 spectra_cljs.search.search_results = (function spectra_cljs$search$search_results(){
-return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"div","div",1057191632),new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"h2","h2",-372662728),"Search Results"], null),(function (){var iter__27292__auto__ = (function spectra_cljs$search$search_results_$_iter__17700(s__17701){
+return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"div","div",1057191632),new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"h2","h2",-372662728),"Search Results"], null),(function (){var iter__27292__auto__ = (function spectra_cljs$search$search_results_$_iter__23613(s__23614){
 return (new cljs.core.LazySeq(null,(function (){
-var s__17701__$1 = s__17701;
+var s__23614__$1 = s__23614;
 while(true){
-var temp__4657__auto__ = cljs.core.seq.call(null,s__17701__$1);
+var temp__4657__auto__ = cljs.core.seq.call(null,s__23614__$1);
 if(temp__4657__auto__){
-var s__17701__$2 = temp__4657__auto__;
-if(cljs.core.chunked_seq_QMARK_.call(null,s__17701__$2)){
-var c__27290__auto__ = cljs.core.chunk_first.call(null,s__17701__$2);
+var s__23614__$2 = temp__4657__auto__;
+if(cljs.core.chunked_seq_QMARK_.call(null,s__23614__$2)){
+var c__27290__auto__ = cljs.core.chunk_first.call(null,s__23614__$2);
 var size__27291__auto__ = cljs.core.count.call(null,c__27290__auto__);
-var b__17703 = cljs.core.chunk_buffer.call(null,size__27291__auto__);
-if((function (){var i__17702 = (0);
+var b__23616 = cljs.core.chunk_buffer.call(null,size__27291__auto__);
+if((function (){var i__23615 = (0);
 while(true){
-if((i__17702 < size__27291__auto__)){
-var id_res = cljs.core._nth.call(null,c__27290__auto__,i__17702);
-cljs.core.chunk_append.call(null,b__17703,cljs.core.with_meta(new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [spectra_cljs.search.result_row,id_res], null),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"key","key",-1516042587),cljs.core.first.call(null,id_res)], null)));
+if((i__23615 < size__27291__auto__)){
+var id_res = cljs.core._nth.call(null,c__27290__auto__,i__23615);
+cljs.core.chunk_append.call(null,b__23616,cljs.core.with_meta(new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [spectra_cljs.search.result_row,id_res], null),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"key","key",-1516042587),cljs.core.first.call(null,id_res)], null)));
 
-var G__17704 = (i__17702 + (1));
-i__17702 = G__17704;
+var G__23617 = (i__23615 + (1));
+i__23615 = G__23617;
 continue;
 } else {
 return true;
@@ -47,13 +47,13 @@ return true;
 break;
 }
 })()){
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__17703),spectra_cljs$search$search_results_$_iter__17700.call(null,cljs.core.chunk_rest.call(null,s__17701__$2)));
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__23616),spectra_cljs$search$search_results_$_iter__23613.call(null,cljs.core.chunk_rest.call(null,s__23614__$2)));
 } else {
-return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__17703),null);
+return cljs.core.chunk_cons.call(null,cljs.core.chunk.call(null,b__23616),null);
 }
 } else {
-var id_res = cljs.core.first.call(null,s__17701__$2);
-return cljs.core.cons.call(null,cljs.core.with_meta(new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [spectra_cljs.search.result_row,id_res], null),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"key","key",-1516042587),cljs.core.first.call(null,id_res)], null)),spectra_cljs$search$search_results_$_iter__17700.call(null,cljs.core.rest.call(null,s__17701__$2)));
+var id_res = cljs.core.first.call(null,s__23614__$2);
+return cljs.core.cons.call(null,cljs.core.with_meta(new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [spectra_cljs.search.result_row,id_res], null),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"key","key",-1516042587),cljs.core.first.call(null,id_res)], null)),spectra_cljs$search$search_results_$_iter__23613.call(null,cljs.core.rest.call(null,s__23614__$2)));
 }
 } else {
 return null;
@@ -66,4 +66,4 @@ return iter__27292__auto__.call(null,spectra_cljs.util.add_ids.call(null,spectra
 })()], null);
 });
 
-//# sourceMappingURL=search.js.map?rel=1468801589546
+//# sourceMappingURL=search.js.map?rel=1468803196710

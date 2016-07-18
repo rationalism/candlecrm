@@ -15,7 +15,8 @@
                      s/location [s/s-name s/zipcode s/email-mentions]
                      s/event [s/s-name s/date-time s/event-type s/website
                               s/event-features s/email-mentions]
-                     s/building [s/street-addr s/email-mentions]})
+                     s/building [s/street-addr s/located-in s/email-mentions
+                                 s/event-org s/mail-address s/has-coord]})
 
 (def title-field {s/person [s/s-name s/email-addr "(No name)"]
                   s/email [s/email-subject "(No subject)"]
