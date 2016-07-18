@@ -1,6 +1,6 @@
-(ns spectra.loom-test
+(ns candlecrm.loom-test
   (:require [clojure.test :refer :all]
-            [spectra.loom :refer :all]))
+            [candlecrm.loom :refer :all]))
 
 (def test-nodes [1 2 3 4 5 6 7])
 (def test-edges [[1 2 :cat] [1 2 :horse] [1 3 :dog] [2 4 :fish]

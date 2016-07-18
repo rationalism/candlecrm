@@ -1,11 +1,11 @@
-(ns spectra.corenlp-test
+(ns candlecrm.corenlp-test
   (:require [clojure.test :refer :all]
-            [spectra.common :refer :all]
-            [spectra.datetime :as dt]
-            [spectra.loom :as loom]
-            [spectra_cljc.schema :as s]
+            [candlecrm.common :refer :all]
+            [candlecrm.datetime :as dt]
+            [candlecrm.loom :as loom]
+            [candlecrm_cljc.schema :as s]
             [clojure.set :as set]
-            [spectra.corenlp :refer :all]))
+            [candlecrm.corenlp :refer :all]))
 
 (defn date-model [f]
   (dt/load-date-model!)

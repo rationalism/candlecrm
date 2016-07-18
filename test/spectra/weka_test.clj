@@ -1,6 +1,6 @@
-(ns spectra.weka-test
+(ns candlecrm.weka-test
   (:require [clojure.test :refer :all]
-            [spectra.weka :refer :all]))
+            [candlecrm.weka :refer :all]))
 
 (def train-points [[0.0 0.0 0.0 0.0]
                    [0.0 0.0 0.0 0.0]

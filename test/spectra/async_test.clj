@@ -1,7 +1,7 @@
-(ns spectra.async-test
+(ns candlecrm.async-test
   (:require [clojure.test :refer :all]
-            [spectra.async :refer :all]
-            [spectra.neo4j :as neo4j]))
+            [candlecrm.async :refer :all]
+            [candlecrm.neo4j :as neo4j]))
 
 (defn graph-ready [f]
   (neo4j/graph-connect!)

@@ -1,6 +1,6 @@
-(ns spectra.contacts-test
+(ns candlecrm.contacts-test
   (:require [clojure.test :refer :all]
-            [spectra.contacts :refer :all])
+            [candlecrm.contacts :refer :all])
   (:import [com.google.gdata.data.contacts ContactEntry]
            [com.google.gdata.data.extensions Email]))
 

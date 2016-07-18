@@ -1,6 +1,6 @@
-(ns spectra.model-test
+(ns candlecrm.model-test
   (:require [clojure.test :refer :all]
-            [spectra.model :refer :all]))
+            [candlecrm.model :refer :all]))
 
 (deftest lcs-test
   (testing "Find the longest common substring"

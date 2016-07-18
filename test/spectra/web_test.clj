@@ -1,8 +1,8 @@
-(ns spectra.web-test
+(ns candlecrm.web-test
   (:require [clojure.test :refer :all]
             [ring.middleware.defaults :refer :all]
-            [spectra.auth :as auth]
-            [spectra.web :refer :all]))
+            [candlecrm.auth :as auth]
+            [candlecrm.web :refer :all]))
 
 (deftest app-exists
   (testing "The app exists"

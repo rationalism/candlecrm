@@ -1,7 +1,7 @@
-(ns spectra.regex-test
+(ns candlecrm.regex-test
   (:require [clojure.test :refer :all]
-            [spectra_cljc.schema :as s]
-            [spectra.regex :refer :all]))
+            [candlecrm_cljc.schema :as s]
+            [candlecrm.regex :refer :all]))
 
 (def test-name "Joe Smith")
 (def test-email "joesmith@gmail.com")

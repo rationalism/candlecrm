@@ -1,12 +1,12 @@
-(ns spectra.mlrecon-test
+(ns candlecrm.mlrecon-test
   (:require [clojure.test :refer :all]
-            [spectra.ajax :as ajax]
-            [spectra.auth :as auth]
-            [spectra.insert :as insert]
-            [spectra.loom :as loom]
-            [spectra.mlrecon :refer :all]
-            [spectra.neo4j :as neo4j]
-            [spectra_cljc.schema :as s]))
+            [candlecrm.ajax :as ajax]
+            [candlecrm.auth :as auth]
+            [candlecrm.insert :as insert]
+            [candlecrm.loom :as loom]
+            [candlecrm.mlrecon :refer :all]
+            [candlecrm.neo4j :as neo4j]
+            [candlecrm_cljc.schema :as s]))
 
 (defn graph-ready [f]
   (neo4j/graph-connect!)

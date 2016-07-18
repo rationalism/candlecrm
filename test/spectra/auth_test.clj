@@ -1,8 +1,8 @@
-(ns spectra.auth-test
+(ns candlecrm.auth-test
   (:require [clojure.test :refer :all]
-            [spectra.auth :refer :all]
-            [spectra.neo4j :as neo4j]
-            [spectra_cljc.schema :as s]))
+            [candlecrm.auth :refer :all]
+            [candlecrm.neo4j :as neo4j]
+            [candlecrm_cljc.schema :as s]))
 
 (defn graph-ready [f]
   (neo4j/graph-connect!)

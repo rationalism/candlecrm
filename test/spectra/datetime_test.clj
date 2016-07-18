@@ -1,6 +1,6 @@
-(ns spectra.datetime-test
+(ns candlecrm.datetime-test
   (:require [clojure.test :refer :all]
-            [spectra.datetime :refer :all]))
+            [candlecrm.datetime :refer :all]))
 
 (defn date-model [f]
   (load-date-model!)

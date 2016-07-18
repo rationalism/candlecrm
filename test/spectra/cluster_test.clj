@@ -1,7 +1,7 @@
-(ns spectra.cluster-test
+(ns candlecrm.cluster-test
   (:require [clojure.test :refer :all]
-            [spectra.loom :as loom]
-            [spectra.cluster :refer :all]))
+            [candlecrm.loom :as loom]
+            [candlecrm.cluster :refer :all]))
 
 (deftest make-random
   (testing "Generate a random graph"

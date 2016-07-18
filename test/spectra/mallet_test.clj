@@ -1,6 +1,6 @@
-(ns spectra.mallet-test
+(ns candlecrm.mallet-test
   (:require [clojure.test :refer :all]
-            [spectra.mallet :refer :all]))
+            [candlecrm.mallet :refer :all]))
 
 (deftest bayes-text
   (testing "Naive Bayes classifier on strings"

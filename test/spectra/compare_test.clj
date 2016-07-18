@@ -1,6 +1,6 @@
-(ns spectra.compare-test
+(ns candlecrm.compare-test
   (:require [clojure.test :refer :all]
-            [spectra.compare :refer :all]))
+            [candlecrm.compare :refer :all]))
 
 (deftest estimation-test
   (testing "Do estimation on test data"

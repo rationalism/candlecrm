@@ -1,6 +1,6 @@
-(ns spectra.google-test
+(ns candlecrm.google-test
   (:require [clojure.test :refer :all]
-            [spectra.google :refer :all]))
+            [candlecrm.google :refer :all]))
 
 (deftest first-test
   (is "Tests should be written"))

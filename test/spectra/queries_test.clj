@@ -1,10 +1,10 @@
-(ns spectra.queries-test
+(ns candlecrm.queries-test
   (:require [clojure.test :refer :all]
-            [spectra.common :refer :all]
-            [spectra.auth :as auth]
-            [spectra.neo4j :as neo4j]
-            [spectra_cljc.schema :as s]
-            [spectra.queries :refer :all]))
+            [candlecrm.common :refer :all]
+            [candlecrm.auth :as auth]
+            [candlecrm.neo4j :as neo4j]
+            [candlecrm_cljc.schema :as s]
+            [candlecrm.queries :refer :all]))
 
 
 (defn graph-ready [f]

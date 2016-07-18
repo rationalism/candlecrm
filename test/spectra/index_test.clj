@@ -1,8 +1,8 @@
-(ns spectra.index-test
+(ns candlecrm.index-test
   (:require [clojure.test :refer :all]
-            [spectra.auth :as auth]
-            [spectra.neo4j :as neo4j]
-            [spectra.index :refer :all]))
+            [candlecrm.auth :as auth]
+            [candlecrm.neo4j :as neo4j]
+            [candlecrm.index :refer :all]))
 
 (defn graph-ready [f]
   (neo4j/graph-connect!)

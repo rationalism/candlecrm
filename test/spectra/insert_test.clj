@@ -1,10 +1,10 @@
-(ns spectra.insert-test
+(ns candlecrm.insert-test
   (:require [clojure.test :refer :all]
-            [spectra.insert :refer :all]
-            [spectra.auth :as auth]
-            [spectra.loom :as loom]
-            [spectra.neo4j :as neo4j]
-            [spectra_cljc.schema :as s]))
+            [candlecrm.insert :refer :all]
+            [candlecrm.auth :as auth]
+            [candlecrm.loom :as loom]
+            [candlecrm.neo4j :as neo4j]
+            [candlecrm_cljc.schema :as s]))
 
 (defn graph-ready [f]
   (neo4j/graph-connect!)

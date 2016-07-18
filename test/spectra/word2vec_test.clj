@@ -1,7 +1,7 @@
-(ns spectra.word2vec-test
+(ns candlecrm.word2vec-test
   (:require [clojure.java.io :as io]
             [clojure.test :refer :all]
-            [spectra.word2vec :refer :all]))
+            [candlecrm.word2vec :refer :all]))
 
 (def test-filename "test/word2vec.txt")
 

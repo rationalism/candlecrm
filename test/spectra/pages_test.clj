@@ -1,11 +1,11 @@
-(ns spectra.pages-test
+(ns candlecrm.pages-test
   (:require [clojure.test :refer :all]
             [clojure.string :as str]
-            [spectra.auth :as auth]
-            [spectra.neo4j :as neo4j]
-            [spectra_cljc.schema :as s]
-            [spectra.sendgrid :as sendgrid]
-            [spectra.pages :refer :all]))
+            [candlecrm.auth :as auth]
+            [candlecrm.neo4j :as neo4j]
+            [candlecrm_cljc.schema :as s]
+            [candlecrm.sendgrid :as sendgrid]
+            [candlecrm.pages :refer :all]))
 
 (defn graph-ready [f]
   (neo4j/graph-connect!)

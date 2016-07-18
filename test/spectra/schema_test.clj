@@ -1,7 +1,7 @@
-(ns spectra.schema-test
+(ns candlecrm.schema-test
   (:require [clojure.test :refer :all]
-            [spectra.neo4j :as neo4j]
-            [spectra_cljc.schema :refer :all]
+            [candlecrm.neo4j :as neo4j]
+            [candlecrm_cljc.schema :refer :all]
             [environ.core :refer [env]]))
 
 ;; This test is from OrientDB and is obsolete

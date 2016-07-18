@@ -1,6 +1,6 @@
-(ns spectra.common-test
+(ns candlecrm.common-test
   (:require [clojure.test :refer :all]
-            [spectra.common :refer :all]))
+            [candlecrm.common :refer :all]))
 
 (def test-coll [1 2 3 4 5 6 7 8 9 10])
 

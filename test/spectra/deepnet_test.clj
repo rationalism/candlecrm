@@ -1,6 +1,6 @@
-(ns spectra.deepnet-test
+(ns candlecrm.deepnet-test
   (:require [clojure.test :refer :all]
-            [spectra.deepnet :refer :all]))
+            [candlecrm.deepnet :refer :all]))
 
 (deftest first-test
   (is "Tests should be written"))

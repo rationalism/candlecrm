@@ -1,14 +1,14 @@
-(ns spectra.imap-test
+(ns candlecrm.imap-test
   (:require [clojure.test :refer :all]
-            [spectra.common :as com]
-            [spectra.corenlp :as nlp]
-            [spectra.loom :as loom]
-            [spectra.regex :as regex]
-            [spectra.reply :as reply]
-            [spectra.weka :as weka]
+            [candlecrm.common :as com]
+            [candlecrm.corenlp :as nlp]
+            [candlecrm.loom :as loom]
+            [candlecrm.regex :as regex]
+            [candlecrm.reply :as reply]
+            [candlecrm.weka :as weka]
             [clojure.string :as str]
-            [spectra_cljc.schema :as s]
-            [spectra.imap :refer :all])
+            [candlecrm_cljc.schema :as s]
+            [candlecrm.imap :refer :all])
   (:import [javax.mail FetchProfile Folder
             Message Message$RecipientType]
            [javax.mail.internet InternetAddress]

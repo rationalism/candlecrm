@@ -1,10 +1,10 @@
-(ns spectra.quartz-test
+(ns candlecrm.quartz-test
   (:require [clojure.test :refer :all]
-            [spectra.auth :as auth]
-            [spectra.imap :as imap]
-            [spectra.neo4j :as neo4j]
-            [spectra.queries :as queries]
-            [spectra.quartz :refer :all]))
+            [candlecrm.auth :as auth]
+            [candlecrm.imap :as imap]
+            [candlecrm.neo4j :as neo4j]
+            [candlecrm.queries :as queries]
+            [candlecrm.quartz :refer :all]))
 
 (defn graph-ready [f]
   (neo4j/graph-connect!)

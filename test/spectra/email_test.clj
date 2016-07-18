@@ -1,9 +1,9 @@
-(ns spectra.email-test
+(ns candlecrm.email-test
   (:require [clojure.test :refer :all]
-            [spectra.loom :as loom]
-            [spectra.datetime :as dt]
-            [spectra_cljc.schema :as s]
-            [spectra.email :refer :all]))
+            [candlecrm.loom :as loom]
+            [candlecrm.datetime :as dt]
+            [candlecrm_cljc.schema :as s]
+            [candlecrm.email :refer :all]))
 
 (defn date-model [f]
   (dt/load-date-model!)
