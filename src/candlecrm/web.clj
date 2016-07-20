@@ -125,9 +125,10 @@
   (geocode/define-context!)
   (quartz/start!)
   (throw-info! "Ready to start server")
-  (nrepl-server/start-server
-   :port 9998
-   :handler cider-nrepl-handler))
+  (when (in-dev?)
+    (nrepl-server/start-server
+     :port 9998
+     :handler cider-nrepl-handler)))
 
 (defn app-shutdown! []
   (imap/close-imap-lookup!))

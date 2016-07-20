@@ -1,4 +1,4 @@
-(defproject candlecrm "0.3.0"
+(defproject candlecrm "0.3.1"
   :description "Personal semantic graphs"
   :url "https://www.candlecrm.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
@@ -16,8 +16,8 @@
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [environ "1.0.3"]
-                 [com.taoensso/encore "2.64.1"]
-                 [com.taoensso/timbre "4.6.0"]
+                 [com.taoensso/encore "2.65.1"]
+                 [com.taoensso/timbre "4.7.0"]
                  [buddy "1.0.0"]
                  [com.google.api-client/google-api-client "1.22.0"
                   :exclusions [com.fasterxml.jackson.core/jackson-core
