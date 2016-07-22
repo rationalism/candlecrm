@@ -7,23 +7,35 @@
             [taoensso.timbre :as timbre
              :refer (log trace info warn error fatal report
                          spy get-env log-env)]
-            [taoensso.timbre.appenders.core :as appenders])
+            [taoensso.timbre.appenders.core :as appenders]
+            [taoensso.timbre.appenders.3rd-party.gelf :as gelf])
   (:import [java.util Date]
            [java.io File FileInputStream FileOutputStream
             ObjectInputStream ObjectOutputStream]))
 
 ;; Common library functions. Shouldn't depend on anything else.
 
+(defn in-dev? []
+  (= (env :in-dev) "true"))
+
+(defn spit-appenders []
+  {:spit
+   (appenders/spit-appender
+    {:min-level :debug
+     :fname (str (env :log-dir) (env :log-file))})
+   :println
+   (assoc (appenders/println-appender)
+          :min-level :warn)})
+
+(defn graylog-appender []
+  {:graylog
+   (gelf/graylog-appender (env :graylog-server)
+                          (env :graylog-port))})
+
 (defn log-setup! []
   (timbre/merge-config!
    {:appenders
-    {:spit
-     (appenders/spit-appender
-      {:min-level :debug
-       :fname (str (env :log-dir) (env :log-file))})
-     :println
-     (assoc (appenders/println-appender)
-            :min-level :warn)}})
+    (if (in-dev?) (spit-appenders) (graylog-appender))})
   (Thread/setDefaultUncaughtExceptionHandler
    (reify Thread$UncaughtExceptionHandler
      (uncaughtException [_ thread ex]
@@ -190,5 +202,4 @@
 (defn average [coll]
   (/ (apply + coll) (count coll)))
 
-(defn in-dev? []
-  (= (env :in-dev) "true"))
+
