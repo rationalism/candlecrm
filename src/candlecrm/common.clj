@@ -30,12 +30,12 @@
           :min-level :debug)})
 
 (defn graylog-appender []
-  (->> (env :graylog-port) Integer/parseInt
-       (gelf/gelf-appender (env :graylog-server))
-       (hash-map :graylog)))
+  {:graylog
+   (gelf/gelf-appender
+    (env :graylog-server) (Integer/parseInt (env :graylog-port)) :tcp)})
 
 (defn log-setup! []
-  (timbre/set-config!
+  (timbre/debug-config!
    {:appenders
     (if (in-dev?) (spit-appenders) (graylog-appender))})
   (Thread/setDefaultUncaughtExceptionHandler
