@@ -6,6 +6,7 @@
                  [org.clojure/clojurescript "1.9.93"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [ns-tracker "0.3.0"]
+                 [cheshire "5.6.3"]
                  [clj-time "0.12.0"]
                  [clj-http "3.1.0"
                   :exclusions [commons-io]]
