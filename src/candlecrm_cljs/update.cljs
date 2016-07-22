@@ -17,9 +17,13 @@
   [:pages/fetch-people
    {:start (state/person-pos)
     :limit (state/look :page-lengths :people)}])
-  
+
+(defn set-people! [rows]
+  {:pre [(coll? rows)]}
+  (state/set! [:people-rows] rows))
+
 (defn update-people! []
-  (send! (people-req) #(state/set! [:people-rows] %)))
+  (send! (people-req) set-people!))
 
 (defn prev-fetch! [counter update-fn]
   (fn []
@@ -44,8 +48,12 @@
     :start (state/email-person-pos link-type)
     :limit (state/look :page-lengths :email)}])
 
+(defn set-emails! [rows]
+  {:pre [(coll? rows)]}
+  (state/set! [:email-rows] rows))
+
 (defn update-emails! []
-  (send! (email-req) #(state/set! [:email-rows] %)))
+  (send! (email-req) set-emails!))
 
 (defn email-callback [link-type]
   (fn [resp]
@@ -94,6 +102,7 @@
 
 (defn new-rank-lists! [rel-type]
   (fn [new-ranks]
+    {:pre [(coll? new-ranks)]}
     (state/set! [:rank-lists rel-type] new-ranks)))
 
 (defn fetch-ranks! [rel-type]
