@@ -29,8 +29,8 @@
 
 (defn graylog-appender []
   {:graylog
-   (gelf/graylog-appender (env :graylog-server)
-                          (env :graylog-port))})
+   (gelf/gelf-appender (env :graylog-server)
+                       (env :graylog-port))})
 
 (defn log-setup! []
   (timbre/merge-config!
