@@ -27,7 +27,7 @@
      :fname (str (env :log-dir) (env :log-file))})
    :println
    (assoc (appenders/println-appender)
-          :min-level :warn)})
+          :min-level :debug)})
 
 (defn graylog-appender []
   (->> (env :graylog-port) Integer/parseInt
@@ -35,7 +35,7 @@
        (hash-map :graylog)))
 
 (defn log-setup! []
-  (timbre/merge-config!
+  (timbre/set-config!
    {:appenders
     (if (in-dev?) (spit-appenders) (graylog-appender))})
   (Thread/setDefaultUncaughtExceptionHandler
