@@ -35,7 +35,7 @@
     (env :graylog-server) (Integer/parseInt (env :graylog-port)) :tcp)})
 
 (defn log-setup! []
-  (timbre/debug-config!
+  (timbre/set-config!
    {:appenders
     (if (in-dev?) (spit-appenders) (graylog-appender))})
   (Thread/setDefaultUncaughtExceptionHandler
