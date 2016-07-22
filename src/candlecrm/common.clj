@@ -17,11 +17,6 @@
 
 ;; Common library functions. Shouldn't depend on anything else.
 
-(println (env :in-dev))
-(println (env :log-dir))
-(println (env :graylog-server))
-(println (env :graylog-port))
-
 (defn in-dev? []
   (= (env :in-dev) "true"))
 
@@ -37,10 +32,13 @@
 (defn graylog-appender []
   {:graylog
    (gelf/gelf-appender
-    (env :graylog-server) (Integer/parseInt (env :graylog-port)) :tcp)})
+    (env :graylog-server) (Integer/parseInt (env :graylog-port)) :tcp)
+   :println
+   (assoc (appenders/println-appender)
+          :enabled? false)})
 
 (defn log-setup! []
-  (timbre/set-config!
+  (timbre/merge-config!
    {:appenders
     (if (in-dev?) (spit-appenders) (graylog-appender))})
   (Thread/setDefaultUncaughtExceptionHandler
