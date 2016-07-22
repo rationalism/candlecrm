@@ -17,6 +17,11 @@
 
 ;; Common library functions. Shouldn't depend on anything else.
 
+(println (env :in-dev))
+(println (env :log-dir))
+(println (env :graylog-server))
+(println (env :graylog-port))
+
 (defn in-dev? []
   (= (env :in-dev) "true"))
 
