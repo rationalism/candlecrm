@@ -11,7 +11,9 @@
             [taoensso.timbre.appenders.3rd-party.gelf :as gelf])
   (:import [java.util Date]
            [java.io File FileInputStream FileOutputStream
-            ObjectInputStream ObjectOutputStream]))
+            ObjectInputStream ObjectOutputStream]
+           [org.graylog2.gelfclient GelfConfiguration]
+           [java.net InetSocketAddress]))
 
 ;; Common library functions. Shouldn't depend on anything else.
 
@@ -28,9 +30,9 @@
           :min-level :warn)})
 
 (defn graylog-appender []
-  {:graylog
-   (gelf/gelf-appender (env :graylog-server)
-                       (env :graylog-port))})
+  (->> (env :graylog-port) Integer/parseInt
+       (gelf/gelf-appender (env :graylog-server))
+       (hash-map :graylog)))
 
 (defn log-setup! []
   (timbre/merge-config!
