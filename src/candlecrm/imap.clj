@@ -160,13 +160,13 @@
 (defnp content-type [message]
   (.getContentType message))
 
-(defn min-zero [n]
-  (if (< n 0) 0 n))
+(defn min-one [n]
+  (if (< n 1) 1 n))
 
 (defn archive-load [user]
-  (if (not user) 0
+  (if (not user) 1
       (if-let [f (fetch-imap-folder user)]
-        (-> f last-uid (- archive-size) min-zero) 0)))
+        (-> f last-uid (- archive-size) min-one) 1)))
 
 (defnp get-parts [multipart]
   (map #(.getBodyPart multipart %)
