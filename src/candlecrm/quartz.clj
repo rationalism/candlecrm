@@ -28,9 +28,6 @@
 
 (def nonlp-insert-limit 600000)
 
-(defn message-count [user]
-  (-> user imap/fetch-imap-folder imap/message-count))
-
 (defn queue-new? [queue]
   (< (s/loaded-top queue) (s/top-uid queue)))
 
@@ -59,16 +56,17 @@
                         (range-bottom user queue))))
 
 (defn refresh-queue! [user]
-  (throw-info! "refreshing queue")
-  (-> ["MATCH (root:" (neo4j/prop-label user s/top-uid)
-       ")<-[:" (neo4j/esc-token s/top-uid)
-       "]-(d:" (neo4j/prop-label user s/email-queue)
-       ")-[:" (neo4j/esc-token s/user-queue)
-       "]->(u:" (neo4j/esc-token s/user)
-       ") WHERE ID(u) = " (.id user)
-       " SET root.val = "
-       (-> user (imap/fetch-imap-folder true) imap/last-uid str)]
-      str/join neo4j/cypher-query))
+  (when-let [folder (imap/fetch-imap-folder user true)]
+    (throw-info! "refreshing queue")
+    (-> ["MATCH (root:" (neo4j/prop-label user s/top-uid)
+         ")<-[:" (neo4j/esc-token s/top-uid)
+         "]-(d:" (neo4j/prop-label user s/email-queue)
+         ")-[:" (neo4j/esc-token s/user-queue)
+         "]->(u:" (neo4j/esc-token s/user)
+         ") WHERE ID(u) = " (.id user)
+         " SET root.val = "
+         (-> folder imap/last-uid str)]
+        str/join neo4j/cypher-query)))
 
 (defn run-insertion! [queue user]
   (throw-info! "inserting emails")
@@ -91,11 +89,11 @@
    s/modified (dt/now)})
 
 (defn add-new-queue! [user]
-  (-> user imap/fetch-imap-folder
-      imap/last-uid new-queue-map vector
-      (insert/push-entities! user s/meta-src)
-      first neo4j/find-by-id
-      (neo4j/create-edge! user s/user-queue)))
+  (when-let [folder (imap/fetch-imap-folder user)]
+    (-> folder imap/last-uid new-queue-map vector
+        (insert/push-entities! user s/meta-src)
+        first neo4j/find-by-id
+        (neo4j/create-edge! user s/user-queue))))
 
 (defn maybe-run-recon! [[user class]]
   (when user

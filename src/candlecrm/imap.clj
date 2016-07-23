@@ -20,7 +20,9 @@
             Message Message$RecipientType]
            [javax.mail.internet InternetAddress]
            [com.sun.mail.imap IMAPFolder$FetchProfileItem]
-           [org.jsoup Jsoup]))
+           [org.jsoup Jsoup]
+           [com.google.api.client.auth.oauth2
+            TokenResponseException]))
 
 ;; Global variables
 (def inbox-folder-name "[Gmail]/All Mail")
@@ -50,7 +52,8 @@
   (.close store))
 
 (defn open-folder-read! [folder]
-  (.open folder (Folder/READ_ONLY)))
+  (when folder
+    (.open folder (Folder/READ_ONLY))))
 
 (defn close-folder! [folder]
   (.close folder false))
@@ -121,9 +124,16 @@
   (reset! imap-lookup {}))
 
 (defnc refresh-inbox [user]
-  (-> user google/lookup-token google/get-access-token!
-      (google/get-imap-store! (auth/get-username user))
-      get-inbox))
+  (try
+    (-> user google/lookup-token google/get-access-token!
+        (google/get-imap-store! (auth/get-username user))
+        get-inbox)
+    (catch TokenResponseException e
+      (throw-warn! (str "Error: Token invalid for user " user))
+      (throw-warn! (str "Revoking token for user " user))
+      (google/revoke-access-token! user)
+      (google/delete-token! user)
+      nil)))
 
 (defonce inbox (atom nil))
 
@@ -456,7 +466,7 @@
        (reset! parse-channel)))
 
 (defn scroll-emails [user f]
-  (let [userinbox (fetch-imap-folder user)]
+  (when-let [userinbox (fetch-imap-folder user)]
     (loop [i (last-uid userinbox)]
       (println "Email number: " i)
       (when-let [m (get-message userinbox i)]
@@ -555,7 +565,7 @@
        (swap! message-queue cset/union)) messages)
 
 (defnc insert-raw-range! [user lower upper]
-  (let [folder (fetch-imap-folder user)]
+  (when-let [folder (fetch-imap-folder user)]
     (->> (fetch-messages folder lower upper) (add-queue folder)
          (pmap #(->> (message-fetch folder %)
                      (hash-map :user user :message)
