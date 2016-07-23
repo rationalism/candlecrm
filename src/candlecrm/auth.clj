@@ -75,17 +75,18 @@
 (defn user-person-edge! [person user]
   (neo4j/create-edge! user person s/user-person))
 
-(defn create-user!
-  [{:keys [username password] :as user-data}]
-  (let [user (user-vertex! username (hashers/encrypt password hash-alg))]
-    (-> username user-person
-        (insert/push-entities! user s/edit-src)
-        first neo4j/find-by-id
-        (user-person-edge! user))
-    user))
-
 (defn get-username [user]
   (neo4j/get-property user s/email-addr))
+
+(defn create-user-person! [user]
+  (-> user get-username user-person
+      (insert/push-entities! user s/edit-src)
+      first neo4j/find-by-id
+      (user-person-edge! user)))
+
+(defn create-user! [{:keys [username password] :as user-data}]
+  (let [user (user-vertex! username (hashers/encrypt password hash-alg))]
+    (create-user-person! user) user))
 
 (defn list-users []
   (neo4j/get-vertices-class (name s/user)))
@@ -122,7 +123,8 @@
     succeeded (recur user)))
 
 (defn reset-user! [user]
-  (delete-user-data! user))
+  (delete-user-data! user)
+  (create-user-person! user))
 
 (defn password-check [password confirm]
   (cond
