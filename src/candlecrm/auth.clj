@@ -15,7 +15,7 @@
             [buddy.auth.backends.token :refer (jwe-backend)]
             [buddy.hashers :as hashers]
             [buddy.sign.jwt :as jwt]
-            [buddy.core.keys :as keys])
+            [buddy.core.keys :as buddy])
   (:import java.net.URI
            [org.passay PasswordData PasswordValidator LengthRule]))
 
@@ -26,9 +26,9 @@
 (def exp-hours 3)
 
 (defn load-keys! []
-  (reset! pubkey (keys/public-key (str (env :ssl-dir) "pubkey.pem")))
-  (reset! privkey (keys/private-key (str (env :ssl-dir) "privkey.pem")
-                                    (env :privkey-pwd))))
+  (reset! pubkey (buddy/public-key (str (env :ssl-dir) "pubkey.pem")))
+  (reset! privkey (buddy/private-key (str (env :ssl-dir) "privkey.pem")
+                                     (env :privkey-pwd))))
 
 (defn hash-pwd [password]
   (hashers/encrypt password hash-alg))
