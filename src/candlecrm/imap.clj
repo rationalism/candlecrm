@@ -467,6 +467,18 @@
        async/create-pool!
        (reset! parse-channel)))
 
+(defn new-queue-map [top-uid]
+  {s/top-uid top-uid s/loaded-top top-uid
+   s/loaded-bottom top-uid s/type-label s/email-queue
+   s/modified (dt/now)})
+
+(defn add-new-queue! [user]
+  (when-let [folder (fetch-imap-folder user)]
+    (-> folder last-uid new-queue-map vector
+        (insert/push-entities! user s/meta-src)
+        first neo4j/find-by-id
+        (neo4j/create-edge! user s/user-queue))))
+
 (defn scroll-emails [user f]
   (when-let [userinbox (fetch-imap-folder user)]
     (loop [i (last-uid userinbox)]

@@ -31,7 +31,7 @@
     (with-redefs [imap/fetch-imap-folder (fn [& x] nil)
                   imap/last-uid (fn [x] 777777)
                   println (fn [& x] nil)]
-      (add-new-queue! test-user)
+      (imap/add-new-queue! test-user)
       (refresh-queue! test-user)
       (queries/next-email-queue test-user))
 

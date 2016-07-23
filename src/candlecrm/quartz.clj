@@ -83,18 +83,6 @@
          (do (queue-reset! user queue) (run-insertion! queue user))
          (queue-time-reset! queue))))))
 
-(defn new-queue-map [top-uid]
-  {s/top-uid top-uid s/loaded-top top-uid
-   s/loaded-bottom top-uid s/type-label s/email-queue
-   s/modified (dt/now)})
-
-(defn add-new-queue! [user]
-  (when-let [folder (imap/fetch-imap-folder user)]
-    (-> folder imap/last-uid new-queue-map vector
-        (insert/push-entities! user s/meta-src)
-        first neo4j/find-by-id
-        (neo4j/create-edge! user s/user-queue))))
-
 (defn maybe-run-recon! [[user class]]
   (when user
     (throw-info! "running recon")

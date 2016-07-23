@@ -3,6 +3,7 @@
             [candlecrm.auth :as auth]
             [candlecrm.google :as google]
             [candlecrm.html :as html]
+            [candlecrm.imap :as imap]
             [candlecrm.neo4j :as neo4j]
             [candlecrm.quartz :as quartz]
             [candlecrm_cljc.schema :as s]
@@ -105,6 +106,6 @@
     (home-with-message "Error: Could not login.")))
 
 (defn init-account [{:keys [identity]}]
-  (quartz/add-new-queue! identity)
+  (imap/add-new-queue! identity)
   (quartz/schedule-contacts! identity)
   (home-with-message "Congrats! Authentication successful"))
