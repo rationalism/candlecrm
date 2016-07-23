@@ -14,16 +14,23 @@
     (async/thread
       (neo4j/thread-wrap
        (while true
-         (let [data-in (async/<!! (get pool-data :in-chan))
-               data-out ((get pool-data :process) params data-in)]
-           (async/>!! (get pool-data :out-chan) data-out)))))))
+         (let [data-in (async/<!! (get pool-data :in-chan))]
+           (try
+             (let [data-out ((get pool-data :process) params data-in)]
+               (async/>!! (get pool-data :out-chan) data-out))
+             (catch Exception e
+               (throw-error! (pr-str e))
+               (async/>!! (get pool-data :out-chan) nil)))))))))
 
 (defn async-outfeed [pool-name]
   (let [pool-data (get @store pool-name)]
     (async/thread
       (while true
         (let [data-out (async/<!! (get pool-data :out-chan))]
-          ((get pool-data :callback) data-out))))))
+          (try
+            ((get pool-data :callback) data-out)
+            (catch Exception e
+              (throw-error! (pr-str e)))))))))
 
 (defn create-pool! [{:keys [name process param-gen
                             callback num-threads]}]
