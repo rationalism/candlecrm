@@ -59,7 +59,8 @@
   (.close folder false))
 
 (defn folder-open? [folder]
-  (.isOpen folder))
+  (when folder
+    (.isOpen folder)))
 
 (defn folder-store [folder]
   (.getStore folder))
@@ -125,9 +126,10 @@
 
 (defnc refresh-inbox [user]
   (try
-    (-> user google/lookup-token google/get-access-token!
-        (google/get-imap-store! (auth/get-username user))
-        get-inbox)
+    (when-let [token (google/lookup-token user)]
+      (-> token google/get-access-token!
+          (google/get-imap-store! (auth/get-username user))
+          get-inbox))
     (catch TokenResponseException e
       (throw-warn! (str "Error: Token invalid for user " user))
       (throw-warn! (str "Revoking token for user " user))
