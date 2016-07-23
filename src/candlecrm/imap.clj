@@ -134,7 +134,7 @@
       (throw-warn! (str "Error: Token invalid for user " user))
       (throw-warn! (str "Revoking token for user " user))
       (google/revoke-access-token! user)
-      (google/delete-token! user)
+      (google/delete-token! user) (auth/delete-queue! user)
       nil)))
 
 (defonce inbox (atom nil))
