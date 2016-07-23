@@ -440,7 +440,6 @@
           (queue-graph graph) graph))))
 
 (defn full-parse [[message headers] models user]
-  (/ 1 0)
   (->> message regex/strip-javascript str/split-lines
        (reply/reply-parse models headers)
        (maybe-load user)))
