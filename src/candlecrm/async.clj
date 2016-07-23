@@ -20,7 +20,7 @@
                (async/>!! (get pool-data :out-chan) data-out))
              (catch Exception e
                (throw-error! (pr-str e))
-               (async/>!! (get pool-data :out-chan) nil)))))))))
+               (async/>!! (get pool-data :out-chan) [])))))))))
 
 (defn async-outfeed [pool-name]
   (let [pool-data (get @store pool-name)]
