@@ -1,4 +1,4 @@
-(defproject candlecrm "0.3.1"
+(defproject candlecrm "0.3.2"
   :description "Personal semantic graphs"
   :url "https://www.candlecrm.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}

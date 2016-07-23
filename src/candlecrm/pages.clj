@@ -60,7 +60,7 @@
 
 (defn switch-user [{:keys [identity]}]
   (if (= identity (auth/get-me))
-    (let [user-token (auth/make-token identity)]
+    (let [user-token (auth/make-token @switch-target)]
       (token-cookie "/app" (:token user-token)))
     (home-with-message "Error: Could not login.")))
 
