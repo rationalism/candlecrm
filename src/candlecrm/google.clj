@@ -86,8 +86,11 @@
   (-> refresh-token build-google-cred! .getAccessToken))
 
 (defn revoke-access-token! [user]
-  (client/post revoke-url
-               {:form-params {:token (lookup-token user)}}))
+  (try
+    (client/post revoke-url
+                 {:form-params {:token (lookup-token user)}})
+    (catch Exception e
+      (throw-warn! (str "Could not revoke token for user: " user)))))
 
 ;; TODO: get the user's email via a Google API
 (defn get-imap-store! [access-token email]
