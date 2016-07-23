@@ -100,16 +100,19 @@
        (map #(neo4j/prop-label user %))
        (run! neo4j/delete-class!)))
 
+(defn delete-user-data! [user]
+  (when (neo4j/get-property user s/index-run)
+    (index/drop-constraints! user))
+  (index/delete-all! user)
+  (delete-queue! user))
+
 ;; Need to retry here because other stuff might interfere
 (defn delete-user! [user]
   (if-let [succeeded
            (try
              (when (google/lookup-token user)
                (google/revoke-access-token! user))
-             (when (neo4j/get-property user s/index-run)
-               (index/drop-constraints! user))
-             (index/delete-all! user)
-             (delete-queue! user)
+             (delete-user-data! user)
              (neo4j/delete-id! (.id user))
              :success
              (catch Exception e
@@ -117,6 +120,9 @@
                (throw-warn! (str "Deletion of user " (.id user) " interrupted"))
                (throw-warn! "Retrying deletion") nil))]
     succeeded (recur user)))
+
+(defn reset-user! [user]
+  (delete-user-data! user))
 
 (defn password-check [password confirm]
   (cond
