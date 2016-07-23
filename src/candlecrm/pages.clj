@@ -51,6 +51,19 @@
        flash (auth/get-username identity)
        (google/make-auth-url))))))
 
+(defonce switch-target (atom nil))
+
+(defn switch-to [email]
+  (if-let [user (auth/lookup-user email)]
+    (reset! switch-target user)
+    (println "Error: User " email " not found.")))
+
+(defn switch-user [{:keys [identity]}]
+  (if (= identity (auth/get-me))
+    (let [user-token (auth/make-token identity)]
+      (token-cookie "/app" (:token user-token)))
+    (home-with-message "Error: Could not login.")))
+
 (defn login-needed [uri]
   (html/base-template
    (html/login-needed uri)))

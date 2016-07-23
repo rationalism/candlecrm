@@ -64,6 +64,8 @@
         (pages/login params))
   (GET "/logout" req
        (logout req))
+  (GET "/switch" req
+       (pages/switch-user req))
   (GET "/gmail" req
        (pages/gmail req))
   (GET "/init-account" req
