@@ -17,8 +17,8 @@
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [environ "1.0.3"]
-                 [com.taoensso/encore "2.64.1"]
-                 [com.taoensso/timbre "4.6.0"]
+                 [com.taoensso/encore "2.65.0"]
+                 [com.taoensso/timbre "4.7.0"]
                  [buddy "1.0.0"]
                  [com.google.api-client/google-api-client "1.22.0"
                   :exclusions [com.fasterxml.jackson.core/jackson-core
@@ -34,7 +34,7 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.4.5"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.5.0"]
                  [org.deeplearning4j/deeplearning4j-core "0.4.0"
                   :exclusions [org.json/json com.google.guava/guava
                                org.apache.commons/commons-compress
