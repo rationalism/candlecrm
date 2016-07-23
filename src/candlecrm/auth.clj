@@ -94,6 +94,12 @@
   (when (neo4j/node-exists? user id type)
     (neo4j/delete-id! id)))
 
+(defn delete-queue! [user]
+  (->> [s/email-queue s/loaded-top s/loaded-bottom
+        s/top-uid s/modified]
+       (map #(neo4j/prop-label user %))
+       (run! neo4j/delete-class!)))
+
 ;; Need to retry here because other stuff might interfere
 (defn delete-user! [user]
   (if-let [succeeded
@@ -103,10 +109,7 @@
              (when (neo4j/get-property user s/index-run)
                (index/drop-constraints! user))
              (index/delete-all! user)
-             (->> [s/email-queue s/loaded-top s/loaded-bottom
-                   s/top-uid s/modified]
-                  (map #(neo4j/prop-label user %))
-                  (run! neo4j/delete-class!))
+             (delete-queue! user)
              (neo4j/delete-id! (.id user))
              :success
              (catch Exception e
