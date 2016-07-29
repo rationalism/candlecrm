@@ -86,14 +86,6 @@
        (mapv (fn [records]
                (map #(.asMap %) records)))))
 
-(defnc cypher-query [query]
-  #_(dump-queries [query])
-  (first
-   (resp-clojure
-    (if (coll? query)
-      (apply tquery query)
-      (tquery query)))))
-
 (defn cypher-property [prop]
   (str (esc-token (key prop)) ": {"
        (esc-token (key prop)) "}"))
@@ -104,10 +96,6 @@
             (map cypher-property)
             (str/join ", "))
        " }"))
-
-(defn cypher-list [query]
-  (->> (cypher-query query)
-       (map vals) (apply concat)))
 
 (defn cypher-statement [cypher]
   (if (coll? cypher)
@@ -150,6 +138,13 @@
    (cypher-combined-tx true queries))
   ([retry queries]
    (trampoline cypher-combined-tx-recur retry queries)))
+
+(defn cypher-query [query]
+  (->> query vector cypher-combined-tx first))
+
+(defn cypher-list [query]
+  (->> (cypher-query query)
+       (map vals) (apply concat)))
 
 (defnp find-by-id [id]
   (->> [(str "MATCH (a) WHERE ID(a) = {id}"
