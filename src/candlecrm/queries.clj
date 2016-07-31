@@ -157,9 +157,12 @@
              " WHERE u." (neo4j/esc-token s/recon-run) " = false"
              " WITH root, u MATCH (root)-[:" (neo4j/esc-token s/loaded-bottom)
              "]-(b) WITH root, u, b MATCH (root)-[:" (neo4j/esc-token s/loaded-top)
-             "]-(t) WHERE t." (neo4j/esc-token s/value)
-             " - b." (neo4j/esc-token s/value) " <= {queuebound}"
-             " MATCH (root)-[:" (neo4j/esc-token s/modified)
+             "]-(t) WITH root, u, b, t MATCH (root)-[:" (neo4j/esc-token s/top-uid)
+             "]-(l) WHERE (t." (neo4j/esc-token s/value)
+             " - b." (neo4j/esc-token s/value) " <= {queuebound})"
+             " OR (l." (neo4j/esc-token s/value)
+             ") > (t." (neo4j/esc-token s/value)
+             ") MATCH (root)-[:" (neo4j/esc-token s/modified)
              "]-(m) WITH root, u, m "
              " RETURN root, u ORDER BY m." (neo4j/esc-token s/value)
              " LIMIT {limit}")
