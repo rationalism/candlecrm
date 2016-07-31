@@ -430,12 +430,13 @@
        (zipmap ids)))
 
 (defn recon-finished [recon-ids]
-  [[(str "MATCH (root) WHERE ID(root) IN {ids}"
-         " SET root:" (neo4j/esc-token s/recon))
-    {:ids recon-ids}]
-   [(str "MATCH (root) WHERE ID(root) IN {ids}"
-         " REMOVE root:" (neo4j/esc-token s/norecon))
-    {:ids recon-ids}]])
+  (if (empty? recon-ids) []
+      [[(str "MATCH (root) WHERE ID(root) IN {ids}"
+             " SET root:" (neo4j/esc-token s/recon))
+        {:ids recon-ids}]
+       [(str "MATCH (root) WHERE ID(root) IN {ids}"
+             " REMOVE root:" (neo4j/esc-token s/norecon))
+        {:ids recon-ids}]]))
 
 (defn candidate-query [label preds]
   (str "MATCH (root:" label
