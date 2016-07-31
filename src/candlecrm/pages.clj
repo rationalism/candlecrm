@@ -84,6 +84,8 @@
       (assoc (resp/redirect "/gmail") :flash auth-err)
       (if-let [token (google/get-token! (.getCode auth-response))]
         (do (google/write-token! user token)
+            (throw-warn! (str "Add Google token for user: "
+                              (auth/get-username user)))
             (resp/redirect "/init-account"))
         (assoc (resp/redirect "/gmail")
                :flash "Error: Could not get auth token")))))

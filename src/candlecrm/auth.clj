@@ -85,6 +85,7 @@
       (user-person-edge! user)))
 
 (defn create-user! [{:keys [username password] :as user-data}]
+  (throw-warn! (str "Creating user with email " username))
   (let [user (user-vertex! username (hashers/encrypt password hash-alg))]
     (create-user-person! user) user))
 
@@ -109,6 +110,7 @@
 
 ;; Need to retry here because other stuff might interfere
 (defn delete-user! [user]
+  (throw-warn! "Deleting user with username: " (get-username user))
   (if-let [succeeded
            (try
              (when (google/lookup-token user)
@@ -173,4 +175,5 @@
 
 (defn login-handler [{:keys [username password]}]
   (when-let [record (find-user username password)]
+    (throw-warn! (str "This user logged in: " username))
     (make-token record)))
