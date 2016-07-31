@@ -207,7 +207,7 @@
                (periodic-trigger 2000 nil "recon.trigger.1"))
   (qs/schedule @scheduler
                (make-job EmailNLP "jobs.nlp.email.1")
-               (periodic-trigger 10000 nil "nlp.trigger.1"))
+               (periodic-trigger 15000 nil "nlp.trigger.1"))
   (qs/schedule @scheduler
                (make-job DeleteResetTokens "jobs.tokens.delete.1")
                (periodic-trigger 600000 nil "tokens.trigger.1")))

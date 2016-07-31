@@ -7,6 +7,7 @@
              :refer (pspy pspy* profile defnp p p*)]))
 
 (defonce store (atom {}))
+(defonce buf-size 10000)
 
 (defn async-worker [pool-name]
   (let [pool-data (get @store pool-name)
@@ -35,7 +36,7 @@
 (defn create-pool! [{:keys [name process param-gen
                             callback num-threads]}]
   {:pre [name process param-gen callback num-threads]}
-  (->> {:in-chan (async/chan) :out-chan (async/chan)
+  (->> {:in-chan (async/chan 10000) :out-chan (async/chan)
         :param-gen param-gen :callback callback
         :process process}
        (swap! store assoc name))

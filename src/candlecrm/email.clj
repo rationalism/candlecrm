@@ -289,7 +289,7 @@
   (let [emails (queries/email-for-nlp batch-size)]
     (when (not (empty? emails))
       (throw-info! "run email nlp")
-      (dorun (pmap @nlp-channel emails)))))
+      (dorun (map @nlp-channel emails)))))
 
 (defn make-nlp-pool! []
   (->> {:name "email-nlp" :process run-email-nlp!
