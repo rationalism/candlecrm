@@ -110,7 +110,7 @@
 
 ;; Need to retry here because other stuff might interfere
 (defn delete-user! [user]
-  (throw-warn! "Deleting user with username: " (get-username user))
+  (throw-warn! (str "Deleting user with username: " (get-username user)))
   (if-let [succeeded
            (try
              (when (google/lookup-token user)
