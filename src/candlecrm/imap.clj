@@ -578,9 +578,6 @@
        (swap! message-queue cset/union)) messages)
 
 (defnc insert-raw-range! [user lower upper]
-  (throw-info! (str "insertion for user: " user))
-  (throw-info! (str "Lower bound: " lower))
-  (throw-info! (str "Upper bound: " upper))
   (when-let [folder (fetch-imap-folder user)]
     (->> (fetch-messages folder lower upper) (add-queue folder)
          (pmap #(->> (message-fetch folder %)
