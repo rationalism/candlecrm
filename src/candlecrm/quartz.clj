@@ -53,7 +53,7 @@
                         (s/loaded-top queue) (range-top queue))
     (neo4j/update-vals! (:id queue) s/loaded-bottom
                         (s/loaded-bottom queue)
-                        (range-bottom user queue))))
+                        (dec (range-bottom user queue)))))
 
 (defn refresh-queue! [user]
   (when-let [folder (imap/fetch-imap-folder user true)]
