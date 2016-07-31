@@ -34,7 +34,7 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.5.0"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.5.1"]
                  [org.deeplearning4j/deeplearning4j-core "0.4.0"
                   :exclusions [org.json/json com.google.guava/guava
                                org.apache.commons/commons-compress
