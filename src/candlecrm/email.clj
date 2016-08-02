@@ -28,9 +28,14 @@
 (defn str-check [author]
   (if (string? author) author "Nobody"))
 
+;; Otherwise, sentence splitter might think an
+;; author's name was a break in the sentence
+(defn strip-periods [author]
+  (str/replace author #"\." " "))
+
 (defn author-name [chain message]
   (-> (loom/out-edge-label chain message s/email-from)
-      second s/s-name str-check))
+      second s/s-name str-check strip-periods))
 
 (defnp nlp-models-fn []
   {:ner ((nlp/get-ner-fn))
