@@ -83,6 +83,11 @@
          (do (queue-reset! user queue) (run-insertion! queue user))
          (queue-time-reset! queue))))))
 
+(defn reset-recon-run! []
+  (neo4j/thread-wrap
+   (->> (auth/list-users)
+        (mapv #(neo4j/set-property! % s/recon-run false)))))
+
 (defn maybe-run-recon! [[user class]]
   (when user
     (throw-info! "running recon")

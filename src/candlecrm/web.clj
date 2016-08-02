@@ -125,6 +125,7 @@
   (mlrecon/load-models!)
   (mlrecon/load-thresholds!)
   (geocode/define-context!)
+  (quartz/reset-recon-run!)
   (quartz/start!)
   (throw-info! "Ready to start server")
   (nrepl-server/start-server
