@@ -98,8 +98,9 @@
       (swap! imap/overload-locked cset/difference #{user}))))
 
 (defn remove-running [jobs]
-  (let [running-ids (queries/users-recon-running)]
-    (remove #(some #{(first %)} running-ids) jobs)))
+  (if (empty? jobs) []
+      (let [running-ids (queries/users-recon-running)]
+        (remove #(some #{(first %)} running-ids) jobs))))
 
 (defn debug-info [x]
   (mapv throw-info! x) x)
