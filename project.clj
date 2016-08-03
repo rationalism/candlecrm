@@ -17,7 +17,7 @@
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [environ "1.0.3"]
-                 [com.taoensso/encore "2.68.1"]
+                 [com.taoensso/encore "2.70.0"]
                  [com.taoensso/timbre "4.7.3"]
                  [buddy "1.0.0"]
                  [com.google.api-client/google-api-client "1.22.0"
@@ -27,7 +27,7 @@
                   :exclusions [com.google.code.findbugs/jsr305
                                com.google.guava/guava]]
                  [org.passay/passay "1.1.0"]
-                 [com.google.apis/google-api-services-oauth2 "v2-rev114-1.22.0"]
+                 [com.google.apis/google-api-services-oauth2 "v2-rev115-1.22.0"]
                  [com.google.http-client/google-http-client-jackson "1.22.0"]
                  [com.sun.mail/javax.mail "1.5.5"]
                  [de.jollyday/jollyday "0.4.7"]
@@ -35,12 +35,12 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"
                   :classifier "models"]
                  [com.googlecode.libphonenumber/libphonenumber "7.5.1"]
-                 [org.deeplearning4j/deeplearning4j-core "0.4.0"
+                 [org.deeplearning4j/deeplearning4j-core "0.5.0"
                   :exclusions [org.json/json com.google.guava/guava
                                org.apache.commons/commons-compress
                                com.fasterxml.jackson.core/jackson-core
                                org.projectlombok/lombok]]
-                 [org.deeplearning4j/deeplearning4j-nlp "0.4.0"
+                 [org.deeplearning4j/deeplearning4j-nlp "0.5.0"
                   :uberjar-merge-with {#"\.properties$" [slurp str spit]
                                        "reference.conf" [slurp str spit]}
                   :exclusions [com.google.code.findbugs/jsr305
