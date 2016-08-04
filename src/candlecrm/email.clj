@@ -280,7 +280,7 @@
   (let [emails (queries/email-for-nlp batch-size)]
     (when (not (empty? emails))
       (throw-info! "run email nlp")
-      (->> emails (mapv :ids) nlp-done-query neo4j/cypher-query)
+      (->> emails (mapv :id) nlp-done-query neo4j/cypher-query)
       (dorun (map @nlp-channel emails)))))
 
 (defn make-nlp-pool! []
