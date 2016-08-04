@@ -213,15 +213,6 @@
           chain (->> chain loom/nodes
                      (filter #(-> % s/type-label (= s/email))))))
 
-(defn merge-bottom-headers [chain headers]
-  (as-> chain $
-    (loom/merge-graphs [$ headers])
-    (loom/replace-node $ (find-bottom chain)
-                       (merge (find-bottom chain)
-                              (-> headers loom/top-nodes first)))
-    (loom/replace-node $ (-> headers loom/top-nodes first)
-                       (find-bottom $))))
-
 (defn chain-lines [chain]
   (-> chain find-top s/email-body))
 
@@ -231,83 +222,8 @@
 (defn count-max-depth [lines]
   (->> lines regex/count-depth (apply max)))
 
-(defn remove-arrows [num lines]
-  (map #(str/replace-first
-         % (apply str (repeat num ">")) "")
-       lines))
-
-(defn remove-arrows-if [lines]
-  (remove-arrows (count-min-depth lines) lines))
-
-(defn new-top [{:keys [end-body start-tail]} chain]
-  (let [new-slice (slice end-body start-tail (chain-lines chain))]
-    {s/email-body (remove-arrows-if new-slice)}))
-
-(defn maybe-add-edges [chain new-node email-from]
-  (if email-from
-    (loom/add-edges chain [[new-node email-from s/email-from]])
-    chain))
-
-(defn maybe-add-top [new-chain old-chain marks new-node]
-  (if (> (:depth marks) 0)
-    (loom/add-edges new-chain [[(new-top marks old-chain)
-                                new-node s/email-reply]])
-    new-chain))
-
-(defn merge-lines [lines]
-  (str/join "\r\n" lines))
-
-(defn sub-email [marks lines]
-  {s/email-sent (-> marks s/email-sent)
-   s/type-label s/email
-   s/email-body (merge-lines (remove-arrows-if lines))})
-
-(defn make-new-node [{:keys [start-tail end-header end-body]
-                      :as marks} chain]
-  (let [lines (chain-lines chain)]
-    (->> (slice start-tail (count lines) lines)
-         (concat (slice end-header end-body lines))
-         (sub-email marks))))
-
 (defn maybe-add [m k v]
   (if v (assoc m k v) m))
-
-(defn header->person [{:keys [email-from-name email-from-addr]}]
-  (when (or email-from-name email-from-addr)
-    (-> (assoc {} s/type-label s/person)
-        (maybe-add s/s-name email-from-name)
-        (maybe-add s/email-addr email-from-addr))))
-
-(defn split-email [marks chain]
-  (let [new-node (make-new-node marks chain)
-        email-from (header->person marks)]
-    (-> chain
-        (loom/replace-node (find-top chain) new-node)
-        (maybe-add-edges new-node email-from)
-        (maybe-add-top chain marks new-node))))
-
-(defn loc-distance [header email]
-  (let [pos (str/last-index-of header email)]
-    (fn [pair]
-      (update (vec pair) 0
-              #(-> % (- pos) Math/abs)))))
-
-(defn name-locations [header name]
-  (loop [locations nil remainder header]
-    (if-let [loc (str/index-of remainder name)]
-      (recur (if locations
-               (conj locations (+ loc (last locations) (count name)))
-               [loc])
-             (subs remainder (+ loc (count name))))
-      (->> name (repeat (count locations))
-           (zipvec locations)))))
-
-(defn pick-name [header models email]
-  (when email
-    (->> header (nlp/run-nlp-default models) nlp/nlp-names
-         (mapcat #(name-locations header %))
-         (map (loc-distance header email))
-         (sort-by first) first second)))
 
 ;; Arbitrary date: 1960-01-02 05:11:48.874
 (def ref-date (java.util.Date. -315514073744))
@@ -316,98 +232,6 @@
   (->> (dt/dates-in-text line ref-date)
        (remove dt/has-ms?)
        (remove #(= "1960" (dt/format-year %)))))
-
-(defn header-parse [header models]
-  (let [date (-> header sent-date last)
-        email (-> header regex/find-email-addrs last)
-        name (pick-name header models email)]
-    (merge (if date {s/email-sent date} {})
-           (if email {:email-from-addr email} {})
-           (if name {:email-from-name name} {}))))
-
-(defn join-lines [lines]
-  (reduce #(str/replace %1 %2 (str %2 " "))
-          (str/join "" lines)
-          email-domains))
-
-(defn find-header-vals [marks models lines]
-  (let [header-lines (->> [0 (:end-header marks) lines]
-                          (apply slice) join-lines)]
-    (if (empty? header-lines) marks
-        (merge marks (header-parse header-lines models)))))
-
-(defn first-header [sep-model lines]
-  (if (or (nil? lines) (empty? lines))
-    0 (loop [cnt 0]
-        (cond (= cnt (count lines)) (count lines)
-              (weka/is-header? sep-model (nth lines cnt)) cnt
-              :else (recur (inc cnt))))))
-
-(defn first-body [sep-model lines]
-  (if (or (nil? lines) (empty? lines))
-    0 (loop [cnt 0]
-        (cond (= cnt (count lines)) (count lines)
-              (not (weka/is-header? sep-model (nth lines cnt))) cnt
-              :else (recur (inc cnt))))))
-
-(defn find-end-header [marks sep-model lines]
-  (->> lines (first-body sep-model)
-       (assoc marks :end-header)))
-
-(defn find-end-body [{:keys [end-header] :as marks}
-                     sep-model lines]
-  (->> (drop end-header lines)
-       (first-header sep-model) (+ end-header)
-       (assoc marks :end-body)))
-
-(defn count-nested [text]
-  (count (first (re-seq #"^>+" text))))
-
-(defn in-block? [lines index f]
-  (cond (neg? index) false
-        (>= index (count lines)) false
-        :else (f (count-nested (nth lines index)))))
-
-(defn start-tail [marks lines]
-  (assoc marks :start-tail
-         (if (= 0 (count-max-depth lines))
-           (count lines)
-           (-> (fn [x] (in-block? (rseq (vec lines)) x zero?))
-               (drop-while (range))
-               first (- )
-               (+ (count lines))))))
-
-(defnp find-marks [{:keys [sep nlp]} depth chain]
-  (let [lines (chain-lines chain)]
-    (-> {:depth depth s/email-sent nil :email-from-name nil
-         :email-from-addr nil}
-        (find-end-header sep lines)
-        (find-end-body sep lines)
-        (start-tail lines)
-        (find-header-vals nlp lines))))
-
-(defn recursive-split [models depth chain]
-  (if (>= depth 0)
-    (recur models
-           (-> chain chain-lines count-max-depth
-               (min (dec depth)))
-           (-> models (find-marks depth chain)
-               (split-email chain)))
-    chain))
-
-(defn start-email-graph [body]
-  (loom/build-graph [{s/email-body body}] []))
-
-(defn full-email-graph [body]
-  (loom/build-graph [{s/email-body (merge-lines body)
-                      s/type-label s/email}] []))
-
-(defnp raw-msg-chain [body models]
-  (let [lines (str/split-lines body)
-        depth (count-max-depth lines)]
-    (if (> depth 0)
-      (recursive-split models depth (start-email-graph lines))
-      (full-email-graph lines))))
 
 (defn make-headers [pair root]
   (map #(vector root % (key pair)) (val pair)))

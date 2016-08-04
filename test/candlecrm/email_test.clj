@@ -33,5 +33,5 @@
     (def r1 (make-nlp-chain nlp-models message1 g1))
     (def r2 (make-nlp-chain nlp-models message2 g2))
     (is r1)
-    (is (not r2))))
+    (is r2)))
 

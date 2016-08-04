@@ -131,6 +131,9 @@
   (testing "Count potential recon types"
     (is (norecon-count-all))))
 
+(defn get-email [m]
+  (get m [s/email-addr]))
+
 (deftest search-test
   (testing "Create and search for a user"
     (def test-user (auth/create-user! {:username test-username
@@ -138,7 +141,7 @@
     (is test-user)
     (is (->> test-username vector (zipmap [:query])
              (full-search test-user) 
-             first s/email-addr keys first
+             first get-email keys first
              (= test-username)))
     
     (auth/delete-user! test-user)))
