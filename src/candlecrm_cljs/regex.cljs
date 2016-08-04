@@ -4,9 +4,9 @@
 
 ;; My own regexes
 (def node-param-regex #"\<node([^\>]+)\>")
-(def node-regex #"\<node((.(?!node\>))+)/node\>")
-(def url-regex #"\<url((.(?!url\>))+)/url\>")
-(def bracket-regex #"\>(.+)\<")
+(def node-regex #"\<node((.(?!node\>)|\n)+)/node\>")
+(def url-regex #"\<url((.(?!url\>)|\n)+)/url\>")
+(def bracket-regex #"\>((.|\n)+)\<")
 (def esc-char-regex #"\^|\[|\]|\.|\$|\{|\}|\(|\)|\\|\*|\+|\||\?|\<|\>")
 
 (defn node-map [hypertext]
@@ -17,9 +17,8 @@
    :original hypertext :type :node})
 
 (defn url-truncate [url]
-  (if (> (count url) 30)
-    (str (subs url 0 30) "...")
-    url))
+  (if (<= (count url) 30) url
+      (str (subs url 0 30) "...")))
 
 (defn url-map [hypertext]
   (let [url (-> bracket-regex (re-seq hypertext)
@@ -27,9 +26,21 @@
     {:text (url-truncate url) :type :url
      :link url :original hypertext}))
 
+(defn split-newline [m]
+  (let [text-pieces (str/split (:text m) #"\n")
+        orig-pieces (str/split (:original m) #"\n")]
+    (if (not= (count text-pieces) (count orig-pieces)) [m]
+        (map #(merge {:link (:link m) :type (:type m)}
+                     {:text %1 :original %2})
+             text-pieces orig-pieces))))
+
+(defn catch-newlines [nodes]
+  (mapcat #(if (not= -1 (.indexOf (:text %) "\n"))
+             (split-newline %) (vector %)) nodes))
+
 (defn node-parse [text]
-  (->> text (re-seq node-regex)
-       (map first) (map node-map)))
+  (->> text (re-seq node-regex) (map first)
+       (map node-map) catch-newlines))
 
 (defn url-parse [text]
   (->> text (re-seq url-regex)

@@ -30,6 +30,9 @@
                   s/event [s/s-name "(No name)"]
                   s/geocode ["Coordinate pair"]})
 
+(defn debug-js [x]
+  (js/alert x) x)
+
 (defn get-title [node]
   (let [fields (-> node :center-node s/type-label title-field)]
     (loop [f fields]
@@ -37,19 +40,6 @@
             (util/get-first (:center-node node) (first f))
             (util/get-first (:center-node node) (first f))
             :else (recur (rest fields))))))
-
-(defn split-regex [s break]
-  (str/split s (-> break regex/regex-escape re-pattern)))
-
-(defn insert-breaks [strs break]
-  (->> break (repeat (count strs))
-       (interleave strs) drop-last))
-
-(defn split-coll [strs break]
-  (->> strs
-       (map #(split-regex % break))
-       (map #(insert-breaks % break))
-       flatten))
 
 (defn ids-if-coll [type m]
   (let [id-fn #(->> % util/add-ids (map vec) vec (into {}))]
@@ -66,25 +56,25 @@
   (u/delete-entity!)
   (state/set! [:tabid] 1))
 
-(defn split-many [s breaks]
-  (reduce split-coll (vector s) breaks))
+(defn split-item [s m]
+  (let [node-index (.indexOf (last s) (:original m))]
+    (->> m :original count (+ node-index) (subs (last s))
+         (vector (subs (last s) 0 node-index) m)
+         (concat (drop-last s)) vec)))
 
-(defn text-keys [parsed]
-  (->> parsed (map #(hash-map (:original %) %))
-       (apply merge)))
+(defn split-urls [item]
+  (let [parsed (regex/url-parse item)]
+    (reduce split-item [item] parsed)))
 
-(defn swap-item [item parsed]
-  (if (contains? parsed item)
-    (get parsed item) item))
-
-(defn link-items [item]
-  (let [parsed (-> item regex/links-parse text-keys)]
-    (->> parsed keys (split-many item)
-         (map #(swap-item % parsed)))))
+(defn split-items [item]
+  (let [parsed (regex/node-parse item)]
+    (->> (reduce split-item [item] parsed)
+         (mapcat #(if (string? %) (split-urls %)
+                      (vector %))))))
 
 (defn add-newlines [piece]
   [:span
-   (let [n (util/add-ids (str/split piece #"\n"))]
+   (let [n (util/add-ids (str/split (str " " piece " ") #"\n"))]
      (for [ln n]
        ^{:key (first ln)}
        [:span (second ln)
@@ -104,7 +94,7 @@
 
 (defn body-links [item]
   [:p#email-body
-   (for [piece (-> item link-items util/add-ids)]
+   (for [piece (-> item split-items util/add-ids)]
      ^{:key (first piece)}
      [body-link (second piece)])])
 
@@ -168,9 +158,6 @@
 (defn remove-dupes [attrs]
   (if (some #{s/body-nlp} attrs)
     (remove #(= s/email-body %) attrs) attrs))
-
-(defn debug-js [x]
-  (js/alert x) x)
 
 (defn info-items [attrs item]
   [:div
