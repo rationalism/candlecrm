@@ -34,6 +34,7 @@
 
 (def email-subject :subject)
 (def email-body :body)
+(def body-nlp :body-nlp)
 (def email-received :received-date)
 (def email-sent :sent-date)
 (def email-reply :reply)
@@ -146,7 +147,7 @@
                  event-org "Events here by" located-in "Located in"
                  has-coord "Coordinates" lat "Latitude" lng "Longitude"
                  geocode "Coordinates" location "Lives in"
-                 loc-inside "Inside of"})
+                 loc-inside "Inside of" body-nlp "Email body"})
 
 (def schema-map {"PERSON" person-name "LOCATION" loc-name
                  "ORGANIZATION" org-name "MONEY" amount

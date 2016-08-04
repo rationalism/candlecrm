@@ -10,7 +10,7 @@
              :refer (pspy pspy* profile defnp p p*)]))
 
 (def insert-csv-block 100)
-(def preprocess-labels {s/nonlp s/email s/nogeocode s/building})
+(def preprocess-labels {s/nogeocode s/building})
 
 (defn create-cypher [user label]
   {:pre [user label]}

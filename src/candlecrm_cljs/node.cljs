@@ -9,7 +9,8 @@
 
 (def display-fields {s/person [s/s-name s/email-addr s/phone-num s/website
                                s/org-member s/birthday s/location s/mail-address]
-                     s/email [s/email-sent s/email-from s/email-to s/email-body]
+                     s/email [s/email-sent s/email-from s/email-to s/email-body
+                              s/body-nlp]
                      s/organization [s/s-name s/email-addr s/phone-num s/website
                                      s/org-member]
                      s/location [s/s-name s/zipcode s/email-mentions
@@ -138,6 +139,7 @@
   [:span
    (cond (some #{prop} s/date-times) [util/date-display item]
          (= prop s/email-body) [body-links (first item)]
+         (= prop s/body-nlp) [body-links (first item)]
          (coll? item)
          (for [list-member (util/add-ids item)]
            ^{:key (first list-member)}

@@ -124,10 +124,6 @@
                (throw-warn! "Retrying deletion") nil))]
     succeeded (recur user)))
 
-(defn reset-user! [user]
-  (delete-user-data! user)
-  (create-user-person! user))
-
 (defn password-check [password confirm]
   (cond
     (str/blank? password) "Password blank"

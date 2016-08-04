@@ -85,7 +85,7 @@
   {s/person [[s/s-name] [s/email-addr] [s/phone-num] [s/birthday]
              [s/org-member s/s-name :id] [s/website]
              [s/location s/s-name :id] [s/mail-address s/street-addr :id]]
-   s/email [[s/email-subject] [s/email-body] [s/email-sent]
+   s/email [[s/email-subject] [s/email-body] [s/body-nlp] [s/email-sent]
             [s/email-from s/email-addr :id] [s/email-to s/email-addr :id]
             [s/email-from s/s-name :id] [s/email-to s/s-name :id]
             [s/email-reply s/email-from s/s-name :id]]
@@ -257,9 +257,9 @@
 
 (defn nonlp-count [user]
   (->> ["MATCH (root:" (neo4j/prop-label user s/email)
-        ":" (neo4j/esc-token s/nonlp)
         ")-[:" (neo4j/esc-token s/email-body)
-        "]->(b) RETURN count(root)"]
+        "]->(b) WITH root OPTIONAL MATCH (root)-[:" (neo4j/esc-token s/body-nlp)
+        "]->(n) WHERE n IS NULL RETURN count(root)"]
        (apply str) neo4j/cypher-query
        first vals first))
 
@@ -314,10 +314,11 @@
          first neo4j/find-by-id)))
 
 (defnp email-for-nlp [limit]
-  (->> [(str "MATCH (root:" (neo4j/esc-token s/nonlp)
-             ":" (neo4j/esc-token s/recon)
+  (->> [(str "MATCH (root:" (neo4j/esc-token s/recon)
              ")-[:" (neo4j/esc-token s/email-body)
-             "]->(b) RETURN ID(root), labels(root) LIMIT {limit}")
+             "]->(b) WITH root OPTIONAL MATCH (root)-[:"
+             (neo4j/esc-token s/body-nlp) "]->(n) WHERE n IS NULL"
+             " RETURN ID(root), labels(root) LIMIT {limit}")
         {:limit limit}]
        neo4j/cypher-query (map clojure-map)
        (map #(update % "labels(root)" find-user-labels))

@@ -7,6 +7,7 @@
             [candlecrm.corenlp :as nlp]
             [candlecrm.datetime :as dt]
             [candlecrm.google :as google]
+            [candlecrm.index :as index]
             [candlecrm.insert :as insert]
             [candlecrm.loom :as loom]
             [candlecrm.neo4j :as neo4j]
@@ -477,6 +478,14 @@
         (insert/push-entities! user s/meta-src)
         first neo4j/find-by-id
         (neo4j/create-edge! user s/user-queue))))
+
+(defn reset-user! [username]
+  (let [user (auth/lookup-user username)]
+    (auth/delete-user-data! user)
+    (auth/create-user-person! user)
+    (add-new-queue! user)
+    (index/make-constraints! user)
+    (neo4j/set-property! user s/index-run true)))
 
 (defn scroll-emails [user f]
   (when-let [userinbox (fetch-imap-folder user)]

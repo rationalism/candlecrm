@@ -231,8 +231,8 @@
        first))
 
 (defn link-message [graph message linked-text]
-  (->> (assoc (dissoc message s/email-sent)
-              s/email-body linked-text)
+  (->> (assoc (dissoc message s/email-sent s/email-body)
+              s/body-nlp linked-text)
        (loom/replace-node graph message)))
 
 (defn remove-metadata [graph node]
@@ -267,28 +267,13 @@
          vector (loom/build-graph [])
          (make-nlp-chain models message))))
 
-(defn body-query []
-  (str "MATCH (root)-[r:" (neo4j/esc-token s/email-body)
-       "]->(b) WHERE ID(root) = {id}"))
-
-(defn delete-email-body [id]
-  [[(str (body-query) " WITH b MATCH (b)<--(x)"
-         " WITH b, count(x) as n WHERE n = {limit} DETACH DELETE b")
-    {:id id :limit 1}]
-   [(str (body-query) " DELETE r")
-    {:id id}]])
-
-(defn remove-nonlp [id]
-  [(str "MATCH (root) WHERE ID(root) = {id}"
-        " REMOVE root:" (neo4j/esc-token s/nonlp))
-   {:id id}])
-
 (defn run-email-nlp! [models {:keys [id user]}]
   (if-let [graph (graph-from-id models id)]
-    (insert/push-graph!
-     graph user s/nlp-src
-     (conj (delete-email-body id) (remove-nonlp id)))
-    (-> id remove-nonlp neo4j/cypher-query)))
+    (insert/push-graph! graph user s/nlp-src [])
+    (let [[name body sent is-digest?] (fetch-body id)]
+      (-> {:id id s/body-nlp body} vector
+          (loom/build-graph [])
+          (insert/push-graph! user s/nlp-src [])))))
 
 (defn push-email-nlp! []
   (let [emails (queries/email-for-nlp batch-size)]
