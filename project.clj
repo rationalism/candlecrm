@@ -16,8 +16,8 @@
                  [ring/ring-defaults "0.2.1"]
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
-                 [environ "1.0.3"]
-                 [com.taoensso/encore "2.70.0"]
+                 [environ "1.1.0"]
+                 [com.taoensso/encore "2.72.0"]
                  [com.taoensso/timbre "4.7.3"]
                  [buddy "1.0.0"]
                  [com.google.api-client/google-api-client "1.22.0"
