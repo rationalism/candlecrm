@@ -291,7 +291,7 @@
     (if (params-ok? params)
       nil (->> params (group-by first) vals
                (map process-params) dummy-map
-               (hash-map path)))))
+               (hash-map (vec (drop-last path)))))))
 
 (defn one-link [n1 n2 pred]
   (str "[:" (neo4j/esc-token pred)

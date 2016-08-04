@@ -82,14 +82,14 @@
   (when node (merge node {:type (:type query-map)})))
 
 (defn key-vector [m]
-  (if (->> m keys first vector?)
-    (let [[k v] (first m)] {[k] v}) m))
+  (if (->> m keys first vector?) m
+      (let [[k v] (first m)] {[k] v})))
 
 (defn node-by-id [user {:keys [id type] :as query-map}]
   (when (neo4j/node-exists? user id type)
     (when-let [paths (s/node-paths type)]
       (->> paths (map rest) (mapv vec)
-           (mlrecon/fetch-paths-full id) 
+           (mlrecon/fetch-paths-full id) (remove nil?)
            (filter #(not-any? nil? (keys %)))
            (map #(dissoc % :id s/type-label))
            (map key-vector) (apply merge)

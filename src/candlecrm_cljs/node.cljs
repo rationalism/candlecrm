@@ -7,12 +7,12 @@
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.util :as util]))
 
-(def title-field {s/person [s/s-name s/email-addr "(No name)"]
-                  s/email [s/email-subject "(No subject)"]
-                  s/organization [s/s-name s/email-addr "(No name)"]
-                  s/location [s/s-name "(No name)"]
-                  s/building [s/street-addr "(No address)"]
-                  s/event [s/s-name "(No name)"]
+(def title-field {s/person [[s/s-name] [s/email-addr] "(No name)"]
+                  s/email [[s/email-subject] "(No subject)"]
+                  s/organization [[s/s-name] [s/email-addr] "(No name)"]
+                  s/location [[s/s-name] "(No name)"]
+                  s/building [[s/street-addr] "(No address)"]
+                  s/event [[s/s-name] "(No name)"]
                   s/geocode ["Coordinate pair"]})
 
 (defn debug-js [x]
@@ -112,9 +112,9 @@
 
 (defn string-item [item prop]
   [:span
-   (cond (some #{prop} s/date-times) [util/date-display item]
-         (= prop s/email-body) [body-links (first item)]
-         (= prop s/body-nlp) [body-links (first item)]
+   (cond (some #{(last prop)} s/date-times) [util/date-display item]
+         (= (last prop) s/email-body) [body-links (first item)]
+         (= (last prop) s/body-nlp) [body-links (first item)]
          (coll? item)
          (for [list-member (util/add-ids item)]
            ^{:key (first list-member)}
