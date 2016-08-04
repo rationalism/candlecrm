@@ -35,6 +35,7 @@
 (def email-subject :subject)
 (def email-body :body)
 (def body-nlp :body-nlp)
+(def nlp-done :nlp-done)
 (def email-received :received-date)
 (def email-sent :sent-date)
 (def email-reply :reply)

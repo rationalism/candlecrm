@@ -258,8 +258,8 @@
 (defn nonlp-count [user]
   (->> ["MATCH (root:" (neo4j/prop-label user s/email)
         ")-[:" (neo4j/esc-token s/email-body)
-        "]->(b) WITH root OPTIONAL MATCH (root)-[:" (neo4j/esc-token s/body-nlp)
-        "]->(n) WHERE n IS NULL RETURN count(root)"]
+        "]->(b) WHERE NOT root:" (neo4j/esc-token s/nlp-done)
+        " RETURN count(root)"]
        (apply str) neo4j/cypher-query
        first vals first))
 
@@ -316,8 +316,7 @@
 (defnp email-for-nlp [limit]
   (->> [(str "MATCH (root:" (neo4j/esc-token s/recon)
              ")-[:" (neo4j/esc-token s/email-body)
-             "]->(b) WITH root OPTIONAL MATCH (root)-[:"
-             (neo4j/esc-token s/body-nlp) "]->(n) WHERE n IS NULL"
+             "]->(b) WHERE NOT root:" (neo4j/esc-token s/nlp-done)
              " RETURN ID(root), labels(root) LIMIT {limit}")
         {:limit limit}]
        neo4j/cypher-query (map clojure-map)

@@ -268,17 +268,18 @@
          (make-nlp-chain models message))))
 
 (defn run-email-nlp! [models {:keys [id user]}]
-  (if-let [graph (graph-from-id models id)]
-    (insert/push-graph! graph user s/nlp-src [])
-    (let [[name body sent is-digest?] (fetch-body id)]
-      (-> {:id id s/body-nlp body} vector
-          (loom/build-graph [])
-          (insert/push-graph! user s/nlp-src [])))))
+  (when-let [graph (graph-from-id models id)]
+    (insert/push-graph! graph user s/nlp-src [])))
+
+(defn nlp-done-query [ids]
+  (->> [(str "MATCH (n) WHERE ID(n) IN {ids} SET n:" s/nlp-done )
+        {:ids ids}]))
 
 (defn push-email-nlp! []
   (let [emails (queries/email-for-nlp batch-size)]
     (when (not (empty? emails))
       (throw-info! "run email nlp")
+      (->> emails (mapv :ids) nlp-done-query neo4j/cypher-query)
       (dorun (map @nlp-channel emails)))))
 
 (defn make-nlp-pool! []
