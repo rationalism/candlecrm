@@ -166,8 +166,11 @@
          (sort-by second >) (map first))))
 
 (defn remove-dupes [attrs]
-  (if (contains? attrs s/body-nlp)
-    (remove #{s/email-body} attrs) attrs))
+  (if (some #{s/body-nlp} attrs)
+    (remove #(= s/email-body %) attrs) attrs))
+
+(defn debug-js [x]
+  (js/alert x) x)
 
 (defn info-items [attrs item]
   [:div
