@@ -7,21 +7,6 @@
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.util :as util]))
 
-(def display-fields {s/person [s/s-name s/email-addr s/phone-num s/website
-                               s/org-member s/birthday s/location s/mail-address]
-                     s/email [s/email-sent s/email-from s/email-to s/email-body
-                              s/body-nlp]
-                     s/organization [s/s-name s/email-addr s/phone-num s/website
-                                     s/org-member]
-                     s/location [s/s-name s/zipcode s/email-mentions
-                                 s/loc-inside s/located-in s/location]
-                     s/event [s/s-name s/date-time s/event-type s/website
-                              s/event-begin s/event-end
-                              s/event-features s/email-mentions]
-                     s/building [s/street-addr s/located-in s/email-mentions
-                                 s/event-org s/mail-address s/has-coord]
-                     s/geocode [s/lat s/lng s/has-coord]})
-
 (def title-field {s/person [s/s-name s/email-addr "(No name)"]
                   s/email [s/email-subject "(No subject)"]
                   s/organization [s/s-name s/email-addr "(No name)"]
@@ -156,19 +141,19 @@
          (sort-by second >) (map first))))
 
 (defn remove-dupes [attrs]
-  (if (some #{s/body-nlp} attrs)
-    (remove #(= s/email-body %) attrs) attrs))
+  (if (some #{s/body-nlp} (map last attrs))
+    (remove #(= s/email-body (last %)) attrs) attrs))
 
 (defn info-items [attrs item]
   [:div
    (doall
-    (for [attr (->> attrs (filter #(contains? item %))
+    (for [attr (->> attrs (filter #(contains? item (vec (rest %))))
                     remove-dupes util/add-ids)]
       ^{:key (first attr)}
       [:div.infoitem
-       [str-item (-> attr second s/attr-names)
-        (second attr)
-        (filtered-list (second attr) item)]]))])
+       [str-item (-> attr second first)
+        (-> attr second rest vec)
+        (-> attr second rest vec (filtered-list item))]]))])
 
 (def type-name {s/person "Person" s/email "Email"
                 s/organization "Organization" s/location "Location"
@@ -194,6 +179,6 @@
      "(Edit)"]" "
     [:a {:href "#" :on-click delete-entity-switch}
      "(Delete)"]]
-   [info-items (-> item s/type-label display-fields) item]
+   [info-items (-> item s/type-label s/node-paths) item]
    (when aux? [node-aux node-name item])])
 
