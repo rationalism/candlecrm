@@ -132,6 +132,41 @@
 
 (def src-features [edit-src nlp-src email-src contact-src])
 
+(def node-paths
+  {s/person [["Name" s/s-name] ["Email address" s/email-addr]
+             ["Phone number" s/phone-num] ["Birthday" s/birthday]
+             ["Member of these organizations" s/org-member s/s-name :id]
+             ["Personal website" s/website] ["Lives in" s/location s/s-name :id]
+             ["Home address" s/mail-address s/street-addr :id]]
+   s/email [["Subject" s/email-subject] ["Body" s/email-body] ["Body" s/body-nlp]
+            ["Email sent" s/email-sent] ["Sent by" s/email-from s/email-addr :id]
+            ["Sent to" s/email-to s/email-addr :id]
+            ["Sent by" s/email-from s/s-name :id]
+            ["Sent to" s/email-to s/s-name :id]
+            ["Other emails in thread" s/email-reply s/email-from s/s-name :id]]
+   s/organization [["Organization name" s/s-name] ["Email address"s/email-addr]
+                   ["Phone number" s/phone-num] ["Organization website" s/website]
+                   ["Members of this organization" s/org-member s/s-name :id]]
+   s/location [["Location name" s/s-name] ["Assocated zipcodes" s/zipcode]
+               ["Emails that mention here" s/link-to s/email-mentions s/email-subject :id]
+               ["Related locations" s/loc-inside s/s-name :id]
+               ["Buildings in this location" s/located-in s/street-addr :id]
+               ["Location name" s/location s/s-name :id]]
+   s/building [["Address of this building" s/street-addr]
+               ["Emails mentioning this address" s/link-to s/email-mentions s/email-subject :id]
+               ["Latitude" s/has-coord s/lat :id] ["Longitude" s/has-coord s/lng :id]
+               ["This building is located in" s/located-in s/s-name :id]
+               ["The zipcode for this building is" s/located-in s/zipcode :id]
+               ["Address of this building" s/mail-address s/s-name :id]
+               ["Events at this address" s/event-addr s/event-org s/s-name :id]]
+   s/event [["Event name" s/s-name] ["Event time" s/date-time]
+            ["Event begins at" s/event-begin] ["Event ends at" s/event-end]
+            ["Type of event" s/event-type] ["Event website" s/website]
+            ["This event features" s/event-features s/s-name :id]
+            ["Emails discussing this event" s/link-to s/email-mentions s/email-subject :id]]
+   s/geocode [["Latitude" s/lat] ["Longitude" s/lng]
+              ["Buildings at this location" s/has-coord s/street-addr :id]]})
+
 (def attr-names {s-name "Name" amount "Amount"
                  email-addr "Email address" email-subject "Subject"
                  email-to "Email to" email-from "Email from"

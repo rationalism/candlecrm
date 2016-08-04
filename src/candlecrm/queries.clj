@@ -81,38 +81,18 @@
 (defn merge-if-exists [node query-map]
   (when node (merge node {:type (:type query-map)})))
 
-(def node-paths
-  {s/person [[s/s-name] [s/email-addr] [s/phone-num] [s/birthday]
-             [s/org-member s/s-name :id] [s/website]
-             [s/location s/s-name :id] [s/mail-address s/street-addr :id]]
-   s/email [[s/email-subject] [s/email-body] [s/body-nlp] [s/email-sent]
-            [s/email-from s/email-addr :id] [s/email-to s/email-addr :id]
-            [s/email-from s/s-name :id] [s/email-to s/s-name :id]
-            [s/email-reply s/email-from s/s-name :id]]
-   s/organization [[s/s-name] [s/email-addr] [s/phone-num] [s/website]
-                   [s/org-member s/s-name :id]]
-   s/location [[s/s-name] [s/zipcode]
-               [s/link-to s/email-mentions s/email-subject :id]
-               [s/loc-inside s/s-name :id] [s/located-in s/street-addr :id]
-               [s/location s/s-name :id]]
-   s/building [[s/street-addr]
-               [s/link-to s/email-mentions s/email-subject :id]
-               [s/has-coord s/lat :id] [s/has-coord s/lng :id]
-               [s/located-in s/s-name :id] [s/located-in s/zipcode :id]
-               [s/mail-address s/s-name :id]
-               [s/event-addr s/event-org s/s-name :id]]
-   s/event [[s/s-name] [s/date-time] [s/event-begin] [s/event-end]
-            [s/event-type] [s/website]
-            [s/event-features s/s-name :id]
-            [s/link-to s/email-mentions s/email-subject :id]]
-   s/geocode [[s/lat] [s/lng] [s/has-coord s/street-addr :id]]})
+(defn key-vector [m]
+  (if (->> m keys first vector?)
+    (let [[k v] (first m)] {[k] v}) m))
 
 (defn node-by-id [user {:keys [id type] :as query-map}]
   (when (neo4j/node-exists? user id type)
-    (when-let [paths (node-paths type)]
-      (->> paths (mlrecon/fetch-paths-full id) 
+    (when-let [paths (s/node-paths type)]
+      (->> paths (map rest) (mapv vec)
+           (mlrecon/fetch-paths-full id) 
            (filter #(not-any? nil? (keys %)))
-           (map #(dissoc % :id s/type-label)) (apply merge)
+           (map #(dissoc % :id s/type-label))
+           (map key-vector) (apply merge)
            (merge {:id id s/type-label type})))))
 
 (defn optional-fetch-node [key-result user]
