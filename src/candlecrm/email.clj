@@ -272,7 +272,8 @@
     (insert/push-graph! graph user s/nlp-src [])))
 
 (defn nlp-done-query [ids]
-  (->> [(str "MATCH (n) WHERE ID(n) IN {ids} SET n:" s/nlp-done )
+  (->> [(str "MATCH (n) WHERE ID(n) IN {ids} SET n:"
+             (neo4j/esc-token s/nlp-done))
         {:ids ids}]))
 
 (defn push-email-nlp! []

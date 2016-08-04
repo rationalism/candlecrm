@@ -165,11 +165,15 @@
          (filter #(-> % second (> limit)))
          (sort-by second >) (map first))))
 
+(defn remove-dupes [attrs]
+  (if (contains? attrs s/body-nlp)
+    (remove #{s/email-body} attrs) attrs))
+
 (defn info-items [attrs item]
   [:div
    (doall
     (for [attr (->> attrs (filter #(contains? item %))
-                    util/add-ids)]
+                    remove-dupes util/add-ids)]
       ^{:key (first attr)}
       [:div.infoitem
        [str-item (-> attr second s/attr-names)
