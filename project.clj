@@ -29,7 +29,7 @@
                  [org.passay/passay "1.2.0"]
                  [com.google.apis/google-api-services-oauth2 "v2-rev116-1.22.0"]
                  [com.google.http-client/google-http-client-jackson "1.22.0"]
-                 [com.sun.mail/javax.mail "1.5.6"]
+                 [com.sun.mail/javax.mail "1.5.5"]
                  [de.jollyday/jollyday "0.4.7"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"
