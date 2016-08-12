@@ -3,7 +3,7 @@
   :url "https://www.candlecrm.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.9.93"]
+                 [org.clojure/clojurescript "1.9.183"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [ns-tracker "0.3.0"]
                  [cheshire "5.6.3"]
@@ -17,7 +17,7 @@
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [environ "1.1.0"]
-                 [com.taoensso/encore "2.72.0"]
+                 [com.taoensso/encore "2.75.0"]
                  [com.taoensso/timbre "4.7.3"]
                  [buddy "1.0.0"]
                  [com.google.api-client/google-api-client "1.22.0"
@@ -26,15 +26,15 @@
                  [com.google.gdata/core "1.47.1"
                   :exclusions [com.google.code.findbugs/jsr305
                                com.google.guava/guava]]
-                 [org.passay/passay "1.1.0"]
-                 [com.google.apis/google-api-services-oauth2 "v2-rev115-1.22.0"]
+                 [org.passay/passay "1.2.0"]
+                 [com.google.apis/google-api-services-oauth2 "v2-rev116-1.22.0"]
                  [com.google.http-client/google-http-client-jackson "1.22.0"]
-                 [com.sun.mail/javax.mail "1.5.5"]
+                 [com.sun.mail/javax.mail "1.5.6"]
                  [de.jollyday/jollyday "0.4.7"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.5.1"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.5.2"]
                  [org.deeplearning4j/deeplearning4j-core "0.5.0"
                   :exclusions [org.json/json com.google.guava/guava
                                org.apache.commons/commons-compress
