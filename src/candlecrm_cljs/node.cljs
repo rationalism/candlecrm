@@ -144,10 +144,14 @@
   (if (some #{s/body-nlp} (map last attrs))
     (remove #(= s/email-body (last %)) attrs) attrs))
 
+(defn drop-id [coll]
+  (if (= :id (last coll)) (drop-last coll) coll))
+
 (defn info-items [attrs item]
   [:div
    (doall
-    (for [attr (->> attrs (filter #(contains? item (vec (rest %))))
+    (for [attr (->> attrs (filter #(->> % rest drop-id vec
+                                        (contains? item)))
                     remove-dupes util/add-ids)]
       ^{:key (first attr)}
       [:div.infoitem
