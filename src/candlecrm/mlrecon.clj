@@ -304,6 +304,12 @@
 
 (defn val-clause [n1 n2]
   (let [id-node (if (= n2 1) "root" (str "b" (- n2 2) "a" n1))]
+    (str "collect({id: ID(" id-node "), labels: labels(" id-node
+         "), type: type(r), val: a" n1 "." (neo4j/esc-token s/value)
+         ", rel: r}) AS b" n1)))
+
+(defn val-clause-old [n1 n2]
+  (let [id-node (if (= n2 1) "root" (str "b" (- n2 2) "a" n1))]
     (str "collect([ID(" id-node "), labels(" id-node
          "), type(r), a" n1 "." (neo4j/esc-token s/value)
          ", r]) AS b" n1)))
@@ -339,10 +345,8 @@
        (str/join " ")))
 
 (defn ret-vals [n]
-  (->> n range
-       (map #(str "b" %))
-       (str/join ", ")
-       (str "RETURN ")))
+  (->> n range (map #(str "b" %))
+       (str/join ", ") (str "RETURN ")))
 
 (defn fetch-paths-query [id paths]
   [(str "MATCH (root) WHERE ID(root) = {id}"
@@ -354,10 +358,17 @@
   (if (= (last path) :id)
     (object-params path m) (mapify-params m)))
 
+(defn pick-keys [m]
+  (mapv #(get m %) ["id" "labels" "type" "val" "rel"]))
+
+(defn arrange-maps [m]
+  (->> m vals first (mapv clojure-map)
+       (mapv pick-keys) (hash-map (first (keys m)))))
+
 (defn parse-paths-general [paths path-rels]
   (->> path-rels first clojure-map (map #(apply hash-map %))
        (sort-by #(-> % keys first))
-       (mapv choose-process paths)))
+       (mapv arrange-maps) (mapv choose-process paths)))
 
 (defn parse-paths [paths path-rels]
   (let [results (parse-paths-general paths path-rels)
