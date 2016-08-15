@@ -73,7 +73,7 @@
         (Exception. ) throw)))
 
 (defn catch-lazy [x]
-  (if (coll? x) (doall x) x))
+  (if (coll? x) (mapv catch-lazy x) x))
 
 (defn print-params [params]
   (map (fn [p] `(str "Value of " (name '~p) ": " (catch-lazy ~p)))
