@@ -72,8 +72,11 @@
     (-> "Error: Can't handle multi-arity functions"
         (Exception. ) throw)))
 
+(defn catch-lazy [x]
+  (if (coll? x) (doall x) x))
+
 (defn print-params [params]
-  (map (fn [p] `(str "Value of " (name '~p) ": " ~p))
+  (map (fn [p] `(str "Value of " (name '~p) ": " (catch-lazy ~p)))
        params))
 
 (defn add-try-catch [fn-name params body]
