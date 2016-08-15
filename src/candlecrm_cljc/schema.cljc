@@ -145,7 +145,7 @@
           ["Sent to" email-to s-name :id]
           ["Other emails in thread" email-reply email-from s-name :id]
           ["Body" email-body] ["Body" body-nlp]]
-   organization [["Organization name" s-name] ["Email address"email-addr]
+   organization [["Organization name" s-name] ["Email address" email-addr]
                  ["Phone number" phone-num] ["Organization website" website]
                  ["Members of this organization" org-member s-name :id]]
    location [["Location name" s-name] ["Assocated zipcodes" zipcode]

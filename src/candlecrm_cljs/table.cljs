@@ -18,13 +18,17 @@
      name "(No name)")
    (person :id) s/person])
 
-(defn new-entity-switch [type]
-  (state/set! [:input-meta :type] type)
-  (state/set! [:input-meta :attr-list]
-              (type entity-attrs))
-  (doseq [attr (type entity-attrs)]
-    (state/set! [:new-entity attr] {0 ""}))
-  (state/set! [:tabid] 7))
+(defn new-attrs [node-type]
+  (->> node-type s/node-paths (filter #(= 2 (count %)))
+       (mapv second)))
+
+(defn new-entity-switch [node-type]
+  (let [type-attrs (new-attrs node-type)]
+    (state/set! [:input-meta :type] node-type)
+    (state/set! [:input-meta :attr-list] type-attrs)
+    (doseq [attr type-attrs]
+      (state/set! [:new-entity attr] {0 ""}))
+    (state/set! [:tabid] 7)))
 
 (defn person-site [person attr]
   [:a {:href (util/get-first person attr)}

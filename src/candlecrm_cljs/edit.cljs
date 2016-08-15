@@ -69,7 +69,7 @@
       "Submit"]]]
    msg])
 
-(defn add-form []
+(defn edit-form []
   [entity-form
    (str "Edit " (-> :current-node (state/look :type) name)
         " named " (-> (state/look :current-node :center-node s/s-name)
@@ -79,7 +79,7 @@
    (when (state/look :edit-entity-msg)
      [edit-message])])
 
-(defn edit-form []
+(defn add-form []
   [entity-form "Add new person"
    (add-ids (s/person table/entity-attrs))
    [:new-entity]
