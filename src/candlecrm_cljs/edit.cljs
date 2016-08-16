@@ -81,8 +81,8 @@
 
 (defn add-form []
   [entity-form "Add new person"
-   (add-ids (s/person table/entity-attrs))
+   (add-ids (state/look :input-meta :attr-list))
    [:new-entity]
-   (submit-new-entity s/person)
+   (submit-new-entity (state/look :input-meta :type))
    (when (state/look :new-entity-msg)
      [add-message])])

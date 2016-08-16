@@ -95,7 +95,7 @@
   {:id id s/type-label type})
 
 (defn new-entity! [user {:keys [fields]}]
-  (-> fields vector (push-entities! user) first
+  (-> fields vector (push-entities! user s/edit-src) first
       (new-resp (s/type-label fields))))
 
 (defn vals-query [attrs]
