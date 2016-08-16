@@ -27,6 +27,8 @@
 (defn search-results []
   [:div
    [:h2 "Search Results"]
-   (for [id-res (-> :search-results state/look add-ids)]
-     ^{:key (first id-res)}
-     [result-row id-res])])
+   (let [results (state/look :search-results)]
+     (if (empty? results) [:h3 "No results found."]
+         (for [id-res (add-ids results)]
+           ^{:key (first id-res)}
+           [result-row id-res])))])
