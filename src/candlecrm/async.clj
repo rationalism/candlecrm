@@ -26,12 +26,13 @@
 (defn async-outfeed [pool-name]
   (let [pool-data (get @store pool-name)]
     (async/thread
-      (while true
-        (let [data-out (async/<!! (get pool-data :out-chan))]
-          (try
-            ((get pool-data :callback) data-out)
-            (catch Exception e
-              (throw-error! (pr-str e)))))))))
+      (neo4j/thread-wrap
+       (while true
+         (let [data-out (async/<!! (get pool-data :out-chan))]
+           (try
+             ((get pool-data :callback) data-out)
+             (catch Exception e
+               (throw-error! (pr-str e))))))))))
 
 (defn create-pool! [{:keys [name process param-gen
                             callback num-threads]}]
