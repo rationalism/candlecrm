@@ -199,7 +199,7 @@
 (defn delete-req []
   [:update/delete-entity
    {:id (state/look :current-node :center-node :id)
-    :type (state/look :current-node :center-node :type)}])
+    :type (state/look :current-node :type)}])
 
 (defn confirm-delete [resp]
   (js/alert "Entity deleted"))

@@ -173,15 +173,19 @@
 (defn node-aux [node-name item]
   [:div
    (when (-> item s/type-label (= s/person))
-     [:div
-      [:div.person-emails
-       [:h3.infotitle (str "Emails to " node-name)]
-       [table/email-table [:current-node s/email-to] s/email-to
-        (partial u/update-emails-person! s/email-to)]]
-      [:div.person-emails
-       [:h3.infotitle (str "Emails from " node-name)]
-       [table/email-table [:current-node s/email-from] s/email-from
-        (partial u/update-emails-person! s/email-from)]]])])
+     (when (or (->> s/email-to (state/look :current-node)
+                    empty? not)
+               (->> s/email-from (state/look :current-node)
+                    empty? not))
+       [:div
+        [:div.person-emails
+         [:h3.infotitle (str "Emails to " node-name)]
+         [table/email-table [:current-node s/email-to] s/email-to
+          (partial u/update-emails-person! s/email-to)]]
+        [:div.person-emails
+         [:h3.infotitle (str "Emails from " node-name)]
+         [table/email-table [:current-node s/email-from] s/email-from
+          (partial u/update-emails-person! s/email-from)]]]))])
 
 (defn show-node [node-name item aux?]
   [:div#node-box
