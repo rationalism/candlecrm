@@ -52,6 +52,8 @@
   (close-session!)
   (def ^:dynamic *session* (get-session)))
 
+(reset-session!)
+
 (defn esc-token [token]
   (str "`" (name token) "`"))
 
