@@ -20,7 +20,7 @@
 
 (defn edit-message []
   (let [resp (state/look :new-entity-msg)]
-    [:span (str "Edit of " (-> resp s/type-label name)
+    [:span (str "Edit of " (-> resp s/type-label)
                 " successful. ")
      (node-link "Go to page" (:id resp) (s/type-label resp))]))
 
