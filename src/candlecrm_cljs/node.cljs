@@ -174,15 +174,17 @@
   [:div
    (when (-> item s/type-label (= s/person))
      [:div
-      [:h3.infotitle (str "Emails to " node-name)]
-      [table/email-table [:current-node s/email-to] s/email-to
-       (partial u/update-emails-person! s/email-to)]
-      [:h3.infotitle (str "Emails from " node-name)]
-      [table/email-table [:current-node s/email-from] s/email-from
-       (partial u/update-emails-person! s/email-from)]])])
+      [:div.person-emails
+       [:h3.infotitle (str "Emails to " node-name)]
+       [table/email-table [:current-node s/email-to] s/email-to
+        (partial u/update-emails-person! s/email-to)]]
+      [:div.person-emails
+       [:h3.infotitle (str "Emails from " node-name)]
+       [table/email-table [:current-node s/email-from] s/email-from
+        (partial u/update-emails-person! s/email-from)]]])])
 
 (defn show-node [node-name item aux?]
-  [:div
+  [:div#node-box
    [:h3.infotitle
     (str node-name " (" (-> item s/type-label type-name) ") ")
     (when aux?

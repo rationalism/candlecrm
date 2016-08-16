@@ -59,6 +59,21 @@ div#menu-bar fieldset {
     border: none;
 }
 
+div#node-box {
+    width: 100%;
+    word-wrap: break-word;
+}
+
+div.person-emails {
+    width: 40%;
+    float: left;
+    margin-right: 10%;
+}
+
+div.person-emails table td.sent-date {
+    width: 50%;
+}
+
 #search-box {
     width:18em;
 }
