@@ -80,7 +80,7 @@
      [edit-message])])
 
 (defn add-form []
-  [entity-form "Add new person"
+  [entity-form (str "Add new " (name (state/look :input-meta :type)))
    (add-ids (state/look :input-meta :attr-list))
    [:new-entity]
    (submit-new-entity (state/look :input-meta :type))
