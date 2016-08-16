@@ -75,7 +75,8 @@
    (str "Edit " (-> :current-node (state/look :type) name)
         " named " (get-first (state/look :current-node :center-node)
                              [s/s-name]))
-   (add-ids (table/new-attrs (state/look :current-node :type)))
+   (->> :type (state/look :current-node) table/new-attrs
+        (map vector) add-ids)
    [:current-node :center-node] #(u/edit-entity!)
    (when (state/look :edit-entity-msg)
      [edit-message])])

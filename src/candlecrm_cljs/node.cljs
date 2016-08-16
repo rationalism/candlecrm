@@ -180,10 +180,12 @@
   [:div
    [:h3.infotitle
     (str node-name " (" (-> item s/type-label type-name) ") ")
-    [:a {:href "#" :on-click #(edit-entity-switch (s/type-label item))}
-     "(Edit)"]" "
-    [:a {:href "#" :on-click delete-entity-switch}
-     "(Delete)"]]
+    (when aux?
+      [:span
+       [:a {:href "#" :on-click #(edit-entity-switch (s/type-label item))}
+        "(Edit)"] " "
+       [:a {:href "#" :on-click delete-entity-switch}
+        "(Delete)"]])]
    [info-items (-> item s/type-label s/node-paths) item]
    (when aux? [node-aux node-name item])])
 
