@@ -23,7 +23,7 @@
 (defn home-content [& content]
   [:div {:class "pure-g"}
    [:div {:class "pure-u-1-12"}]
-   (into [:div {:class "pure-u-5-6"}]
+   (into [:div#main-page {:class "pure-u-5-6"}]
          content)])
 
 (defn person-option [person]

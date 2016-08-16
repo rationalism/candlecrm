@@ -42,7 +42,7 @@
 (defn footer-box []
   [:div#page-footer {:class "pure-g"}
    [:div {:class "pure-u-1-12"}]
-   [:div {:class "pure-u-5-6"}
+   [:div#main-page {:class "pure-u-5-6"}
     [:p "© 2016 Alyssa Vance"]]])
 
 (defn base-template [& content]

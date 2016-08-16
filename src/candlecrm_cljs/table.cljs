@@ -35,10 +35,11 @@
    (util/get-first person attr)])
 
 (defn person-cell [person attr]
-  [:td (condp = attr
-         s/s-name [person-link person attr]
-         s/website [person-site person attr]
-         (util/get-first person attr))])
+  [:td {:class (name attr)}
+   (condp = attr
+     s/s-name [person-link person attr]
+     s/website [person-site person attr]
+     (util/get-first person attr))])
 
 (defn person-row [person]
   [:tr (for [attr (util/add-ids (s/person entity-attrs))]
@@ -66,7 +67,8 @@
      [:tr
       (for [attr (util/add-ids (s/person entity-attrs))]
         ^{:key (first attr)}
-        [:td (get s/attr-names (second attr))])]]
+        [:td {:class (name (second attr))}
+         (get s/attr-names (second attr))])]]
     [:tbody {:id "people-rows"}
      (for [p-row (-> :people-rows state/look util/add-ids)]
        ^{:key (first p-row)}
@@ -77,11 +79,12 @@
    (email :id) s/email])
 
 (defn email-cell [email attr]
-  [:td (cond
-         (= s/email-subject attr) [email-link email attr]
-         (some #{attr} s/date-times)
-         [util/date-display (util/get-first email attr)]
-         :else (util/get-first email attr))])
+  [:td {:class (name attr)}
+   (cond
+     (= s/email-subject attr) [email-link email attr]
+     (some #{attr} s/date-times)
+     [util/date-display (util/get-first email attr)]
+     :else (util/get-first email attr))])
 
 (defn email-row [email]
   [:tr (for [attr (-> email-attrs keys util/add-ids)]
@@ -97,7 +100,8 @@
      [:tr
       (for [attr (util/add-ids email-attrs)]
         ^{:key (first attr)}
-        [:td (second attr)])]]
+        [:td {:class (name (first (second attr)))}
+         (second attr)])]]
     [:tbody {:id "email-rows"}
      (for [e-row (util/add-ids (apply state/look row-keys))]
        ^{:key (first e-row)}

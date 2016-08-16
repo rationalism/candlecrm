@@ -38,8 +38,8 @@
 
 (defn cal-html []
   (if (= (state/look :tabid) 3)
-    [:div#calendarbox {:style {:height "600px" :width "1000px"}}]
-    [:div#calendarbox {:style {:height "599px" :width "999px"}}]))
+    [:div#calendarbox {:style {:width "80%"}}]
+    [:div#calendarbox {:style {:width "79%"}}]))
 
 (defn calendar-box []
   (r/create-class

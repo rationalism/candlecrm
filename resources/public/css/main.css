@@ -30,6 +30,29 @@ li.pure-menu-selected a {
     color: #00688B;
 }
 
+div#main-page table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+div#main-page table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+div#main-page table td.phone-num {
+    width: 15%;
+}
+
+div#main-page table td.name {
+    width: 20%;
+}
+
+div#main-page table td.sent-date {
+    width: 20%;
+}
+
 div#menu-bar fieldset {
     padding-top: 0em;
     padding-bottom: 0.4em;
