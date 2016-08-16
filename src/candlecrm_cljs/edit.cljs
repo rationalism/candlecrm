@@ -4,7 +4,8 @@
             [candlecrm_cljs.state :as state]
             [candlecrm_cljs.table :as table]
             [candlecrm_cljs.update :as u]
-            [candlecrm_cljs.util :refer [node-link set-field! add-ids]]))
+            [candlecrm_cljs.util :refer
+             [get-first node-link set-field! add-ids]]))
 
 (defn submit-new-entity [type]
   (fn []
@@ -72,9 +73,8 @@
 (defn edit-form []
   [entity-form
    (str "Edit " (-> :current-node (state/look :type) name)
-        " named " (-> (state/look :current-node :center-node s/s-name)
-                      first second))
-   (add-ids (s/person table/entity-attrs))
+        " named " (get-first (state/look :current-node :center-node) [s/s-name]))
+   (add-ids (table/new-attrs (state/look :current-node :type)))
    [:current-node :center-node] #(u/edit-entity!)
    (when (state/look :edit-entity-msg)
      [edit-message])])
