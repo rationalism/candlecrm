@@ -49,6 +49,11 @@
   (mapv #(spit "/home/alyssa/alldates.txt" (str (.getText %) "\n")
                :append true) dates) dates)
 
+(defn tree-nodes [date-tree]
+  (println (.getText date-tree))
+  (when-let [children (.getChildren date-tree)]
+    (mapv tree-nodes children)))
+
 (defn parse-dates [text reference]
   (try
     (->> (parse-dates-raw text reference)
