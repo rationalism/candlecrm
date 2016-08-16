@@ -32,7 +32,7 @@
   [:div {:class "pure-control-group"}
    [:label
     (if (= 0 (first id-attr))
-      ((second id-attr) s/attr-names) "")]
+      ((first (second id-attr)) s/attr-names) "")]
    (let [attr (second id-attr)
          params (->> id-attr first vector (concat [attr])
                      (concat cache))]
@@ -73,8 +73,7 @@
 (defn edit-form []
   [entity-form
    (str "Edit " (-> :current-node (state/look :type) name)
-        " named " (get-first (state/look :current-node :center-node)
-                             [s/s-name]))
+        " named " (state/look :current-node :center-node [s/s-name] 0))
    (->> :type (state/look :current-node) table/new-attrs
         (map vector) add-ids)
    [:current-node :center-node] #(u/edit-entity!)
