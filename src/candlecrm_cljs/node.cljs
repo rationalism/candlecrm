@@ -33,9 +33,14 @@
             m (vec (keep (set (map rest (node-type s/node-paths)))
                          (set (keys m)))))))
 
+(defn devector-keys [m]
+  (->> m (into []) (map (fn [p] (update p 0 #(if (coll? %) (first %) %))))
+       (into {})))
+
 (defn edit-entity-switch [type]
   (state/update! [:current-node :center-node]
                  (partial ids-if-coll type))
+  (state/update! [:current-node :center-node] devector-keys)
   (state/set! [:tabid] 8))
 
 (defn delete-entity-switch []
