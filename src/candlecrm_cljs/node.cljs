@@ -26,10 +26,11 @@
             (util/get-first (:center-node node) (first f))
             :else (recur (rest fields))))))
 
-(defn ids-if-coll [type m]
-  (let [id-fn #(->> % util/add-ids (map vec) vec (into {}))]
+(defn ids-if-coll [node-type m]
+  (let [id-fn #(->> % (into []) (sort-by second >) (map first)
+                    util/add-ids (map vec) vec (into {}))]
     (reduce #(update %1 %2 id-fn)
-            m (vec (keep (set (type table/entity-attrs))
+            m (vec (keep (set (map rest (node-type s/node-paths)))
                          (set (keys m)))))))
 
 (defn edit-entity-switch [type]

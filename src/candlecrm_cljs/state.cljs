@@ -24,6 +24,8 @@
     :ajax-chan nil
     :new-entity {}
     :new-entity-msg nil
+    :edit-entity {}
+    :edit-entity-msg nil
     :search ""
     :search-results nil
     :delete-account {}
