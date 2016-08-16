@@ -32,13 +32,21 @@
         " (" (get-first person s/email-addr) ")")])
 
 (defn people-ranks [rel-type]
-  [:div>span "Select a person: "
-   [:form {:class "pure-form"}
-    [:select {:class (str "people-list-" rel-type " pure-input-1-2")
-              :on-change #(u/rel-switch (.. % -target -value) rel-type)}
-     (for [person (add-ids (state/look :rank-lists rel-type))]
-       ^{:key (first person)}
-       [person-option (second person)])]]])
+  [:div#rank-box
+   [:div#add-entity
+    [:p [:a {:href "#" :on-click #(table/new-entity-switch rel-type)
+             :id (str "add-new-" (name rel-type)) :class "pure-button"}
+         (str "Add new " (name rel-type))]]
+    [:span (if (state/look :loading) "  (Loading...)" "")]]
+   [:div#people-ranks
+    [:span
+     [:span.select-text "Select a person: "]
+     [:form {:class "pure-form"}
+      [:select {:class (str "people-list-" (name rel-type))
+                :on-change #(u/rel-switch (.. % -target -value) rel-type)}
+       (for [person (add-ids (state/look :rank-lists rel-type))]
+         ^{:key (first person)}
+         [person-option (second person)])]]]]])
 
 (defn calendar []
   [:div#calendar

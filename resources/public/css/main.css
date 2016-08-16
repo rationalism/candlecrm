@@ -74,8 +74,25 @@ div.person-emails table td.sent-date {
     width: 50%;
 }
 
+div#calendarbox {
+    margin-top: 60px;
+}
+
+div#people-ranks {
+    float: right;
+}
+
+div#add-entity {
+    width: 25%;
+    float: left;
+}
+
+span.select-text {
+    float: right;
+}
+
 #search-box {
-    width:18em;
+    width: 18em;
 }
 
 div#menu-bar .pure-menu-horizontal {
