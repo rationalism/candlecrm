@@ -475,6 +475,16 @@
        "(m:" (neo4j/prop-label user label) ")"
        " RETURN ID(root), ID(m)"))
 
+(defn candidate-range-find [user label field]
+  (->> (str "MATCH (root:" (neo4j/prop-label user label)
+            ":" (neo4j/esc-token s/norecon)
+            ")-[r:" (neo4j/esc-token field)
+            "]->(v:" (neo4j/prop-label user field) ")"
+            " RETURN ID(root), v." (neo4j/esc-token s/value))
+       neo4j/cypher-query
+       (map (juxt #(get % "ID(root)")
+                  #(get % (str "v." (neo4j/esc-token s/value)))))))
+
 (defn email-candidate-pattern [user]
   (str "MATCH (root:" (neo4j/prop-label user s/person)
        ")<-[:" (neo4j/esc-token s/link-to)
