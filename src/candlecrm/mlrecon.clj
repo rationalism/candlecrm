@@ -477,7 +477,7 @@
 
 (defn candidate-range-find [user label field]
   (->> (str "MATCH (root:" (neo4j/prop-label user label)
-            ":" (neo4j/esc-token s/norecon)
+            ":" (neo4j/esc-token s/recon)
             ")-[r:" (neo4j/esc-token field)
             "]->(v:" (neo4j/prop-label user field) ")"
             " RETURN ID(root), v." (neo4j/esc-token s/value))
@@ -491,17 +491,34 @@
        "]->(v:" (neo4j/prop-label user field) ")"
        " WHERE v." (neo4j/esc-token s/value)))
 
-(defn candidate-range-str [user label field val margin]
+(defn candidate-range-str [user label field margin [id val]]
   [(str (candidate-range-base user label field)
-        " STARTS WITH {val} RETURN ID(root)")
+        " STARTS WITH {val} AND ID(root) > {id}"
+        " RETURN {id}, ID(root)")
    {:val (if (<= (count val) 5) val
-             (->> val count (* margin) Math/floor (subs val 0)))}])
+             (->> val count (* margin) Math/floor (subs val 0)))
+    :id id}])
 
-(defn candidate-range-num [user label field val margin]
+(defn candidate-range-num [user label field margin [id val]]
   [(str (candidate-range-base user label field)
         " > {sval} AND v." (neo4j/esc-token s/value)
-        " < {bval} RETURN ID(root)")
-   {:sval (- val margin) :bval (+ val margin)}])
+        " < {bval} AND ID(root) > {id}"
+        " RETURN {id}, ID(root)")
+   {:sval (- val margin) :bval (+ val margin)
+    :id id}])
+
+(defn get-pair [m]
+  ((juxt #(get % "{id}") #(get % "ID(root)")) m))
+
+(defn candidate-range [user label field margin]
+  (let [id-vals (candidate-range-find user label field)]
+    (when (not (empty? id-vals))
+      (let [range-fn (partial
+                      (if (string? (second (first id-vals)))
+                        candidate-range-str candidate-range-num)
+                      user label field margin)]
+        (->> id-vals (map range-fn) neo4j/cypher-combined-tx
+             (mapcat #(map get-pair %)))))))
 
 (defn email-candidate-pattern [user]
   (str "MATCH (root:" (neo4j/prop-label user s/person)
