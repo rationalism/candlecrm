@@ -485,6 +485,24 @@
        (map (juxt #(get % "ID(root)")
                   #(get % (str "v." (neo4j/esc-token s/value)))))))
 
+(defn candidate-range-base [user label field]
+  (str "MATCH (root:" (neo4j/prop-label user label)
+       ")-[r:" (neo4j/esc-token field)
+       "]->(v:" (neo4j/prop-label user field) ")"
+       " WHERE v." (neo4j/esc-token s/value)))
+
+(defn candidate-range-str [user label field val]
+  [(str (candidate-range-base user label field)
+        " STARTS WITH {val} RETURN ID(root)")
+   {:val (if (<= (count val) 5) val
+             (subs val 0 (Math/floor (* (count val) 0.7))))}])
+
+(defn candidate-range-num [user label field val margin]
+  [(str (candidate-range-base user label field)
+        " > {sval} AND v." (neo4j/esc-token s/value)
+        " < {bval} RETURN ID(root)")
+   {:sval (- val margin) :bval (+ val margin)}])
+
 (defn email-candidate-pattern [user]
   (str "MATCH (root:" (neo4j/prop-label user s/person)
        ")<-[:" (neo4j/esc-token s/link-to)
