@@ -477,7 +477,7 @@
 
 (defn candidate-range-find [user label field]
   (->> (str "MATCH (root:" (neo4j/prop-label user label)
-            ":" (neo4j/esc-token s/recon)
+            ":" (neo4j/esc-token s/norecon)
             ")-[r:" (neo4j/esc-token field)
             "]->(v:" (neo4j/prop-label user field) ")"
             " RETURN ID(root), v." (neo4j/esc-token s/value))
@@ -510,7 +510,7 @@
 (defn get-pair [m]
   ((juxt #(get % "{id}") #(get % "ID(root)")) m))
 
-(defn candidate-range [user label field margin]
+(defn candidate-range [user label [field margin]]
   (let [id-vals (candidate-range-find user label field)]
     (when (not (empty? id-vals))
       (let [range-fn (partial
@@ -537,12 +537,19 @@
     (concat query [(email-candidate-meta user)])
     query))
 
-(defnp find-candidates [user class]
+(defn find-candidate-paths [user class]
   (->> class (get model/candidates)
+       (filter #(keyword? (second %)))
        (mapv #(candidate-path user class %)) 
        (optional-search user class)
        (mapcat neo4j/cypher-query)
-       (map (juxt #(get % "ID(root)") #(get % "ID(m)")))
+       (map (juxt #(get % "ID(root)") #(get % "ID(m)")))))
+
+(defnp find-candidates [user class]
+  (->> class (get model/candidates)
+       (remove #(keyword? (second %)))
+       (mapcat #(candidate-range user class %))
+       (concat (find-candidate-paths user class))
        (map sort) distinct))
 
 (defn pair-map [p m]

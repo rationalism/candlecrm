@@ -166,31 +166,39 @@
 (def candidates
   {s/email
    [[s/email-subject s/email-subject]
+    [s/email-subject 0.7]
     [s/email-body s/email-body]
     [s/email-received s/email-received]
-    [s/email-sent s/email-sent]]
+    [s/email-received 300000]
+    [s/email-sent s/email-sent]
+    [s/email-sent 300000]]
    s/person
    [[s/s-name s/s-name]
+    [s/s-name 0.7]
     [s/email-addr s/email-addr]
     [s/phone-num s/phone-num]
     [s/email s/has-link s/link-to]]
    s/organization
    [[s/s-name s/s-name]
+    [s/s-name 0.7]
     [s/email-addr s/email-addr]
     [s/phone-num s/phone-num]
     [s/website s/website]
     [s/email s/has-link s/link-to]]
    s/location
    [[s/s-name s/s-name]
+    [s/s-name 0.7]
     [s/zipcode s/zipcode]]
    s/event
    [[s/start-time s/start-time]
     [s/stop-time s/stop-time]
     [s/event-begin s/event-begin]
+    [s/event-begin 500000]
     [s/event-end s/event-end]
     [s/website s/website]]
    s/building
-   [[s/street-addr s/street-addr]]})
+   [[s/street-addr s/street-addr]
+    [s/street-addr 0.7]]})
 
 (def scoring
   {s/email
