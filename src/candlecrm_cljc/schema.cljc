@@ -78,6 +78,14 @@
 (def event-begin :event-begin)
 (def event-end :event-end)
 
+(def has-minute :has-minute)
+(def has-hour :has-hour)
+(def has-date :has-date)
+(def has-day :has-day)
+(def has-week :has-week)
+(def has-month :has-month)
+(def has-year :has-year)
+
 (def number :number)
 (def percent :percent)
 (def ordinal :ordinal)

@@ -4,6 +4,7 @@
             [clj-time.core :as ctime]
             [clj-time.coerce :as coerce]
             [clj-time.format :as format]
+            [candlecrm_cljc.schema :as s]
             [candlecrm.common :refer :all]
             [candlecrm.mallet :as mallet]
             [candlecrm.model :as model]
@@ -49,10 +50,18 @@
   (mapv #(spit "/home/alyssa/alldates.txt" (str (.getText %) "\n")
                :append true) dates) dates)
 
+(def date-tree-map {"MONTH_OF_YEAR" s/has-month "DAY_OF_MONTH" s/has-date
+                    "YEAR_OF" s/has-year "week" s/has-week
+                    "HOURS_OF_DAY" s/has-hour "MINUTES_OF_HOUR" s/has-minute
+                    "DAY_OF_WEEK" s/has-day "day" s/has-date
+                    "year" s/has-year "month" s/has-month
+                    "minute" s/has-minute "hour" s/has-hour})
+
 (defn tree-nodes [date-tree]
-  (println (.getText date-tree))
-  (when-let [children (.getChildren date-tree)]
-    (mapv tree-nodes children)))
+  (->> date-tree .getChildren (mapcat tree-nodes)
+       (concat [(.getText date-tree)])
+       (map #(if (string? %) (date-tree-map %) %))
+       (remove nil?)))
 
 (defn parse-dates [text reference]
   (try
