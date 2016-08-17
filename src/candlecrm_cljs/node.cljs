@@ -162,8 +162,8 @@
       ^{:key (first attr)}
       [:div.infoitem
        [str-item (-> attr second first)
-        (-> attr second rest vec)
-        (-> attr second rest vec (filtered-list item))]]))])
+        (-> attr second rest drop-id vec)
+        (-> attr second rest drop-id vec (filtered-list item))]]))])
 
 (def type-name {s/person "Person" s/email "Email"
                 s/organization "Organization" s/location "Location"
