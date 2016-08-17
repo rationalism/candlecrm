@@ -449,12 +449,30 @@
              " REMOVE root:" (neo4j/esc-token s/norecon))
         {:ids recon-ids}]]))
 
-(defn candidate-query [label preds]
-  (str "MATCH (root:" label
-       ":" (neo4j/esc-token s/norecon)
-       ")-[r1]->(v)<-[r2]-(m:" label
-       ") WHERE type(r1) IN [" preds
-       "] AND type(r2) = type(r1)"
+(defn add-ns [coll]
+  (map vector (map inc (range (count coll))) coll))
+
+(defn candidate-piece-left [user [n pred]]
+  (str "-[lr" n ":" (neo4j/esc-token pred)
+       "]-(l" n ")"))
+
+(defn candidate-piece-right [user [n pred]]
+  (str "(r" n ")-[rr" n ":" (neo4j/esc-token pred)
+       "]-"))
+
+(defn candidate-path [user label preds]
+  (str "MATCH (root:" (neo4j/prop-label user label)
+       ":" (neo4j/esc-token s/norecon) ")"
+       (->> preds (drop 2) reverse add-ns
+            (mapv #(candidate-piece-left user %))
+            (map str) str/join)
+       "-[l0:" (neo4j/esc-token (second preds))
+       "]-(v:" (neo4j/prop-label user (first preds))
+       ")-[r0:" (neo4j/esc-token (second preds)) "]-"
+       (->> preds (drop 2) add-ns
+            (mapv #(candidate-piece-right user %))
+            (map str) str/join)
+       "(m:" (neo4j/prop-label user label) ")"
        " RETURN ID(root), ID(m)"))
 
 (defn email-candidate-pattern [user]
@@ -469,25 +487,15 @@
        ")-->(m:" (neo4j/prop-label user s/person)
        ") RETURN ID(root), ID(m)"))
 
-(defn email-candidate-links [user]
-  (str (email-candidate-pattern user)
-       ")-[:" (neo4j/esc-token s/has-link)
-       "]->(l2:" (neo4j/prop-label user s/hyperlink)
-       ")-[:" (neo4j/esc-token s/link-to)
-       "]->(m:" (neo4j/prop-label user s/person)
-       ") RETURN ID(root), ID(m)"))
-
 (defn optional-search [user class query]
   (if (= class s/person)
-    (concat query [(email-candidate-meta user)
-                   (email-candidate-links user)])
+    (concat query [(email-candidate-meta user)])
     query))
 
 (defnp find-candidates [user class]
-  (->> class (get model/candidates) (map name)
-       (map #(str "'" % "'")) (str/join ", ")
-       (candidate-query (neo4j/prop-label user class))
-       vector (optional-search user class)
+  (->> class (get model/candidates)
+       (mapv #(candidate-path user class %)) 
+       (optional-search user class)
        (mapcat neo4j/cypher-query)
        (map (juxt #(get % "ID(root)") #(get % "ID(m)")))
        (map sort) distinct))
