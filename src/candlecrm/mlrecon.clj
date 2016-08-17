@@ -491,11 +491,11 @@
        "]->(v:" (neo4j/prop-label user field) ")"
        " WHERE v." (neo4j/esc-token s/value)))
 
-(defn candidate-range-str [user label field val]
+(defn candidate-range-str [user label field val margin]
   [(str (candidate-range-base user label field)
         " STARTS WITH {val} RETURN ID(root)")
    {:val (if (<= (count val) 5) val
-             (subs val 0 (Math/floor (* (count val) 0.7))))}])
+             (->> val count (* margin) Math/floor (subs val 0)))}])
 
 (defn candidate-range-num [user label field val margin]
   [(str (candidate-range-base user label field)
