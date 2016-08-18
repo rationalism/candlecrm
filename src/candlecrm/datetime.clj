@@ -8,6 +8,7 @@
             [candlecrm.common :refer :all]
             [candlecrm.mallet :as mallet]
             [candlecrm.model :as model]
+            [candlecrm.regex :as regex]
             [candlecrm.weka :as weka]
             [candlecrm.environ :refer [env]]
             [taoensso.timbre.profiling :as profiling
@@ -71,7 +72,7 @@
 (defn parse-dates [text reference]
   (try
     (->> (parse-dates-raw text reference)
-         #_(filter #(-> % (.getText) is-good-date?)))
+         (remove #(-> % (.getText) regex/silly-date?)))
     (catch java.lang.NullPointerException e
       (do (throw-info! (str "Date parse error on: " text))
           []))))

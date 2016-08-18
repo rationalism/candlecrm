@@ -19,6 +19,12 @@
 (def tag-regex #"\<([^\>]*)\>")
 (def esc-char-regex #"\^|\[|\]|\.|\$|\{|\}|\(|\)|\\|\*|\+|\||\?|\<|\>")
 
+;; Natty parses these as times (eg. 2015 = 8:15 PM). That's no good
+(def year-regex #"^20\d\d$")
+
+(defn silly-date? [text]
+  (re-matches year-regex text))
+
 (defn regex-escape [text]
   (str/replace text esc-char-regex #(str "\\" %1)))
 
