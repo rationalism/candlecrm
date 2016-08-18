@@ -321,13 +321,16 @@
         (merge {s/hash-code (str "hc" (mention-hash entity))})
         (merge (condp some [node-type]
                  #{s/event}
-                 (let [node-dates (-> entity mention-text
-                                      (dt/dates-in-text reftime))]
-                   (condp = (count node-dates)
-                     1 {s/event-begin (first node-dates)}
-                     2 {s/event-begin (first node-dates)
-                        s/event-end (second node-dates)}
-                     {s/date-time node-dates}))
+                 (let [date-text (mention-text entity)
+                       node-dates (dt/dates-in-text date-text reftime)
+                       tree-data (-> date-text (dt/parse-dates reftime)
+                                     dt/all-nodes)]
+                   (merge tree-data
+                          (condp = (count node-dates)
+                            1 {s/event-begin (first node-dates)}
+                            2 {s/event-begin (first node-dates)
+                               s/event-end (second node-dates)}
+                            {s/date-time node-dates})))
                  #{s/person s/organization}
                  (if (some #{(-> entity .getType s/schema-map)}
                            [s/person-name s/email-addr])

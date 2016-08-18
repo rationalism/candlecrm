@@ -63,6 +63,11 @@
        (map #(if (string? %) (date-tree-map %) %))
        (remove nil?)))
 
+(defn all-nodes [date-groups]
+  (->> date-groups (map #(.getSyntaxTree %))
+       (mapcat tree-nodes) distinct
+       (mapv #(vector % true)) (into {})))
+
 (defn parse-dates [text reference]
   (try
     (->> (parse-dates-raw text reference)
