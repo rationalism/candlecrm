@@ -314,6 +314,13 @@
   {(-> entity .getType s/schema-map s/label-correct)
    (mention-text entity)})
 
+(defn event-times [node-dates]
+  (condp = (count node-dates)
+    1 {s/event-begin (first node-dates)}
+    2 {s/event-begin (first node-dates)
+       s/event-end (second node-dates)}
+    {s/date-time node-dates}))
+
 (defn ner-graph [reftime entity]
   (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
     (-> {s/type-label node-type}
@@ -325,12 +332,8 @@
                        node-dates (dt/dates-in-text date-text reftime)
                        tree-data (-> date-text (dt/parse-dates reftime)
                                      dt/all-nodes)]
-                   (merge tree-data
-                          (condp = (count node-dates)
-                            1 {s/event-begin (first node-dates)}
-                            2 {s/event-begin (first node-dates)
-                               s/event-end (second node-dates)}
-                            {s/date-time node-dates})))
+                   (->> entity .getSentence .toString (hash-map s/event-context)
+                        (merge tree-data (event-times node-dates))))
                  #{s/person s/organization}
                  (if (some #{(-> entity .getType s/schema-map)}
                            [s/person-name s/email-addr])

@@ -77,6 +77,7 @@
 (def event-time :event-time)
 (def event-begin :event-begin)
 (def event-end :event-end)
+(def event-context :event-context)
 
 (def has-minute :has-minute)
 (def has-hour :has-hour)
@@ -192,7 +193,8 @@
                  event-org "Events here by" located-in "Located in"
                  has-coord "Coordinates" lat "Latitude" lng "Longitude"
                  geocode "Coordinates" location "Lives in"
-                 loc-inside "Inside of" body-nlp "Email body"})
+                 loc-inside "Inside of" body-nlp "Email body"
+                 event-context "Event context"})
 
 (def schema-map {"PERSON" person-name "LOCATION" loc-name
                  "ORGANIZATION" org-name "MONEY" amount
