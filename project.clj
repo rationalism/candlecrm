@@ -66,7 +66,7 @@
                  [clojure-csv/clojure-csv "2.0.2"]
                  [org.apache.commons/commons-lang3 "3.4"]
                  [com.sendgrid/sendgrid-java "2.2.2"]
-                 [reagent-forms "0.5.24"
+                 [reagent-forms "0.5.25"
                   :exclusions [com.google.guava/guava]]
                  [org.apache.commons/commons-math3 "3.6.1"]
                  [org.bitbucket.cowwoc/diff-match-patch "1.1"]

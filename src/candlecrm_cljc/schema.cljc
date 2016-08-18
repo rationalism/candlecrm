@@ -173,6 +173,7 @@
           ["Event begins at" event-begin] ["Event ends at" event-end]
           ["Type of event" event-type] ["Event website" website]
           ["This event features" event-features s-name :id]
+          ["Event context" event-context]
           ["Emails discussing this event" link-to email-mentions email-subject :id]]
    geocode [["Latitude" lat] ["Longitude" lng]
             ["Buildings at this location" has-coord street-addr :id]]})
