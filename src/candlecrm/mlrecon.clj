@@ -518,7 +518,7 @@
                         candidate-range-str candidate-range-num)
                       user label field margin)]
         (->> id-vals (map range-fn) neo4j/cypher-combined-tx
-             (mapcat #(map get-pair %)))))))
+             doall (mapcat #(map get-pair %)))))))
 
 (defn email-candidate-pattern [user]
   (str "MATCH (root:" (neo4j/prop-label user s/person)
@@ -542,7 +542,7 @@
        (filter #(keyword? (second %)))
        (mapv #(candidate-path user class %)) 
        (optional-search user class)
-       (mapcat neo4j/cypher-query)
+       (mapcat neo4j/cypher-query) doall
        (map (juxt #(get % "ID(root)") #(get % "ID(m)")))))
 
 (defnp find-candidates [user class]
