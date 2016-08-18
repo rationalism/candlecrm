@@ -481,7 +481,7 @@
             ")-[r:" (neo4j/esc-token field)
             "]->(v:" (neo4j/prop-label user field) ")"
             " RETURN ID(root), v." (neo4j/esc-token s/value))
-       neo4j/cypher-query
+       neo4j/cypher-query doall
        (map (juxt #(get % "ID(root)")
                   #(get % (str "v." (neo4j/esc-token s/value)))))))
 
