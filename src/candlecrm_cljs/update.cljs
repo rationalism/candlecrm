@@ -100,15 +100,6 @@
 (defn people-ranked-req [rel-type]
   [:pages/people-ranked (rel-map rel-type)])
 
-(defn new-rank-lists! [rel-type]
-  (fn [new-ranks]
-    {:pre [(coll? new-ranks)]}
-    (state/set! [:rank-lists rel-type] new-ranks)))
-
-(defn fetch-ranks! [rel-type]
-  (send! (people-ranked-req rel-type)
-         (new-rank-lists! rel-type)))
-
 (defn person-event-req [person-id]
   [:pages/person-events
    (assoc (rel-map s/event) :person-id person-id)])
@@ -149,6 +140,18 @@
     s/event (cal-events person-id)
     s/building (map-markers person-id)
     nil))
+
+(defn new-rank-lists! [rel-type is-init?]
+  (fn [new-ranks]
+    {:pre [(coll? new-ranks)]}
+    (state/set! [:rank-lists rel-type] new-ranks)
+    (when is-init?
+      (->> :rank-lists state/look s/event first :id str cal-events)
+      (->> :rank-lists state/look s/building first :id str map-markers))))
+
+(defn fetch-ranks! [rel-type is-init?]
+  (send! (people-ranked-req rel-type)
+         (new-rank-lists! rel-type is-init?)))
 
 (defn strip-ids [m]
   (reduce #(update %1 %2 vals)

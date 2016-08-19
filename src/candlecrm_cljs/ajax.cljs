@@ -48,15 +48,15 @@
     (js/setTimeout #(state/set! [:loading] false) 1000)
     (u/update-emails!)
     (u/update-people!)
-    (u/fetch-ranks! s/event)
-    (u/fetch-ranks! s/building)))
+    (u/fetch-ranks! s/event false)
+    (u/fetch-ranks! s/building false)))
 
 ;; This fills in initial email values
 (defn chsk-init! []
   (update-tables!)
   (u/update-user!)
-  (u/fetch-ranks! s/event)
-  (u/fetch-ranks! s/building))
+  (u/fetch-ranks! s/event true)
+  (u/fetch-ranks! s/building true))
 
 (defmulti event-msg-handler :id) ; Dispatch on event-id
 
