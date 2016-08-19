@@ -84,6 +84,7 @@
    [:div {:class "pure-u-7-12"}
     [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
      [:ul {:class "pure-menu-list"}
+      [header-tab 10 "Agenda"]
       [header-tab 1 "People"]
       [header-tab 2 "Emails"]
       [header-tab 3 "Calendar"]
@@ -119,6 +120,7 @@
      7 (edit/add-form)
      8 (edit/edit-form)
      9 [search/search-results]
+     10 [calendar/agenda]
      [:div "Error: Page not found."])])
 
 (defn homepage []

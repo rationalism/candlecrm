@@ -48,3 +48,5 @@
     :display-name "calendar-tab"
     :reagent-render cal-html}))
 
+(defn agenda []
+  [:h2 "Daily agenda goes here"])
