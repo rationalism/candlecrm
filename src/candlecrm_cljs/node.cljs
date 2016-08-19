@@ -116,11 +116,24 @@
      [map-link item] (str item))
    (last-append is-last "")])
 
+(defn web-link [url is-last?]
+  [:span [:a.go-node {:href url}
+          (regex/url-truncate url)]
+   (when (not is-last?) ", ")])
+
+(defn web-links [item]
+  [:span 
+   (for [url (util/add-ids item)]
+     ^{:key (first url)}
+     [web-link (second url)
+      (= (second url) (last item))])])
+
 (defn string-item [item prop]
   [:span
    (cond (some #{(last prop)} s/date-times) [util/date-display item]
          (= (last prop) s/email-body) [body-links (first item)]
          (= (last prop) s/body-nlp) [body-links (first item)]
+         (= (last prop) s/website) [web-links item]
          (coll? item)
          (for [list-member (util/add-ids item)]
            ^{:key (first list-member)}
@@ -193,10 +206,12 @@
     (str node-name " (" (-> item s/type-label type-name) ") ")
     (when aux?
       [:span
-       [:a {:href "#" :on-click #(edit-entity-switch (s/type-label item))}
-        "(Edit)"] " "
-       [:a {:href "#" :on-click delete-entity-switch}
-        "(Delete)"]])]
+       [:a {:href "#" :on-click #(edit-entity-switch (s/type-label item))
+            :class "pure-button"}
+        "Edit"] " "
+       [:a {:href "#" :on-click delete-entity-switch
+            :class "pure-button"}
+        "Delete"]])]
    [info-items (-> item s/type-label s/node-paths) item]
    (when aux? [node-aux node-name item])])
 

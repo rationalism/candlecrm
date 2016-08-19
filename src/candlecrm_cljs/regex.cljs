@@ -17,8 +17,8 @@
    :original hypertext :type :node})
 
 (defn url-truncate [url]
-  (if (<= (count url) 30) url
-      (str (subs url 0 30) "...")))
+  (if (<= (count url) 40) url
+      (str (subs url 0 40) "...")))
 
 (defn url-map [hypertext]
   (let [url (-> bracket-regex (re-seq hypertext)
