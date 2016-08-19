@@ -379,7 +379,8 @@
 (def attr-functions
   [[regex/find-zipcode "ZIPCODE"] [regex/find-email-addrs "EMAIL"]
    [regex/find-urls "URL"] [regex/find-phone-nums "PHONE"]
-   [dt/find-dates "DATETIME"]])
+   [(partial dt/find-dates true (dt/now)) "DATETIME"]
+   [(partial dt/find-dates false (dt/now)) "DATERANGE"]])
 
 (defn replace-all [text coll]
   (str/replace text (regex/regex-or coll) ""))

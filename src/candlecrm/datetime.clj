@@ -69,6 +69,11 @@
        (mapcat tree-nodes) distinct
        (mapv #(vector % true)) (into {})))
 
+(defn specific? [[date-group date-tree]]
+  (->> [s/has-minute s/has-hour s/has-day s/has-date]
+       (map #(contains? date-tree %)) (remove false?)
+       empty? not))
+
 (defn parse-dates [text reference]
   (try
     (->> (parse-dates-raw text reference)
@@ -107,7 +112,13 @@
   ([text] (find-dates text (now)))
   ([text reference]
    (->> reference (parse-dates text)
-        (map #(.getText %)))))
+        (map #(.getText %))))
+  ([specific-mode? reference text]
+   (let [filter-fn (if specific-mode? #(filter specific? %)
+                       #(remove specific? %))]
+     (->> reference (parse-dates text) (map vector)
+          (map (juxt identity all-nodes)) filter-fn
+          (map ffirst) (map #(.getText %))))))
 
 (defn find-intervals
   ([text] (find-intervals text (now)))

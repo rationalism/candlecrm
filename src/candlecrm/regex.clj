@@ -23,7 +23,8 @@
 (def year-regex #"^20\d\d$")
 
 (defn silly-date? [text]
-  (re-matches year-regex text))
+  (or (re-matches year-regex text)
+      (= "today" (str/lower-case text))))
 
 (defn regex-escape [text]
   (str/replace text esc-char-regex #(str "\\" %1)))
