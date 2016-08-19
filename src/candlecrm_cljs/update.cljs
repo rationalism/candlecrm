@@ -77,6 +77,7 @@
 (defn update-node []
   (fn [req]
     (state/set! [:current-node] (new-node req (s/type-label req)))
+    (state/set! [:prop-filters] {})
     (state/set! [:tabid] 6)
     (when (= (s/type-label req) s/person)
       (update-emails-person! s/email-to)

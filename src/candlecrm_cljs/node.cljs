@@ -128,24 +128,6 @@
      [web-link (second url)
       (= (second url) (last item))])])
 
-(defn string-item [item prop]
-  [:span
-   (cond (some #{(last prop)} s/date-times) [util/date-display item]
-         (= (last prop) s/email-body) [body-links (first item)]
-         (= (last prop) s/body-nlp) [body-links (first item)]
-         (= (last prop) s/website) [web-links item]
-         (coll? item)
-         (for [list-member (util/add-ids item)]
-           ^{:key (first list-member)}
-           [display-item (is-last? list-member (util/add-ids item))
-            (second list-member)])
-         :else item) " "
-   [ask-more prop]])
-
-(defn str-item [n k v]
-  [:span [:strong (str n ": ")]
-   [string-item v k]])
-
 (defn get-filter-limit [attr item]
   (let [max-val (->> (get item attr) vals (apply max) (+ -0.01))]
     (if-let [filter-level (state/look :prop-filters attr)]
@@ -158,6 +140,28 @@
     (->> attr (get item)
          (filter #(-> % second (> limit)))
          (sort-by second >) (map first))))
+
+(defn string-item [item prop]
+  [:span
+   (let [disp (filtered-list prop item)]
+     (cond (some #{(last prop)} s/date-times) [util/date-display disp]
+           (= (last prop) s/email-body) [body-links (first disp)]
+           (= (last prop) s/body-nlp) [body-links (first disp)]
+           (= (last prop) s/website) [web-links disp]
+           (coll? disp)
+           (for [list-member (util/add-ids disp)]
+             ^{:key (first list-member)}
+             [display-item (is-last? list-member (util/add-ids disp))
+              (second list-member)])
+           :else disp)) " "
+   (when (and (> (count (get item prop)) 1)
+              (->> prop (get item) vals (apply min)
+                   (> (get-filter-limit prop item))))
+     [ask-more prop])])
+
+(defn str-item [n k v]
+  [:span [:strong (str n ": ")]
+   [string-item v k]])
 
 (defn remove-dupes [attrs]
   (if (some #{s/body-nlp} (map last attrs))
@@ -175,8 +179,8 @@
       ^{:key (first attr)}
       [:div.infoitem
        [str-item (-> attr second first)
-        (-> attr second rest drop-id vec)
-        (-> attr second rest drop-id vec (filtered-list item))]]))])
+        (-> attr second rest drop-id vec) item
+        #_(-> attr second rest drop-id vec (filtered-list item))]]))])
 
 (def type-name {s/person "Person" s/email "Email"
                 s/organization "Organization" s/location "Location"
