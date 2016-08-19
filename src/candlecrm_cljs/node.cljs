@@ -179,13 +179,17 @@
       ^{:key (first attr)}
       [:div.infoitem
        [str-item (-> attr second first)
-        (-> attr second rest drop-id vec) item
-        #_(-> attr second rest drop-id vec (filtered-list item))]]))])
+        (-> attr second rest drop-id vec) item]]))])
 
 (def type-name {s/person "Person" s/email "Email"
                 s/organization "Organization" s/location "Location"
                 s/event "Event" s/building "Building"
                 s/geocode "Coordinates"})
+
+(defn person-notes []
+  [:div
+   [:h3 "Notes"]
+   [:textarea]])
 
 (defn node-aux [node-name item]
   [:div
@@ -195,6 +199,7 @@
                (->> s/email-from (state/look :current-node)
                     empty? not))
        [:div
+        [person-notes]
         [:div.person-emails
          [:h3.infotitle (str "Emails to " node-name)]
          [table/email-table [:current-node s/email-to] s/email-to
