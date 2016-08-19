@@ -379,8 +379,7 @@
 (def attr-functions
   [[regex/find-zipcode "ZIPCODE"] [regex/find-email-addrs "EMAIL"]
    [regex/find-urls "URL"] [regex/find-phone-nums "PHONE"]
-   [(partial dt/find-dates true (dt/now)) "DATETIME"]
-   [(partial dt/find-dates false (dt/now)) "DATERANGE"]])
+   [dt/find-dates "DATETIME"]])
 
 (defn replace-all [text coll]
   (str/replace text (regex/regex-or coll) ""))
@@ -443,7 +442,8 @@
 
 (defn remove-bad-dates [mentions]
   (remove #(and (-> % .getType s/schema-map (= s/date-time))
-                (or (->> % mention-text dt/dates-in-text empty?)
+                (or (->> % mention-text dt/parse-dates
+                         dt/all-nodes dt/specific? not)
                     (->> % mention-text dt/is-good-date? not)))
           mentions))
 
