@@ -283,9 +283,9 @@
 (defn full-search [user query-map]
   (let [query (:query query-map)]
     (->> s/search-preds (map #(partial-val-query user query %))
-         neo4j/cypher-combined-tx (zipvec s/search-preds) vec
+         neo4j/cypher-combined-tx (zipvec s/search-preds) vec 
          (remove #(-> % second empty?)) (map id-row)
-         (mapcat second) (map #(zipmap [:id :type] %)) 
+         (mapcat second) distinct (map #(zipmap [:id :type] %)) 
          (map #(node-by-id user %)))))
 
 (defn find-user-labels [labels]
