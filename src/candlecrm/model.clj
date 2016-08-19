@@ -177,14 +177,14 @@
     [s/s-name 0.7]
     [s/email-addr s/email-addr]
     [s/phone-num s/phone-num]
-    [s/email s/has-link s/link-to]]
+    [s/email s/email-mentions s/link-to]]
    s/organization
    [[s/s-name s/s-name]
     [s/s-name 0.7]
     [s/email-addr s/email-addr]
     [s/phone-num s/phone-num]
     [s/website s/website]
-    [s/email s/has-link s/link-to]]
+    [s/email s/email-mentions s/link-to]]
    s/location
    [[s/s-name s/s-name]
     [s/s-name 0.7]
@@ -215,7 +215,7 @@
     [[s/phone-num] [overlap is-eq]]
     [[s/email-from s/email-sent] [overlap is-eq]]
     [[s/email-to s/email-sent] [overlap is-eq]]
-    [[s/link-to s/has-link s/email-sent] [is-eq]]]
+    [[s/link-to s/email-mentions s/email-sent] [is-eq]]]
    s/tool
    [[[s/tool-category] [is-eq]]
     [[s/vendor-name] [is-eq]]
@@ -251,7 +251,7 @@
     [[s/phone-num] [overlap is-eq]]
     [[s/email-from s/email-sent] [overlap is-eq]]
     [[s/email-to s/email-sent] [overlap is-eq]]
-    [[s/link-to s/has-link s/email-sent] [is-eq]]]
+    [[s/link-to s/email-mentions s/email-sent] [is-eq]]]
    s/email-body
    [[[s/email-body] [(count-regex #"\s+") (count-regex #">")
                      (count-regex #"\n|\r")

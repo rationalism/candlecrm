@@ -99,7 +99,6 @@
 (def hyperlink :hyperlink)
 (def link-to :link-to)
 (def link-id :link-id)
-(def has-link :has-link)
 (def link-text :link-text)
 (def hash-code :hash-code)
 
