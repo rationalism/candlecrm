@@ -3,6 +3,7 @@
             [clojure.string :as str]
             [candlecrm.common :refer :all]
             [candlecrm.auth :as auth]
+            [candlecrm.datetime :as dt]
             [candlecrm.imap :as imap]
             [candlecrm.mlrecon :as mlrecon] 
             [candlecrm.neo4j :as neo4j]
@@ -192,6 +193,17 @@
              (vals-collect))
         query-map]
        neo4j/cypher-query (mapv mlrecon/mapify-params)))
+
+(defn event-agenda [user query-map]
+  (->> [(str "MATCH (e:" (neo4j/prop-label user s/event)
+             ")-[:" (neo4j/esc-token s/event-begin)
+             "]->(b:" (neo4j/prop-label user s/event-begin)
+             ") WHERE b." (neo4j/esc-token s/value)
+             " >= {present} RETURN ID(e) ORDER BY b." (neo4j/esc-token s/value)
+             " SKIP {start} LIMIT {limit}")
+        (merge query-map {:present (to-ms (dt/now))})]
+       neo4j/cypher-query (map #(into {} %)) (mapcat vals)
+       (map #(node-by-id user {:id % :type s/event}))))
 
 (defn event-related [user query-map]
   (->> [(str (rel-query user)

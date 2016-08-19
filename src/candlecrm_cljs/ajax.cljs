@@ -55,6 +55,7 @@
 (defn chsk-init! []
   (update-tables!)
   (u/update-user!)
+  (u/update-agenda!)
   (u/fetch-ranks! s/event true)
   (u/fetch-ranks! s/building true))
 

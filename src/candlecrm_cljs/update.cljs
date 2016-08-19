@@ -25,6 +25,18 @@
 (defn update-people! []
   (send! (people-req) set-people!))
 
+(defn agenda-req []
+  [:pages/fetch-agenda
+   {:start (state/agenda-pos)
+    :limit (state/look :page-lengths :agenda)}])
+
+(defn set-agenda! [rows]
+  {:pre [(coll? rows)]}
+  (state/set! [:agenda-events] rows))
+
+(defn update-agenda! []
+  (send! (agenda-req) set-agenda!))
+
 (defn prev-fetch! [counter update-fn]
   (fn []
     (when (pos? (state/look :counters counter))

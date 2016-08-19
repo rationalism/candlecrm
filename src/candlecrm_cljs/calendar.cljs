@@ -1,9 +1,10 @@
 (ns candlecrm_cljs.calendar
   (:require [clojure.string :as str]
             [candlecrm_cljc.schema :as s]
+            [candlecrm_cljs.node :as node]
             [candlecrm_cljs.state :as state]
             [candlecrm_cljs.update :as u]
-            [candlecrm_cljs.util :refer []]
+            [candlecrm_cljs.util :refer [add-ids]]
             [reagent.core :as r])
   (:use [jayq.core :only [$]]))
 
@@ -49,4 +50,7 @@
     :reagent-render cal-html}))
 
 (defn agenda []
-  [:h2 "Daily agenda goes here"])
+  [:div
+   (for [event (add-ids (state/look :agenda-events))]
+     ^{:key (first event)}
+     [node/show-node "" (second event) false])])

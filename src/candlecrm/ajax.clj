@@ -66,6 +66,8 @@
                                    :keys [:fields]}
                 :pages/fetch-people {:fn queries/person-from-user
                                      :keys [:start :limit]}
+                :pages/fetch-agenda {:fn queries/event-agenda
+                                     :keys [:start :limit]}
                 :pages/fetch-emails {:fn queries/emails-from-user
                                      :keys [:start :limit]}
                 :pages/person-emails {:fn queries/emails-linked

@@ -4,8 +4,9 @@
 
 (defonce a
   (r/atom
-   {:counters {:people 0 :email 0 s/email-from 0 s/email-to 0}
-    :page-lengths {:people 20 :email 20 s/event 50
+   {:counters {:people 0 :email 0 s/email-from 0 s/email-to 0
+               :agenda 0}
+    :page-lengths {:people 20 :email 20 :agenda 20 s/event 50
                    s/location 50 s/building 50}
     :user {:username "Joe Bob Smith"}
     :tabid 10
@@ -30,10 +31,15 @@
     :search-results nil
     :delete-account {}
     :change-pwd {}
+    :agenda-events []
     :loading false}))
 
 (defn look [& args]
   (get-in @a args))
+
+(defn agenda-pos []
+  (* (look :counters :agenda)
+     (look :page-lengths :agenda)))
 
 (defn person-pos []
   (* (look :counters :people)
