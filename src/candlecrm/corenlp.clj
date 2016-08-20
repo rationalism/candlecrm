@@ -321,27 +321,6 @@
        s/event-end (second node-dates)}
     {s/date-time node-dates}))
 
-(defn ner-graph [reftime entity]
-  (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
-    (-> {s/type-label node-type}
-        (merge {s/link-text (mention-text entity)})
-        (merge {s/hash-code (str "hc" (mention-hash entity))})
-        (merge (condp some [node-type]
-                 #{s/event}
-                 (let [date-text (mention-text entity)
-                       node-dates (dt/dates-in-text date-text reftime)
-                       tree-data (-> date-text (dt/parse-dates reftime)
-                                     dt/all-nodes)]
-                   (->> entity .getSentence .toString (hash-map s/event-context)
-                        (merge tree-data (event-times node-dates))))
-                 #{s/person s/organization}
-                 (if (some #{(-> entity .getType s/schema-map)}
-                           [s/person-name s/email-addr])
-                   (-> entity mention-text regex/parse-name-email)
-                   (default-entity entity))
-                 (default-entity entity)))
-        vector (loom/build-graph []))))
-
 (defn add-link [g node]
   (loom/add-edge g [{s/type-label s/hyperlink
                      s/link-id (s/hash-code node)}
@@ -376,15 +355,18 @@
   (->> (map #(hash-map % attr) coll)
        (apply merge)))
 
-(def attr-functions
+(def all-functions
   [[regex/find-zipcode "ZIPCODE"] [regex/find-email-addrs "EMAIL"]
    [regex/find-urls "URL"] [regex/find-phone-nums "PHONE"]
    [dt/find-dates "DATETIME"]])
 
+(def url-functions
+  [[regex/find-urls "URL"]])
+
 (defn replace-all [text coll]
   (str/replace text (regex/regex-or coll) ""))
 
-(defn library-map [text]
+(defn library-map [attr-functions text]
   (loop [rem-text text lib-map {}
          attr-map attr-functions]
     (if (empty? attr-map) lib-map
@@ -421,8 +403,9 @@
 
 (defn class-map [sentence]
   (let [char-map (sentence-token-map sentence)]
-    (->> sentence (.toString) library-map (boundaries-map sentence)
-         (map #(token-pos-map char-map %)) (apply merge))))
+    (->> sentence .toString (library-map all-functions)
+         (boundaries-map sentence) (map #(token-pos-map char-map %))
+         (apply merge))))
 
 (defn number-junk? [sentence]
   (let [c (-> sentence .toString count)]
@@ -513,6 +496,50 @@
    (if (empty? coll) (set sets)
        (->> coll rest (mapv #(hash-set (first coll) %))
             (concat sets) (recur (rest coll))))))
+
+(defn sentence-ends [sentence boundaries]
+  (concat [0] boundaries [(count sentence)]))
+
+(defn hash-brackets [code text]
+  (str "<node " code ">" text "</node>"))
+
+(defn url-brackets [url]
+  (str "<url>" url "</url>"))
+
+(defn insert-brackets [chunks]
+  (->> chunks drop-last (partition-all 2) (map vec)
+       (mapcat #(update % 1 url-brackets))
+       vec (rconj (last chunks)) (str/join "")))
+
+(defn add-urls [sentence]
+  (let [char-map (sentence-token-map sentence)
+        text (.toString sentence)]
+    (->> text (library-map url-functions) (boundaries-map sentence)
+         keys (map first) (sort-by first) (map #(update % 1 inc))
+         (apply concat) (sentence-ends text) vec (beam 2)
+         (map #(concat [text] %)) (map #(apply subs %))
+         insert-brackets)))
+
+(defn ner-graph [reftime entity]
+  (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
+    (-> {s/type-label node-type}
+        (merge {s/link-text (mention-text entity)})
+        (merge {s/hash-code (str "hc" (mention-hash entity))})
+        (merge (condp some [node-type]
+                 #{s/event}
+                 (let [date-text (mention-text entity)
+                       node-dates (dt/dates-in-text date-text reftime)
+                       tree-data (-> date-text (dt/parse-dates reftime)
+                                     dt/all-nodes)]
+                   (->> entity .getSentence add-urls (hash-map s/event-context)
+                        (merge tree-data (event-times node-dates))))
+                 #{s/person s/organization}
+                 (if (some #{(-> entity .getType s/schema-map)}
+                           [s/person-name s/email-addr])
+                   (-> entity mention-text regex/parse-name-email)
+                   (default-entity entity))
+                 (default-entity entity)))
+        vector (loom/build-graph []))))
 
 (defn all-ner-graph [reftime sentence]
   (->> sentence relation-mentions
@@ -638,12 +665,6 @@
 
 (defn strip-parens [text]
   (replace-all text ["(" ")" "<" ">"]))
-
-(defn hash-brackets [code text]
-  (str "<node " code ">" text "</node>"))
-
-(defn url-brackets [url]
-  (str "<url>" url "</url>"))
 
 (defn mention-link [mention]
   (if (-> mention .getType s/schema-map (= s/webpage))
