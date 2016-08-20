@@ -333,7 +333,7 @@
   (if-let [text (.toString annotation)]
     text (->> annotation get-sentences first .toString)))
 
-(defn add-hyperlinks [model author text mentions]
+(defnc add-hyperlinks [model author text mentions]
   (let [annotation (run-nlp model text)
         mmap (switch-map author annotation mentions)]
     (->> mmap (mapcat second) (cons 0) (partition-all 2)
