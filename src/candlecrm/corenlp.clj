@@ -312,18 +312,20 @@
 (defn first-token-pos [tokens]
   (->> tokens first .beginPosition))
 
-(defn end-fpp-pos [tokens]
-  (if (and (-> tokens first .value (= "said"))
-           (-> tokens second .value (= ":")))
-    (-> tokens second .endPosition inc)
-    (recur (rest tokens))))
+(defn end-fpp-pos [author tokens]
+  (if author
+    (if (and (-> tokens first .value (= "said"))
+             (-> tokens second .value (= ":")))
+      (-> tokens second .endPosition inc)
+      (recur author (rest tokens)))
+    (first-token-pos tokens)))
 
-(defn sentence-map [sentences]
-  (mapvals (comp (juxt first-token-pos end-fpp-pos) get-tokens)
-           sentences))
+(defn sentence-map [author sentences]
+  (mapvals (comp (juxt first-token-pos #(end-fpp-pos author %))
+                 get-tokens) sentences))
 
-(defn switch-map [annotation mentions]
-  (->> annotation get-sentences sentence-map
+(defn switch-map [author annotation mentions]
+  (->> annotation get-sentences (sentence-map author)
        (merge (mention-map mentions))
        (sort-by second)))
 
@@ -331,8 +333,8 @@
   (if-let [text (.toString annotation)]
     text (->> annotation get-sentences first .toString)))
 
-(defn add-hyperlinks [annotation mentions]
-  (let [mmap (switch-map annotation mentions)]
+(defn add-hyperlinks [author annotation mentions]
+  (let [mmap (switch-map author annotation mentions)]
     (->> mmap (mapcat second) (cons 0) (partition-all 2)
          (map #(apply (partial subs (annotation-text annotation)) %))
          (interleave (cons "" (map switch-val mmap)))
@@ -355,9 +357,10 @@
        number-items (filter #(-> % second (= fpp-join)))
        ffirst))
 
-(defnc is-fpp-mention? [author mention]
-  (and (< (.getHeadTokenStart mention) (fpp-pos (.getSentence mention)))
-       (.contains author (mention-text mention))))
+(defn is-fpp-mention? [author mention]
+  (when author
+    (and (< (.getHeadTokenStart mention) (fpp-pos (.getSentence mention)))
+         (.contains author (mention-text mention)))))
 
 (defn hyperlink-mentions [author sentences]
   (->> sentences (mapcat relation-mentions)
@@ -404,7 +407,7 @@
                                      dt/all-nodes)
                        sentences (vector (.getSentence entity))]
                    (->> sentences (hyperlink-mentions author) (filter url-link?)
-                        (add-hyperlinks (make-doc sentences))
+                        (add-hyperlinks author (make-doc sentences))
                         (hash-map s/event-context)
                         (merge tree-data (event-times node-dates))))
                  #{s/person s/organization}
@@ -717,7 +720,7 @@
 
 (defn nlp-graph
   ([parsed-text]
-   (nlp-graph ["" (dt/now)] parsed-text))
+   (nlp-graph [nil (dt/now)] parsed-text))
   ([metadata parsed-text]
    (->> parsed-text number-items
         (map #(sentence-graph metadata %))
@@ -751,7 +754,7 @@
     [(->> sentences (find-all-relations models) 
           get-sentences (nlp-graph [author reftime]))
      (->> sentences (hyperlink-mentions author) (filter make-link?)
-          (add-hyperlinks (run-nlp (:token models) new-text)))]))
+          (add-hyperlinks author (run-nlp (:token models) new-text)))]))
 
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))
