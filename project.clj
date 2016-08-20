@@ -3,7 +3,7 @@
   :url "https://www.candlecrm.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.9.216"]
+                 [org.clojure/clojurescript "1.9.225"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [ns-tracker "0.3.0"]
                  [cheshire "5.6.3"]
@@ -17,7 +17,7 @@
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [environ "1.1.0"]
-                 [com.taoensso/encore "2.76.0"]
+                 [com.taoensso/encore "2.78.0"]
                  [com.taoensso/timbre "4.7.3"]
                  [buddy "1.0.0"]
                  [com.google.api-client/google-api-client "1.22.0"
