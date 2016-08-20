@@ -333,8 +333,9 @@
   (if-let [text (.toString annotation)]
     text (->> annotation get-sentences first .toString)))
 
-(defn add-hyperlinks [author annotation mentions]
-  (let [mmap (switch-map author annotation mentions)]
+(defn add-hyperlinks [model author text mentions]
+  (let [annotation (run-nlp model text)
+        mmap (switch-map author annotation mentions)]
     (->> mmap (mapcat second) (cons 0) (partition-all 2)
          (map #(apply (partial subs (annotation-text annotation)) %))
          (interleave (cons "" (map switch-val mmap)))
@@ -394,7 +395,7 @@
        s/event-end (second node-dates)}
     {s/date-time node-dates}))
 
-(defn ner-graph [[author reftime] entity]
+(defn ner-graph [[model author reftime] entity]
   (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
     (-> {s/type-label node-type}
         (merge {s/link-text (mention-text entity)})
@@ -405,9 +406,10 @@
                        node-dates (dt/dates-in-text date-text reftime)
                        tree-data (-> date-text (dt/parse-dates reftime)
                                      dt/all-nodes)
-                       sentences (vector (.getSentence entity))]
-                   (->> sentences (hyperlink-mentions author) (filter url-link?)
-                        (add-hyperlinks author (make-doc sentences))
+                       sentence (.getSentence entity)]
+                   (->> sentence vector (hyperlink-mentions author)
+                        (filter url-link?)
+                        (add-hyperlinks model author (.toString sentence))
                         (hash-map s/event-context)
                         (merge tree-data (event-times node-dates))))
                  #{s/person s/organization}
@@ -719,11 +721,11 @@
        (apply relations-graph) add-links))
 
 (defn nlp-graph
-  ([parsed-text]
-   (nlp-graph [nil (dt/now)] parsed-text))
-  ([metadata parsed-text]
+  ([model parsed-text]
+   (nlp-graph model nil (dt/now) parsed-text))
+  ([model author reftime parsed-text]
    (->> parsed-text number-items
-        (map #(sentence-graph metadata %))
+        (map #(sentence-graph [model author reftime] %))
         loom/merge-graphs)))
 
 (defn capitalize-words [text]
@@ -744,7 +746,7 @@
 
 (defnc run-nlp-default [models text]
   (->> text (run-nlp-ner models)
-       get-sentences nlp-graph))
+       get-sentences (nlp-graph (:token models))))
 
 (defnc run-nlp-full [models author reftime clean-dates text]
   (let [new-text (->> text strip-parens
@@ -752,9 +754,9 @@
         sentences (->> new-text (run-nlp-ner models)
                        get-sentences (clean-sentences clean-dates))]
     [(->> sentences (find-all-relations models) 
-          get-sentences (nlp-graph [author reftime]))
+          get-sentences (nlp-graph (:token models) author reftime))
      (->> sentences (hyperlink-mentions author) (filter make-link?)
-          (add-hyperlinks author (run-nlp (:token models) new-text)))]))
+          (add-hyperlinks (:token models) author new-text))]))
 
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))
