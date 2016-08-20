@@ -15,7 +15,8 @@
   {:sep ((weka/email-sep-model-fn))
    :nlp {:ner ((nlp/get-ner-fn))
          :mention ((nlp/get-mention-fn))
-         :entity (nlp/entity-extractor)}})
+         :entity (nlp/entity-extractor)
+         :token ((nlp/get-tokenize-fn))}})
 
 (defn combine-lines [lines]
   (->> lines ((juxt first last)) (mapv second)
