@@ -346,6 +346,9 @@
   (let [m-type (-> mention .getType s/schema-map)]
     (or (s/entity-map m-type) (= m-type s/webpage))))
 
+(defn number-items [items]
+  (zipmap (map inc (range (count items))) items))
+
 (defn fpp-pos [sentence]
   (->> sentence get-tokens (mapv #(.originalText %)) (beam 2)
        (map #(str/join "" %)) (map #(str " " % " "))
@@ -376,9 +379,6 @@
 (defn sentence-token-map [sentence]
   (->> (get-tokens sentence) (map char-token-map)
        (apply merge) normalize-map (into {})))
-
-(defn number-items [items]
-  (zipmap (map inc (range (count items))) items))
 
 (defn default-entity [entity]
   {(-> entity .getType s/schema-map s/label-correct)
