@@ -290,6 +290,7 @@
                      (.beginPosition token))
                   (dec (.index token)))))
 
+<<<<<<< HEAD
 (defn hash-brackets [code text]
   (str "<node " code ">" text "</node>"))
 
@@ -367,6 +368,8 @@
   (->> sentences (mapcat relation-mentions)
        (remove #(is-fpp-mention? author %))))
 
+=======
+>>>>>>> parent of 7434c4d... add urls, filtering to context
 (defn token-boundaries [bottom top token-map]
   (vector (token-map bottom) (token-map top)))
 
@@ -395,7 +398,11 @@
        s/event-end (second node-dates)}
     {s/date-time node-dates}))
 
+<<<<<<< HEAD
 (defn ner-graph [[model author reftime] entity]
+=======
+(defn ner-graph [reftime entity]
+>>>>>>> parent of 7434c4d... add urls, filtering to context
   (when-let [node-type (-> entity .getType s/schema-map s/entity-map)]
     (-> {s/type-label node-type}
         (merge {s/link-text (mention-text entity)})
@@ -405,12 +412,17 @@
                  (let [date-text (mention-text entity)
                        node-dates (dt/dates-in-text date-text reftime)
                        tree-data (-> date-text (dt/parse-dates reftime)
+<<<<<<< HEAD
                                      dt/all-nodes)
                        sentence (.getSentence entity)]
                    (->> sentence vector (hyperlink-mentions author)
                         (filter url-link?)
                         (add-hyperlinks model author (.toString sentence))
                         (hash-map s/event-context)
+=======
+                                     dt/all-nodes)]
+                   (->> entity .getSentence .toString (hash-map s/event-context)
+>>>>>>> parent of 7434c4d... add urls, filtering to context
                         (merge tree-data (event-times node-dates))))
                  #{s/person s/organization}
                  (if (some #{(-> entity .getType s/schema-map)}
@@ -592,9 +604,9 @@
        (->> coll rest (mapv #(hash-set (first coll) %))
             (concat sets) (recur (rest coll))))))
 
-(defn all-ner-graph [metadata sentence]
+(defn all-ner-graph [reftime sentence]
   (->> sentence relation-mentions
-       (map #(ner-graph metadata %))
+       (map #(ner-graph reftime %))
        (remove nil?) loom/merge-graphs))
 
 (defn has-rel-candidates? [sentence]
@@ -700,7 +712,8 @@
               (conj (mapv #(swap-fpp author %) fpps) "")))
 
 (defn sentence-split [models text]
-  (->> text (run-nlp (:token models)) get-sentences))
+  (->> text (run-nlp (:token models))
+       get-sentences))
 
 (defn fpp-merge [author strings]
   (->> strings rest (map #(str author fpp-join %))
@@ -716,16 +729,68 @@
 (defn strip-parens [text]
   (replace-all text ["(" ")" "<" ">"]))
 
-(defn sentence-graph [metadata sent-pair]
-  (->> sent-pair val ((juxt #(all-ner-graph metadata %) get-relations))
+(defn hash-brackets [code text]
+  (str "<node " code ">" text "</node>"))
+
+(defn url-brackets [url]
+  (str "<url>" url "</url>"))
+
+(defn mention-link [mention]
+  (if (-> mention .getType s/schema-map (= s/webpage))
+    (->> mention mention-text url-brackets)
+    (->> mention mention-text
+         (hash-brackets (str "hc" (mention-hash mention))))))
+
+(defn switch-val [[param _]]
+  (if (= (type param) Annotation) ""
+      (mention-link param)))
+
+(defn mention-map [mentions]
+  (mapvals mention-chars mentions))
+
+(defn first-token-pos [tokens]
+  (->> tokens first .beginPosition))
+
+(defn end-fpp-pos [tokens]
+  (if (and (-> tokens first .value (= "said"))
+           (-> tokens second .value (= ":")))
+    (-> tokens second .endPosition inc)
+    (recur (rest tokens))))
+
+(defn sentence-map [sentences]
+  (mapvals (comp (juxt first-token-pos end-fpp-pos) get-tokens)
+           sentences))
+
+(defn switch-map [annotation mentions]
+  (->> annotation get-sentences sentence-map
+       (merge (mention-map mentions))
+       (sort-by second)))
+
+(defn add-hyperlinks [annotation mentions]
+  (let [mmap (switch-map annotation mentions)]
+    (->> mmap (mapcat second) (cons 0) (partition-all 2)
+         (map #(apply (partial subs (.toString annotation)) %))
+         (interleave (cons "" (map switch-val mmap)))
+         (str/join ""))))
+
+(defn sentence-graph [reftime sent-pair]
+  (->> sent-pair val ((juxt #(all-ner-graph reftime %) get-relations))
        (apply relations-graph) add-links))
 
 (defn nlp-graph
+<<<<<<< HEAD
   ([model parsed-text]
    (nlp-graph model nil (dt/now) parsed-text))
   ([model author reftime parsed-text]
    (->> parsed-text number-items
         (map #(sentence-graph [model author reftime] %))
+=======
+  ([parsed-text]
+   (nlp-graph (dt/now) parsed-text))
+  ([reftime parsed-text]
+   (->> parsed-text number-items
+        (map #(sentence-graph reftime %))
+>>>>>>> parent of 7434c4d... add urls, filtering to context
         loom/merge-graphs)))
 
 (defn capitalize-words [text]
@@ -748,15 +813,37 @@
   (->> text (run-nlp-ner models)
        get-sentences (nlp-graph (:token models))))
 
+(defn make-link? [mention]
+  (let [m-type (-> mention .getType s/schema-map)]
+    (or (s/entity-map m-type)
+        (= m-type s/webpage))))
+
+(defn fpp-pos [sentence]
+  (->> sentence get-tokens (mapv #(.originalText %)) (beam 2)
+       (map #(str/join "" %)) (map #(str " " % " "))
+       number-items (filter #(-> % second (= fpp-join)))
+       ffirst))
+
+(defnc is-fpp-mention? [author mention]
+  (and (< (.getHeadTokenStart mention) (fpp-pos (.getSentence mention)))
+       (.contains author (mention-text mention))))
+
 (defnc run-nlp-full [models author reftime clean-dates text]
   (let [new-text (->> text strip-parens
                       (fpp-replace models author))
         sentences (->> new-text (run-nlp-ner models)
                        get-sentences (clean-sentences clean-dates))]
     [(->> sentences (find-all-relations models) 
+<<<<<<< HEAD
           get-sentences (nlp-graph (:token models) author reftime))
      (->> sentences (hyperlink-mentions author) (filter make-link?)
           (add-hyperlinks (:token models) author new-text))]))
+=======
+          get-sentences (nlp-graph reftime))
+     (->> sentences (mapcat relation-mentions)
+          (remove #(is-fpp-mention? author %)) (filter make-link?)
+          (add-hyperlinks (run-nlp (:token models) new-text)))]))
+>>>>>>> parent of 7434c4d... add urls, filtering to context
 
 (defn fix-punct [text]
   (str/replace text #" [,\.']" #(subs %1 1)))
