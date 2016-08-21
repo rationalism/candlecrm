@@ -147,6 +147,10 @@
      (cond (some #{(last prop)} s/date-times) [util/date-display disp]
            (= (last prop) s/email-body) [body-links (first disp)]
            (= (last prop) s/body-nlp) [body-links (first disp)]
+           (= (last prop) s/event-context)
+           (for [context (util/add-ids disp)]
+             ^{:key (first context)}
+             [body-links (second context)])
            (= (last prop) s/website) [web-links disp]
            (coll? disp)
            (for [list-member (util/add-ids disp)]

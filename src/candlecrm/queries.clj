@@ -224,7 +224,7 @@
                   (str/join " " locs) " "
                   (str/join " " zips))]})
 
-(defn loc-related [user query-map]
+(defnc loc-related [user query-map]
   (->> [(str (rel-query user)
              (neo4j/prop-label user s/building)
              ")-[:" (neo4j/esc-token s/has-coord)
