@@ -361,7 +361,7 @@
    [dt/find-dates "DATETIME"]])
 
 (def url-functions
-  [[regex/find-urls "URL"]])
+  [[regex/find-email-addrs "EMAIL"] [regex/find-urls "URL"]])
 
 (defn replace-all [text coll]
   (str/replace text (regex/regex-or coll) ""))
@@ -515,8 +515,10 @@
   (let [char-map (sentence-token-map sentence)
         text (.toString sentence)]
     (->> text (library-map url-functions) (boundaries-map sentence)
-         keys (map first) (sort-by first) (map #(update % 1 inc))
-         (apply concat) (sentence-ends text) vec (beam 2)
+         (filter #(= (second %) "URL")) keys (map first)
+         (sort-by first) (map #(update % 1 inc)) (apply concat)
+         (map #(- % (->> sentence get-tokens first .beginPosition)))
+         (sentence-ends text) vec (beam 2)
          (map #(concat [text] %)) (map #(apply subs %))
          insert-brackets)))
 
