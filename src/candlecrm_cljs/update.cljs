@@ -143,10 +143,12 @@
   (state/set! [:map-markers :updated] false))
 
 (defn map-markers [person-id]
-  (send! (person-place-req person-id) update-loc-rows!))
+  (when (not (empty? person-id))
+    (send! (person-place-req person-id) update-loc-rows!)))
 
 (defn cal-events [person-id]
-  (send! (person-event-req person-id) update-cal-rows!))
+  (when (not (empty? person-id))
+    (send! (person-event-req person-id) update-cal-rows!)))
 
 (defn rel-switch [person-id rel-type]
   (condp = rel-type
@@ -158,7 +160,7 @@
   (fn [new-ranks]
     {:pre [(coll? new-ranks)]}
     (state/set! [:rank-lists rel-type] new-ranks)
-    (when is-init?
+    (when (> (rand-int 25) 10)
       (->> :rank-lists state/look s/event first :id str cal-events)
       (->> :rank-lists state/look s/building first :id str map-markers))))
 
