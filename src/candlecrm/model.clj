@@ -161,7 +161,7 @@
    s/location []
    #_s/event #_[]
    s/building []
-   s/organization []})
+   #_s/organization #_[]})
 
 (def candidates
   {s/email
