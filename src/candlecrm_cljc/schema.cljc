@@ -169,11 +169,11 @@
              ["Address of this building" mail-address s-name :id]
              ["Events at this address" event-addr event-org s-name :id]]
    event [["Event name" s-name] ["Event time" date-time]
-          ["Event begins at" event-begin] ["Event ends at" event-end]
+          ["Event begins" event-begin] ["Event ends" event-end]
           ["Type of event" event-type] ["Event website" website]
-          ["This event features" event-features s-name :id]
-          ["Event context" event-context]
-          ["Emails discussing this event" link-to email-mentions email-subject :id]]
+          ["Hosted by" event-features s-name :id]
+          ["More information" event-context]
+          ["In email" link-to email-mentions email-subject :id]]
    geocode [["Latitude" lat] ["Longitude" lng]
             ["Buildings at this location" has-coord street-addr :id]]})
 
