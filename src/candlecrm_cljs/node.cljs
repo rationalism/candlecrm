@@ -18,6 +18,13 @@
 (defn debug-js [x]
   (js/alert x) x)
 
+(defn event-name [event]
+  (let [subject (-> event (util/get-first [:link-to :email-mentions :subject])
+                    (util/get-first :subject))
+        from (-> event (util/get-first [:link-to :email-mentions :email-from :name])
+                 (util/get-first :name))]
+    (str from " - " subject)))
+
 (defn get-title [node]
   (let [fields (-> node :center-node s/type-label title-field)]
     (loop [f fields]
@@ -175,6 +182,10 @@
   (cond->> attrs
     (some #{s/body-nlp} (map last attrs))
     (remove #(= s/email-body (last %)))
+    (some #{["Sent by" s/email-from s/s-name :id]} attrs)
+    (remove #(= ["Sent by" s/email-from s/email-addr :id] %))
+    (some #{["Sent to" s/email-to s/s-name :id]} attrs)
+    (remove #(= ["Sent to" s/email-to s/email-addr :id] %))
     :always
     (remove #(some #{%} never-show))))
 

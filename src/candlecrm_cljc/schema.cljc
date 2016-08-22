@@ -166,7 +166,7 @@
              ["Latitude" has-coord lat :id] ["Longitude" has-coord lng :id]
              ["This building is located in" located-in s-name :id]
              ["The zipcode for this building is" located-in zipcode :id]
-             ["Address of this building" mail-address s-name :id]
+             ["People living here" mail-address s-name :id]
              ["Events at this address" event-addr event-org s-name :id]]
    event [["Event name" s-name] ["Event time" date-time]
           ["Event begins" event-begin] ["Event ends" event-end]
