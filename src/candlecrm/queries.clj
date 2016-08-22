@@ -202,7 +202,7 @@
              " >= {present} WITH b, ID(e) as e ORDER BY b."
              (neo4j/esc-token s/value) " RETURN DISTINCT e"
              " SKIP {start} LIMIT {limit}")
-        (merge query-map {:present (to-ms (dt/now))})]
+        (merge query-map {:present (to-ms (dt/now))})] 
        neo4j/cypher-query (map #(into {} %)) (mapcat vals) 
        (map #(node-by-id user {:id % :type s/event}))))
 

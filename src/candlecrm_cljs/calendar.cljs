@@ -62,7 +62,11 @@
 
 (defn display-agenda [event]
   (if (string? event) [:h2 event]
-      [node/show-node "" event false]))
+      (let [subject (-> event (get-first [:link-to :email-mentions :subject])
+                        (get-first :subject))
+            from (-> event (get-first [:link-to :email-mentions :email-from :name])
+                     (get-first :name))]
+        [node/show-node (str from " - " subject) event false])))
 
 (defn agenda []
   [:div

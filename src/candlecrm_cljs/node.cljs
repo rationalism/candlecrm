@@ -167,9 +167,16 @@
   [:span [:strong (str n ": ")]
    [string-item v k]])
 
+(def never-show
+  [["Email from" :link-to :email-mentions :email-from :name :id]])
+
 (defn remove-dupes [attrs]
-  (if (some #{s/body-nlp} (map last attrs))
-    (remove #(= s/email-body (last %)) attrs) attrs))
+  (js/alert attrs)
+  (cond->> attrs
+    (some #{s/body-nlp} (map last attrs))
+    (remove #(= s/email-body (last %)))
+    :always
+    (remove #(some #{%} never-show))))
 
 (defn drop-id [coll]
   (if (= :id (last coll)) (drop-last coll) coll))

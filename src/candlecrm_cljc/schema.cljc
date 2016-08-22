@@ -176,7 +176,8 @@
           ["Hosted by" event-features s-name :id]
           ["Run by" event-org s-name :id] ["Event website" website]
           ["More information" event-context]
-          ["In email" link-to email-mentions email-subject :id]]
+          ["In email" link-to email-mentions email-subject :id]
+          ["Email from" link-to email-mentions email-from s-name :id]]
    geocode [["Latitude" lat] ["Longitude" lng]
             ["Buildings at this location" has-coord street-addr :id]]})
 
