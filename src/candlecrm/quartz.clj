@@ -110,6 +110,8 @@
    (->> (queries/norecon-count-all) (map second) 
         (filter #(some #{(second %)}
                        (keys @mlrecon/recon-models)))
+        (remove #(some #{(second %)}
+                       mlrecon/recon-stop))
         remove-running 
         (map #(vector (neo4j/find-by-id
                        (first %)) (second %)))

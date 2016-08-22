@@ -159,7 +159,7 @@
   {s/email [s/email-body s/email-subject s/email-sent]
    s/person []
    s/location []
-   #_s/event #_[]
+   s/event []
    s/building []
    s/organization []})
 
