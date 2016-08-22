@@ -71,6 +71,9 @@
     [load-box] [add-new s/event]
     [prev-next-box :agenda u/update-agenda!
      (count (state/look :agenda-events)) :agenda]]
-   (for [event (add-ids (agenda-events))]
-     ^{:key (first event)}
-     [display-agenda (second event)])])
+   (let [events (agenda-events)]
+     (if (empty? events)
+       [:h2 "No events loaded yet."]
+       (for [event (add-ids events)]
+         ^{:key (first event)}
+         [display-agenda (second event)])))])
