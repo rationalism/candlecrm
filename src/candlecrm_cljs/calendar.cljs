@@ -5,7 +5,8 @@
             [candlecrm_cljs.state :as state]
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.util :refer
-             [add-ids add-new prev-next-box display-day get-first]]
+             [add-ids add-new prev-next-box display-day
+              get-first load-box]]
             [reagent.core :as r])
   (:use [jayq.core :only [$]]))
 
@@ -66,10 +67,10 @@
 
 (defn agenda []
   [:div
-   [:span (if (state/look :loading) "  (Loading...)" "")]
-   [add-new s/event]
-   [prev-next-box :agenda u/update-agenda!
-    (count (state/look :agenda-events)) :agenda]
+   [:div
+    [load-box] [add-new s/event]
+    [prev-next-box :agenda u/update-agenda!
+     (count (state/look :agenda-events)) :agenda]]
    (for [event (add-ids (agenda-events))]
      ^{:key (first event)}
      [display-agenda (second event)])])

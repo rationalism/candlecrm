@@ -12,7 +12,7 @@
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.user :as user]
             [candlecrm_cljs.util :refer
-             [get-first add-ids add-new new-entity-switch]]
+             [get-first add-ids add-new new-entity-switch load-box]]
             [reagent.core :as r]
             [jayq.core :as jq])
   (:use [jayq.core :only [$]]))
@@ -35,8 +35,7 @@
 (defn people-ranks [rel-type]
   [:div#rank-box
    [:div#add-entity
-    [add-new rel-type]
-    [:span (if (state/look :loading) "  (Loading...)" "")]]
+    [add-new rel-type] [load-box]]
    [:div#people-ranks
     [:span
      [:span.select-text "Select a person: "]

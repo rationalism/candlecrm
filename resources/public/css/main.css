@@ -135,3 +135,8 @@ div.prev-next {
     float: right;
     margin-bottom: 20px;
 }
+
+form.pure-form select {
+    width: 100%;
+    margin-bottom: 20px;
+}

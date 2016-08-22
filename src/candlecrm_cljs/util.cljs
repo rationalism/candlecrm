@@ -7,6 +7,9 @@
 (defn get-first [node attr]
   (u/get-first node attr))
 
+(defn load-box []
+  [:span (if (state/look :loading) "  (Loading...)" "")])
+
 (defn node-link [text id type]
   [:a.go-node
    {:href "#" :on-click #(u/go-node! id type)}
@@ -25,9 +28,9 @@
     (state/set! [:tabid] 7)))
 
 (defn add-new [rel-type]
-  [:p [:a {:href "#" :on-click #(new-entity-switch rel-type)
-           :id (str "add-new-" (name rel-type)) :class "pure-button"}
-       (str "Add new " (name rel-type))]])
+  [:a {:href "#" :on-click #(new-entity-switch rel-type)
+       :id (str "add-new-" (name rel-type)) :class "pure-button"}
+   (str "Add new " (name rel-type))])
 
 (defn prev-next-box [counter update-fn num-rows row-type]
   [:div.prev-next

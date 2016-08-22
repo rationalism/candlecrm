@@ -40,7 +40,7 @@
     (count (state/look :people-rows)) :people]
    [:p [:a {:href "#" :on-click #(util/new-entity-switch s/person)
             :id "add-new-person" :class "pure-button"} "Add new person"]
-    [:span (if (state/look :loading) "  (Loading...)" "")]]
+    [util/load-box]]
    [:table {:id "people-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "people-header"}
      [:tr
@@ -73,7 +73,7 @@
 (defn email-table [row-keys counter update-fn]
   [:div
    [:div
-    [:span (if (state/look :loading) "  (Loading...)" "")]
+    [util/load-box]
     [util/prev-next-box counter update-fn
      (count (apply state/look row-keys)) :email]]
    [:table {:id "email-table" :class "pure-table pure-table-horizontal"}
