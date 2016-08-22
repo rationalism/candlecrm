@@ -5,7 +5,7 @@
             [candlecrm_cljs.state :as state]
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.util :refer
-             [add-ids add-new prev-next-box]]
+             [add-ids add-new prev-next-box display-day get-first]]
             [reagent.core :as r])
   (:use [jayq.core :only [$]]))
 
@@ -50,12 +50,26 @@
     :display-name "calendar-tab"
     :reagent-render cal-html}))
 
+(defn event-group [group]
+  (->> group (map first)
+       (concat (-> group first second vector))))
+
+(defn agenda-events []
+  (let [events (state/look :agenda-events)]
+    (->> events (map #(get-first % [s/event-begin]))
+         (map display-day) (map vector events)
+         (partition-by second) (mapcat event-group))))
+
+(defn display-agenda [event]
+  (if (string? event) [:h2 event]
+      [node/show-node "" event false]))
+
 (defn agenda []
   [:div
    [:span (if (state/look :loading) "  (Loading...)" "")]
    [add-new s/event]
    [prev-next-box :agenda u/update-agenda!
     (count (state/look :agenda-events)) :agenda]
-   (for [event (add-ids (state/look :agenda-events))]
+   (for [event (add-ids (agenda-events))]
      ^{:key (first event)}
-     [node/show-node "" (second event) false])])
+     [display-agenda (second event)])])
