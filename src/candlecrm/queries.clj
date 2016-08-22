@@ -90,7 +90,7 @@
   (when (neo4j/node-exists? user id type)
     (when-let [paths (s/node-paths type)]
       (->> paths (map rest) (mapv vec)
-           (mlrecon/fetch-paths-full id) (remove nil?)
+           (mlrecon/fetch-paths-full id) (remove nil?) 
            (filter #(not-any? nil? (keys %)))
            (map #(dissoc % :id s/type-label))
            (map key-vector) (apply merge)

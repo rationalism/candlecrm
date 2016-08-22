@@ -365,9 +365,12 @@
   (->> m vals first (mapv clojure-map)
        (mapv pick-keys) (hash-map (first (keys m)))))
 
+(defn key-number [key]
+  (-> key first (subs 1) (Integer/parseInt)))
+
 (defn parse-paths-general [paths path-rels]
   (->> path-rels first clojure-map (map #(apply hash-map %))
-       (sort-by #(-> % keys first))
+       (sort-by #(-> % keys key-number))
        (mapv arrange-maps) (mapv choose-process paths)))
 
 (defn parse-paths [paths path-rels]
