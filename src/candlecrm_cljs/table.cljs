@@ -34,18 +34,9 @@
          ^{:key (first attr)}
          [person-cell person (second attr)])])
 
-(defn prev-next-box [counter update-fn num-rows row-type]
-  [:div.prev-next
-   (when (> (state/look :counters counter) 0)
-     [:a {:href "#" :on-click (u/prev-fetch! counter update-fn)
-          :class "prev-email-page pure-button"} "<-- Previous"])
-   (when (= num-rows (state/look :page-lengths row-type))
-     [:a {:href "#" :on-click (u/next-fetch! counter update-fn)
-          :class "next-email-page pure-button"} "Next -->"])])
-
 (defn people-table []
   [:div
-   [prev-next-box :people u/update-people!
+   [util/prev-next-box :people u/update-people!
     (count (state/look :people-rows)) :people]
    [:p [:a {:href "#" :on-click #(util/new-entity-switch s/person)
             :id "add-new-person" :class "pure-button"} "Add new person"]
@@ -81,7 +72,7 @@
 
 (defn email-table [row-keys counter update-fn]
   [:div
-   [prev-next-box counter update-fn
+   [util/prev-next-box counter update-fn
     (count (apply state/look row-keys)) :email]
    [:table {:id "email-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "email-header"}
@@ -94,3 +85,4 @@
      (for [e-row (util/add-ids (apply state/look row-keys))]
        ^{:key (first e-row)}
        [email-row (second e-row)])]]])
+

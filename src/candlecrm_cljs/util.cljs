@@ -25,9 +25,18 @@
     (state/set! [:tabid] 7)))
 
 (defn add-new [rel-type]
-  [:p [:a {:href "#" :on-click #(table/new-entity-switch rel-type)
+  [:p [:a {:href "#" :on-click #(new-entity-switch rel-type)
            :id (str "add-new-" (name rel-type)) :class "pure-button"}
        (str "Add new " (name rel-type))]])
+
+(defn prev-next-box [counter update-fn num-rows row-type]
+  [:div.prev-next
+   (when (> (state/look :counters counter) 0)
+     [:a {:href "#" :on-click (u/prev-fetch! counter update-fn)
+          :class "prev-email-page pure-button"} "<-- Previous"])
+   (when (= num-rows (state/look :page-lengths row-type))
+     [:a {:href "#" :on-click (u/next-fetch! counter update-fn)
+          :class "next-email-page pure-button"} "Next -->"])])
 
 (defn key-link [text key type]
   (condp = type
