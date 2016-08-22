@@ -63,3 +63,12 @@
   [:span (format-date
           (if (coll? item)
             (first item) item))])
+
+(defn get-day [date]
+  (.format (js/moment. date)
+           "dddd, MMMM Do"))
+
+(defn display-day [date]
+  (let [today (get-day (js/moment. ))
+        date-text (get-day date)]
+    (if (= today date-text) "Today" date-text)))
