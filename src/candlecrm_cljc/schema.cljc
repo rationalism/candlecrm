@@ -171,6 +171,7 @@
    event [["Event name" s-name] ["Event time" date-time]
           ["Event begins" event-begin] ["Event ends" event-end]
           ["Event location" event-loc s-name :id]
+          ["Address" event-addr street-addr :id]
           ["Type of event" event-type] 
           ["Hosted by" event-features s-name :id]
           ["Run by" event-org s-name :id] ["Event website" website]
