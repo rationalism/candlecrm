@@ -178,7 +178,6 @@
   [["Email from" :link-to :email-mentions :email-from :name :id]])
 
 (defn remove-dupes [attrs]
-  (js/alert attrs)
   (cond->> attrs
     (some #{s/body-nlp} (map last attrs))
     (remove #(= s/email-body (last %)))
