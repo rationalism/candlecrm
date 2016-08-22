@@ -57,7 +57,7 @@
 
 (defn format-date [date]
   (.format (js/moment. date)
-           "MMM Do, h:mm a"))
+           "dddd, MMM Do, h:mm a"))
 
 (defn date-display [item]
   [:span (format-date
