@@ -18,18 +18,6 @@
      name "(No name)")
    (person :id) s/person])
 
-(defn new-attrs [node-type]
-  (->> node-type s/node-paths (filter #(= 2 (count %)))
-       (mapv second)))
-
-(defn new-entity-switch [node-type]
-  (let [type-attrs (new-attrs node-type)]
-    (state/set! [:input-meta :type] node-type)
-    (state/set! [:input-meta :attr-list] type-attrs)
-    (doseq [attr type-attrs]
-      (state/set! [:new-entity attr] {0 ""}))
-    (state/set! [:tabid] 7)))
-
 (defn person-site [person attr]
   [:a {:href (util/get-first person attr)}
    (util/get-first person attr)])
@@ -59,7 +47,7 @@
   [:div
    [prev-next-box :people u/update-people!
     (count (state/look :people-rows)) :people]
-   [:p [:a {:href "#" :on-click #(new-entity-switch s/person)
+   [:p [:a {:href "#" :on-click #(util/new-entity-switch s/person)
             :id "add-new-person" :class "pure-button"} "Add new person"]
     [:span (if (state/look :loading) "  (Loading...)" "")]]
    [:table {:id "people-table" :class "pure-table pure-table-horizontal"}

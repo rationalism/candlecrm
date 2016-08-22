@@ -48,6 +48,7 @@
     (js/setTimeout #(state/set! [:loading] false) 1000)
     (u/update-emails!)
     (u/update-people!)
+    (u/update-agenda!)
     (u/fetch-ranks! s/event false)
     (u/fetch-ranks! s/building false)))
 
@@ -55,7 +56,6 @@
 (defn chsk-init! []
   (update-tables!)
   (u/update-user!)
-  (u/update-agenda!)
   (u/fetch-ranks! s/event true)
   (u/fetch-ranks! s/building true))
 

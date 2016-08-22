@@ -2,10 +2,9 @@
   (:require [clojure.string :as str]
             [candlecrm_cljc.schema :as s]
             [candlecrm_cljs.state :as state]
-            [candlecrm_cljs.table :as table]
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.util :refer
-             [get-first node-link set-field! add-ids]]))
+             [get-first node-link set-field! new-attrs add-ids]]))
 
 (defn submit-new-entity [type]
   (fn []
@@ -74,7 +73,7 @@
   [entity-form
    (str "Edit " (-> :current-node (state/look :type) name)
         " named " (state/look :current-node :center-node s/s-name 0))
-   (->> :type (state/look :current-node) table/new-attrs add-ids)
+   (->> :type (state/look :current-node) new-attrs add-ids)
    [:current-node :center-node] #(u/edit-entity!)
    (when (state/look :edit-entity-msg)
      [edit-message])])

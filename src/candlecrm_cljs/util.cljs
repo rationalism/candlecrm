@@ -12,6 +12,23 @@
    {:href "#" :on-click #(u/go-node! id type)}
    text])
 
+(defn new-attrs [node-type]
+  (->> node-type s/node-paths (filter #(= 2 (count %)))
+       (mapv second)))
+
+(defn new-entity-switch [node-type]
+  (let [type-attrs (new-attrs node-type)]
+    (state/set! [:input-meta :type] node-type)
+    (state/set! [:input-meta :attr-list] type-attrs)
+    (doseq [attr type-attrs]
+      (state/set! [:new-entity attr] {0 ""}))
+    (state/set! [:tabid] 7)))
+
+(defn add-new [rel-type]
+  [:p [:a {:href "#" :on-click #(table/new-entity-switch rel-type)
+           :id (str "add-new-" (name rel-type)) :class "pure-button"}
+       (str "Add new " (name rel-type))]])
+
 (defn key-link [text key type]
   (condp = type
     :node [:a.go-node

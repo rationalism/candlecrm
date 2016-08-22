@@ -11,7 +11,8 @@
             [candlecrm_cljs.table :as table]
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.user :as user]
-            [candlecrm_cljs.util :refer [get-first add-ids]]
+            [candlecrm_cljs.util :refer
+             [get-first add-ids add-new new-entity-switch]]
             [reagent.core :as r]
             [jayq.core :as jq])
   (:use [jayq.core :only [$]]))
@@ -34,9 +35,7 @@
 (defn people-ranks [rel-type]
   [:div#rank-box
    [:div#add-entity
-    [:p [:a {:href "#" :on-click #(table/new-entity-switch rel-type)
-             :id (str "add-new-" (name rel-type)) :class "pure-button"}
-         (str "Add new " (name rel-type))]]
+    [add-new rel-type]
     [:span (if (state/look :loading) "  (Loading...)" "")]]
    [:div#people-ranks
     [:span
