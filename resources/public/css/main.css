@@ -80,10 +80,11 @@ div#calendarbox {
 
 div#people-ranks {
     float: right;
+    width: 35%;
 }
 
 div#add-entity {
-    width: 25%;
+    width: 60%;
     float: left;
 }
 
@@ -114,6 +115,10 @@ tbody#people-rows td {
     overflow: hidden;
 }
 
+table#email-table {
+    margin-top: 20px;
+}
+
 #email-body a, span {
     display: inline;
 }
@@ -128,4 +133,5 @@ a#pass-reset-link {
 
 div.prev-next {
     float: right;
+    margin-bottom: 20px;
 }
