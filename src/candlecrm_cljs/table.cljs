@@ -85,4 +85,3 @@
      (for [e-row (util/add-ids (apply state/look row-keys))]
        ^{:key (first e-row)}
        [email-row (second e-row)])]]])
-
