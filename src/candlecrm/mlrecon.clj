@@ -729,6 +729,8 @@
     (train-full user class pos-cs neg-cs)))
 
 (defn train-iterate [user class]
+  (when (empty? @recon-pairs)
+    (reset! recon-pairs (find-candidates user class)))
   (gather-train)
   (let [new-model (train-atom user class)]
     (write-forest class new-model))
