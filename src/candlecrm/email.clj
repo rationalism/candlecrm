@@ -255,7 +255,7 @@
             (link-message message linked-text)
             remove-all-metadata)))))
 
-(defn graph-from-id [models id]
+(defnc graph-from-id [models id]
   (let [[name body sent is-digest?] (fetch-body id)
         message {s/type-label s/email :id id s/email-body body
                  s/email-sent (java.util.Date. sent)
