@@ -68,7 +68,7 @@
 (defn agenda []
   [:div
    [:div
-    [load-box] [add-new s/event]
+    [add-new s/event] [load-box]
     [prev-next-box :agenda u/update-agenda!
      (count (state/look :agenda-events)) :agenda]]
    (let [events (agenda-events)]

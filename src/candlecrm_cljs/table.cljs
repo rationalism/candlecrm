@@ -62,7 +62,7 @@
    (cond
      (= s/email-subject attr) [email-link email attr]
      (some #{attr} s/date-times)
-     [util/date-display (util/get-first email attr)]
+     [util/email-date-display (util/get-first email attr)]
      :else (util/get-first email attr))])
 
 (defn email-row [email]

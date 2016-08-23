@@ -67,6 +67,15 @@
           (if (coll? item)
             (first item) item))])
 
+(defn email-date [date]
+  (.format (js/moment. date)
+           "MMM Do, h:mm a"))
+
+(defn email-date-display [item]
+  [:span (email-date
+          (if (coll? item)
+            (first item) item))])
+
 (defn get-day [date]
   (.format (js/moment. date)
            "dddd, MMMM Do"))

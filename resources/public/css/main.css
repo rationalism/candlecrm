@@ -49,8 +49,12 @@ div#main-page table td.name {
     width: 20%;
 }
 
-div#main-page table td.sent-date {
+div table td.sent-date {
     width: 20%;
+}
+
+table#email-table td.sent-date {
+    width: 40%;
 }
 
 div#menu-bar fieldset {
