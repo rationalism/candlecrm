@@ -24,7 +24,8 @@
 
 (defn silly-date? [text]
   (or (re-matches year-regex text)
-      (= "today" (str/lower-case text))))
+      (= "today" (str/lower-case text))
+      (= "sun" (str/lower-case text))))
 
 (defn regex-escape [text]
   (str/replace text esc-char-regex #(str "\\" %1)))
