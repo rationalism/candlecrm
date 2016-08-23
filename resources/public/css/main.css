@@ -49,11 +49,11 @@ div#main-page table td.name {
     width: 20%;
 }
 
-div table td.sent-date {
+div#tab2 table td.sent-date {
     width: 20%;
 }
 
-table#email-table td.sent-date {
+table td.sent-date {
     width: 40%;
 }
 
@@ -72,10 +72,6 @@ div.person-emails {
     width: 40%;
     float: left;
     margin-right: 10%;
-}
-
-div.person-emails table td.sent-date {
-    width: 50%;
 }
 
 div#calendarbox {
