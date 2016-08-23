@@ -618,6 +618,9 @@
       (- (* x -1 (log2 x))
          (* (- 1 x) (log2 (- 1 x))))))
 
+(defn entropy-weight [x]
+  (-> x bin-entropy Math/sqrt (max 0.01)))
+
 (defn sample-one [n total [a1 a2] sample]
   (let [i (+ a1 (second sample))]
     (if (-> a2 count (+ 0.5)
