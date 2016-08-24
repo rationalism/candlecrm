@@ -11,6 +11,13 @@
 (def default-score 0.5)
 (def str-compare-max 300)
 
+(defn string-boundaries [s]
+  (let [b1 0 b6 (count s)
+        b2 (-> b6 (/ 3) Math/floor (min str-compare-max))
+        b5 (- b6 b2) b3 (-> b6 (/ 2) (- (/ str-compare-max 2)) (max b2))
+        b4 (-> b6 (/ 2) (+ (/ str-compare-max 2)) (min b5))]
+    [(subs s b1 b2) (subs s b3 b4) (subs s b5 b6)]))
+
 (defn str-compare-truncate [s]
   (let [cs (count s)]
     (if (<= cs (* 3 str-compare-max))
