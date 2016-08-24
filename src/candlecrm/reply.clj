@@ -29,8 +29,7 @@
                     s/has-minute s/has-week s/has-month s/has-year])
 
 (defn remove-context [graph]
-  (->> graph loom/nodes (filter #(some #{(s/type-label %)} context-types))
-       (loom/remove-nodes graph)))
+  (loom/adjust-nodes graph #(apply dissoc % context-types)))
 
 (defn email-nodes [nodes]
   (filter #(= s/email (s/type-label %)) nodes))
