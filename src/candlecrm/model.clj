@@ -232,7 +232,7 @@
     [[s/email-uid] [is-eq which-nil]]]
    s/person
    [[[s/s-name] [overlap lcs lev-split len-and-diff]]
-    [[s/email-addr] [overlap is-eq shortest]]
+    [[s/email-addr] [overlap is-eq lev shortest]]
     [[s/link-to s/email-mentions s/email-sent] [is-eq]]]
    s/tool
    [[[s/tool-category] [is-eq]]
