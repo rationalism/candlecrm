@@ -134,7 +134,7 @@
   (when :nil (run-recon!)))
 
 (jobs/defjob EmailNLP [ctx]
-  (neo4j/thread-wrap (when :nil (email/push-email-nlp!))))
+  (neo4j/thread-wrap (when nil (email/push-email-nlp!))))
 
 (jobs/defjob EmailRefresh [ctx]
   (neo4j/thread-wrap

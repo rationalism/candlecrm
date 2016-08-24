@@ -25,6 +25,13 @@
   (->> graph loom/nodes (filter #(= s/hyperlink (s/type-label %)))
        (loom/remove-nodes graph)))
 
+(def context-types [s/event-context s/has-date s/has-day s/has-hour
+                    s/has-minute s/has-week s/has-month s/has-year])
+
+(defn remove-context [graph]
+  (->> graph loom/nodes (filter #(some #{(s/type-label %)} context-types))
+       (loom/remove-nodes graph)))
+
 (defn email-nodes [nodes]
   (filter #(= s/email (s/type-label %)) nodes))
 
@@ -94,7 +101,8 @@
 
 (defn nlp-headers [models text]
   (->> text (map #(nlp/run-nlp-default models %)) 
-       (map (comp filter-dates adjust-labels rename-dates remove-links))
+       (map (comp filter-dates adjust-labels rename-dates
+                  remove-context remove-links))
        from-to-graphs remove-bad-dates merge-from remove-meta))
 
 (defn update-last [sig-map line-groups]
