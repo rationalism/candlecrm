@@ -58,10 +58,11 @@
   (map #(lev-distance %1 %2) a b))
 
 (defn lev-split [coll1 coll2]
-  (diff-empty-all
-   coll1 coll2
-   #(->> (for [x (map string-boundaries %1)
-               y (map string-boundaries %2)]
+  (if (or (empty? coll1) (empty? coll2)
+          (every? empty? coll1) (every? empty? coll2))
+    [0.5 0.5 0.5]
+    (->> (for [x (map string-boundaries coll1)
+               y (map string-boundaries coll2)]
            (vector x y))
          (map (fn [x] (apply lev-distance-split x)))
          (sort-by (fn [coll] (apply + coll)) >) first)))
