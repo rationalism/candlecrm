@@ -54,6 +54,18 @@
          (map (fn [x] (apply lev-distance x)))
          (apply min))))
 
+(defn lev-distance-split [a b]
+  (map #(lev-distance %1 %2) a b))
+
+(defn lev-split [coll1 coll2]
+  (diff-empty-all
+   coll1 coll2
+   #(->> (for [x (map string-boundaries %1)
+               y (map string-boundaries %2)]
+           (vector x y))
+         (map (fn [x] (apply lev-distance-split x)))
+         (sort-by (fn [coll] (apply + coll)) >) first)))
+
 (defn abs [a b]
   (diff-first a b #(Math/abs (- %1 %2))))
 
