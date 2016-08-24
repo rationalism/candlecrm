@@ -221,11 +221,7 @@
    s/person
    [[[s/s-name] [overlap lcs lev len-and-diff]]
     [[s/email-addr] [overlap is-eq shortest]]
-    [[s/phone-num] [overlap is-eq]]
-    [[s/email-from s/email-sent] [overlap is-eq]]
-    [[s/email-to s/email-sent] [overlap is-eq]]
-    [[s/link-to s/email-mentions s/email-sent] [is-eq]]
-    [[s/website] [overlap]]]
+    [[s/link-to s/email-mentions s/email-sent] [is-eq]]]
    s/tool
    [[[s/tool-category] [is-eq]]
     [[s/vendor-name] [is-eq]]

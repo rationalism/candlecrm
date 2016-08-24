@@ -28,7 +28,7 @@
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
 
-(def recon-stop [])
+(def recon-stop [s/person])
 
 (defn models-dir []
   "models")
@@ -781,7 +781,7 @@
                        (mapcat #(delete-queries user % recon-groups))
                        doall)]
     (->> (recon-finished recon-ids)
-         #_(concat (doall (mapcat #(merge-all bad-links %)
-                                  recon-groups)))
+         (concat (doall (mapcat #(merge-all bad-links %)
+                                recon-groups)))
          (neo4j/cypher-combined-tx nil))
     (neo4j/table-refresh! user)))
