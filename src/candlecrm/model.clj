@@ -19,12 +19,7 @@
     [(subs s b1 b2) (subs s b3 b4) (subs s b5 b6)]))
 
 (defn str-compare-truncate [s]
-  (let [cs (count s)]
-    (if (<= cs (* 3 str-compare-max))
-      s (str (subs s 0 str-compare-max)
-             (subs s (- (/ cs 2) (/ str-compare-max 2))
-                   (+ (/ cs 2) (/ str-compare-max 2)))
-             (subs s (- cs str-compare-max) cs)))))
+  (str/join "" (string-boundaries s)))
 
 (defn run-diff [s1 s2]
   (if (and s1 s2)
