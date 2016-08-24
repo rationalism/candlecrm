@@ -51,7 +51,7 @@
                   :exclusions [junit com.google.guava/guava
                                org.bytedeco/javacpp]]
                  [com.joestelmach/natty "0.12"]
-                 [org.neo4j.driver/neo4j-java-driver "1.0.4"]
+                 [org.neo4j.driver/neo4j-java-driver "1.0.5"]
                  [pandect "0.6.0"]
                  [aysylu/loom "0.6.0"
                   :exclusions [org.clojure/data.priority-map]]
