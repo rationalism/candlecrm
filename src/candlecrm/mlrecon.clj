@@ -572,9 +572,10 @@
   (let [rules (get model/scoring class)
         vs (->> cs flatten distinct
                 (fetch-all-paths (map first rules)))]
-    (->> (map #(pair-map % vs) cs)
+    (->> cs dump-recon-log
+         (map #(pair-map % vs)) dump-recon-log
          (pmap #(score-diff rules %))
-         (map vec) (zipmap cs))))
+         (map vec) (zipmap cs) dump-recon-log)))
 
 (defnp conflict-data [user class ids]
   (fetch-all-paths
@@ -595,9 +596,10 @@
                  (partial weka/classify-logit)))))
 
 (defn score-all [user class]
-  (->> (find-candidates user class) 
+  (->> (find-candidates user class)
        (get-diffs user class)
        (score-map class)
+       dump-recon-log
        (into [])))
 
 (defn training-query [[ids1 ids2]]
@@ -779,7 +781,7 @@
                        (mapcat #(delete-queries user % recon-groups))
                        doall)]
     (->> (recon-finished recon-ids)
-         (concat (doall (mapcat #(merge-all bad-links %)
-                                recon-groups)))
+         #_(concat (doall (mapcat #(merge-all bad-links %)
+                                  recon-groups)))
          (neo4j/cypher-combined-tx nil))
     (neo4j/table-refresh! user)))
