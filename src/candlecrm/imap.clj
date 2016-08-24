@@ -33,7 +33,7 @@
 
 (def parse-threads 6)
 (def batch-size 12)
-(def archive-size 3000)
+(def archive-size 4000)
 
 (defonce parse-channel (atom nil))
 (defonce overload-locked (atom #{}))
