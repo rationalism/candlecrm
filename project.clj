@@ -73,7 +73,7 @@
                  [org.seleniumhq.selenium/selenium-java "2.53.1"]
                  [com.cemerick/piggieback "0.2.1"
                   :exclusions [com.google.guava/guava]]
-                 [figwheel-sidecar "0.5.5"]
+                 [figwheel-sidecar "0.5.6"]
                  [org.jsoup/jsoup "1.9.2"]
                  [cc.mallet/mallet "2.0.8"
                   :exclusions [org.hamcrest/hamcrest-core]]

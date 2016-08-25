@@ -156,7 +156,7 @@
        (partition-by second) (filter #(-> % first second))
        (map #(map first %)) (map combine-lines)
        (map reverse) (map vec) (map #(update % 0 vec))
-       (map #(update % 1 (partial nlp-headers nlp))) 
+       (map #(update % 1 (partial nlp-headers nlp)))
        (filter #(->> % second loom/nodes (map s/type-label)
                      (some #{s/email})))
        (cons [[0 0] headers]) filter-bad-dates))
