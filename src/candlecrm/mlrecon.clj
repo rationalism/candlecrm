@@ -28,7 +28,7 @@
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
 
-(def recon-stop [])
+(def recon-stop [s/person])
 
 (defn models-dir []
   "models")
@@ -572,10 +572,9 @@
   (let [rules (get model/scoring class)
         vs (->> cs flatten distinct
                 (fetch-all-paths (map first rules)))]
-    (->> cs dump-recon-log
-         (map #(pair-map % vs)) dump-recon-log
+    (->> cs (map #(pair-map % vs)) 
          (pmap #(score-diff rules %))
-         (map vec) (zipmap cs) dump-recon-log)))
+         (map vec) (zipmap cs))))
 
 (defnp conflict-data [user class ids]
   (fetch-all-paths
@@ -596,11 +595,8 @@
                  (partial weka/classify-logit)))))
 
 (defn score-all [user class]
-  (->> (find-candidates user class)
-       (get-diffs user class)
-       (score-map class)
-       dump-recon-log
-       (into [])))
+  (->> (find-candidates user class) (get-diffs user class)
+       (score-map class) (into [])))
 
 (defn training-query [[ids1 ids2]]
   (str "MATCH (a)--(b) WHERE ID(a) IN ["
