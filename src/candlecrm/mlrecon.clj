@@ -28,7 +28,7 @@
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
 
-(def recon-stop [s/person])
+(def recon-stop [s/person s/email])
 
 (defn models-dir []
   "models")
@@ -567,9 +567,12 @@
 (defn map-first [coll]
   (map #(map first %) coll))
 
-(defn diff-pair [[p1 p2]]
+(defn diff-pair-new [[p1 p2]]
   (map #(apply % (if (some #{%} model/score-fns)
                    p2 (map-first p2))) p1))
+
+(defn diff-pair [[p1 p2]]
+  (map #(apply % p2) p1))
 
 (defn score-diff [rules diff]
   (->> (apply zipvec diff)
@@ -579,7 +582,7 @@
 (defn get-diffs [user class cs]
   (let [rules (get model/scoring class)
         vs (->> cs flatten distinct
-                (fetch-all-paths (map first rules) true))]
+                (fetch-all-paths (map first rules) false))]
     (->> cs (map #(pair-map % vs)) 
          (pmap #(score-diff rules %))
          (map vec) (zipmap cs))))
