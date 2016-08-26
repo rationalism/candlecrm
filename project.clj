@@ -3,12 +3,12 @@
   :url "https://www.candlecrm.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.9.225"]
+                 [org.clojure/clojurescript "1.9.227"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [ns-tracker "0.3.0"]
                  [cheshire "5.6.3"]
                  [clj-time "0.12.0"]
-                 [clj-http "3.1.0"
+                 [clj-http "3.2.0"
                   :exclusions [commons-io]]
                  [http-kit "2.2.0"]
                  [ring/ring-core "1.5.0"]
