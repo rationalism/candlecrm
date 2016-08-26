@@ -1,5 +1,6 @@
 (ns candlecrm.model
-  (:require [clojure.string :as str]
+  (:require [clojure.set :as cset]
+            [clojure.string :as str]
             [candlecrm.common :refer :all]
             [candlecrm_cljc.schema :as s]
             [taoensso.timbre.profiling :as profiling
@@ -122,13 +123,19 @@
            (->> [%1 %2] (map count)
                 (apply min) double))))
 
+(defn subtract-maxes [maxes scores]
+  (map (fn [m s] (map #(- m %) s)) maxes scores))
+
 (defn overlap-score [a b]
   (diff-empty
-   a b #(/ (->> (concat %1 %2) distinct count
-                (- (+ (count %1) (count %2)))
-                double)
-           (->> [%1 %2] (map count)
-                (apply min) double))))
+   a b #(let [ma (into {} %1) mb (into {} %2)
+              maxa (apply max (map second %1))
+              maxb (apply max (map second %2))]
+          (->> [%1 %2] map-first (map set) (apply cset/intersection)
+               (map (juxt ma mb)) (apply mapv vector)
+               (subtract-maxes [maxa maxb]) (apply mapv vector)
+               (map (fn [p] (apply + p))) average 
+               (vector (overlap (map first %1) (map first %2)))))))
 
 (defn max-lcs [coll1 coll2 s]
   (->> (concat coll1 coll2)

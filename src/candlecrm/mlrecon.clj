@@ -564,9 +564,6 @@
 (defn pair-map [p m]
   (map #(get m %) p))
 
-(defn map-first [coll]
-  (map #(map first %) coll))
-
 (defn diff-pair [[p1 p2]]
   (mapv #(apply % (if (some #{%} model/score-fns)
                     p2 (map-first p2))) p1))

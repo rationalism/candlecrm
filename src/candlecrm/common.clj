@@ -210,4 +210,5 @@
 (defn average [coll]
   (/ (apply + coll) (count coll)))
 
-
+(defn map-first [coll]
+  (map #(map first %) coll))
