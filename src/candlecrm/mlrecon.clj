@@ -375,13 +375,14 @@
        (sort-by #(-> % keys key-number))
        (mapv arrange-maps) (mapv choose-process paths)))
 
-(defn parse-paths [paths path-rels]
+(defn parse-paths [paths keep-scores? path-rels]
   (let [results (parse-paths-general paths path-rels)
         result-map (->> (mapvals (comp first keys
                                        #(dissoc % :id s/type-label))
                                  results)
-                        (into []) (map reverse) (mapv vec) (into {}))]
-    (mapv #(-> % result-map % keys vec)
+                        (into []) (map reverse) (mapv vec) (into {}))
+        keep-fn (if keep-scores? identity keys)]
+    (mapv #(-> % result-map % keep-fn vec)
           (mapv #(if (= (last %) :id)
                    (last (last %)) (last %))
                 paths))))
@@ -403,7 +404,7 @@
 (defn fetch-paths [id paths]
   (->> (fetch-paths-query id paths)
        vector neo4j/cypher-combined-tx
-       first (parse-paths paths)))
+       first (parse-paths paths false)))
 
 (defn prop-diff [id1 id2 prop]
   (->> (map #(fetch-paths % [[prop]]) [id1 id2])
@@ -415,7 +416,7 @@
   (->> (mapcat get-ids-path paths)
        (fetch-paths-query id) vector
        neo4j/cypher-combined-tx
-       (map #(parse-paths paths %))
+       (map #(parse-paths paths false %))
        (mapcat #(apply concat %))
        (concat [id])))
 
@@ -439,11 +440,14 @@
          (mapv #(mapv (comp vec drop-last) %))
          (even-conflict class))))
 
-(defn fetch-all-paths [paths ids]
-  (->> (map #(fetch-paths-query % paths) ids)
-       neo4j/cypher-combined-tx
-       (map #(parse-paths paths %))
-       (zipmap ids)))
+(defn fetch-all-paths
+  ([paths ids]
+   (fetch-all-paths paths false ids))
+  ([paths keep-scores? ids]
+   (->> (map #(fetch-paths-query % paths) ids)
+        neo4j/cypher-combined-tx
+        (map #(parse-paths paths keep-scores? %))
+        (zipmap ids))))
 
 (defn recon-finished [recon-ids]
   (if (empty? recon-ids) []
