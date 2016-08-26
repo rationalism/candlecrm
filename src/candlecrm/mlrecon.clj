@@ -571,9 +571,6 @@
   (mapv #(apply % (if (some #{%} model/score-fns)
                     p2 (map-first p2))) p1))
 
-(defn diff-pair-old [[p1 p2]]
-  (map #(apply % p2) p1))
-
 (defnc score-diff [rules diff]
   (->> (apply zipvec diff)
        (zipvec (map second rules))
