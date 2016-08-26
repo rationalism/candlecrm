@@ -28,7 +28,7 @@
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
 
-(def recon-stop [s/person s/email])
+(def recon-stop [])
 
 (defn models-dir []
   "models")
@@ -567,22 +567,22 @@
 (defn map-first [coll]
   (map #(map first %) coll))
 
-(defn diff-pair-new [[p1 p2]]
-  (map #(apply % (if (some #{%} model/score-fns)
-                   p2 (map-first p2))) p1))
-
 (defn diff-pair [[p1 p2]]
+  (mapv #(apply % (if (some #{%} model/score-fns)
+                    p2 (map-first p2))) p1))
+
+(defn diff-pair-old [[p1 p2]]
   (map #(apply % p2) p1))
 
-(defn score-diff [rules diff]
+(defnc score-diff [rules diff]
   (->> (apply zipvec diff)
        (zipvec (map second rules))
-       (pmap diff-pair) flatten))
+       (map diff-pair) flatten))
 
 (defn get-diffs [user class cs]
   (let [rules (get model/scoring class)
         vs (->> cs flatten distinct
-                (fetch-all-paths (map first rules) false))]
+                (fetch-all-paths (map first rules) true))]
     (->> cs (map #(pair-map % vs)) 
          (pmap #(score-diff rules %))
          (map vec) (zipmap cs))))
@@ -590,7 +590,7 @@
 (defnp conflict-data [user class ids]
   (fetch-all-paths
    (map first (get model/scoring class))
-   ids))
+   true ids))
 
 (defnp conflict-prob [class]
   (fn [d1 d2]
@@ -787,6 +787,7 @@
         bad-links (->> class model/conflicts
                        (mapcat #(delete-queries user % recon-groups))
                        doall)]
+    (/ 1 0)
     (->> (recon-finished recon-ids)
          (concat (doall (mapcat #(merge-all bad-links %)
                                 recon-groups)))
