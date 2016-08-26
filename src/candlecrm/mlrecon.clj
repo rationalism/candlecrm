@@ -564,8 +564,12 @@
 (defn pair-map [p m]
   (map #(get m %) p))
 
+(defn map-first [coll]
+  (map #(map first %) coll))
+
 (defn diff-pair [[p1 p2]]
-  (map #(apply % p2) p1))
+  (map #(apply % (if (some #{%} model/score-fns)
+                   p2 (map-first p2))) p1))
 
 (defn score-diff [rules diff]
   (->> (apply zipvec diff)
@@ -575,7 +579,7 @@
 (defn get-diffs [user class cs]
   (let [rules (get model/scoring class)
         vs (->> cs flatten distinct
-                (fetch-all-paths (map first rules)))]
+                (fetch-all-paths (map first rules) true))]
     (->> cs (map #(pair-map % vs)) 
          (pmap #(score-diff rules %))
          (map vec) (zipmap cs))))

@@ -122,6 +122,14 @@
            (->> [%1 %2] (map count)
                 (apply min) double))))
 
+(defn overlap-score [a b]
+  (diff-empty
+   a b #(/ (->> (concat %1 %2) distinct count
+                (- (+ (count %1) (count %2)))
+                double)
+           (->> [%1 %2] (map count)
+                (apply min) double))))
+
 (defn max-lcs [coll1 coll2 s]
   (->> (concat coll1 coll2)
        (map count) (apply min)
@@ -177,6 +185,8 @@
    s/event []
    s/building []
    s/organization []})
+
+(def score-fns [overlap-score])
 
 (def candidates
   {s/email
