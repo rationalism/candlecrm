@@ -784,7 +784,6 @@
         bad-links (->> class model/conflicts
                        (mapcat #(delete-queries user % recon-groups))
                        doall)]
-    (/ 1 0)
     (->> (recon-finished recon-ids)
          (concat (doall (mapcat #(merge-all bad-links %)
                                 recon-groups)))
