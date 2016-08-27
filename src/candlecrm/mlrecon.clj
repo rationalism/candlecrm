@@ -28,7 +28,7 @@
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
 
-(def recon-stop [])
+(def recon-stop [s/person])
 
 (defn models-dir []
   "models")
@@ -531,6 +531,7 @@
 
 (defn email-candidate-pattern [user]
   (str "MATCH (root:" (neo4j/prop-label user s/person)
+       ":" (neo4j/esc-token s/norecon)
        ")<-[:" (neo4j/esc-token s/link-to)
        "]-(l:" (neo4j/prop-label user s/hyperlink)
        ")<-[:" (neo4j/esc-token s/email-mentions)
