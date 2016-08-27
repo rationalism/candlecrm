@@ -577,11 +577,6 @@
 (defn diff-score [cols diff]
   (->> cols (map #(nth diff %)) (apply +)))
 
-(defn big-diffs [user class cols]
-  (->> (find-candidates user class) (get-diffs user class)
-       (map vec) (map #(update % 1 (partial diff-score cols)))
-       (sort-by second >)))
-
 (defn get-diffs [user class cs]
   (let [rules (get model/scoring class)
         vs (->> cs flatten distinct
@@ -589,6 +584,11 @@
     (->> cs (map #(pair-map % vs)) 
          (pmap #(score-diff rules %))
          (map vec) (zipmap cs))))
+
+(defn big-diffs [user class cols]
+  (->> (find-candidates user class) (get-diffs user class)
+       (map vec) (map #(update % 1 (partial diff-score cols)))
+       (sort-by second >)))
 
 (defnp conflict-data [user class ids]
   (fetch-all-paths
