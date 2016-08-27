@@ -28,7 +28,7 @@
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
 
-(def recon-stop [s/person])
+(def recon-stop [])
 
 (defn models-dir []
   "models")
@@ -574,8 +574,13 @@
        (zipvec (map second rules))
        (map diff-pair) flatten))
 
-(defn diff-score [diff cols]
+(defn diff-score [cols diff]
   (->> cols (map #(nth diff %)) (apply +)))
+
+(defn big-diffs [user class cols]
+  (->> (find-candidates user class) (get-diffs user class)
+       (map vec) (map #(update % 1 (partial diff-score cols)))
+       (sort-by second >)))
 
 (defn get-diffs [user class cs]
   (let [rules (get model/scoring class)
