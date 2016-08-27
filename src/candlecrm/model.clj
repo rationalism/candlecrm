@@ -138,9 +138,9 @@
              (map (fn [p] (apply + p))) average))))
 
 (defnc overlap-score [a b]
-  (diff-empty
-   a b #(vector (overlap (map first %1) (map first %2))
-                (intersect-score %1 %2))))
+  (if (or (empty? a) (empty? b)) [0.0 0.0]
+      (vector (overlap (map first a) (map first b))
+              (intersect-score a b))))
 
 (defn max-lcs [coll1 coll2 s]
   (->> (concat coll1 coll2)
