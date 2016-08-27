@@ -126,16 +126,21 @@
 (defn subtract-maxes [maxes scores]
   (map (fn [m s] (map #(- m %) s)) maxes scores))
 
-(defn overlap-score [a b]
+(defn intersect-score [a b]
+  (let [ma (into {} a) mb (into {} b)
+        maxa (apply max (map second a))
+        maxb (apply max (map second b))
+        intersect (->> [a b] map-first (map set)
+                       (apply cset/intersection))]
+    (if (empty? intersect) 0.0
+        (->> intersect (map (juxt ma mb)) (apply mapv vector)
+             (subtract-maxes [maxa maxb]) (apply mapv vector)
+             (map (fn [p] (apply + p))) average))))
+
+(defnc overlap-score [a b]
   (diff-empty
-   a b #(let [ma (into {} %1) mb (into {} %2)
-              maxa (apply max (map second %1))
-              maxb (apply max (map second %2))]
-          (->> [%1 %2] map-first (map set) (apply cset/intersection)
-               (map (juxt ma mb)) (apply mapv vector)
-               (subtract-maxes [maxa maxb]) (apply mapv vector)
-               (map (fn [p] (apply + p))) average 
-               (vector (overlap (map first %1) (map first %2)))))))
+   a b #(vector (overlap (map first %1) (map first %2))
+                (intersect-score %1 %2))))
 
 (defn max-lcs [coll1 coll2 s]
   (->> (concat coll1 coll2)
