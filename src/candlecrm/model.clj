@@ -254,8 +254,8 @@
     [[s/email-to s/email-addr] [is-eq]]
     [[s/email-uid] [is-eq which-nil]]]
    s/person
-   [[[s/s-name] [overlap-score lcs lev-split len-and-diff]]
-    [[s/email-addr] [overlap-score is-eq lev shortest]]
+   [[[s/s-name] [overlap lcs lev-split len-and-diff]]
+    [[s/email-addr] [overlap is-eq lev shortest]]
     [[s/phone-num] [overlap]]
     [[s/website] [overlap]]
     [[s/link-to s/email-mentions s/email-sent] [is-eq]]]
