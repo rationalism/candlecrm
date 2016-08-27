@@ -574,6 +574,9 @@
        (zipvec (map second rules))
        (map diff-pair) flatten))
 
+(defn diff-score [diff cols]
+  (->> cols (map #(nth diff %)) (apply +)))
+
 (defn get-diffs [user class cs]
   (let [rules (get model/scoring class)
         vs (->> cs flatten distinct
