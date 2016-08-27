@@ -28,7 +28,7 @@
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
 
-(def recon-stop [])
+(def recon-stop [s/person])
 
 (defn models-dir []
   "models")
@@ -622,7 +622,7 @@
          (* (- 1 x) (log2 (- 1 x))))))
 
 (defn entropy-weight [x]
-  (-> x bin-entropy Math/sqrt (max 0.01)))
+  (-> x bin-entropy (max 0.01)))
 
 (defn sample-one [n total [a1 a2] sample]
   (let [i (+ a1 (second sample))]
