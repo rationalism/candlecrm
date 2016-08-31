@@ -142,6 +142,9 @@
       (vector (overlap (map first a) (map first b))
               (intersect-score a b))))
 
+(defn count-min [a b]
+  (min (count a) (count b)))
+
 (defn max-lcs [coll1 coll2 s]
   (->> (concat coll1 coll2)
        (map count) (apply min)

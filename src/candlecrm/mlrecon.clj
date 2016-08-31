@@ -28,7 +28,7 @@
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
 
-(def recon-stop [])
+(def recon-stop [s/person])
 
 (defn models-dir []
   "models")
@@ -588,7 +588,7 @@
 (defn big-diffs [user class cols]
   (->> (find-candidates user class) (get-diffs user class)
        (map vec) (map #(update % 1 (partial diff-score cols)))
-       (sort-by second >)))
+       (sort-by second >) vec))
 
 (defnp conflict-data [user class ids]
   (fetch-all-paths
