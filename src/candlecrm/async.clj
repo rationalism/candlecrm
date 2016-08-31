@@ -17,7 +17,7 @@
        (while true
          (let [data-in (async/<!! (get pool-data :in-chan))]
            (try
-             (let [data-out ((get pool-data :process) params data-in)]
+             (when-let [data-out ((get pool-data :process) params data-in)]
                (async/>!! (get pool-data :out-chan) data-out))
              (catch Exception e
                (throw-error! (pr-str e))
