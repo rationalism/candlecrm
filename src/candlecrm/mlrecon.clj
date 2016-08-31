@@ -709,21 +709,23 @@
   (swap! traindata
          (fn [t] (update t 1 #(cons pair %)))))
 
-(defn gather-train []
-  (loop [candidates @recon-pairs]
-    (println "New candidate:")
-    (println (training-query (first candidates)))
-    (let [resp (read-line)]
-      (condp = resp
-        "p" (do (add-pos (first candidates))
-                (recur (rest candidates)))
-        "n" (do (add-neg (first candidates))
-                (recur (rest candidates)))
-        "s" (recur (rest candidates))
-        "l" (/ 1 0) ; Intentional exception to quit
-        "q" nil
-        (do (println "Error: Invalid input, trying again")
-            (recur candidates))))))
+(defn gather-train [class]
+  (let [rules (->> class (get model/scoring) (map first))]
+    (loop [candidates @recon-pairs]
+      (println "New candidate:")
+      (mapv println (fetch-all-paths rules true (first candidates)))
+      (println (training-query (first candidates)))
+      (let [resp (read-line)]
+        (condp = resp
+          "p" (do (add-pos (first candidates))
+                  (recur (rest candidates)))
+          "n" (do (add-neg (first candidates))
+                  (recur (rest candidates)))
+          "s" (recur (rest candidates))
+          "l" (/ 1 0) ; Intentional exception to quit
+          "q" nil
+          (do (println "Error: Invalid input, trying again")
+              (recur candidates)))))))
 
 (defn append-scores [[pos neg]]
   [(->> (map vec pos) (map #(conj % 1.0)))
@@ -748,7 +750,7 @@
 (defn train-iterate [user class]
   (when (empty? @recon-pairs)
     (reset! recon-pairs (shuffle (find-candidates user class))))
-  (gather-train)
+  (gather-train class)
   (let [new-model (train-atom user class)]
     (write-forest class new-model))
   (load-models!) (load-thresholds!)
