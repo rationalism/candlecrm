@@ -142,8 +142,8 @@
       (vector (overlap (map first a) (map first b))
               (intersect-score a b))))
 
-(defn count-min [a b]
-  (min (count a) (count b)))
+(defn count-sort [a b]
+  (sort [(count a) (count b)]))
 
 (defn max-lcs [coll1 coll2 s]
   (->> (concat coll1 coll2)
@@ -257,8 +257,8 @@
     [[s/email-to s/email-addr] [is-eq]]
     [[s/email-uid] [is-eq which-nil]]]
    s/person
-   [[[s/s-name] [overlap-score lcs lev-split len-and-diff]]
-    [[s/email-addr] [overlap-score is-eq lev shortest]]
+   [[[s/s-name] [overlap-score count-sort lcs lev-split len-and-diff]]
+    [[s/email-addr] [overlap-score count-sort is-eq lev shortest]]
     [[s/phone-num] [overlap]]
     [[s/website] [overlap]]
     [[s/link-to s/email-mentions s/email-sent] [is-eq]]]
