@@ -268,8 +268,8 @@
          (make-nlp-chain models message))))
 
 (defn run-email-nlp! [models {:keys [id user]}]
-  (when-let [graph (graph-from-id models id)]
-    (insert/push-graph! graph user s/nlp-src [])))
+  (if-let [graph (graph-from-id models id)]
+    (insert/push-graph! graph user s/nlp-src []) []))
 
 (defn nlp-done-query [ids]
   (->> [(str "MATCH (n) WHERE ID(n) IN {ids} SET n:"
