@@ -84,3 +84,9 @@
   (let [today (get-day (js/moment. ))
         date-text (get-day date)]
     (if (= today date-text) "Today" date-text)))
+
+(defn beam [n coll]
+  (apply map vector
+         (for [i (range n)]
+           (->> n (- (count coll)) inc (+ i)
+                (subvec coll i)))))

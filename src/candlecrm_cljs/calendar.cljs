@@ -6,7 +6,7 @@
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.util :refer
              [add-ids add-new prev-next-box display-day
-              get-first load-box]]
+              get-first load-box beam]]
             [reagent.core :as r])
   (:use [jayq.core :only [$]]))
 
@@ -55,10 +55,18 @@
   (->> group (map first)
        (concat (-> group first second vector))))
 
+(defn pick-times [all-times]
+  (let [present (->> all-times (map #(apply min %)) (apply max)
+                     (min (.getTime (js/Date.))))]
+    (loop [last present times all-times select-times []]
+      (let [event-time (->> times (remove #(< % present)) first)]
+        (if (empty? times) select-times
+            (recur event-time (rest times) (conj select-times event-time)))))))
+
 (defn agenda-events []
   (let [events (state/look :agenda-events)]
-    (->> events (map #(get-first % [s/event-begin]))
-         (map display-day) (map vector events)
+    (->> events (map #(get % [s/event-begin])) (map keys) (map sort)
+         pick-times (map display-day) (map vector events)
          (partition-by second) (mapcat event-group))))
 
 (defn display-agenda [event]
