@@ -38,11 +38,13 @@
    (when (> (state/look :counters counter) 0)
      [:a {:href "#" :on-click (u/prev-fetch! counter update-fn)
           :class "prev-email-page pure-button pure-button-primary button-round"}
-      "<-- Previous"])
+      [:i {:class "fa fa-arrow-left"}]
+      "  Previous"])
    (when (= num-rows (state/look :page-lengths row-type))
      [:a {:href "#" :on-click (u/next-fetch! counter update-fn)
           :class "next-email-page pure-button pure-button-primary button-round"}
-      "Next -->"])])
+      "Next  "
+      [:i {:class "fa fa-arrow-right"}]])])
 
 (defn key-link [text key type]
   (condp = type

@@ -18,6 +18,9 @@
   [:link {:rel "stylesheet"
           :href "/css/pure-release-0.6.0/pure-min.css"}])
 
+(defn font-awesome []
+  [:script {:src "https://use.fontawesome.com/6cf2e50a67.js"}])
+
 (defn viewport []
   [:meta {:name "viewport"
           :content "width=device-width, initial-scale=1"}]) 
@@ -48,7 +51,7 @@
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "CandleCRM"]
-          (pure-css) (viewport)
+          (pure-css) (viewport) (font-awesome)
           (include-css "/css/main.css")]
          [:body
           (header-box)
@@ -60,7 +63,7 @@
 (defn app-template [& content]
   (html5 {:lang "en"}
          [:head [:title "CandleCRM"]
-          (pure-css) (viewport)
+          (pure-css) (viewport) (font-awesome)
           (include-css "/css/fullcalendar.min.css")
           (include-css "/css/main.css")]
          [:body
