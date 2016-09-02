@@ -10,6 +10,9 @@
             [reagent.core :as r])
   (:use [jayq.core :only [$]]))
 
+(defn debug-js [x]
+  (js/alert x) x)
+
 (defn cal-adjust
   ([param] (.fullCalendar ($ :#calendarbox) param))
   ([param1 param2] (.fullCalendar ($ :#calendarbox) param1 param2)))
@@ -59,7 +62,7 @@
   (let [present (->> all-times (map #(apply min %)) (apply max)
                      (min (.getTime (js/Date.))))]
     (loop [last present times all-times select-times []]
-      (let [event-time (->> times (remove #(< % last)) first)]
+      (let [event-time (->> times first (remove #(< % last)) first)]
         (if (empty? times) select-times
             (recur event-time (rest times) (conj select-times event-time)))))))
 
