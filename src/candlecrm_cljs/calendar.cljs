@@ -59,7 +59,7 @@
   (let [present (->> all-times (map #(apply min %)) (apply max)
                      (min (.getTime (js/Date.))))]
     (loop [last present times all-times select-times []]
-      (let [event-time (->> times (remove #(< % present)) first)]
+      (let [event-time (->> times (remove #(< % last)) first)]
         (if (empty? times) select-times
             (recur event-time (rest times) (conj select-times event-time)))))))
 
