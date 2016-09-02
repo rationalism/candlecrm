@@ -38,9 +38,7 @@
   [:div
    [util/prev-next-box :people u/update-people!
     (count (state/look :people-rows)) :people]
-   [:p [:a {:href "#" :on-click #(util/new-entity-switch s/person)
-            :id "add-new-person" :class "pure-button pure-button-primary button-round"}
-        "Add new person"]
+   [:p [util/add-new s/person]
     [util/load-box]]
    [:table {:id "people-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "people-header"}

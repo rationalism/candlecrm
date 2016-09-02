@@ -31,7 +31,8 @@
   [:a {:href "#" :on-click #(new-entity-switch rel-type)
        :id (str "add-new-" (name rel-type))
        :class "pure-button pure-button-primary button-round"}
-   (str "Add new " (name rel-type))])
+   [:i {:class "fa fa-plus"}]
+   (str " Add new " (name rel-type))])
 
 (defn prev-next-box [counter update-fn num-rows row-type]
   [:div.prev-next
