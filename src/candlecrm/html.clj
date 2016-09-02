@@ -39,7 +39,7 @@
 (defn header-box []
   [:div#page-header {:class "pure-g"}
    [:div {:class "pure-u-1-12"}]
-   [:div {:class "pure-u-1-6 main-logo"}
+   [:div {:class "pure-u-1-8 main-logo"}
     [:img {:src "/candlecrm_logo.png" :class "pure-img"}]]])
 
 (defn footer-box []
