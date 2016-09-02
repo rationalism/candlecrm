@@ -30,13 +30,16 @@ div.menu-icons a {
     color: #FFFFFF;
 }
 
-/* does not work right */
-li.pure-menu-link h3 {
-    color: #FFFFFF;
+a.pure-menu-link {
+    color: #FFFFFF !important;
 }
 
-a.pure-menu-link {
-    color: #FFFFFF;
+a.pure-menu-link:hover {
+    background-color: #00386B !important;
+}
+
+a.pure-menu-link:focus {
+    background-color: #00386B !important;
 }
 
 div#main-page table {
@@ -148,4 +151,8 @@ div.prev-next {
 form.pure-form select {
     width: 100%;
     margin-bottom: 20px;
+}
+
+.button-round {
+    border-radius: 4px;
 }

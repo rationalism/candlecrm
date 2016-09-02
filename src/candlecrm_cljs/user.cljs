@@ -22,7 +22,7 @@
               :on-change (set-field! :delete-account :confirm-button)}]
      "No, don't delete my account"]
     [:button {:type "submit"
-              :class "pure-button pure-button-primary"
+              :class "pure-button pure-button-primary button-round"
               :on-click u/delete-account!}
      "Confirm delete"]]])
 
@@ -45,23 +45,23 @@
                :on-change (set-field! :change-pwd :confirm)
                :value (state/look :change-pwd :confirm)}]]
      [:div.pure-controls
-      [:input {:class "pure-button pure-button-primary"
+      [:input {:class "pure-button pure-button-primary button-round"
                :value "Set new password" :type "button"
                :on-click u/change-password!}]]]]])
 
 (defn user-footer []
   [:div
    [:p
-    [:a {:href "/logout" :class "pure-button"}
+    [:a {:href "/logout" :class "pure-button pure-button-primary button-round"}
      "Logout here"]]
    [:p
-    [:a {:href "#" :class "pure-button"
+    [:a {:href "#" :class "pure-button pure-button-primary button-round"
          :on-click #(state/set! [:change-pwd :show-form] :true)}
      "Change password"]]
    (when (state/look :change-pwd :show-form)
      [change-pwd-box])
    [:p
-    [:a {:href "#" :class "pure-button"
+    [:a {:href "#" :class "pure-button pure-button-primary button-round"
          :on-click #(state/set! [:delete-account :confirm-box] :true)}
      "Close account"]]
    (when (state/look :delete-account :confirm-box)

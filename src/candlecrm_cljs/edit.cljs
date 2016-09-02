@@ -64,7 +64,7 @@
        ^{:key (first attr)}
        [input-block (second attr) cache])
      [:button {:type "button"
-               :class "pure-button pure-button-primary"
+               :class "pure-button pure-button-primary button-round"
                :on-click onclick}
       "Submit"]]]
    msg])

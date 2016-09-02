@@ -99,7 +99,7 @@
         [:input {:type "password" :name "confirm"
                  :id "signupConfirm" :required "required"}]]
        [:div.pure-controls
-        [:input {:class "pure-button pure-button-primary"
+        [:input {:class "pure-button pure-button-primary button-round"
                  :value "Sign up" :type "submit"}]
         [:span {:style "padding:0 0 0 10px;color:red;"
                 :id "signupError"} flash]]]]]]])
@@ -120,7 +120,7 @@
       [:input {:type "password" :name "password"
                :id "loginPassword"}]]
      [:div.pure-controls
-      [:input {:class "pure-button pure-button-primary"
+      [:input {:class "pure-button pure-button-primary button-round"
                :value "Login" :type "submit"}]
       [:a {:id "pass-reset-link" :href "/reset-password"}
        "(Forgot password?)"]
@@ -140,7 +140,7 @@
       [:input {:type "text" :name "username"
                :id "resetUsername"}]]
      [:div.pure-controls
-      [:input {:class "pure-button pure-button-primary"
+      [:input {:class "pure-button pure-button-primary button-round"
                :value "Request reset" :type "submit"}]]]]])
 
 (defn new-password [user token]
@@ -164,7 +164,7 @@
       [:input {:type "password" :name "confirm"
                :id "setPwdConfirm" :required "required"}]]
      [:div.pure-controls
-      [:input {:class "pure-button pure-button-primary"
+      [:input {:class "pure-button pure-button-primary button-round"
                :value "Set new password" :type "submit"}]]]]])
 
 (defn login-needed [uri]
@@ -183,5 +183,5 @@
    [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
    [:h3 (str "Your email address is: " username)]
    [:h3 "Select an email provider"]
-   [:a {:class "pure-button pure-button-primary" :href auth-url}
+   [:a {:class "pure-button pure-button-primary button-round" :href auth-url}
     [:h3 "GMail"]]])

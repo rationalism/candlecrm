@@ -237,10 +237,10 @@
     (when aux?
       [:span
        [:a {:href "#" :on-click #(edit-entity-switch (s/type-label item))
-            :class "pure-button"}
+            :class "pure-button pure-button-primary button-round"}
         "Edit"] " "
        [:a {:href "#" :on-click delete-entity-switch
-            :class "pure-button"}
+            :class "pure-button pure-button-primary button-round"}
         "Delete"]])]
    [info-items (-> item s/type-label s/node-paths) item]
    (when aux? [node-aux node-name item])])
