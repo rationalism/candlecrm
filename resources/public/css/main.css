@@ -159,4 +159,14 @@ form.pure-form select {
 
 .prev-email-page {
     margin-right: 0.5em;
+    font-weight: bold;    
+}
+
+.next-email-page {
+    margin-right: 0.5em;
+    font-weight: bold;
+}
+
+.new-button {
+    font-weight: bold;
 }

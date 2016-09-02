@@ -30,7 +30,7 @@
 (defn add-new [rel-type]
   [:a {:href "#" :on-click #(new-entity-switch rel-type)
        :id (str "add-new-" (name rel-type))
-       :class "pure-button pure-button-primary button-round"}
+       :class "pure-button pure-button-primary button-round new-button"}
    [:i {:class "fa fa-plus"}]
    (str " Add new " (name rel-type))])
 
