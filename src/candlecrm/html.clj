@@ -36,8 +36,8 @@
 (defn header-box []
   [:div#page-header {:class "pure-g"}
    [:div {:class "pure-u-1-12"}]
-   [:div {:class "pure-u-5-6"}
-    [:h1 "CandleCRM"]]])
+   [:div {:class "pure-u-1-6 main-logo"}
+    [:img {:src "/candlecrm_logo.png" :class "pure-img"}]]])
 
 (defn footer-box []
   [:div#page-footer {:class "pure-g"}

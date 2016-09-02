@@ -6,28 +6,37 @@ div.tab-hide {
     display: none;
 }
 
+div.main-logo {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+}
+
 div#page-footer {
-    background: #00688B;
+    background: #0068CB;
     color: #FFFFFF;
     margin-top: 4em;
 }
 
 div#page-header {
-    background: #00688B;
+    background: #FFFFFF;
     color: #FFFFFF;
 }
 
 div#menu-bar {
-    background: #d3d3d3;
+    background: #0068CB;
 }
 
 div.menu-icons a {
-    color: #000000;
+    color: #FFFFFF;
 }
 
 /* does not work right */
-li.pure-menu-selected a {
-    color: #00688B;
+li.pure-menu-link h3 {
+    color: #FFFFFF;
+}
+
+a.pure-menu-link {
+    color: #FFFFFF;
 }
 
 div#main-page table {

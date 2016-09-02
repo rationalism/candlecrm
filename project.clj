@@ -99,6 +99,7 @@
   :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
   :resource-paths ["config" "resources"]
   :source-paths ["src"]
+  :figwheel {:css-dirs ["resources/public/css"]}
   :cljsbuild {:builds
               {:dev
                {:source-paths ["src/candlecrm_cljs" "src/candlecrm_cljc"]
