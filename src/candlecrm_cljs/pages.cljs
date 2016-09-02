@@ -90,7 +90,7 @@
       [header-tab 5 "My Account"]]]]
    [:div#right-menu {:class "pure-u-1-4"}
     [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
-     [search/search-box]]]])   
+     [search/search-box]]]])
 
 (defn my-account []
   [:div
