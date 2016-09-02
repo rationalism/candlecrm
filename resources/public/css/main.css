@@ -1,3 +1,7 @@
+div#content {
+    background-color: #FFFFFF;
+}
+
 div.tab-show {
     display: block;
 }
@@ -18,7 +22,7 @@ div#page-footer {
 }
 
 div#page-header {
-    background: #FFFFFF;
+    background: #EEEEEE;
     color: #FFFFFF;
 }
 
