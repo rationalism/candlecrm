@@ -109,7 +109,8 @@ span.select-text {
 }
 
 #search-box {
-    width: 18em;
+    width: 20em;
+    float: right;
 }
 
 div#menu-bar .pure-menu-horizontal {
