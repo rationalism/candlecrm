@@ -19,7 +19,7 @@
                  [environ "1.1.0"]
                  [com.taoensso/encore "2.80.0"]
                  [com.taoensso/timbre "4.7.4"]
-                 [buddy "1.0.0"]
+                 [buddy "1.1.0"]
                  [com.google.api-client/google-api-client "1.22.0"
                   :exclusions [com.fasterxml.jackson.core/jackson-core
                                com.google.guava/guava-jdk5]]
@@ -27,7 +27,7 @@
                   :exclusions [com.google.code.findbugs/jsr305
                                com.google.guava/guava]]
                  [org.passay/passay "1.2.0"]
-                 [com.google.apis/google-api-services-oauth2 "v2-rev117-1.22.0"]
+                 [com.google.apis/google-api-services-oauth2 "v2-rev118-1.22.0"]
                  [com.google.http-client/google-http-client-jackson "1.22.0"]
                  [com.sun.mail/javax.mail "1.5.5"]
                  [de.jollyday/jollyday "0.4.7"]
