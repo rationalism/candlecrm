@@ -73,8 +73,10 @@
          (partition-by second) (mapcat event-group))))
 
 (defn display-agenda [event]
-  (if (string? event) [:h2 event]
-      [node/show-node (node/event-name event) event false]))
+  [:div 
+   (if (string? event) [:h2 event]
+       [node/show-node (node/event-name event) event false])
+   [:hr]])
 
 (defn agenda []
   [:div
@@ -87,4 +89,6 @@
        [:h2 "No events loaded yet."]
        (for [event (add-ids events)]
          ^{:key (first event)}
-         [display-agenda (second event)])))])
+         [display-agenda (second event)])))
+   [prev-next-box :agenda u/update-agenda!
+    (count (state/look :agenda-events)) :agenda]])
