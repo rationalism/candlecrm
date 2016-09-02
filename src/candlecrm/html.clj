@@ -48,15 +48,15 @@
    [:div#main-page {:class "pure-u-5-6"}
     [:p "© 2016 CandleCRM"]]])
 
-(defn tab-class [num]
+(defn tab-class []
   "pure-menu-item")
 
-(defn header-tab [num name]
-  [:li {:class (tab-class num)}
+(defn header-tab [logo-class name]
+  [:li {:class (tab-class)}
    [:h3
-    [:a {:href "#" :class "pure-menu-link"
-         :id (str "set-tab-" num)}
-     name]]])
+    [:a {:href "#" :class "pure-menu-link"}
+     [:i {:class logo-class}]
+     (str "  " name)]]])
 
 (defn home-header []
   [:div#menu-bar {:class "pure-g"}
@@ -64,9 +64,9 @@
    [:div {:class "pure-u-7-12"}
     [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
      [:ul {:class "pure-menu-list"}
-      (header-tab 10 "Home")
-      (header-tab 1 "Log In")
-      (header-tab 2 "Contact")]]]])
+      (header-tab "fa fa-home" "Home")
+      (header-tab "fa fa-sign-in" "Log In")
+      (header-tab "fa fa-envelope" "Contact")]]]])
 
 (defn base-template [& content]
   (html5 {:lang "en"}

@@ -69,12 +69,14 @@
     "pure-menu-item pure-menu-selected"
     "pure-menu-item"))
 
-(defn header-tab [num name]
+(defn header-tab [logo-class num name]
   [:li {:class (tab-class num)}
    [:h3>a
     {:href "#" :class "pure-menu-link"
      :on-click (set-tab-fn num)
-     :id (str "set-tab-" num)} name]])
+     :id (str "set-tab-" num)}
+    [:i {:class logo-class}]
+    (str " " name)]])
 
 (defn home-header []
   [:div#menu-bar {:class "pure-g"}
@@ -82,12 +84,12 @@
    [:div {:class "pure-u-7-12"}
     [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
      [:ul {:class "pure-menu-list"}
-      [header-tab 10 "Agenda"]
-      [header-tab 1 "People"]
-      [header-tab 2 "Emails"]
-      [header-tab 3 "Calendar"]
-      [header-tab 4 "Locations"]
-      [header-tab 5 "My Account"]]]]
+      [header-tab "fa fa-list-ul" 10 "Agenda"]
+      [header-tab "fa fa-users" 1 "People"]
+      [header-tab "fa fa-envelope" 2 "Emails"]
+      [header-tab "fa fa-calendar" 3 "Calendar"]
+      [header-tab "fa fa-globe" 4 "Locations"]
+      [header-tab "fa fa-cog" 5 "My Account"]]]]
    [:div#right-menu {:class "pure-u-1-4"}
     [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
      [search/search-box]]]])
