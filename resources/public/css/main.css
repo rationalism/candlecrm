@@ -136,6 +136,10 @@ table#email-table {
     margin-top: 20px;
 }
 
+table.pure-table thead {
+    font-weight: bold;
+}
+
 #email-body a, span {
     display: inline;
 }

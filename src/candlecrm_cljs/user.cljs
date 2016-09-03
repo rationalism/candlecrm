@@ -53,7 +53,7 @@
   [:div
    [:p
     [:a {:href "/logout" :class "pure-button pure-button-primary button-round"}
-     "Logout here"]]
+     "Log out"]]
    [:p
     [:a {:href "#" :class "pure-button pure-button-primary button-round"
          :on-click #(state/set! [:change-pwd :show-form] :true)}
