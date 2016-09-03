@@ -4,7 +4,8 @@
             [candlecrm_cljs.state :as state]
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.util :refer
-             [get-first node-link set-field! new-attrs add-ids]]))
+             [get-first node-link set-field! new-attrs
+              add-ids get-title]]))
 
 (defn submit-new-entity [type]
   (fn []
@@ -19,7 +20,7 @@
 
 (defn edit-message []
   (let [resp (state/look :edit-entity-msg)]
-    [:span (str "Edit of " 
+    [:span (str "Edit of " (get-title (state/look :current-node))
                 " successful. ")
      (node-link "Go to page" (:id resp) (s/type-label resp))]))
 

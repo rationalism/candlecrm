@@ -37,7 +37,7 @@
     (event-name (:center-node node) true)
     (let [fields (-> node :center-node s/type-label title-field)]
       (loop [f fields]
-        (cond (= 1 (count f)) (first f)
+        (cond (= 0 (count f)) "" (= 1 (count f)) (first f)
               (get-first (:center-node node) (first f))
               (get-first (:center-node node) (first f))
               :else (recur (rest f)))))))
