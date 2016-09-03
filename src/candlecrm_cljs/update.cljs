@@ -125,7 +125,9 @@
   (-> (assoc cal :start (get-first cal [s/event-begin]))
       (assoc :end (get-first cal [s/event-end]))
       (dissoc [s/event-begin] [s/event-end])
-      (assoc :title (str (:id cal)))))
+      (assoc :title
+             (get-first (get-first cal [s/link-to s/email-mentions s/email-subject])
+                        s/email-subject))))
 
 (defn update-cal-rows! [new-rows]
   (->> new-rows (map normalize-cal) 
