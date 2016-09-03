@@ -180,7 +180,7 @@
 
 (defn edit-req []
   [:edit/edit-entity
-   {:fields (state/look :current-node :center-node)}])
+   {:fields (state/look :edit-entity)}])
 
 (defn new-entity-confirm! [resp]
   (state/set! [:new-entity] {})
