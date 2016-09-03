@@ -48,10 +48,18 @@
   (->> m (into []) (map (fn [p] (update p 0 #(if (coll? %) (first %) %))))
        (into {})))
 
+(defn add-key [m k]
+  (if (contains? m k) m (assoc m k {0 ""})))
+
+(defn add-keys [node-type m]
+  (let [edit-attrs (util/new-attrs node-type)]
+    (reduce add-key m edit-attrs)))
+
 (defn edit-entity-switch [type]
-  (state/update! [:current-node :center-node]
-                 (partial ids-if-coll type))
-  (state/update! [:current-node :center-node] devector-keys)
+  (state/set! [:edit-entity] (state/look :current-node :center-node))
+  (state/update! [:edit-entity] (partial ids-if-coll type))
+  (state/update! [:edit-entity] devector-keys)
+  (state/update! [:edit-entity] (partial add-keys type))
   (state/set! [:tabid] 8))
 
 (defn delete-entity-switch []
