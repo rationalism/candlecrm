@@ -75,7 +75,7 @@
 (defn display-agenda [event]
   [:div 
    (if (string? event) [:h2 event]
-       [node/show-node (node/event-name event) event false])
+       [node/show-node (node/event-name event false) event false])
    [:hr]])
 
 (defn agenda []

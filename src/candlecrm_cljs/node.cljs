@@ -18,12 +18,14 @@
 (defn debug-js [x]
   (js/alert x) x)
 
-(defn event-name [event]
+(defn event-name [event no-link?]
   (let [subject (-> event (util/get-first [:link-to :email-mentions :subject])
                     (util/get-first :subject))
         from (-> event (util/get-first [:link-to :email-mentions :email-from :name])
                  (util/get-first :name))]
-    (str from " - " subject)))
+    [:span from " - "
+     (if no-link? subject
+         (util/node-link subject (:id event) s/event))]))
 
 (defn get-title [node]
   (let [fields (-> node :center-node s/type-label title-field)]
@@ -233,7 +235,7 @@
 (defn show-node [node-name item aux?]
   [:div#node-box
    [:h3.infotitle
-    (str node-name " (" (-> item s/type-label type-name) ") ")
+    [:span node-name (str " (" (-> item s/type-label type-name) ") ")]
     (when aux?
       [:span
        [:a {:href "#" :on-click #(edit-entity-switch (s/type-label item))
