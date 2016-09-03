@@ -4,7 +4,8 @@
             [candlecrm_cljs.node :as node]
             [candlecrm_cljs.state :as state]
             [candlecrm_cljs.update :as u]
-            [candlecrm_cljs.util :refer [set-field! add-ids node-link]]))
+            [candlecrm_cljs.util :refer
+             [set-field! add-ids node-link get-title]]))
 
 (defn search-key [e] 
   (when (= 13 (.-charCode e))
@@ -19,9 +20,9 @@
 (defn result-row [res]
   [:div [:hr]
    [:h3.infotitle (str "Result #" (inc (first res)))]
-   [node/show-node (node/get-title {:center-node (second res)})
+   [node/show-node (get-title {:center-node (second res)})
     (second res) false]
-   [:p [node-link (str "Link to " (node/get-title {:center-node (second res)}))
+   [:p [node-link (str "Link to " (get-title {:center-node (second res)}))
         (:id (second res)) (s/type-label (second res))]]])
 
 (defn search-results []

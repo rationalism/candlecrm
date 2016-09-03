@@ -6,7 +6,7 @@
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.util :refer
              [add-ids add-new prev-next-box display-day
-              get-first load-box beam]]
+              get-first load-box beam event-name]]
             [reagent.core :as r])
   (:use [jayq.core :only [$]]))
 
@@ -75,7 +75,7 @@
 (defn display-agenda [event]
   [:div 
    (if (string? event) [:h2 event]
-       [node/show-node (node/event-name event false) event false])
+       [node/show-node (event-name event false) event false])
    [:hr]])
 
 (defn agenda []

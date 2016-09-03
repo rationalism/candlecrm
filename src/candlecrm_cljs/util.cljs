@@ -4,6 +4,14 @@
             [candlecrm_cljs.state :as state]
             [candlecrm_cljs.update :as u]))
 
+(def title-field {s/person [[s/s-name] [s/email-addr] "(No name)"]
+                  s/email [[s/email-subject] "(No subject)"]
+                  s/organization [[s/s-name] [s/email-addr] "(No name)"]
+                  s/location [[s/s-name] "(No name)"]
+                  s/building [[s/street-addr] "(No address)"]
+                  s/event [[s/s-name] "(No name)"]
+                  s/geocode ["Coordinate pair"]})
+
 (defn get-first [node attr]
   (u/get-first node attr))
 
@@ -14,6 +22,25 @@
   [:a.go-node
    {:href "#" :on-click #(u/go-node! id type)}
    text])
+
+(defn event-name [event no-link?]
+  (let [subject (-> event (get-first [:link-to :email-mentions :subject])
+                    (get-first :subject))
+        from (-> event (get-first [:link-to :email-mentions :email-from :name])
+                 (get-first :name))]
+    [:span from " - "
+     (if no-link? subject
+         (node-link subject (:id event) s/event))]))
+
+(defn get-title [node]
+  (if (-> node :center-node s/type-label (= s/event))
+    (event-name (:center-node node) true)
+    (let [fields (-> node :center-node s/type-label title-field)]
+      (loop [f fields]
+        (cond (= 1 (count f)) (first f)
+              (get-first (:center-node node) (first f))
+              (get-first (:center-node node) (first f))
+              :else (recur (rest f)))))))
 
 (defn new-attrs [node-type]
   (->> node-type s/node-paths (filter #(= 2 (count %)))

@@ -12,7 +12,8 @@
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.user :as user]
             [candlecrm_cljs.util :refer
-             [get-first add-ids add-new new-entity-switch load-box]]
+             [get-first add-ids add-new new-entity-switch
+              load-box get-title]]
             [reagent.core :as r]
             [jayq.core :as jq])
   (:use [jayq.core :only [$]]))
@@ -105,7 +106,7 @@
    [table/email-table [:email-rows] :email u/update-emails!]])
 
 (defn show-node [node]
-  [node/show-node (node/get-title node)
+  [node/show-node (get-title node)
    (:center-node node) true])
 
 (defn main-page []

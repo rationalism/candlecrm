@@ -7,35 +7,8 @@
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.util :as util]))
 
-(def title-field {s/person [[s/s-name] [s/email-addr] "(No name)"]
-                  s/email [[s/email-subject] "(No subject)"]
-                  s/organization [[s/s-name] [s/email-addr] "(No name)"]
-                  s/location [[s/s-name] "(No name)"]
-                  s/building [[s/street-addr] "(No address)"]
-                  s/event [[s/s-name] "(No name)"]
-                  s/geocode ["Coordinate pair"]})
-
 (defn debug-js [x]
   (js/alert x) x)
-
-(defn event-name [event no-link?]
-  (let [subject (-> event (util/get-first [:link-to :email-mentions :subject])
-                    (util/get-first :subject))
-        from (-> event (util/get-first [:link-to :email-mentions :email-from :name])
-                 (util/get-first :name))]
-    [:span from " - "
-     (if no-link? subject
-         (util/node-link subject (:id event) s/event))]))
-
-(defn get-title [node]
-  (if (-> node :center-node s/type-label (= s/event))
-    (event-name (:center-node node) true)
-    (let [fields (-> node :center-node s/type-label title-field)]
-      (loop [f fields]
-        (cond (= 1 (count f)) (first f)
-              (util/get-first (:center-node node) (first f))
-              (util/get-first (:center-node node) (first f))
-              :else (recur (rest f)))))))
 
 (defn ids-if-coll [node-type m]
   (let [id-fn #(->> % (into []) (sort-by second >) (map first)
