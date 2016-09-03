@@ -123,6 +123,7 @@
             {:id id :limit 1}]
            [(str (vals-query attrs) " DELETE r")
             {:id id}]])
-         neo4j/cypher-combined-tx)))
+         neo4j/cypher-combined-tx)
+    (new-resp id (s/type-label fields))))
 
 
