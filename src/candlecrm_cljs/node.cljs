@@ -28,12 +28,14 @@
          (util/node-link subject (:id event) s/event))]))
 
 (defn get-title [node]
-  (let [fields (-> node :center-node s/type-label title-field)]
-    (loop [f fields]
-      (cond (= 1 (count f)) (first f)
-            (util/get-first (:center-node node) (first f))
-            (util/get-first (:center-node node) (first f))
-            :else (recur (rest fields))))))
+  (if (-> node :center-node s/type-label (= s/event))
+    (event-name (:center-node node) true)
+    (let [fields (-> node :center-node s/type-label title-field)]
+      (loop [f fields]
+        (cond (= 1 (count f)) (first f)
+              (util/get-first (:center-node node) (first f))
+              (util/get-first (:center-node node) (first f))
+              :else (recur (rest f)))))))
 
 (defn ids-if-coll [node-type m]
   (let [id-fn #(->> % (into []) (sort-by second >) (map first)
