@@ -122,9 +122,9 @@
    (assoc (rel-map s/building) :person-id person-id)])
 
 (defn normalize-cal [cal]
-  (-> (assoc cal :start (get-first cal s/event-begin))
-      (assoc :end (get-first cal s/event-end))
-      (dissoc s/event-begin s/event-end)
+  (-> (assoc cal :start (get-first cal [s/event-begin]))
+      (assoc :end (get-first cal [s/event-end]))
+      (dissoc [s/event-begin] [s/event-end])
       (assoc :title (str (:id cal)))))
 
 (defn update-cal-rows! [new-rows]

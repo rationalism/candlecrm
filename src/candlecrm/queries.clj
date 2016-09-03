@@ -203,18 +203,18 @@
              (neo4j/esc-token s/value) " RETURN DISTINCT e"
              " SKIP {start} LIMIT {limit}")
         (merge query-map {:present (to-ms (dt/now))})] 
-       neo4j/cypher-query (map #(into {} %)) (mapcat vals) 
+       neo4j/cypher-query (map #(into {} %)) (mapcat vals)
        (map #(node-by-id user {:id % :type s/event}))))
 
 (defn event-related [user query-map]
   (->> [(str (rel-query user)
              (neo4j/prop-label user s/event)
              ") WHERE ID(root) = {`person-id`}"
-             " WITH ev as root, 0 as o"
-             " SKIP {start} LIMIT {limit}"
-             (vals-collect))
+             " WITH ev as root SKIP {start} LIMIT {limit}"
+             " MATCH (root) RETURN DISTINCT ID(root)")
         (update query-map :person-id #(Integer/parseInt %))]
-       neo4j/cypher-query (mapv mlrecon/mapify-params)))
+       neo4j/cypher-query (map #(into {} %)) (mapcat vals)
+       (map #(node-by-id user {:id % :type s/event}))))
 
 (def loc-paths [[s/street-addr] [s/located-in s/s-name] [s/located-in s/zipcode]
                 [s/has-coord s/lat] [s/has-coord s/lng]])
