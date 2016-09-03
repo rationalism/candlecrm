@@ -39,6 +39,7 @@
   (state/update! [:edit-entity] (partial filter-keys type))
   (state/update! [:edit-entity] devector-keys)
   (state/update! [:edit-entity] (partial add-keys type))
+  (state/set! [:edit-entity-msg] nil)
   (state/set! [:tabid] 8))
 
 (defn delete-entity-switch []
