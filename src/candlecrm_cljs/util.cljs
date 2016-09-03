@@ -92,8 +92,9 @@
          (interleave coll))))
 
 (defn format-date [date]
-  (.format (js/moment. date)
-           "dddd, MMM Do, h:mm a"))
+  (if (and (string? date) (empty? date)) ""
+      (.format (js/moment. date)
+               "dddd, MMM Do, h:mm a")))
 
 (defn date-display [item]
   [:span (format-date

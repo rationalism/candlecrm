@@ -33,12 +33,21 @@
   (let [edit-attrs (util/new-attrs node-type)]
     (reduce add-key m edit-attrs)))
 
+(defn date-format-map [m k]
+  (->> m (into []) (mapv #(update % 1 util/format-date))
+       (into {})))
+
+(defn translate-dates [m]
+  (reduce #(update %1 %2 date-format-map) m
+          (filter #(some #{%} s/date-times) (keys m))))
+
 (defn edit-entity-switch [type]
   (state/set! [:edit-entity] (state/look :current-node :center-node))
   (state/update! [:edit-entity] (partial ids-if-coll type))
   (state/update! [:edit-entity] (partial filter-keys type))
   (state/update! [:edit-entity] devector-keys)
   (state/update! [:edit-entity] (partial add-keys type))
+  (state/update! [:edit-entity] translate-dates)
   (state/set! [:edit-entity-msg] nil)
   (state/set! [:tabid] 8))
 
