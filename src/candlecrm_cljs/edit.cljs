@@ -81,9 +81,9 @@
      [:input {:type "text" :name (str attr (first id-attr))
               :on-change (apply set-field! params)
               :class "edit-field" :value (apply state/look params)}])
-   (let [attr (second (second id-attr))]
+   (let [attr (second id-attr)]
      (when (= 0 (first id-attr))
-       [:a {:on-click #(-> cache (concat [attr])
+       [:a {:on-click #(-> cache (concat [(second attr)])
                            (concat [(count-cells attr cache)])
                            (state/set! "")) :href "#"
             :class "pure-button pure-button-primary button-round"}
