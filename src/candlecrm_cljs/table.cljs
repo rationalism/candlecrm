@@ -5,9 +5,9 @@
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.util :as util]))
 
-(def entity-attrs
-  {s/person [s/s-name s/email-addr s/phone-num
-             s/website]})
+(def person-attrs
+  {s/s-name "Name" s/email-addr "Email address"
+   s/phone-num "Phone number" s/website "Website"})
 
 (def email-attrs {s/email-sent "Date"
                   s/email-subject "Subject"})
@@ -30,9 +30,9 @@
      (util/get-first person attr))])
 
 (defn person-row [person]
-  [:tr (for [attr (util/add-ids (s/person entity-attrs))]
+  [:tr (for [attr (util/add-ids person-attrs)]
          ^{:key (first attr)}
-         [person-cell person (second attr)])])
+         [person-cell person (first (second attr))])])
 
 (defn people-table []
   [:div
@@ -43,10 +43,10 @@
    [:table {:id "people-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "people-header"}
      [:tr
-      (for [attr (util/add-ids (s/person entity-attrs))]
+      (for [attr (util/add-ids person-attrs)]
         ^{:key (first attr)}
-        [:td {:class (name (second attr))}
-         (get s/attr-names (second attr))])]]
+        [:td {:class (name (first (second attr)))}
+         (second (second attr))])]]
     [:tbody {:id "people-rows"}
      (for [p-row (-> :people-rows state/look util/add-ids)]
        ^{:key (first p-row)}

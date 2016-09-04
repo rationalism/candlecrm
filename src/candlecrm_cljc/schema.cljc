@@ -183,25 +183,6 @@
    geocode [["Latitude" lat] ["Longitude" lng]
             ["Buildings at this location" has-coord street-addr :id]]})
 
-(def attr-names {s-name "Name" amount "Amount"
-                 email-addr "Email address" email-subject "Subject"
-                 email-to "Email to" email-from "Email from"
-                 email-reply "Reply to" email-body "Email body"
-                 date-time "Time" email-received "Email received"
-                 email-sent "Email sent" phone-num "Phone number"
-                 birthday "Birthday" gender "Gender"
-                 occupation "Occupation" mail-address "Mailing address of"
-                 website "Website" org-member "Member of"
-                 url "Page address" start-time "Begins at"
-                 stop-time "Ends at" street-addr "Street address"
-                 event-begin "Event begins at" event-end "Event ends at"
-                 event-features "Event with" email-mentions "Related emails"
-                 event-org "Events here by" located-in "Located in"
-                 has-coord "Coordinates" lat "Latitude" lng "Longitude"
-                 geocode "Coordinates" location "Lives in"
-                 loc-inside "Inside of" body-nlp "Email body"
-                 event-context "Event context"})
-
 (def schema-map {"PERSON" person-name "LOCATION" loc-name
                  "ORGANIZATION" org-name "MONEY" amount
                  "DATETIME" date-time "EMAIL" email-addr
