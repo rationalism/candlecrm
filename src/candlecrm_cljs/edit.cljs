@@ -7,6 +7,9 @@
              [get-first node-link set-field! new-attrs
               add-ids get-title format-date]]))
 
+(defn debug-js [x]
+  (js/alert x) x)
+
 (defn ids-if-coll [node-type m]
   (let [id-fn #(->> % (into []) (sort-by second >) (map first)
                     add-ids (map vec) vec (into {}))]
@@ -15,8 +18,8 @@
                          (set (keys m)))))))
 
 (defn filter-keys [node-type m]
-  (->> m keys (filter coll?)
-       (remove #(some #{%} (map rest (node-type s/node-paths))))
+  (->> m keys (filter coll?) 
+       (remove #(some #{%} (new-attrs node-type)))
        (apply dissoc m)))
 
 (defn devector-keys [m]
@@ -73,8 +76,8 @@
   [:div {:class "pure-control-group"}
    [:label
     (if (= 0 (first id-attr))
-      ((second id-attr) s/attr-names) "")]
-   (let [attr (second id-attr)
+      ((first (second id-attr)) s/attr-names) "")]
+   (let [attr (first (second id-attr))
          params (->> id-attr first vector (concat [attr])
                      (concat cache))]
      [:input {:type "text" :name (str attr (first id-attr))

@@ -57,9 +57,6 @@
    [people-ranks s/building] [:br]
    [map/map-box]])
 
-(defn filter-display [attrs]
-  (filter #(-> % key s/attr-names) attrs))
-
 (defn set-tab-fn [tab-num]
   (fn []
     (state/set! [:tabid] tab-num)
