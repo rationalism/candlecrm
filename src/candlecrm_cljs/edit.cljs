@@ -5,7 +5,7 @@
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.util :refer
              [get-first node-link set-field! new-attrs
-              add-ids get-title format-date]]))
+              add-ids get-title simple-name format-date]]))
 
 (defn debug-js [x]
   (js/alert x) x)
@@ -39,6 +39,19 @@
 (defn translate-dates [m]
   (->> m keys (filter is-date-path?) 
        (reduce #(update %1 %2 date-format-map) m)))
+
+(defn vectorize-key [k]
+  (cond (some #{k} [:id :label]) k
+        (coll? k) k :else (vector k)))
+
+(defn vectorize-keys [m]
+  (->> m (into []) (map #(update % 0 vectorize-key)) (mapv vec) (into {})))
+
+(defn edit-name-map [m]
+  (->> m keys (map #(select-keys % [:id :label]))
+       (zipmap (->> m keys (map vectorize-keys)
+                    (map #(hash-map :center-node %))
+                    (map simple-name)))))
 
 (defn edit-entity-switch [type]
   (state/set! [:edit-entity] (state/look :current-node :center-node))

@@ -32,15 +32,18 @@
      (if no-link? subject
          (node-link subject (:id event) s/event))]))
 
+(defn simple-name [node]
+  (let [fields (-> node :center-node s/type-label title-field)]
+    (loop [f fields]
+      (cond (= 0 (count f)) "" (= 1 (count f)) (first f)
+            (get-first (:center-node node) (first f))
+            (get-first (:center-node node) (first f))
+            :else (recur (rest f))))))
+
 (defn get-title [node]
   (if (-> node :center-node s/type-label (= s/event))
     (event-name (:center-node node) true)
-    (let [fields (-> node :center-node s/type-label title-field)]
-      (loop [f fields]
-        (cond (= 0 (count f)) "" (= 1 (count f)) (first f)
-              (get-first (:center-node node) (first f))
-              (get-first (:center-node node) (first f))
-              :else (recur (rest f)))))))
+    (simple-name node)))
 
 (defn new-attrs [node-type]
   (->> node-type s/node-paths (filter #(<= 2 (count %)))
