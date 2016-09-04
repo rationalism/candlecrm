@@ -44,7 +44,8 @@
 
 (defn new-attrs [node-type]
   (->> node-type s/node-paths (filter #(<= 2 (count %)))
-       (filter #(>= 4 (count %))) (mapv rest)))
+       (filter #(>= 4 (count %))) (mapv rest)
+       (mapv #(if (> (count %) 2) (drop-last %) %))))
 
 (defn new-entity-switch [node-type]
   (let [type-attrs (new-attrs node-type)]

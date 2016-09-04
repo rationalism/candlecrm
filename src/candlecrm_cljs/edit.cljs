@@ -69,21 +69,21 @@
      (node-link "Go to page" (:id resp) (s/type-label resp))]))
 
 (defn count-cells [attr cache]
-  (->> attr vector (concat cache) (apply state/look)
+  (->> attr second vector (concat cache) (apply state/look)
        keys count))
 
 (defn input-cell [id-attr cache]
   [:div {:class "pure-control-group"}
    [:label
     (if (= 0 (first id-attr))
-      ((first (second id-attr)) s/attr-names) "")]
-   (let [attr (first (second id-attr))
+      (first (second id-attr)) "")]
+   (let [attr (second (second id-attr))
          params (->> id-attr first vector (concat [attr])
                      (concat cache))]
      [:input {:type "text" :name (str attr (first id-attr))
               :on-change (apply set-field! params)
               :value (apply state/look params)}])
-   (let [attr (second id-attr)]
+   (let [attr (second (second id-attr))]
      (when (= 0 (first id-attr))
        [:a.new-link {:href "#"
                      :on-click #(-> cache (concat [attr])
@@ -114,19 +114,27 @@
       "Submit"]]]
    msg])
 
+(defn path-names [node-type attrs]
+  (let [name-map (->> node-type s/node-paths
+                      (map #(if (= (last %) :id) (drop-last %) %))
+                      (map #(hash-map (rest %) (first %))) (apply merge))]
+    (map (juxt name-map identity) attrs)))
+
 (defn edit-form []
-  [entity-form
-   (str "Edit " (-> :current-node (state/look :type) name)
-        " named " (state/look :current-node :center-node s/s-name 0))
-   (->> :type (state/look :current-node) new-attrs add-ids)
-   [:edit-entity] #(u/edit-entity!)
-   (when (state/look :edit-entity-msg)
-     [edit-message])])
+  (let [node-type (state/look :current-node :type)]
+    [entity-form
+     (str "Edit " (name node-type)
+          " named " (get-title (state/look :edit-entity)))
+     (->> node-type new-attrs (path-names node-type) add-ids)
+     [:edit-entity] #(u/edit-entity!)
+     (when (state/look :edit-entity-msg)
+       [edit-message])]))
 
 (defn add-form []
-  [entity-form (str "Add new " (name (state/look :input-meta :type)))
-   (add-ids (state/look :input-meta :attr-list))
-   [:new-entity]
-   (submit-new-entity (state/look :input-meta :type))
-   (when (state/look :new-entity-msg)
-     [add-message])])
+  (let [node-type (state/look :input-meta :type)]
+    [entity-form (str "Add new " (name node-type))
+     (->> :attr-list (state/look :input-meta)
+          (path-names node-type) add-ids)
+     [:new-entity] (submit-new-entity node-type)
+     (when (state/look :new-entity-msg)
+       [add-message])]))
