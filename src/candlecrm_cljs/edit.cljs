@@ -48,10 +48,17 @@
   (->> m (into []) (map #(update % 0 vectorize-key)) (mapv vec) (into {})))
 
 (defn edit-name-map [m]
-  (->> m keys (map #(select-keys % [:id :label]))
-       (zipmap (->> m keys (map vectorize-keys)
-                    (map #(hash-map :center-node %))
-                    (map simple-name)))))
+  (if (number? (ffirst m)) nil
+      (->> m keys (map #(select-keys % [:id :label]))
+           (zipmap (->> m keys (map vectorize-keys)
+                        (map #(hash-map :center-node %))
+                        (map simple-name))))))
+
+(defn map-node-link [l]
+  (when-let [new-map (edit-name-map (state/look :edit-entity l))]
+    (->> new-map keys add-ids (mapv vec) (into {})
+         (state/set! [:edit-entity l]))
+    (state/set! [:edit-node-map l] new-map)))
 
 (defn edit-entity-switch [type]
   (state/set! [:edit-entity] (state/look :current-node :center-node))
@@ -59,6 +66,9 @@
   (state/update! [:edit-entity] (partial filter-keys type))
   (state/update! [:edit-entity] (partial add-keys type))
   (state/update! [:edit-entity] translate-dates)
+  (let [link-keys (->> :edit-entity state/look keys (filter coll?)
+                       (filter #(= 2 (count %))))]
+    (doseq [l link-keys] (map-node-link l)))
   (state/set! [:edit-entity-msg] nil)
   (state/set! [:tabid] 8))
 
