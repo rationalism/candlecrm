@@ -1,6 +1,7 @@
 (ns candlecrm_cljs.node
   (:require [clojure.string :as str]
             [candlecrm_cljc.schema :as s]
+            [candlecrm_cljs.edit :as edit]
             [candlecrm_cljs.regex :as regex]
             [candlecrm_cljs.state :as state]
             [candlecrm_cljs.table :as table]
@@ -9,47 +10,6 @@
 
 (defn debug-js [x]
   (js/alert x) x)
-
-(defn ids-if-coll [node-type m]
-  (let [id-fn #(->> % (into []) (sort-by second >) (map first)
-                    util/add-ids (map vec) vec (into {}))]
-    (reduce #(update %1 %2 id-fn)
-            m (vec (keep (set (map rest (node-type s/node-paths)))
-                         (set (keys m)))))))
-
-(defn filter-keys [node-type m]
-  (->> m keys (filter coll?)
-       (remove #(some #{%} (map rest (node-type s/node-paths))))
-       (apply dissoc m)))
-
-(defn devector-keys [m]
-  (->> m (into []) (map (fn [p] (update p 0 #(if (coll? %) (first %) %))))
-       (into {})))
-
-(defn add-key [m k]
-  (if (contains? m k) m (assoc m k {0 ""})))
-
-(defn add-keys [node-type m]
-  (let [edit-attrs (util/new-attrs node-type)]
-    (reduce add-key m edit-attrs)))
-
-(defn date-format-map [m k]
-  (->> m (into []) (mapv #(update % 1 util/format-date))
-       (into {})))
-
-(defn translate-dates [m]
-  (reduce #(update %1 %2 date-format-map) m
-          (filter #(some #{%} s/date-times) (keys m))))
-
-(defn edit-entity-switch [type]
-  (state/set! [:edit-entity] (state/look :current-node :center-node))
-  (state/update! [:edit-entity] (partial ids-if-coll type))
-  (state/update! [:edit-entity] (partial filter-keys type))
-  (state/update! [:edit-entity] devector-keys)
-  (state/update! [:edit-entity] (partial add-keys type))
-  (state/update! [:edit-entity] translate-dates)
-  (state/set! [:edit-entity-msg] nil)
-  (state/set! [:tabid] 8))
 
 (defn delete-entity-switch []
   (u/delete-entity!)
@@ -237,7 +197,7 @@
     [:span node-name (str " (" (-> item s/type-label type-name) ") ")]
     (when aux?
       [:span
-       [:a {:href "#" :on-click #(edit-entity-switch (s/type-label item))
+       [:a {:href "#" :on-click #(edit/edit-entity-switch (s/type-label item))
             :class "pure-button pure-button-primary button-round"}
         "Edit"] " "
        [:a {:href "#" :on-click delete-entity-switch

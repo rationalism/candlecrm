@@ -27,6 +27,7 @@
     :new-entity-msg nil
     :edit-entity {}
     :edit-entity-msg nil
+    :edit-node-map {}
     :search ""
     :search-results nil
     :delete-account {}
