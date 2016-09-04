@@ -22,10 +22,6 @@
        (remove #(some #{%} (new-attrs node-type)))
        (apply dissoc m)))
 
-(defn devector-keys [m]
-  (->> m (into []) (map (fn [p] (update p 0 #(if (coll? %) (first %) %))))
-       (into {})))
-
 (defn add-key [m k]
   (if (contains? m k) m (assoc m k {0 ""})))
 
@@ -37,15 +33,17 @@
   (->> m (into []) (mapv #(update % 1 format-date))
        (into {})))
 
+(defn is-date-path? [p]
+  (and (coll? p) (some #{(last p)} s/date-times)))
+
 (defn translate-dates [m]
-  (reduce #(update %1 %2 date-format-map) m
-          (filter #(some #{%} s/date-times) (keys m))))
+  (->> m keys (filter is-date-path?) 
+       (reduce #(update %1 %2 date-format-map) m)))
 
 (defn edit-entity-switch [type]
   (state/set! [:edit-entity] (state/look :current-node :center-node))
   (state/update! [:edit-entity] (partial ids-if-coll type))
   (state/update! [:edit-entity] (partial filter-keys type))
-  (state/update! [:edit-entity] devector-keys)
   (state/update! [:edit-entity] (partial add-keys type))
   (state/update! [:edit-entity] translate-dates)
   (state/set! [:edit-entity-msg] nil)
@@ -123,8 +121,8 @@
 (defn edit-form []
   (let [node-type (state/look :current-node :type)]
     [entity-form
-     (str "Edit " (name node-type)
-          " named " (get-title (state/look :edit-entity)))
+     [:span "Edit " (name node-type)
+      " named " (get-title (state/look :current-node))]
      (->> node-type new-attrs (path-names node-type) add-ids)
      [:edit-entity] #(u/edit-entity!)
      (when (state/look :edit-entity-msg)
