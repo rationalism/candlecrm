@@ -80,14 +80,14 @@
                      (concat cache))]
      [:input {:type "text" :name (str attr (first id-attr))
               :on-change (apply set-field! params)
-              :value (apply state/look params)}])
+              :class "edit-field" :value (apply state/look params)}])
    (let [attr (second (second id-attr))]
      (when (= 0 (first id-attr))
-       [:a.new-link {:href "#"
-                     :on-click #(-> cache (concat [attr])
-                                    (concat [(count-cells attr cache)])
-                                    (state/set! ""))}
-        "Add new"]))])
+       [:a {:on-click #(-> cache (concat [attr])
+                           (concat [(count-cells attr cache)])
+                           (state/set! "")) :href "#"
+            :class "pure-button pure-button-primary button-round"}
+        [:i {:class "fa fa-plus"}]]))])
 
 (defn count-attr-cells [attr cache]
   (-> (count-cells attr cache) (repeat attr) add-ids))

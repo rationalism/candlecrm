@@ -179,3 +179,7 @@ form.pure-form select {
 .new-button {
     font-weight: bold;
 }
+
+input.edit-field {
+    margin-right: 1em;
+}
