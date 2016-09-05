@@ -103,7 +103,6 @@
 (defn signup-form [flash]
   [:div {:class "row"}
    [:div
-    [:span flash]
     [:div.row
      [:form {:method "POST" :action "create-account"
              :class "pure-form pure-form-aligned" :id "signupForm" :novalidate ""}
