@@ -63,7 +63,7 @@
 (def reply-map {:edit/add-entity {:fn insert/new-entity!
                                   :keys [:fields]}
                 :edit/edit-entity {:fn insert/edit-entity!
-                                   :keys [:fields]}
+                                   :keys [:fields :add-links :delete-links]}
                 :pages/fetch-people {:fn queries/person-from-user
                                      :keys [:start :limit]}
                 :pages/fetch-agenda {:fn queries/event-agenda

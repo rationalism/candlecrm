@@ -115,11 +115,15 @@
                           [[k (decode-date v)]] [[k v]])))
        (mapv vec) (map #(into {} %)) (apply merge)))
 
+(defn new-links [id [k v]]
+  (map #(vector {:id id} {(second k) %} (first k)) v))
+
 (defn edit-entity! [user {:keys [fields add-links delete-links]}]
   (let [attrs (->> (dissoc fields :id :type :label) keys
                    (map neo4j/esc-token) (str/join "|"))
         id (:id fields)]
-    (println add-links)
+    (->> add-links (into []) (mapcat #(new-links id %))
+         (loom/build-graph []) (#(push-graph! % user s/edit-src)))
     (->> (-> fields (dissoc :id :type :label) 
              (fmap vals) decode-dates (hash-map id) first
              (id-pair-cypher user s/edit-src))
