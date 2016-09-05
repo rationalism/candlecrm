@@ -178,6 +178,12 @@
   [:edit/add-entity
    {:fields (-> :new-entity state/look strip-ids)}])
 
+(defn links-to-delete [names name-map]
+  (->> name-map keys (remove #(some #{%} (vals names))) (map name-map)))
+
+(defn links-to-add [names name-map]
+  (->> names vals (remove empty?) (remove #(contains? name-map %))))
+
 (defn edit-req []
   [:edit/edit-entity
    {:fields (state/look :edit-entity)}])
