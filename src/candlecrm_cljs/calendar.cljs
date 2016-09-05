@@ -86,7 +86,7 @@
      (count (state/look :agenda-events)) :agenda]]
    (let [events (agenda-events)]
      (if (empty? events)
-       [:h2 "No events loaded yet."]
+       [:h2 "Loading events. Hang on, this might take a few seconds."]
        (for [event (add-ids events)]
          ^{:key (first event)}
          [display-agenda (second event)])))
