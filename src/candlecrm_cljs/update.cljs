@@ -184,6 +184,12 @@
 (defn links-to-add [names name-map]
   (->> names vals (remove empty?) (remove #(contains? name-map %))))
 
+(defn devectorize-edit []
+  (->> :edit-entity state/look (into [])
+       (remove #(and (coll? (first %)) (> (count (first %)) 1)))
+       (map (fn [[k v]] [(if (coll? k) (first k) k) v]))
+       (mapv vec) (into {})))
+
 (defn edit-req []
   [:edit/edit-entity
    {:fields (state/look :edit-entity)}])
