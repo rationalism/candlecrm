@@ -104,7 +104,7 @@
        " AND v." (neo4j/esc-token s/value)
        " IS NOT NULL"))
 
-(defn edit-entity! [user {:keys [fields]}]
+(defn edit-entity! [user {:keys [fields add-links delete-links]}]
   (let [attrs (->> (dissoc fields :id :type :label) keys
                    (map neo4j/esc-token) (str/join "|"))
         id (:id fields)]

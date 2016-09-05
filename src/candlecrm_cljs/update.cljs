@@ -178,13 +178,23 @@
   [:edit/add-entity
    {:fields (-> :new-entity state/look strip-ids)}])
 
-(defn links-to-delete [names name-map]
+(defn find-delete-links [names name-map]
   (->> name-map keys (remove #(some #{%} (vals names))) (map name-map)))
 
-(defn links-to-add [names name-map]
+(defn find-add-links [names name-map]
   (->> names vals (remove empty?) (remove #(contains? name-map %))))
 
-(defn devectorize-edit []
+(defn link-keys []
+  (->> :edit-entity state/look keys (filter coll?)
+       (filter #(= 2 (count %)))))
+
+(defn find-links [link-fn]
+  (->> (map #(link-fn (state/look :edit-entity %)
+                      (state/look :edit-node-map %))
+            (link-keys)) 
+       (zipmap (link-keys))))
+
+(defn devectorized-edit []
   (->> :edit-entity state/look (into [])
        (remove #(and (coll? (first %)) (> (count (first %)) 1)))
        (map (fn [[k v]] [(if (coll? k) (first k) k) v]))
@@ -192,7 +202,9 @@
 
 (defn edit-req []
   [:edit/edit-entity
-   {:fields (state/look :edit-entity)}])
+   {:fields (devectorized-edit)
+    :add-links (find-links find-add-links)
+    :delete-links (find-links find-delete-links)}])
 
 (defn new-entity-confirm! [resp]
   (state/set! [:new-entity] {})
