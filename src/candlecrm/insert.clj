@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [clojure-csv.core :as csv]
             [candlecrm.common :refer :all]
+            [candlecrm.datetime :as dt]
             [candlecrm.loom :as loom]
             [candlecrm.neo4j :as neo4j]
             [candlecrm_cljc.schema :as s]
@@ -104,12 +105,22 @@
        " AND v." (neo4j/esc-token s/value)
        " IS NOT NULL"))
 
+(defn decode-date [coll]
+  (->> coll (remove empty?)
+       (map #(ffirst (dt/unix-dates % (dt/now))))))
+
+(defn decode-dates [m]
+  (->> m (into [])
+       (map (fn [[k v]] (if (some #{k} s/date-times)
+                          [[k (decode-date v)]] [[k v]])))
+       (mapv vec) (map #(into {} %)) (apply merge)))
+
 (defn edit-entity! [user {:keys [fields add-links delete-links]}]
   (let [attrs (->> (dissoc fields :id :type :label) keys
                    (map neo4j/esc-token) (str/join "|"))
         id (:id fields)]
-    (->> (-> fields (dissoc :id :type :label)
-             (fmap vals) (hash-map id) first
+    (->> (-> fields (dissoc :id :type :label) 
+             (fmap vals) decode-dates (hash-map id) first
              (id-pair-cypher user s/edit-src))
          (concat
           [[(str "MATCH (root) WHERE ID(root) = {id}"
