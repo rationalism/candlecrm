@@ -119,6 +119,7 @@
   (let [attrs (->> (dissoc fields :id :type :label) keys
                    (map neo4j/esc-token) (str/join "|"))
         id (:id fields)]
+    (println add-links)
     (->> (-> fields (dissoc :id :type :label) 
              (fmap vals) decode-dates (hash-map id) first
              (id-pair-cypher user s/edit-src))
