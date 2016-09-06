@@ -131,6 +131,11 @@
   (map #(vector {:id id} {(second k) % s/type-label (link-type (first k))}
                 (first k)) v))
 
+(defn drop-link-query [id1 id2 link]
+  (str "MATCH (r1)-[l:" (neo4j/esc-token link)
+       "]-(r2) WHERE ID(r1) = {id1}"
+       " AND ID(r2) = {id2} DELETE l"))
+
 (defn edit-entity! [user {:keys [fields add-links delete-links]}]
   (let [attrs (->> (dissoc fields :id :type :label) keys
                    (map neo4j/esc-token) (str/join "|"))
