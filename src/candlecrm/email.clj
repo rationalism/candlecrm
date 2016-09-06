@@ -298,4 +298,7 @@
 
 (defn edit-notes! [user {:keys [node notes]}]
   (neo4j/cypher-query (delete-notes-query user (:id node)))
+  (-> {s/notes notes} (hash-map (:id node))
+      (insert/id-pair-cypher user s/edit-src)
+      neo4j/cypher-combined-tx)
   node)
