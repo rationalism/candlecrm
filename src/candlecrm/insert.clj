@@ -124,6 +124,7 @@
         id (:id fields)]
     (->> add-links (into []) (mapcat #(new-links id %))
          (loom/build-graph []) (#(push-graph! % user s/edit-src)))
+    (println delete-links)
     (->> (-> fields (dissoc :id :type :label) 
              (fmap vals) decode-dates (hash-map id) first
              (id-pair-cypher user s/edit-src))

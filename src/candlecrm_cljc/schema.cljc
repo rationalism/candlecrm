@@ -48,6 +48,7 @@
 (def lng :lng)
 (def has-coord :has-coord)
 (def geocode :geocode)
+(def coord-pair :coord-pair)
 (def street-addr :street-addr)
 (def zipcode :zipcode)
 (def building :building)
@@ -207,7 +208,7 @@
                    "PersonAddr" mail-address "OrgAddr" mail-address
                    "PersonPhone" phone-num "OrgPhone" phone-num
                    "PersonWebsite" website "OrgWebsite" website
-                   "EventFrequency" frequency})
+                   "EventFrequency" frequency "HasCoord" has-coord})
 
 (def is-attr [start-time stop-time duration event-type frequency
               event-cost website event-time phone-num age
@@ -216,7 +217,8 @@
 (def entity-map {person-name person org-name organization
                  email-addr person phone-num person
                  loc-name location date-time event
-                 street-addr building zipcode location})
+                 street-addr building zipcode location
+                 coord-pair geocode})
 
 (def label-correct {person-name s-name org-name s-name
                     loc-name s-name email-addr email-addr
@@ -257,7 +259,8 @@
                      [email-addr webpage] ["PersonWebsite" "OrgWebsite"]
                      [email-addr duration] ["PersonAge" "OrgAge"]
                      [person-name duration] ["PersonAge"]
-                     [org-name duration] ["OrgAge"]})
+                     [org-name duration] ["OrgAge"]
+                     [street-addr coord-pair] ["HasCoord"]})
 
 (def email-links [email-to email-cc email-bcc
                   email-reply email-replyto email-mentions])
