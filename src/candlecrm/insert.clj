@@ -95,9 +95,19 @@
 (defn new-resp [id type]
   {:id id s/type-label type})
 
+(defn decode-date [coll]
+  (->> coll (remove empty?)
+       (map #(ffirst (dt/unix-dates % (dt/now))))))
+
+(defn decode-dates [m]
+  (->> m (into [])
+       (map (fn [[k v]] (if (some #{k} s/date-times)
+                          [[k (decode-date v)]] [[k v]])))
+       (mapv vec) (map #(into {} %)) (apply merge)))
+
 (defn new-entity! [user {:keys [fields]}]
-  (-> fields vector (push-entities! user s/edit-src) first
-      (new-resp (s/type-label fields))))
+  (-> fields decode-dates vector (push-entities! user s/edit-src)
+      first (new-resp (s/type-label fields))))
 
 (defn vals-query [attrs]
   (str "MATCH (root)-[r:" attrs
@@ -116,16 +126,6 @@
 
 (defn link-type [link]
   (->> link relation-string relation-type s/entity-map))
-
-(defn decode-date [coll]
-  (->> coll (remove empty?)
-       (map #(ffirst (dt/unix-dates % (dt/now))))))
-
-(defn decode-dates [m]
-  (->> m (into [])
-       (map (fn [[k v]] (if (some #{k} s/date-times)
-                          [[k (decode-date v)]] [[k v]])))
-       (mapv vec) (map #(into {} %)) (apply merge)))
 
 (defn new-links [id [k v]]
   (map #(vector {:id id} {(second k) % s/type-label (link-type (first k))}
