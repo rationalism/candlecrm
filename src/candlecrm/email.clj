@@ -307,7 +307,11 @@
     {:id id}]])
 
 (defn edit-notes! [user {:keys [node notes]}]
-  (let [models (nlp-models-fn)]
+  (let [models (nlp-models-fn)
+        author (->> user auth/get-user-person .id (hash-map :id)
+                    (merge {:type s/person}) (queries/node-by-id user)
+                    (#(get % [s/s-name])) (into []) (sort-by second >)
+                    ffirst)]
     (neo4j/cypher-combined-tx (delete-notes-query user (:id node)))
     (-> {s/notes notes} (hash-map (:id node)) first
         (insert/id-pair-cypher user s/edit-src)
