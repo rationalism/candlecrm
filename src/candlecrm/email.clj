@@ -290,5 +290,12 @@
        async/create-pool!
        (reset! nlp-channel)))
 
+(defn delete-notes-query [user id]
+  [(str "MATCH (root)-[r:" (neo4j/esc-token s/notes)
+        "]->(n:" (neo4j/prop-label user s/notes)
+        " WHERE ID(root) = {id} DETACH DELETE n")
+   {:id id}])
+
 (defn edit-notes! [user {:keys [node notes]}]
+  (neo4j/cypher-query (delete-notes-query user (:id node)))
   node)
