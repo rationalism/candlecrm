@@ -141,7 +141,7 @@
         " AND ID(r2) = {id2} DELETE l")
    {:id1 id1 :id2 id2}])
 
-(defn unwind-links [[l1 l2] ids]
+(defn unwind-links [[[l1 l2] ids]]
   (->> ids (map :id) (map #(vector % l1))))
 
 (defn edit-entity! [user {:keys [fields add-links delete-links]}]
