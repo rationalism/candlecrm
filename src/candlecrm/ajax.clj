@@ -61,7 +61,7 @@
   {:umatched-event-as-echoed-from-from-server event})
 
 (def reply-map {:edit/add-entity {:fn insert/new-entity!
-                                  :keys [:fields]}
+                                  :keys [:fields :add-links]}
                 :edit/edit-entity {:fn insert/edit-entity!
                                    :keys [:fields :add-links :delete-links]}
                 :pages/fetch-people {:fn queries/person-from-user

@@ -105,7 +105,7 @@
                           [[k (decode-date v)]] [[k v]])))
        (mapv vec) (map #(into {} %)) (apply merge)))
 
-(defn new-entity! [user {:keys [fields]}]
+(defn new-entity! [user {:keys [fields add-links]}]
   (-> fields decode-dates vector (push-entities! user s/edit-src)
       first (new-resp (s/type-label fields))))
 

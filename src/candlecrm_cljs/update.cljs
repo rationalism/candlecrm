@@ -174,9 +174,11 @@
   (reduce #(update %1 %2 vals)
           m (remove #(= % s/type-label) (keys m))))
 
-(defn add-req []
-  [:edit/add-entity
-   {:fields (-> :new-entity state/look strip-ids)}])
+(defn devectorize [m]
+  (->> m (into [])
+       (remove #(and (coll? (first %)) (> (count (first %)) 1)))
+       (map (fn [[k v]] [(if (coll? k) (first k) k) v]))
+       (mapv vec) (into {})))
 
 (defn find-delete-links [names name-map]
   (->> name-map keys (remove #(some #{%} (vals names))) (map name-map)))
@@ -184,25 +186,30 @@
 (defn find-add-links [names name-map]
   (->> names vals (remove empty?) (remove #(contains? name-map %))))
 
-(defn link-keys []
-  (->> :edit-entity state/look keys (filter coll?)
+(defn link-keys [cache]
+  (->> cache state/look keys (filter coll?)
        (filter #(= 2 (count %)))))
+
+(defn find-new-links []
+  (->> (map #(find-add-links
+              (state/look :new-entity %) {})
+            (link-keys :new-entity)) 
+       (zipmap (link-keys :new-entity))))
+
+(defn add-req []
+  [:edit/add-entity
+   {:fields (-> :new-entity state/look devectorize strip-ids)
+    :add-links (find-new-links)}])
 
 (defn find-links [link-fn]
   (->> (map #(link-fn (state/look :edit-entity %)
                       (state/look :edit-node-map %))
-            (link-keys)) 
-       (zipmap (link-keys))))
-
-(defn devectorized-edit []
-  (->> :edit-entity state/look (into [])
-       (remove #(and (coll? (first %)) (> (count (first %)) 1)))
-       (map (fn [[k v]] [(if (coll? k) (first k) k) v]))
-       (mapv vec) (into {})))
+            (link-keys :edit-entity)) 
+       (zipmap (link-keys :edit-entity))))
 
 (defn edit-req []
   [:edit/edit-entity
-   {:fields (devectorized-edit)
+   {:fields (-> :edit-entity state/look devectorize)
     :add-links (find-links find-add-links)
     :delete-links (find-links find-delete-links)}])
 
