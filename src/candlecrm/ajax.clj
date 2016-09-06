@@ -80,6 +80,8 @@
                                       :keys [:person-id :start :limit]}
                 :update/delete-account {:fn quartz/delete-req!
                                         :keys [:confirmed]}
+                :update/refresh-email {:fn quartz/refresh-request!
+                                       :keys []}
                 :update/user-data {:fn queries/user-data-public
                                    :keys []}
                 :update/key-link {:fn queries/key-link

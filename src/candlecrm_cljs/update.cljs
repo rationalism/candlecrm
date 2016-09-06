@@ -37,6 +37,12 @@
 (defn update-agenda! []
   (send! (agenda-req) set-agenda!))
 
+(defn refresh-req []
+  [:update/refresh-email])
+
+(defn refresh-email! []
+  (send! (refresh-req) identity))
+
 (defn prev-fetch! [counter update-fn]
   (fn []
     (when (pos? (state/look :counters counter))

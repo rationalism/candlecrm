@@ -68,6 +68,11 @@
          (-> folder imap/last-uid str)]
         str/join neo4j/cypher-query)))
 
+(defn refresh-request! [user _]
+  (future (do (Thread/sleep 100)
+              (refresh-queue! user)))
+  :received)
+
 (defn run-insertion! [queue user]
   (throw-info! "inserting emails")
   (imap/insert-raw-range!

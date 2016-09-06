@@ -70,7 +70,7 @@
          [email-cell email (second attr)])])
 
 (defn refresh-email []
-  [:a {:href "#" :on-click #(js/alert "Refreshing email") :id "email-refresh"
+  [:a {:href "#" :on-click #(u/refresh-email!) :id "email-refresh"
        :class "pure-button pure-button-primary button-round new-button"}
    [:i {:class "fa fa-refresh"}]
    (str " Refresh email ")])
