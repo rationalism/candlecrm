@@ -311,9 +311,13 @@
         author (->> user auth/get-user-person .id (hash-map :id)
                     (merge {:type s/person}) (queries/node-by-id user)
                     (#(get % [s/s-name])) (into []) (sort-by second >)
-                    ffirst)]
+                    ffirst)
+        message {:id (:id node) :label (:label node) s/notes notes}]
     (neo4j/cypher-combined-tx (delete-notes-query user (:id node)))
-    (-> {s/notes notes} (hash-map (:id node)) first
-        (insert/id-pair-cypher user s/edit-src)
-        neo4j/cypher-combined-tx)
+    (let [[graph linked-text]
+          (nlp/run-nlp-full models author (dt/now) [] notes)]
+      (when (-> graph loom/nodes empty? not)
+        (-> (append-hyperlinks graph message)
+            (link-message message linked-text s/notes-nlp)
+            remove-all-metadata (insert/push-graph! user s/nlp-src []))))
     node))
