@@ -10,6 +10,7 @@
 (def type-label :label)
 (def date-time :date-time)
 (def s-time :time)
+(def notes :notes)
 
 (def person :person)
 (def email-addr :email-addr)
@@ -147,7 +148,8 @@
            ["Member of these organizations" org-member s-name :id]
            ["Personal website" website] ["Lives in" location s-name :id]
            ["Home address" mail-address street-addr :id]
-           ["Mentioned in" link-to email-mentions email-subject :id]]
+           ["Mentioned in" link-to email-mentions email-subject :id]
+           ["Notes" notes]]
    email [["Subject" email-subject] ["Email sent" email-sent]
           ["Sent by" email-from email-addr :id]
           ["Sent to" email-to email-addr :id]
@@ -158,19 +160,22 @@
    organization [["Organization name" s-name] ["Email address" email-addr]
                  ["Phone number" phone-num] ["Organization website" website]
                  ["Members of this organization" org-member s-name :id]
-                 ["Mentioned in" link-to email-mentions email-subject :id]]
+                 ["Mentioned in" link-to email-mentions email-subject :id]
+                 ["Notes" notes]]
    location [["Location name" s-name] ["Assocated zipcodes" zipcode]
              ["Emails that mention here" link-to email-mentions email-subject :id]
              ["Related locations" loc-inside s-name :id]
              ["Buildings in this location" located-in street-addr :id]
-             ["Location name" location s-name :id]]
+             ["Location name" location s-name :id]
+             ["Notes" notes]]
    building [["Address of this building" street-addr]
              ["Emails mentioning this address" link-to email-mentions email-subject :id]
              ["Latitude" has-coord lat :id] ["Longitude" has-coord lng :id]
              ["This building is located in" located-in s-name :id]
              ["The zipcode for this building is" located-in zipcode :id]
              ["People living here" mail-address s-name :id]
-             ["Events at this address" event-addr event-org s-name :id]]
+             ["Events at this address" event-addr event-org s-name :id]
+             ["Notes" notes]]
    event [["Event name" s-name] ["Event time" date-time]
           ["Event begins" event-begin] ["Event ends" event-end]
           ["Event location" event-loc s-name :id]
@@ -180,7 +185,8 @@
           ["Run by" event-org s-name :id] ["Event website" website]
           ["More information" event-context]
           ["In email" link-to email-mentions email-subject :id]
-          ["Email from" link-to email-mentions email-from s-name :id]]
+          ["Email from" link-to email-mentions email-from s-name :id]
+          ["Notes" notes]]
    geocode [["Latitude" lat] ["Longitude" lng]
             ["Buildings at this location" has-coord street-addr :id]]})
 
