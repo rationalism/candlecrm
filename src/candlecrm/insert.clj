@@ -105,16 +105,6 @@
                           [[k (decode-date v)]] [[k v]])))
        (mapv vec) (map #(into {} %)) (apply merge)))
 
-(defn new-entity! [user {:keys [fields add-links]}]
-  (-> fields decode-dates vector (push-entities! user s/edit-src)
-      first (new-resp (s/type-label fields))))
-
-(defn vals-query [attrs]
-  (str "MATCH (root)-[r:" attrs
-       "]->(v) WHERE ID(root) = {id}"
-       " AND v." (neo4j/esc-token s/value)
-       " IS NOT NULL"))
-
 (defn relation-string [link]
   (->> s/relation-map (into [])
        (drop-while (fn [[k v]] (not= v link))) ffirst))
@@ -127,9 +117,23 @@
 (defn link-type [link]
   (->> link relation-string relation-type s/entity-map))
 
-(defn new-links [id [k v]]
-  (map #(vector {:id id} {(second k) % s/type-label (link-type (first k))}
+(defn new-links [node [k v]]
+  (map #(vector node {(second k) % s/type-label (link-type (first k))}
                 (first k)) v))
+
+(defn new-entity! [user {:keys [fields add-links]}]
+  (let [new-node (decode-dates fields)
+        new-links (->> add-links (into [])
+                       (mapcat #(new-links new-node %)))]
+    (-> new-node vector (loom/build-graph new-links)
+        (push-graph! user s/edit-src) first
+        (new-resp (s/type-label fields)))))
+
+(defn vals-query [attrs]
+  (str "MATCH (root)-[r:" attrs
+       "]->(v) WHERE ID(root) = {id}"
+       " AND v." (neo4j/esc-token s/value)
+       " IS NOT NULL"))
 
 (defn drop-link-query [id1 [id2 link]]
   [(str "MATCH (r1)-[l:" (neo4j/esc-token link)
@@ -144,7 +148,7 @@
   (let [attrs (->> (dissoc fields :id :type :label) keys
                    (map neo4j/esc-token) (str/join "|"))
         id (:id fields)]
-    (->> add-links (into []) (mapcat #(new-links id %))
+    (->> add-links (into []) (mapcat #(new-links {:id id} %))
          (loom/build-graph []) (#(push-graph! % user s/edit-src)))
     (->> delete-links (mapcat unwind-links)
          (map #(drop-link-query id %)) neo4j/cypher-combined-tx)
