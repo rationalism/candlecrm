@@ -24,9 +24,9 @@
    text])
 
 (defn event-name [event no-link?]
-  (let [subject (-> event (get-first [:link-to :email-mentions :subject])
+  (let [subject (-> event (get-first [:link-to s/text-mentions :subject])
                     (get-first :subject))
-        from (-> event (get-first [:link-to :email-mentions :email-from :name])
+        from (-> event (get-first [:link-to s/text-mentions :email-from :name])
                  (get-first :name))]
     [:span from " - "
      (if no-link? subject

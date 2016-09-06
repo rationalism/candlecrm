@@ -136,7 +136,7 @@
    [string-item v k]])
 
 (def never-show
-  [["Email from" :link-to :email-mentions :email-from :name :id]])
+  [["Email from" :link-to s/text-mentions :email-from :name :id]])
 
 (defn remove-dupes [attrs]
   (cond->> attrs

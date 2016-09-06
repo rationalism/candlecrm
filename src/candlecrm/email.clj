@@ -221,7 +221,7 @@
   (def known-tokens (atom [])))
 
 (defn append-hyperlink [[graph message] link-node]
-  [(loom/add-edge graph [message link-node s/email-mentions])
+  [(loom/add-edge graph [message link-node s/text-mentions])
    message])
 
 (defn append-hyperlinks [graph message]

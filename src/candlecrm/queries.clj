@@ -56,7 +56,7 @@
   (->> [(str "MATCH (sd:" (neo4j/prop-label user s/email-sent)
              ")<-[:" (neo4j/esc-token s/email-sent)
              "]-(root:" (neo4j/prop-label user s/email)
-             ")-[:" (neo4j/esc-token s/email-mentions)
+             ")-[:" (neo4j/esc-token s/text-mentions)
              "]->(d:" (neo4j/prop-label user s/event)
              ") WITH root, sd." (neo4j/esc-token s/value)
              " as o ORDER BY o DESC SKIP {start} LIMIT {limit}"
@@ -105,7 +105,7 @@
 
 (defn key-link [user query-map]
   (-> [(str "MATCH (m:" (neo4j/prop-label user s/email)
-            ")-[:" (neo4j/esc-token s/email-mentions)
+            ")-[:" (neo4j/esc-token s/text-mentions)
             "]->(h:" (neo4j/prop-label user s/hyperlink)
             ")-[:" (neo4j/esc-token s/link-id)
             "]->(l:" (neo4j/prop-label user s/link-id)
@@ -180,7 +180,7 @@
   (str "MATCH (root:" (neo4j/prop-label user s/person)
        ")<-[" (escape-rels [s/email-to s/email-from])
        "]-(em:" (neo4j/prop-label user s/email)
-       ")-[:" (neo4j/esc-token s/email-mentions)
+       ")-[:" (neo4j/esc-token s/text-mentions)
        "]->(m:" (neo4j/prop-label user s/hyperlink)
        ")-[:" (neo4j/esc-token s/link-to)
        "]->(ev:"))

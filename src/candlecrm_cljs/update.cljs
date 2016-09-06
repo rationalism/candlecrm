@@ -133,7 +133,7 @@
       (assoc :end (get-first cal [s/event-end]))
       (dissoc [s/event-begin] [s/event-end])
       (assoc :title
-             (get-first (get-first cal [s/link-to s/email-mentions s/email-subject])
+             (get-first (get-first cal [s/link-to s/text-mentions s/email-subject])
                         s/email-subject))))
 
 (defn update-cal-rows! [new-rows]

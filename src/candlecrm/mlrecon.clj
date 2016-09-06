@@ -534,7 +534,7 @@
        ":" (neo4j/esc-token s/norecon)
        ")<-[:" (neo4j/esc-token s/link-to)
        "]-(l:" (neo4j/prop-label user s/hyperlink)
-       ")<-[:" (neo4j/esc-token s/email-mentions)
+       ")<-[:" (neo4j/esc-token s/text-mentions)
        "]-(e:" (neo4j/prop-label user s/email)))
 
 (defn email-candidate-meta [user]
