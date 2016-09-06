@@ -142,6 +142,8 @@
   (cond->> attrs
     (some #{s/body-nlp} (map last attrs))
     (remove #(= s/email-body (last %)))
+    (some #{s/notes-nlp} (map last attrs))
+    (remove #(= s/notes (last %)))
     (some #{["Sent by" s/email-from s/s-name :id]} attrs)
     (remove #(= ["Sent by" s/email-from s/email-addr :id] %))
     (some #{["Sent to" s/email-to s/s-name :id]} attrs)
