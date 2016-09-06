@@ -180,7 +180,7 @@
        [:br]
        [:button {:type "button"
                  :class "pure-button pure-button-primary button-round"
-                 :on-click #(js/alert "Editing notes")}
+                 :on-click #(u/edit-notes!)}
         "Edit"]]]
      [:div [:br]
       [:button {:type "button"

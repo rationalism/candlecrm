@@ -2,6 +2,7 @@
   (:require
    [candlecrm.auth       :as auth]
    [candlecrm.common    :refer :all]
+   [candlecrm.email    :as email]
    [candlecrm.insert    :as insert]
    [candlecrm.neo4j     :as neo4j]
    [candlecrm.quartz    :as quartz]
@@ -64,6 +65,8 @@
                                   :keys [:fields :add-links]}
                 :edit/edit-entity {:fn insert/edit-entity!
                                    :keys [:fields :add-links :delete-links]}
+                :edit/edit-notes {:fn email/edit-notes!
+                                  :keys [:node :notes]}
                 :pages/fetch-people {:fn queries/person-from-user
                                      :keys [:start :limit]}
                 :pages/fetch-agenda {:fn queries/event-agenda

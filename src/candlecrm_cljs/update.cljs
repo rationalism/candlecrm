@@ -287,3 +287,16 @@
     (update-agenda!)
     (fetch-ranks! s/event false)
     (fetch-ranks! s/building false)))
+
+(defn notes-req []
+  [:edit/edit-notes
+   {:notes (state/look :notes-text)
+    :node (state/look :current-node :center-node)}])
+
+(defn new-notes [resp]
+  (state/set! [:notes-edit] false)
+  (state/set! [:notes-text] "")
+  (go-node! (:id resp) (:label resp)))
+
+(defn edit-notes! []
+  (send! (notes-req) new-notes))

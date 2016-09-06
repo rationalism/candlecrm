@@ -289,3 +289,6 @@
         :callback identity :num-threads nlp-threads}
        async/create-pool!
        (reset! nlp-channel)))
+
+(defn edit-notes! [user {:keys [node notes]}]
+  node)
