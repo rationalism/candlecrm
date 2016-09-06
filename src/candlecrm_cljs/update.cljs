@@ -271,3 +271,13 @@
 
 (defn change-password! []
   (send! (change-pwd-req) confirm-changed))
+
+(defn update-tables! []
+  (when (not (state/look :loading))
+    (state/set! [:loading] true)
+    (js/setTimeout #(state/set! [:loading] false) 1000)
+    (update-emails!)
+    (update-people!)
+    (update-agenda!)
+    (fetch-ranks! s/event false)
+    (fetch-ranks! s/building false)))

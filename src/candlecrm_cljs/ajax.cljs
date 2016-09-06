@@ -42,19 +42,9 @@
 ;; alternatives include a simple `case`/`cond`/`condp` against event-ids, or
 ;;`core.match` against events.
 
-(defn update-tables! []
-  (when (not (state/look :loading))
-    (state/set! [:loading] true)
-    (js/setTimeout #(state/set! [:loading] false) 1000)
-    (u/update-emails!)
-    (u/update-people!)
-    (u/update-agenda!)
-    (u/fetch-ranks! s/event false)
-    (u/fetch-ranks! s/building false)))
-
 ;; This fills in initial email values
 (defn chsk-init! []
-  (update-tables!)
+  (u/update-tables!)
   (u/update-user!)
   (u/fetch-ranks! s/event true)
   (u/fetch-ranks! s/building true))
@@ -83,7 +73,7 @@
   (defmethod event-msg-handler :chsk/recv
     [{:as ev-msg :keys [?data]}]
     (if (= ?data [:refresh/tables true])
-      (update-tables!)
+      (u/update-tables!)
       (debugf "Push event from server: %s" ?data)))
   
   (defmethod event-msg-handler :chsk/handshake

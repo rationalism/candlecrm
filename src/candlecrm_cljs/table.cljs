@@ -69,12 +69,19 @@
          ^{:key (first attr)}
          [email-cell email (second attr)])])
 
+(defn refresh-email []
+  [:a {:href "#" :on-click #(js/alert "Refreshing email") :id "email-refresh"
+       :class "pure-button pure-button-primary button-round new-button"}
+   [:i {:class "fa fa-refresh"}]
+   (str " Refresh email ")])
+
 (defn email-table [row-keys counter update-fn]
   [:div
    [:div
-    [util/load-box]
     [util/prev-next-box counter update-fn
-     (count (apply state/look row-keys)) :email]]
+     (count (apply state/look row-keys)) :email]
+    [:p [refresh-email]
+     [util/load-box]]]
    [:table {:id "email-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "email-header"}
      [:tr
