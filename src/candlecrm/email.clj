@@ -230,9 +230,9 @@
        (reduce append-hyperlink [graph message])
        first))
 
-(defn link-message [graph message linked-text]
+(defn link-message [graph message linked-text link-type]
   (->> (assoc (dissoc message s/email-sent s/email-body)
-              s/body-nlp linked-text)
+              link-type linked-text)
        (loom/replace-node graph message)))
 
 (defn remove-metadata [graph node]
@@ -252,7 +252,7 @@
                             (s/email-body message))]
       (when (-> graph loom/nodes empty? not)
         (-> (append-hyperlinks graph message)
-            (link-message message linked-text)
+            (link-message message linked-text s/body-nlp)
             remove-all-metadata)))))
 
 (defnc graph-from-id [models id]
@@ -291,14 +291,25 @@
        (reset! nlp-channel)))
 
 (defn delete-notes-query [user id]
-  [(str "MATCH (root)-[r:" (neo4j/esc-token s/notes)
-        "]->(n:" (neo4j/prop-label user s/notes)
-        ") WHERE ID(root) = {id} DETACH DELETE n")
-   {:id id}])
+  [[(str "MATCH (root)-[r:" (neo4j/esc-token s/notes)
+         "]->(n:" (neo4j/prop-label user s/notes)
+         ") WHERE ID(root) = {id} DETACH DELETE n")
+    {:id id}]
+   [(str "MATCH (root)-[r:" (neo4j/esc-token s/notes-nlp)
+         "]->(n:" (neo4j/prop-label user s/notes-nlp)
+         ") WHERE ID(root) = {id} DETACH DELETE n")
+    {:id id}]
+   [(str "MATCH (root)-[r:" (neo4j/esc-token s/text-mentions)
+         "]->(h:" (neo4j/prop-label user s/hyperlink)
+         ")-[lr:" (neo4j/esc-token s/link-id)
+         "]->(li:" (neo4j/prop-label user s/link-id)
+         ") WHERE ID(root) = {id} DETACH DELETE h, li")
+    {:id id}]])
 
 (defn edit-notes! [user {:keys [node notes]}]
-  (neo4j/cypher-query (delete-notes-query user (:id node)))
-  (-> {s/notes notes} (hash-map (:id node)) first
-      (insert/id-pair-cypher user s/edit-src)
-      neo4j/cypher-combined-tx)
-  node)
+  (let [models (nlp-models-fn)]
+    (neo4j/cypher-combined-tx (delete-notes-query user (:id node)))
+    (-> {s/notes notes} (hash-map (:id node)) first
+        (insert/id-pair-cypher user s/edit-src)
+        neo4j/cypher-combined-tx)
+    node))
