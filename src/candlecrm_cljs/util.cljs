@@ -54,6 +54,7 @@
   (let [type-attrs (new-attrs node-type)]
     (state/set! [:input-meta :type] node-type)
     (state/set! [:input-meta :attr-list] type-attrs)
+    (state/set! [:new-entity-msg] nil)
     (doseq [attr type-attrs]
       (state/set! [:new-entity attr] {0 ""}))
     (state/set! [:tabid] 7)))
