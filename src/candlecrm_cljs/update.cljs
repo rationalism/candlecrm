@@ -221,7 +221,8 @@
   (send! (add-req) new-entity-confirm!))
 
 (defn edit-entity-confirm! [resp]
-  (state/set! [:edit-entity-msg] resp))
+  (state/set! [:edit-entity-msg] resp)
+  (go-node! (:id resp) (:label resp)))
 
 (defn edit-entity! []
   (send! (edit-req) edit-entity-confirm!))
