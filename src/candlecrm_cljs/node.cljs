@@ -170,8 +170,23 @@
 
 (defn person-notes []
   [:div
-   [:h3 "Notes"]
-   [:textarea]])
+   (if (state/look :notes-edit)
+     [:form {:class "pure-form pure-form-stacked"}
+      [:fieldset
+       [:h3 "Notes"]
+       [:textarea {:type "text" :class "edit-field pure-input-1-3"
+                   :on-change (util/set-field! :notes-text)
+                   :value (state/look :notes-text)}]
+       [:br]
+       [:button {:type "button"
+                 :class "pure-button pure-button-primary button-round"
+                 :on-click #(js/alert "Editing notes")}
+        "Edit"]]]
+     [:div [:br]
+      [:button {:type "button"
+                :class "pure-button pure-button-primary button-round"
+                :on-click #(state/set! [:notes-edit] true)}
+       "Edit notes"]])])
 
 (defn node-aux [node-name item]
   [:div

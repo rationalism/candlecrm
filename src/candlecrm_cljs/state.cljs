@@ -33,7 +33,9 @@
     :delete-account {}
     :change-pwd {}
     :agenda-events []
-    :loading false}))
+    :loading false
+    :notes-edit false
+    :notes-text ""}))
 
 (defn look [& args]
   (get-in @a args))
