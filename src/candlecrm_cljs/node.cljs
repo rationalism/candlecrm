@@ -113,8 +113,8 @@
   [:span
    (let [disp (filtered-list prop item)]
      (cond (some #{(last prop)} s/date-times) [util/date-display disp]
-           (= (last prop) s/email-body) [body-links (first disp)]
-           (= (last prop) s/body-nlp) [body-links (first disp)]
+           (some #{(last prop)} [s/email-body s/body-nlp s/notes-nlp])
+           [body-links (first disp)]
            (= (last prop) s/event-context)
            (for [context (util/add-ids disp)]
              ^{:key (first context)}
@@ -170,6 +170,12 @@
                 s/event "Event" s/building "Building"
                 s/geocode "Coordinates"})
 
+(defn set-notes! []
+  (state/set! [:notes-edit] true)
+  (state/set! [:notes-text]
+              (util/get-first (state/look :current-node :center-node)
+                              [:notes])))
+
 (defn person-notes []
   [:div
    (if (state/look :notes-edit)
@@ -187,7 +193,7 @@
      [:div [:br]
       [:button {:type "button"
                 :class "pure-button pure-button-primary button-round"
-                :on-click #(state/set! [:notes-edit] true)}
+                :on-click #(set-notes!)}
        "Edit notes"]])])
 
 (defn node-aux [node-name item]
