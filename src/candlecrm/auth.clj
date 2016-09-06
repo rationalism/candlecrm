@@ -69,7 +69,7 @@
          :reconrun false :indexrun false}]
        neo4j/cypher-query first vals first))
 
-(defn user-person [email]
+(defn user-person-node [email]
   [{s/type-label s/person s/email-addr email}])
 
 (defn user-person-edge! [person user]
@@ -78,8 +78,19 @@
 (defn get-username [user]
   (neo4j/get-property user s/email-addr))
 
+(defn user-person-query [user]
+  [(str "MATCH (root:" (neo4j/esc-token s/user)
+        ")-[:" (neo4j/esc-token s/user-person)
+        "]->(person:" (neo4j/prop-label user s/person)
+        ") WHERE ID(root) = {uid} RETURN person")
+   {:uid (.id user)}])
+
+(defn get-user-person [user]
+  (-> user user-person-query neo4j/cypher-query
+      first vals first))
+
 (defn create-user-person! [user]
-  (-> user get-username user-person
+  (-> user get-username user-person-node
       (insert/push-entities! user s/edit-src)
       first neo4j/find-by-id
       (user-person-edge! user)))
