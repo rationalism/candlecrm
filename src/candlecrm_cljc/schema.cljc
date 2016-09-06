@@ -268,9 +268,6 @@
                      [org-name duration] ["OrgAge"]
                      [street-addr coord-pair] ["HasCoord"]})
 
-(def email-links [email-to email-cc email-bcc
-                  email-reply email-replyto email-mentions])
-
 (def date-times [start-time stop-time over-time date-time
                  email-sent email-received birthday
                  event-begin event-end])
