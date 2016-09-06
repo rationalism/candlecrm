@@ -105,6 +105,18 @@
        " AND v." (neo4j/esc-token s/value)
        " IS NOT NULL"))
 
+(defn relation-string [link]
+  (->> s/relation-map (into [])
+       (drop-while (fn [[k v]] (not= v link))) ffirst))
+
+(defn relation-type [s]
+  (->> s/relation-types (into [])
+       (drop-while (fn [[k v]] (not (some #{s} v))))
+       ffirst second))
+
+(defn link-type [link]
+  (->> link relation-string relation-type s/entity-map))
+
 (defn decode-date [coll]
   (->> coll (remove empty?)
        (map #(ffirst (dt/unix-dates % (dt/now))))))
@@ -116,7 +128,8 @@
        (mapv vec) (map #(into {} %)) (apply merge)))
 
 (defn new-links [id [k v]]
-  (map #(vector {:id id} {(second k) %} (first k)) v))
+  (map #(vector {:id id} {(second k) % s/type-label (link-type (first k))}
+                (first k)) v))
 
 (defn edit-entity! [user {:keys [fields add-links delete-links]}]
   (let [attrs (->> (dissoc fields :id :type :label) keys
