@@ -77,11 +77,12 @@
 
 (defn email-table [row-keys counter update-fn]
   [:div
-   [:div
-    [util/prev-next-box counter update-fn
-     (count (apply state/look row-keys)) :email]
-    [:p [refresh-email]
-     [util/load-box]]]
+   (when (= row-keys [:email-rows])
+     [:div
+      [util/prev-next-box counter update-fn
+       (count (apply state/look row-keys)) :email]
+      [:p [refresh-email]
+       [util/load-box]]])
    [:table {:id "email-table" :class "pure-table pure-table-horizontal"}
     [:thead {:id "email-header"}
      [:tr
