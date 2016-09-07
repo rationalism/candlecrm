@@ -28,12 +28,24 @@
 (defn contact-page []
   [:div
    [:h2 "Contact us"]
-   [:p (str "If you're interested in CandleCRM, please email us"
+   [:p (str "If you're interested in CandleCRM, feel free to contact us"
             " at admin@candlecrm.com.")]])
 
 (defn homepage []
-  [:div
-   [:h3 "Hi! This is the home page."]])
+  [:div {:class "pure-u-1-2"}
+   [:h2 "The CRM That Updates Itself"] [:hr]
+   [:p (str "CandleCRM is the only CRM that uses artificial"
+            " intelligence (AI) to replace manual data entry."
+            " CandleCRM can \"read\" emails, and figure out who your best"
+            " customers are, what company they work for, when"
+            " your next meeting with them is, and more. And when"
+            " new emails arrive, it updates itself, seamlessly"
+            " and automatically.")]
+   [:p (str "Because your data is entered automatically, you can start"
+            " using CandleCRM in under thirty seconds. Give it a try -"
+            " just jump in and go.")]
+   [:p (str "CandleCRM is currently in private beta. Check"
+            " back soon for more updates!")]])
 
 (defn login-box [content]
   [:div {:class "pure-g"}
@@ -135,7 +147,7 @@
         [:input {:class "pure-button pure-button-primary button-round"
                  :value "Sign up" :type "submit"}]
         [:span {:style "padding:0 0 0 10px;color:red;"
-                :id "signupError"} flash]]]]]]])
+            :id "signupError"} flash]]]]]]])
 
 (defn login-form []
   [:div
