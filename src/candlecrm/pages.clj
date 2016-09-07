@@ -30,11 +30,30 @@
     (html/signup-form flash)
     (html/login-form))))
 
-(defn homepage [{:keys [identity] :as req}]
-  (cond (not identity) (login-form req)
+(defn contact-form [_req]
+  (html-wrapper
+   (html/base-template
+    (html/contact-page))))
+
+(defn homepage-form [_req]
+  (html-wrapper
+   (html/base-template
+    (html/homepage))))
+
+(defn login-switch [identity req alt-page]
+  (cond (not identity) (alt-page req)
         (google/lookup-token identity)
         (resp/redirect "/app")
         :else (resp/redirect "/gmail")))
+
+(defn login-page [{:keys [identity] :as req}]
+  (login-switch identity req login-form))
+
+(defn contact [{:keys [identity] :as req}]
+  (login-switch identity req contact-form))
+
+(defn homepage [{:keys [identity] :as req}]
+  (login-switch identity req homepage-form))
 
 (defn app-page [{:keys [identity]}]
   (cond (not identity) (home-with-message "Logged out")

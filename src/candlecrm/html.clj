@@ -25,9 +25,19 @@
   [:meta {:name "viewport"
           :content "width=device-width, initial-scale=1"}]) 
 
+(defn contact-page []
+  [:div
+   [:h2 "Contact us"]
+   [:p (str "If you're interested in CandleCRM, please email us"
+            " at admin@candlecrm.com.")]])
+
+(defn homepage []
+  [:div
+   [:h3 "Hi! This is the home page."]])
+
 (defn login-box [content]
   [:div {:class "pure-g"}
-   [:div {:class "pure-u-1-8"}]
+   [:div {:class "pure-u-1-12"}]
    (into [:div#content {:class "pure-u-3-4"}]
          content)])
 
@@ -51,10 +61,10 @@
 (defn tab-class []
   "pure-menu-item")
 
-(defn header-tab [logo-class name]
+(defn header-tab [logo-class name link-to]
   [:li {:class (tab-class)}
    [:h3
-    [:a {:href "#" :class "pure-menu-link"}
+    [:a {:href link-to :class "pure-menu-link"}
      [:i {:class logo-class}]
      (str "  " name)]]])
 
@@ -64,9 +74,9 @@
    [:div {:class "pure-u-7-12"}
     [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
      [:ul {:class "pure-menu-list"}
-      (header-tab "fa fa-home" "Home")
-      (header-tab "fa fa-sign-in" "Log In")
-      (header-tab "fa fa-envelope" "Contact")]]]])
+      (header-tab "fa fa-home" "Home" "/")
+      (header-tab "fa fa-sign-in" "Log In" "/login.html")
+      (header-tab "fa fa-envelope" "Contact" "/contact.html")]]]])
 
 (defn base-template [& content]
   (html5 {:lang "en"}

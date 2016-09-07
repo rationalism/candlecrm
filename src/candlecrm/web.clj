@@ -38,6 +38,10 @@
   (GET "/" req
        (pages/homepage req))
   ;; TODO: Make this return an error message when credentials are invalid
+  (GET "/contact.html" req
+       (pages/contact req))
+  (GET "/login.html" req
+       (pages/login-page req))
   (GET "/login" req
        (pages/login req))
   (GET "/reset-password" req
