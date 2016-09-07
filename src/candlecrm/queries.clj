@@ -104,8 +104,7 @@
         (#(node-by-id user %)))))
 
 (defn key-link [user query-map]
-  (-> [(str "MATCH (m:" (neo4j/prop-label user s/email)
-            ")-[:" (neo4j/esc-token s/text-mentions)
+  (-> [(str "MATCH (m)-[:" (neo4j/esc-token s/text-mentions)
             "]->(h:" (neo4j/prop-label user s/hyperlink)
             ")-[:" (neo4j/esc-token s/link-id)
             "]->(l:" (neo4j/prop-label user s/link-id)
