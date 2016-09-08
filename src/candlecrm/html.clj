@@ -39,9 +39,15 @@
 (defn font-awesome []
   [:script {:src "https://use.fontawesome.com/6cf2e50a67.js"}])
 
+(defn charset []
+  [:meta {:charset "utf-8"}])
+
 (defn viewport []
   [:meta {:name "viewport"
-          :content "width=device-width, initial-scale=1"}]) 
+          :content "width=device-width, initial-scale=1, shrink-to-fit=no"}]) 
+
+(defn ie-render []
+  [:meta {:http-equiv "x-ua-compatible" :content "ie-edge"}])
 
 (defn contact-page []
   [:div
@@ -111,7 +117,8 @@
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "CandleCRM"]
-          (viewport) (bootstrap-css) (font-awesome)
+          (charset) (viewport) (ie-render)
+          (bootstrap-css) (font-awesome)
           (include-css "/css/main.css")]
          [:body
           (header-box)
@@ -124,7 +131,8 @@
 (defn app-template [& content]
   (html5 {:lang "en"}
          [:head [:title "CandleCRM"]
-          (viewport) (bootstrap-css) (font-awesome)
+          (charset) (viewport) (ie-render)
+          (bootstrap-css) (font-awesome)
           (include-css "/css/fullcalendar.min.css")
           (include-css "/css/main.css")]
          [:body
