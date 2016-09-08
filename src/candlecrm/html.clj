@@ -14,6 +14,28 @@
   (str "https://maps.googleapis.com/maps/api/js?v=3&key="
        (env :gmaps-api-key)))
 
+(defn bootstrap-css []
+  [:link {:rel "stylesheet"
+          :href (str "https://maxcdn.bootstrapcdn.com/bootstrap/"
+                     "4.0.0-alpha.4/css/bootstrap.min.css")
+          :integrity "2hfp1SzUoho7/TsGGGDaFdsuuDL0LX2hnUp6VkX3CUQ2K4K+xjboZdsXyp4oUHZj"
+          :crossorigin "anonymous"}])
+
+(defn jquery-js []
+  [:script {:src "https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"
+            :integrity "sha384-THPy051/pYDQGanwU6poAc/hOdQxjnOEXzbT+OuUAFqNqFjL+4IGLBgCJC3ZOShY"
+            :crossorigin "anonymous"}])
+
+(defn tether-js []
+  [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js"
+            :integrity "sha384-Plbmg8JY28KFelvJVai01l8WyZzrYWG825m+cZ0eDDS1f7d/js6ikvy1+X+guPIB"
+            :crossorigin "anonymous"}])
+
+(defn bootstrap-js []
+  [:script {:src "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.4/js/bootstrap.min.js"
+            :integrity "VjEeINv9OSwtWFLAtmc4JCtEJXXBub00gtSnszmspDLCtC0I4z4nqz7rEFbIZLLU"
+            :crossorigin "anonymous"}])
+
 (defn font-awesome []
   [:script {:src "https://use.fontawesome.com/6cf2e50a67.js"}])
 
@@ -89,20 +111,20 @@
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "CandleCRM"]
-          (viewport) (font-awesome)
+          (viewport) (bootstrap-css) (font-awesome)
           (include-css "/css/main.css")]
          [:body
           (header-box)
           (home-header)
           (login-box content)
           (footer-box)
-          (include-js goog-jquery)
+          (jquery-js) (tether-js) (bootstrap-js)
           (include-js "/js/login.js")]))
 
 (defn app-template [& content]
   (html5 {:lang "en"}
          [:head [:title "CandleCRM"]
-          (viewport) (font-awesome)
+          (viewport) (bootstrap-css) (font-awesome)
           (include-css "/css/fullcalendar.min.css")
           (include-css "/css/main.css")]
          [:body
@@ -110,7 +132,7 @@
           (app-box content)
           (footer-box)
           (include-js (goog-maps))
-          (include-js goog-jquery)
+          (jquery-js) (tether-js) (bootstrap-js)
           (include-js "https://code.highcharts.com/highcharts.js")
           (include-js "/js/libs/moment.min.js")
           (include-js "/js/libs/fullcalendar-2.8.0/fullcalendar.js")
@@ -143,7 +165,7 @@
         [:input {:class ""
                  :value "Sign up" :type "submit"}]
         [:span {:style "padding:0 0 0 10px;color:red;"
-                :id "signupError"} flash]]]]]]])
+                     :id "signupError"} flash]]]]]]])
 
 (defn login-form []
   [:div
