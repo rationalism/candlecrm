@@ -157,15 +157,15 @@
        [:legend [:h2 "Sign up"]]
        [:div.
         [:label {:for "signupUsername"} "Email "]
-        [:input {:type "text" :name "username"
+        [:input {:type "email" :name "username" :class "form-control"
                  :id "signupUsername" :required "required"}]]
        [:div.
         [:label {:for "signupPassword"} "Password "]
-        [:input {:type "password" :name "password"
+        [:input {:type "password" :name "password" :class "form-control"
                  :id "signupPassword" :required "required"}]]
        [:div.
         [:label {:for "signupConfirm"} "Confirm "]
-        [:input {:type "password" :name "confirm"
+        [:input {:type "password" :name "confirm" :class "form-control"
                  :id "signupConfirm" :required "required"}]]
        [:div
         [:input {:class "btn btn-primary" 
@@ -182,12 +182,12 @@
      [:legend [:h2 "Log in"]]
      [:div.
       [:label {:for "loginUsername"} "Email "]
-      [:input {:type "text" :name "username"
-               :id "loginUsername"}]]
+      [:input {:type "email" :name "username"
+               :id "loginUsername" :class "form-control"}]]
      [:div.
       [:label {:for "loginPassword"} "Password "]
       [:input {:type "password" :name "password"
-               :id "loginPassword"}]]
+               :id "loginPassword" :class "form-control"}]]
      [:div
       [:input {:class "btn btn-primary"
                :value "Login" :type "submit"}]
@@ -206,8 +206,8 @@
      [:legend [:h2 "Reset password"]]
      [:div.
       [:label {:for "resetUsername"} "Email "]
-      [:input {:type "text" :name "username"
-               :id "resetUsername"}]]
+      [:input {:type "email" :name "username"
+               :id "resetUsername" :class "form-control"}]]
      [:div
       [:input {:class "btn btn-primary"
                :value "Request reset" :type "submit"}]]]]])
@@ -226,11 +226,11 @@
               :value token}]
      [:div.
       [:label {:for "setPwd"} "New password "]
-      [:input {:type "password" :name "password"
+      [:input {:type "password" :name "password" :class "form-control"
                :id "setPwd" :required "required"}]]
      [:div.
       [:label {:for "setPwdConfirm"} "Confirm new password "]
-      [:input {:type "password" :name "confirm"
+      [:input {:type "password" :name "confirm" :class "form-control"
                :id "setPwdConfirm" :required "required"}]]
      [:div
       [:input {:class "btn btn-primary"

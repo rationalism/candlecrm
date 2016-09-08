@@ -103,7 +103,8 @@
                      (concat cache))]
      [:input {:type "text" :name (str attr (first id-attr))
               :on-change (apply set-field! params)
-              :class "edit-field" :value (apply state/look params)}])
+              :class "form-control edit-field"
+              :value (apply state/look params)}])
    (let [attr (second id-attr)]
      (when (= 0 (first id-attr))
        [:a {:on-click #(-> cache (concat [(second attr)])

@@ -34,12 +34,12 @@
      [:div.
       [:label {:for "setPwd"} "New password "]
       [:input {:type "password" :name "password"
-               :id "setPwd" :required "required"
+               :id "setPwd" :required "required" :class "form-control"
                :on-change (set-field! :change-pwd :password)
                :value (state/look :change-pwd :password)}]]
      [:div.
       [:label {:for "setPwdConfirm"} "Confirm new password "]
-      [:input {:type "password" :name "confirm"
+      [:input {:type "password" :name "confirm" :class "form-control"
                :id "setPwdConfirm" :required "required"
                :on-change (set-field! :change-pwd :confirm)
                :value (state/look :change-pwd :confirm)}]]
