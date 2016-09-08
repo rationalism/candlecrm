@@ -40,7 +40,7 @@
     (count (state/look :people-rows)) :people]
    [:p [util/add-new s/person]
     [util/load-box]]
-   [:table {:id "people-table" :class "pure-table pure-table-horizontal"}
+   [:table {:id "people-table" :class ""}
     [:thead {:id "people-header"}
      [:tr
       (for [attr (util/add-ids person-attrs)]
@@ -71,7 +71,7 @@
 
 (defn refresh-email []
   [:a {:href "#" :on-click #(u/refresh-email!) :id "email-refresh"
-       :class "pure-button pure-button-primary button-round new-button"}
+       :class " new-button"}
    [:i {:class "fa fa-refresh"}]
    (str " Refresh email ")])
 
@@ -83,7 +83,7 @@
        (count (apply state/look row-keys)) :email]
       [:p [refresh-email]
        [util/load-box]]])
-   [:table {:id "email-table" :class "pure-table pure-table-horizontal"}
+   [:table {:id "email-table" :class ""}
     [:thead {:id "email-header"}
      [:tr
       (for [attr (util/add-ids email-attrs)]

@@ -14,10 +14,6 @@
   (str "https://maps.googleapis.com/maps/api/js?v=3&key="
        (env :gmaps-api-key)))
 
-(defn pure-css []
-  [:link {:rel "stylesheet"
-          :href "/css/pure-release-0.6.0/pure-min.css"}])
-
 (defn font-awesome []
   [:script {:src "https://use.fontawesome.com/6cf2e50a67.js"}])
 
@@ -32,7 +28,7 @@
             " at admin@candlecrm.com.")]])
 
 (defn homepage []
-  [:div {:class "pure-u-1-2"}
+  [:div {:class ""}
    [:h2 "The CRM That Updates Itself"] [:hr]
    [:p (str "CandleCRM is the only CRM that uses artificial"
             " intelligence (AI) to replace manual data entry."
@@ -48,44 +44,44 @@
             " back soon for more updates!")]])
 
 (defn login-box [content]
-  [:div {:class "pure-g"}
-   [:div {:class "pure-u-1-12"}]
-   (into [:div#content {:class "pure-u-3-4"}]
+  [:div {:class ""}
+   [:div {:class ""}]
+   (into [:div#content {:class ""}]
          content)])
 
 (defn app-box [content]
-  [:div {:class "pure-g"}
-   (into [:div#content {:class "pure-u-1-1"}]
+  [:div {:class ""}
+   (into [:div#content {:class ""}]
          content)])
 
 (defn header-box []
-  [:div#page-header {:class "pure-g"}
-   [:div {:class "pure-u-1-12"}]
-   [:div {:class "pure-u-1-8 main-logo"}
-    [:img {:src "/candlecrm_logo.png" :class "pure-img"}]]])
+  [:div#page-header {:class ""}
+   [:div {:class ""}]
+   [:div {:class "main-logo"}
+    [:img {:src "/candlecrm_logo.png" :class ""}]]])
 
 (defn footer-box []
-  [:div#page-footer {:class "pure-g"}
-   [:div {:class "pure-u-1-12"}]
-   [:div#main-page {:class "pure-u-5-6"}
+  [:div#page-footer {:class ""}
+   [:div {:class ""}]
+   [:div#main-page {:class ""}
     [:p "© 2016 CandleCRM"]]])
 
 (defn tab-class []
-  "pure-menu-item")
+  "")
 
 (defn header-tab [logo-class name link-to]
   [:li {:class (tab-class)}
    [:h3
-    [:a {:href link-to :class "pure-menu-link"}
+    [:a {:href link-to :class ""}
      [:i {:class logo-class}]
      (str "  " name)]]])
 
 (defn home-header []
-  [:div#menu-bar {:class "pure-g"}
-   [:div {:class "pure-u-1-12"}]
-   [:div {:class "pure-u-7-12"}
-    [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
-     [:ul {:class "pure-menu-list"}
+  [:div#menu-bar {:class ""}
+   [:div {:class ""}]
+   [:div {:class ""}
+    [:div {:class "menu-icons"}
+     [:ul {:class ""}
       (header-tab "fa fa-home" "Home" "/")
       (header-tab "fa fa-sign-in" "Log In" "/login.html")
       (header-tab "fa fa-envelope" "Contact" "/contact.html")]]]])
@@ -93,7 +89,7 @@
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "CandleCRM"]
-          (pure-css) (viewport) (font-awesome)
+          (viewport) (font-awesome)
           (include-css "/css/main.css")]
          [:body
           (header-box)
@@ -106,7 +102,7 @@
 (defn app-template [& content]
   (html5 {:lang "en"}
          [:head [:title "CandleCRM"]
-          (pure-css) (viewport) (font-awesome)
+          (viewport) (font-awesome)
           (include-css "/css/fullcalendar.min.css")
           (include-css "/css/main.css")]
          [:body
@@ -127,45 +123,45 @@
    [:div
     [:div.row
      [:form {:method "POST" :action "create-account"
-             :class "pure-form pure-form-aligned" :id "signupForm" :novalidate ""}
+             :class "" :id "signupForm" :novalidate ""}
       [:fieldset
        (anti-forgery-field)
        [:legend [:h2 "Sign up"]]
-       [:div.pure-control-group
+       [:div.
         [:label {:for "signupUsername"} "Email "]
         [:input {:type "text" :name "username"
                  :id "signupUsername" :required "required"}]]
-       [:div.pure-control-group
+       [:div.
         [:label {:for "signupPassword"} "Password "]
         [:input {:type "password" :name "password"
                  :id "signupPassword" :required "required"}]]
-       [:div.pure-control-group
+       [:div.
         [:label {:for "signupConfirm"} "Confirm "]
         [:input {:type "password" :name "confirm"
                  :id "signupConfirm" :required "required"}]]
-       [:div.pure-controls
-        [:input {:class "pure-button pure-button-primary button-round"
+       [:div
+        [:input {:class ""
                  :value "Sign up" :type "submit"}]
         [:span {:style "padding:0 0 0 10px;color:red;"
-            :id "signupError"} flash]]]]]]])
+                :id "signupError"} flash]]]]]]])
 
 (defn login-form []
   [:div
-   [:form {:method "POST" :action "login" :class "pure-form pure-form-aligned"
+   [:form {:method "POST" :action "login" :class ""
            :id "loginForm" :novalidate ""}
     [:fieldset
      (anti-forgery-field)
      [:legend [:h2 "Log in"]]
-     [:div.pure-control-group
+     [:div.
       [:label {:for "loginUsername"} "Email "]
       [:input {:type "text" :name "username"
                :id "loginUsername"}]]
-     [:div.pure-control-group
+     [:div.
       [:label {:for "loginPassword"} "Password "]
       [:input {:type "password" :name "password"
                :id "loginPassword"}]]
-     [:div.pure-controls
-      [:input {:class "pure-button pure-button-primary button-round"
+     [:div
+      [:input {:class ""
                :value "Login" :type "submit"}]
       [:a {:id "pass-reset-link" :href "/reset-password"}
        "(Forgot password?)"]
@@ -175,23 +171,23 @@
 (defn reset-pwd []
   [:div
    [:form {:method "POST" :action "request-reset"
-           :class "pure-form pure-form-aligned"
+           :class ""
            :id "resetPassForm" :novalidate ""}
     [:fieldset
      (anti-forgery-field)
      [:legend [:h2 "Reset password"]]
-     [:div.pure-control-group
+     [:div.
       [:label {:for "resetUsername"} "Email "]
       [:input {:type "text" :name "username"
                :id "resetUsername"}]]
-     [:div.pure-controls
-      [:input {:class "pure-button pure-button-primary button-round"
+     [:div
+      [:input {:class ""
                :value "Request reset" :type "submit"}]]]]])
 
 (defn new-password [user token]
   [:div
    [:form {:method "POST" :action "set-password"
-           :class "pure-form pure-form-aligned"
+           :class ""
            :id "changePassForm" :novalidate ""}
     [:fieldset
      (anti-forgery-field)
@@ -200,16 +196,16 @@
      [:input {:type "hidden" :name "reset-token"
               :id "setPwdToken" :required "required"
               :value token}]
-     [:div.pure-control-group
+     [:div.
       [:label {:for "setPwd"} "New password "]
       [:input {:type "password" :name "password"
                :id "setPwd" :required "required"}]]
-     [:div.pure-control-group
+     [:div.
       [:label {:for "setPwdConfirm"} "Confirm new password "]
       [:input {:type "password" :name "confirm"
                :id "setPwdConfirm" :required "required"}]]
-     [:div.pure-controls
-      [:input {:class "pure-button pure-button-primary button-round"
+     [:div
+      [:input {:class ""
                :value "Set new password" :type "submit"}]]]]])
 
 (defn login-needed [uri]
@@ -228,5 +224,5 @@
    [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
    [:h3 (str "Your email address is: " username)]
    [:h3 "Select an email provider"]
-   [:a {:class "pure-button pure-button-primary button-round" :href auth-url}
+   [:a {:class "" :href auth-url}
     [:h3 "GMail"]]])

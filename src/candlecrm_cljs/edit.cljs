@@ -94,7 +94,7 @@
        keys count))
 
 (defn input-cell [id-attr cache]
-  [:div {:class "pure-control-group"}
+  [:div {:class ""}
    [:label
     (if (= 0 (first id-attr))
       (first (second id-attr)) "")]
@@ -109,7 +109,7 @@
        [:a {:on-click #(-> cache (concat [(second attr)])
                            (concat [(count-cells attr cache)])
                            (state/set! "")) :href "#"
-            :class "pure-button pure-button-primary button-round"}
+            :class ""}
         [:i {:class "fa fa-plus"}]]))])
 
 (defn count-attr-cells [attr cache]
@@ -123,14 +123,14 @@
 
 (defn entity-form [legend attrs cache onclick msg]
   [:div
-   [:form {:class "pure-form pure-form-aligned"}
+   [:form {:class ""}
     [:fieldset
      [:legend>h3 legend]
      (for [attr attrs]
        ^{:key (first attr)}
        [input-block (second attr) cache])
      [:button {:type "button"
-               :class "pure-button pure-button-primary button-round"
+               :class ""
                :on-click onclick}
       "Submit"]]]
    msg])

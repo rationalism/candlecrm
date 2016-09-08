@@ -23,9 +23,9 @@
    [:h3 (str "Welcome. Your email is: " username)]])
 
 (defn home-content [& content]
-  [:div {:class "pure-g"}
-   [:div {:class "pure-u-1-12"}]
-   (into [:div#main-page {:class "pure-u-5-6"}]
+  [:div {:class ""}
+   [:div {:class ""}]
+   (into [:div#main-page {:class ""}]
          content)])
 
 (defn person-option [person]
@@ -40,7 +40,7 @@
    [:div#people-ranks
     [:span
      [:span.select-text "Select a person: "]
-     [:form {:class "pure-form"}
+     [:form {:class ""}
       [:select {:class (str "people-list-" (name rel-type))
                 :on-change #(u/rel-switch (.. % -target -value) rel-type)}
        (for [person (add-ids (state/look :rank-lists rel-type))]
@@ -64,32 +64,32 @@
 
 (defn tab-class [num]
   (if (= num (state/look :tabid))
-    "pure-menu-item pure-menu-selected"
-    "pure-menu-item"))
+    ""
+    ""))
 
 (defn header-tab [logo-class num name]
   [:li {:class (tab-class num)}
    [:h3>a
-    {:href "#" :class "pure-menu-link"
+    {:href "#" :class ""
      :on-click (set-tab-fn num)
      :id (str "set-tab-" num)}
     [:i {:class logo-class}]
     (str " " name)]])
 
 (defn home-header []
-  [:div#menu-bar {:class "pure-g"}
-   [:div {:class "pure-u-1-12"}]
-   [:div {:class "pure-u-7-12"}
-    [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
-     [:ul {:class "pure-menu-list"}
+  [:div#menu-bar {:class ""}
+   [:div {:class ""}]
+   [:div {:class ""}
+    [:div {:class "menu-icons"}
+     [:ul {:class ""}
       [header-tab "fa fa-list-ul" 10 "Agenda"]
       [header-tab "fa fa-users" 1 "People"]
       [header-tab "fa fa-envelope" 2 "Emails"]
       [header-tab "fa fa-calendar" 3 "Calendar"]
       [header-tab "fa fa-globe" 4 "Locations"]
       [header-tab "fa fa-cog" 5 "My Account"]]]]
-   [:div#right-menu {:class "pure-u-1-4"}
-    [:div {:class "pure-menu pure-menu-horizontal menu-icons"}
+   [:div#right-menu {:class ""}
+    [:div {:class "menu-icons"}
      [search/search-box]]]])
 
 (defn my-account []

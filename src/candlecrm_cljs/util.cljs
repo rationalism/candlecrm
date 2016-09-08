@@ -62,7 +62,7 @@
 (defn add-new [rel-type]
   [:a {:href "#" :on-click #(new-entity-switch rel-type)
        :id (str "add-new-" (name rel-type))
-       :class "pure-button pure-button-primary button-round new-button"}
+       :class " new-button"}
    [:i {:class "fa fa-plus"}]
    (str " Add new " (name rel-type))])
 
@@ -70,12 +70,12 @@
   [:div.prev-next
    (when (> (state/look :counters counter) 0)
      [:a {:href "#" :on-click (u/prev-fetch! counter update-fn)
-          :class "prev-email-page pure-button pure-button-primary button-round"}
+          :class "prev-email-page "}
       [:i {:class "fa fa-arrow-left"}]
       "  Previous"])
    (when (= num-rows (state/look :page-lengths row-type))
      [:a {:href "#" :on-click (u/next-fetch! counter update-fn)
-          :class "next-email-page pure-button pure-button-primary button-round"}
+          :class "next-email-page "}
       "Next  "
       [:i {:class "fa fa-arrow-right"}]])])
 

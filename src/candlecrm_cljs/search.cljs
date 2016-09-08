@@ -12,7 +12,7 @@
     (u/run-search!)))
 
 (defn search-box []
-  [:fieldset {:class "pure-form"}
+  [:fieldset {:class ""}
    [:input {:id "search-box" :type "text" :name "search-box" :placeholder "Search"
             :on-change (set-field! :search) :value (state/look :search)
             :on-key-press search-key}]])

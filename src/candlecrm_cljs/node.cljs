@@ -179,20 +179,20 @@
 (defn person-notes []
   [:div
    (if (state/look :notes-edit)
-     [:form {:class "pure-form pure-form-stacked"}
+     [:form {:class ""}
       [:fieldset
        [:h3 "Notes"]
-       [:textarea {:type "text" :class "edit-field pure-input-1-3"
+       [:textarea {:type "text" :class "edit-field"
                    :on-change (util/set-field! :notes-text)
                    :value (state/look :notes-text)}]
        [:br]
        [:button {:type "button"
-                 :class "pure-button pure-button-primary button-round"
+                 :class ""
                  :on-click #(u/edit-notes!)}
         "Edit"]]]
      [:div [:br]
       [:button {:type "button"
-                :class "pure-button pure-button-primary button-round"
+                :class ""
                 :on-click #(set-notes!)}
        "Edit notes"]])])
 
@@ -221,10 +221,10 @@
     (when aux?
       [:span
        [:a {:href "#" :on-click #(edit/edit-entity-switch (s/type-label item))
-            :class "pure-button pure-button-primary button-round"}
+            :class ""}
         "Edit"] " "
        [:a {:href "#" :on-click delete-entity-switch
-            :class "pure-button pure-button-primary button-round"}
+            :class ""}
         "Delete"]])]
    [info-items (-> item s/type-label s/node-paths) item]
    (when aux? [node-aux node-name item])])
