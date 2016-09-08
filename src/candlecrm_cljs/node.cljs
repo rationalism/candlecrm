@@ -180,7 +180,7 @@
   [:div
    (if (state/look :notes-edit)
      [:form {:class ""}
-      [:fieldset
+      [:fieldset {:class "form-group"}
        [:h3 "Notes"]
        [:textarea {:type "text" :class "edit-field"
                    :on-change (util/set-field! :notes-text)

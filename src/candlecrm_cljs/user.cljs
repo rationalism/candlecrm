@@ -29,7 +29,7 @@
   [:div
    [:form {:class ""
            :id "changePassForm"}
-    [:fieldset
+    [:fieldset {:class "form-group"}
      [:legend [:h2 "Set a new password"]]
      [:div.
       [:label {:for "setPwd"} "New password "]

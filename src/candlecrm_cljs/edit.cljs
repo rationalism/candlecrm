@@ -124,7 +124,7 @@
 (defn entity-form [legend attrs cache onclick msg]
   [:div
    [:form {:class ""}
-    [:fieldset
+    [:fieldset {:class "form-group"}
      [:legend>h3 legend]
      (for [attr attrs]
        ^{:key (first attr)}

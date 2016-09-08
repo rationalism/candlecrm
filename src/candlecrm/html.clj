@@ -152,7 +152,7 @@
     [:div.row
      [:form {:method "POST" :action "create-account"
              :class "" :id "signupForm" :novalidate ""}
-      [:fieldset
+      [:fieldset {:class "form-group"}
        (anti-forgery-field)
        [:legend [:h2 "Sign up"]]
        [:div.
@@ -177,7 +177,7 @@
   [:div
    [:form {:method "POST" :action "login" :class ""
            :id "loginForm" :novalidate ""}
-    [:fieldset
+    [:fieldset {:class "form-group"}
      (anti-forgery-field)
      [:legend [:h2 "Log in"]]
      [:div.
@@ -201,7 +201,7 @@
    [:form {:method "POST" :action "request-reset"
            :class ""
            :id "resetPassForm" :novalidate ""}
-    [:fieldset
+    [:fieldset {:class "form-group"}
      (anti-forgery-field)
      [:legend [:h2 "Reset password"]]
      [:div.
@@ -217,7 +217,7 @@
    [:form {:method "POST" :action "set-password"
            :class ""
            :id "changePassForm" :novalidate ""}
-    [:fieldset
+    [:fieldset {:class "form-group"}
      (anti-forgery-field)
      [:legend [:h2 "Set a new password for "
                (.get user (name s/email-addr))]]
