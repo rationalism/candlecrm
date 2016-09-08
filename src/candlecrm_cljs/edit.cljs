@@ -94,23 +94,24 @@
        keys count))
 
 (defn input-cell [id-attr cache]
-  [:div {:class ""}
-   [:label
+  [:div {:class "row form-group"}
+   [:label {:class "col-xs-3 col-form-label"}
     (if (= 0 (first id-attr))
       (first (second id-attr)) "")]
    (let [attr (second (second id-attr))
          params (->> id-attr first vector (concat [attr])
                      (concat cache))]
-     [:input {:type "text" :name (str attr (first id-attr))
-              :on-change (apply set-field! params)
-              :class "form-control edit-field"
-              :value (apply state/look params)}])
+     [:div {:class "col-xs-4"}
+      [:input {:type "text" :name (str attr (first id-attr))
+               :on-change (apply set-field! params)
+               :class "form-control edit-field"
+               :value (apply state/look params)}]])
    (let [attr (second id-attr)]
      (when (= 0 (first id-attr))
        [:a {:on-click #(-> cache (concat [(second attr)])
                            (concat [(count-cells attr cache)])
                            (state/set! "")) :href "#"
-            :class "btn btn-primary" :role "button"}
+            :class "btn btn-primary btn-sm" :role "button"}
         [:i {:class "fa fa-plus"}]]))])
 
 (defn count-attr-cells [attr cache]
@@ -123,18 +124,19 @@
      [input-cell id-attr cache])])
 
 (defn entity-form [legend attrs cache onclick msg]
-  [:div
-   [:form {:class ""}
-    [:fieldset {:class "form-group"}
-     [:legend>h3 legend]
-     (for [attr attrs]
-       ^{:key (first attr)}
-       [input-block (second attr) cache])
-     [:button {:type "button"
-               :class "btn btn-primary"
-               :on-click onclick}
-      "Submit"]]]
-   msg])
+  [:div {:class "container"}
+   [:div {:class "row"}
+    [:form {:class ""}
+     [:fieldset {:class "form-group"}
+      [:legend>h3 legend]
+      (for [attr attrs]
+        ^{:key (first attr)}
+        [input-block (second attr) cache])
+      [:button {:type "button"
+                :class "btn btn-primary"
+                :on-click onclick}
+       "Submit"]]]
+    msg]])
 
 (defn path-names [node-type attrs]
   (let [name-map (->> node-type s/node-paths

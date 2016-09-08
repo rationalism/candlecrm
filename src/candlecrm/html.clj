@@ -54,10 +54,12 @@
    [:p "© 2016 CandleCRM"]])
 
 (defn contact-page []
-  [:div
-   [:h2 "Contact us"]
-   [:p (str "If you're interested in CandleCRM, please contact us"
-            " at admin@candlecrm.com.")]
+  [:div#homepage {:class "container"}
+   [:div#contact {:class "row"}
+    [:div {:class "col-xs-8"}
+     [:h2 "Contact us"]
+     [:p (str "If you're interested in CandleCRM, please contact us"
+              " at admin@candlecrm.com.")]]]
    (footer-box)])
 
 (defn homepage []
@@ -121,7 +123,7 @@
    {:class "navbar navbar-static-top navbar-dark bg-inverse"}
    [:a {:class "navbar-brand" :href "#"}
     "CandleCRM"]
-   [:ul {:class "nav navbar-nav"}
+   [:ul {:class "nav navbar-nav pull-xs-right"}
     (header-tab "" "Home" "/")
     (header-tab "" "Log In" "/login.html")
     (header-tab "" "Contact" "/contact.html")]])
@@ -159,23 +161,23 @@
             (include-js "/js/main.js"))]))
 
 (defn signup-form [flash]
-  [:div {:class "row"}
-   [:div
-    [:div.row
+  [:div#signup {:class "container"}
+   [:div {:class "row"}
+    [:div {:class "col-xs-4"}
      [:form {:method "POST" :action "create-account"
              :class "" :id "signupForm" :novalidate ""}
       [:fieldset {:class "form-group"}
        (anti-forgery-field)
        [:legend [:h2 "Sign up"]]
-       [:div.
+       [:div
         [:label {:for "signupUsername"} "Email "]
         [:input {:type "email" :name "username" :class "form-control"
                  :id "signupUsername" :required "required"}]]
-       [:div.
+       [:div
         [:label {:for "signupPassword"} "Password "]
         [:input {:type "password" :name "password" :class "form-control"
                  :id "signupPassword" :required "required"}]]
-       [:div.
+       [:div
         [:label {:for "signupConfirm"} "Confirm "]
         [:input {:type "password" :name "confirm" :class "form-control"
                  :id "signupConfirm" :required "required"}]]
@@ -186,27 +188,30 @@
                 :id "signupError"} flash]]]]]]])
 
 (defn login-form []
-  [:div
-   [:form {:method "POST" :action "login" :class ""
-           :id "loginForm" :novalidate ""}
-    [:fieldset {:class "form-group"}
-     (anti-forgery-field)
-     [:legend [:h2 "Log in"]]
-     [:div.
-      [:label {:for "loginUsername"} "Email "]
-      [:input {:type "email" :name "username"
-               :id "loginUsername" :class "form-control"}]]
-     [:div.
-      [:label {:for "loginPassword"} "Password "]
-      [:input {:type "password" :name "password"
-               :id "loginPassword" :class "form-control"}]]
-     [:div
-      [:input {:class "btn btn-primary"
-               :value "Login" :type "submit"}]
-      [:a {:id "pass-reset-link" :href "/reset-password"}
-       "(Forgot password?)"]
-      [:span {:style "padding:0 0 0 10px;color:red;"
-              :id "loginError"}]]]]])
+  [:div {:class "container"}
+   [:div {:class "row"}
+    [:div {:class "col-xs-4"}
+     [:form {:method "POST" :action "login" :class ""
+             :id "loginForm" :novalidate ""}
+      [:fieldset {:class "form-group"}
+       (anti-forgery-field)
+       [:legend [:h2 "Log in"]]
+       [:div
+        [:label {:for "loginUsername"} "Email "]
+        [:input {:type "email" :name "username"
+                 :id "loginUsername" :class "form-control"}]]
+       [:div
+        [:label {:for "loginPassword"} "Password "]
+        [:input {:type "password" :name "password"
+                 :id "loginPassword" :class "form-control"}]]
+       [:div
+        [:input {:class "btn btn-primary"
+                 :value "Login" :type "submit"}]
+        [:a {:id "pass-reset-link" :href "/reset-password"}
+         "(Forgot password?)"]
+        [:span {:style "padding:0 0 0 10px;color:red;"
+                :id "loginError"}]]]]]]
+   (footer-box)])
 
 (defn reset-pwd []
   [:div
