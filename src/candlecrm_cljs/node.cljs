@@ -181,7 +181,7 @@
    (if (state/look :notes-edit)
      [:form {:class ""}
       [:fieldset {:class "form-group"}
-       [:h3 "Notes"]
+       [:h4 "Notes"]
        [:textarea {:type "text" :class "edit-field"
                    :on-change (util/set-field! :notes-text)
                    :value (state/look :notes-text)}]
