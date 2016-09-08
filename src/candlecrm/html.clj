@@ -56,20 +56,23 @@
             " at admin@candlecrm.com.")]])
 
 (defn homepage []
-  [:div {:class ""}
-   [:h2 "The CRM That Updates Itself"] [:hr]
-   [:p (str "CandleCRM is the only CRM that uses artificial"
-            " intelligence (AI) to replace manual data entry."
-            " CandleCRM can \"read\" emails, and figure out who your best"
-            " customers are, what company they work for, when"
-            " your next meeting with them is, and more. And when"
-            " new emails arrive, it updates itself, seamlessly"
-            " and automatically.")]
-   [:p (str "Because your data is entered automatically, you can start"
-            " using CandleCRM in under thirty seconds. Give it a try -"
-            " just jump in and go.")]
-   [:p (str "CandleCRM is currently in private beta. Check"
-            " back soon for more updates!")]])
+  [:div#homepage
+   [:div {:class "jumbotron"}
+    [:div {:class "container"}
+     [:h1 {:class "display-3"} "A CRM that updates itself."]
+     [:p (str "CandleCRM uses artificial intelligence (AI) to"
+              " update itself, replacing manual data entry.")]]]
+   [:div {:class "container"}
+    [:p (str "CandleCRM can \"read\" emails, and figure out who your best"
+             " customers are, what company they work for, when"
+             " your next meeting with them is, and more. And when"
+             " new emails arrive, it updates itself, seamlessly"
+             " and automatically.")]
+    [:p (str "Because your data is entered automatically, you can start"
+             " using CandleCRM in under thirty seconds. Give it a try -"
+             " just jump in and go.")]
+    [:p (str "CandleCRM is currently in private beta. Check"
+             " back soon for more updates!")]]])
 
 (defn login-box [content]
   [:div {:class ""}
@@ -95,30 +98,30 @@
     [:p "© 2016 CandleCRM"]]])
 
 (defn tab-class []
-  "")
+  "nav-item")
 
 (defn header-tab [logo-class name link-to]
   [:li {:class (tab-class)}
-   [:h3
-    [:a {:href link-to :class ""}
-     [:i {:class logo-class}]
-     (str "  " name)]]])
+   [:a {:href link-to :class "nav-link"}
+    #_[:i {:class logo-class}]
+    name]])
 
 (defn home-header []
-  [:div#menu-bar {:class ""}
-   [:div {:class ""}]
-   [:div {:class ""}
-    [:div {:class "menu-icons"}
-     [:ul {:class ""}
-      (header-tab "fa fa-home" "Home" "/")
-      (header-tab "fa fa-sign-in" "Log In" "/login.html")
-      (header-tab "fa fa-envelope" "Contact" "/contact.html")]]]])
+  [:nav#frontbar
+   {:class "navbar navbar-static-top navbar-dark bg-inverse"}
+   [:a {:class "navbar-brand" :href "#"}
+    "CandleCRM"]
+   [:ul {:class "nav navbar-nav"}
+    (header-tab "" "Home" "/")
+    (header-tab "" "Log In" "/login.html")
+    (header-tab "" "Contact" "/contact.html")]])
 
 (defn base-template [& content]
   (html5 {:lang "en"}
          [:head [:title "CandleCRM"]
           (charset) (viewport) (ie-render)
           (bootstrap-css) (font-awesome)
+          (include-css "/css/jumbotron.css")
           (include-css "/css/main.css")]
          [:body
           (home-header)
