@@ -49,11 +49,16 @@
 (defn ie-render []
   [:meta {:http-equiv "x-ua-compatible" :content "ie-edge"}])
 
+(defn footer-box []
+  [:footer [:hr]
+   [:p "© 2016 CandleCRM"]])
+
 (defn contact-page []
   [:div
    [:h2 "Contact us"]
    [:p (str "If you're interested in CandleCRM, feel free to contact us"
-            " at admin@candlecrm.com.")]])
+            " at admin@candlecrm.com.")]
+   (footer-box)])
 
 (defn homepage []
   [:div#homepage
@@ -61,18 +66,29 @@
     [:div {:class "container"}
      [:h1 {:class "display-3"} "A CRM that updates itself."]
      [:p (str "CandleCRM uses artificial intelligence (AI) to"
-              " update itself, replacing manual data entry.")]]]
+              " update itself, replacing manual data entry.")]
+     [:p [:a {:class "btn btn-primary btn-lg" :href "/contact.html"
+              :role "button"}
+          "Contact us"]]]]
    [:div {:class "container"}
-    [:p (str "CandleCRM can \"read\" emails, and figure out who your best"
-             " customers are, what company they work for, when"
-             " your next meeting with them is, and more. And when"
-             " new emails arrive, it updates itself, seamlessly"
-             " and automatically.")]
-    [:p (str "Because your data is entered automatically, you can start"
-             " using CandleCRM in under thirty seconds. Give it a try -"
-             " just jump in and go.")]
-    [:p (str "CandleCRM is currently in private beta. Check"
-             " back soon for more updates!")]]])
+    [:div {:class "row"}
+     [:div {:class "col-md-4"}
+      [:h2 "Email integration"]
+      [:p (str "CandleCRM can \"read\" emails, and figure out who your best"
+               " customers are, what company they work for, when"
+               " your next meeting with them is, and more. And when"
+               " new emails arrive, it updates itself, seamlessly"
+               " and automatically.")]]
+     [:div {:class "col-md-4"}
+      [:h2 "Easy to use"]
+      [:p (str "Because your data is entered automatically, you can start"
+               " using CandleCRM in under thirty seconds. Give it a try -"
+               " just jump in and go.")]]
+     [:div {:class "col-md-4"}
+      [:h2 "Coming soon"]
+      [:p (str "CandleCRM is currently in private beta. Check"
+               " back soon for more updates!")]]]
+    (footer-box)]])
 
 (defn login-box [content]
   [:div {:class ""}
@@ -90,12 +106,6 @@
    [:div {:class ""}]
    [:div {:class "main-logo"}
     [:img {:src "/candlecrm_logo.png" :class ""}]]])
-
-(defn footer-box []
-  [:div#page-footer {:class ""}
-   [:div {:class ""}]
-   [:div#main-page {:class ""}
-    [:p "© 2016 CandleCRM"]]])
 
 (defn tab-class []
   "nav-item")
@@ -126,7 +136,6 @@
          [:body
           (home-header)
           (login-box content)
-          (footer-box)
           (jquery-js) (tether-js) (bootstrap-js)
           (include-js "/js/login.js")]))
 
