@@ -168,10 +168,10 @@
         [:input {:type "password" :name "confirm"
                  :id "signupConfirm" :required "required"}]]
        [:div
-        [:input {:class ""
+        [:input {:class "btn btn-primary" 
                  :value "Sign up" :type "submit"}]
         [:span {:style "padding:0 0 0 10px;color:red;"
-                     :id "signupError"} flash]]]]]]])
+                :id "signupError"} flash]]]]]]])
 
 (defn login-form []
   [:div
@@ -189,7 +189,7 @@
       [:input {:type "password" :name "password"
                :id "loginPassword"}]]
      [:div
-      [:input {:class ""
+      [:input {:class "btn btn-primary"
                :value "Login" :type "submit"}]
       [:a {:id "pass-reset-link" :href "/reset-password"}
        "(Forgot password?)"]
@@ -209,7 +209,7 @@
       [:input {:type "text" :name "username"
                :id "resetUsername"}]]
      [:div
-      [:input {:class ""
+      [:input {:class "btn btn-primary"
                :value "Request reset" :type "submit"}]]]]])
 
 (defn new-password [user token]
@@ -233,7 +233,7 @@
       [:input {:type "password" :name "confirm"
                :id "setPwdConfirm" :required "required"}]]
      [:div
-      [:input {:class ""
+      [:input {:class "btn btn-primary"
                :value "Set new password" :type "submit"}]]]]])
 
 (defn login-needed [uri]

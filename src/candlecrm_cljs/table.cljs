@@ -71,7 +71,7 @@
 
 (defn refresh-email []
   [:a {:href "#" :on-click #(u/refresh-email!) :id "email-refresh"
-       :class " new-button"}
+       :class "btn btn-primary new-button" :role "button"}
    [:i {:class "fa fa-refresh"}]
    (str " Refresh email ")])
 

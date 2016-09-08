@@ -109,7 +109,7 @@
        [:a {:on-click #(-> cache (concat [(second attr)])
                            (concat [(count-cells attr cache)])
                            (state/set! "")) :href "#"
-            :class ""}
+            :class "btn btn-primary" :role "button"}
         [:i {:class "fa fa-plus"}]]))])
 
 (defn count-attr-cells [attr cache]
@@ -130,7 +130,7 @@
        ^{:key (first attr)}
        [input-block (second attr) cache])
      [:button {:type "button"
-               :class ""
+               :class "btn btn-primary"
                :on-click onclick}
       "Submit"]]]
    msg])

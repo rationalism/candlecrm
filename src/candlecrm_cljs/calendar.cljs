@@ -84,6 +84,7 @@
     [add-new s/event] [load-box]
     [prev-next-box :agenda u/update-agenda!
      (count (state/look :agenda-events)) :agenda]]
+   [:br]
    (let [events (agenda-events)]
      (if (empty? events)
        [:h2 "Loading events. Hang on, this might take a few seconds."]

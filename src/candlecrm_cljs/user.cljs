@@ -21,8 +21,7 @@
               :name "delete-radio" :value "no"
               :on-change (set-field! :delete-account :confirm-button)}]
      "No, don't delete my account"]
-    [:button {:type "submit"
-              :class ""
+    [:button {:type "submit" :class "btn btn-primary"
               :on-click u/delete-account!}
      "Confirm delete"]]])
 
@@ -45,23 +44,23 @@
                :on-change (set-field! :change-pwd :confirm)
                :value (state/look :change-pwd :confirm)}]]
      [:div
-      [:input {:class ""
+      [:input {:class "btn btn-primary"
                :value "Set new password" :type "button"
                :on-click u/change-password!}]]]]])
 
 (defn user-footer []
   [:div
    [:p
-    [:a {:href "/logout" :class ""}
+    [:a {:href "/logout" :class "btn btn-primary" :role "button"}
      "Log out"]]
    [:p
-    [:a {:href "#" :class ""
+    [:a {:href "#" :class "btn btn-primary" :role "button"
          :on-click #(state/set! [:change-pwd :show-form] :true)}
      "Change password"]]
    (when (state/look :change-pwd :show-form)
      [change-pwd-box])
    [:p
-    [:a {:href "#" :class ""
+    [:a {:href "#" :class "btn btn-primary" :role "button"
          :on-click #(state/set! [:delete-account :confirm-box] :true)}
      "Close account"]]
    (when (state/look :delete-account :confirm-box)

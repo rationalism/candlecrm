@@ -19,7 +19,7 @@
 
 (defn result-row [res]
   [:div [:hr]
-   [:h3.infotitle (str "Result #" (inc (first res)))]
+   [:h5.infotitle (str "Result #" (inc (first res)))]
    [node/show-node (get-title {:center-node (second res)})
     (second res) false]
    [:p [node-link (str "Link to " (get-title {:center-node (second res)}))

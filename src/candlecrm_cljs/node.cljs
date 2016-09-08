@@ -187,12 +187,12 @@
                    :value (state/look :notes-text)}]
        [:br]
        [:button {:type "button"
-                 :class ""
+                 :class "btn btn-primary"
                  :on-click #(u/edit-notes!)}
         "Edit"]]]
      [:div [:br]
       [:button {:type "button"
-                :class ""
+                :class "btn btn-primary"
                 :on-click #(set-notes!)}
        "Edit notes"]])])
 
@@ -206,25 +206,25 @@
        [:div
         [person-notes]
         [:div.person-emails
-         [:h3.infotitle (str "Emails to " node-name)]
+         [:h5.infotitle (str "Emails to " node-name)]
          [table/email-table [:current-node s/email-to] s/email-to
           (partial u/update-emails-person! s/email-to)]]
         [:div.person-emails
-         [:h3.infotitle (str "Emails from " node-name)]
+         [:h5.infotitle (str "Emails from " node-name)]
          [table/email-table [:current-node s/email-from] s/email-from
           (partial u/update-emails-person! s/email-from)]]]))])
 
 (defn show-node [node-name item aux?]
   [:div#node-box
-   [:h3.infotitle
+   [:h5.infotitle
     [:span node-name (str " (" (-> item s/type-label type-name) ") ")]
     (when aux?
       [:span
        [:a {:href "#" :on-click #(edit/edit-entity-switch (s/type-label item))
-            :class ""}
+            :class "btn btn-primary" :role "button"}
         "Edit"] " "
        [:a {:href "#" :on-click delete-entity-switch
-            :class ""}
+            :class "btn btn-primary" :role "button"}
         "Delete"]])]
    [info-items (-> item s/type-label s/node-paths) item]
    (when aux? [node-aux node-name item])])

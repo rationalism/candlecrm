@@ -194,3 +194,7 @@ input.edit-field {
 .navbar {
     border-radius: 0rem;
 }
+
+div.main {
+    top: 54px;
+}
