@@ -40,7 +40,7 @@
     (count (state/look :people-rows)) :people]
    [:p [util/add-new s/person]
     [util/load-box]]
-   [:table {:id "people-table" :class "table"}
+   [:table {:id "people-table" :class "table table-hover"}
     [:thead {:id "people-header" :class "thead-inverse"}
      [:tr
       (for [attr (util/add-ids person-attrs)]
@@ -83,7 +83,7 @@
        (count (apply state/look row-keys)) :email]
       [:p [refresh-email]
        [util/load-box]]])
-   [:table {:id "email-table" :class "table"}
+   [:table {:id "email-table" :class "table table-hover"}
     [:thead {:id "email-header" :class "thead-inverse"}
      [:tr
       (for [attr (util/add-ids email-attrs)]
