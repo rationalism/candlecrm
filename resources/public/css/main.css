@@ -1,3 +1,7 @@
+body {
+    font-size: 0.9rem;
+}
+
 div#content {
     background-color: #FFFFFF;
 }
@@ -109,8 +113,7 @@ span.select-text {
 }
 
 #search-box {
-    width: 20em;
-    float: right;
+    width: 20rem;
 }
 
 div#menu-bar .pure-menu-horizontal {
@@ -182,4 +185,12 @@ form.pure-form select {
 
 input.edit-field {
     margin-right: 1em;
+}
+
+.navbar-dark {
+    background-color: #222!important;
+}
+
+.navbar {
+    border-radius: 0rem;
 }

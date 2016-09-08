@@ -23,8 +23,7 @@
    [:h3 (str "Welcome. Your email is: " username)]])
 
 (defn home-content [& content]
-  [:div {:class ""}
-   [:div {:class ""}]
+  [:div {:class "col-sm-9 offset-sm-3 col-md-10 offset-md-2 main"}
    (into [:div#main-page {:class ""}]
          content)])
 
@@ -64,33 +63,36 @@
 
 (defn tab-class [num]
   (if (= num (state/look :tabid))
-    ""
-    ""))
+    "nav-item active"
+    "nav-item"))
 
 (defn header-tab [logo-class num name]
   [:li {:class (tab-class num)}
-   [:h3>a
-    {:href "#" :class ""
-     :on-click (set-tab-fn num)
-     :id (str "set-tab-" num)}
+   [:a {:href "#" :class "nav-link"
+        :on-click (set-tab-fn num)
+        :id (str "set-tab-" num)}
     [:i {:class logo-class}]
     (str " " name)]])
 
 (defn home-header []
-  [:div#menu-bar {:class ""}
-   [:div {:class ""}]
-   [:div {:class ""}
-    [:div {:class "menu-icons"}
-     [:ul {:class ""}
-      [header-tab "fa fa-list-ul" 10 "Agenda"]
-      [header-tab "fa fa-users" 1 "People"]
-      [header-tab "fa fa-envelope" 2 "Emails"]
-      [header-tab "fa fa-calendar" 3 "Calendar"]
-      [header-tab "fa fa-globe" 4 "Locations"]
-      [header-tab "fa fa-cog" 5 "My Account"]]]]
-   [:div#right-menu {:class ""}
-    [:div {:class "menu-icons"}
+  [:nav {:class "navbar navbar-dark navbar-fixed-top bg-inverse"}
+   [:a {:class "navbar-brand" :href "#"}
+    "CandleCRM"]
+   [:div#navbar
+    [:nav {:class "nav navbar-nav pull-xs-right"}
+     [:ul {:class "nav navbar-nav"}
+      [header-tab "" 5 "My Account"]]]
+    [:form {:class "form-inline pull-xs-right"}
      [search/search-box]]]])
+
+(defn side-header []
+  [:div {:class "col-sm-3 col-md-2 sidebar"}
+   [:ul {:class "nav nav-sidebar"}
+    [header-tab "fa fa-list-ul" 10 "Agenda"]
+    [header-tab "fa fa-users" 1 "People"]
+    [header-tab "fa fa-envelope" 2 "Emails"]
+    [header-tab "fa fa-calendar" 3 "Calendar"]
+    [header-tab "fa fa-globe" 4 "Locations"]]])
 
 (defn my-account []
   [:div
@@ -122,11 +124,14 @@
      [:div "Error: Page not found."])])
 
 (defn homepage []
-  [:div
+  [:div 
    [home-header]
-   [home-content
-    [:h2 ""]
-    [main-page]]])
+   [:div {:class "container-fluid"}
+    [:div {:class "row"}
+     [side-header]
+     [home-content
+      [:h2 ""]
+      [main-page]]]]])
 
 (defn insert-rows! [table n]
   (dotimes [i n]

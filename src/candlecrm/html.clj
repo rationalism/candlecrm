@@ -121,7 +121,6 @@
           (bootstrap-css) (font-awesome)
           (include-css "/css/main.css")]
          [:body
-          (header-box)
           (home-header)
           (login-box content)
           (footer-box)
@@ -133,12 +132,11 @@
          [:head [:title "CandleCRM"]
           (charset) (viewport) (ie-render)
           (bootstrap-css) (font-awesome)
+          (include-css "/css/dashboard.css")
           (include-css "/css/fullcalendar.min.css")
           (include-css "/css/main.css")]
          [:body
-          (header-box)
           (app-box content)
-          (footer-box)
           (include-js (goog-maps))
           (jquery-js) (tether-js) (bootstrap-js)
           (include-js "https://code.highcharts.com/highcharts.js")

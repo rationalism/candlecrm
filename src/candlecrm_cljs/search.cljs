@@ -12,10 +12,10 @@
     (u/run-search!)))
 
 (defn search-box []
-  [:fieldset {:class ""}
-   [:input {:id "search-box" :type "text" :name "search-box" :placeholder "Search"
-            :on-change (set-field! :search) :value (state/look :search)
-            :on-key-press search-key}]])
+  [:input {:id "search-box" :type "text" :name "search-box"
+           :placeholder "Search" :class "form-control"
+           :on-change (set-field! :search) :value (state/look :search)
+           :on-key-press search-key}])
 
 (defn result-row [res]
   [:div [:hr]
