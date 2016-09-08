@@ -82,7 +82,7 @@
     [:nav {:class "nav navbar-nav pull-xs-right"}
      [:ul {:class "nav navbar-nav"}
       [header-tab "" 5 "My Account"]]]
-    [:form {:class "form-inline pull-xs-right"}
+    [:div {:class "form-inline pull-xs-right"}
      [search/search-box]]]])
 
 (defn side-header []
