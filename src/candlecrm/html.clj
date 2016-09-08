@@ -56,7 +56,7 @@
 (defn contact-page []
   [:div
    [:h2 "Contact us"]
-   [:p (str "If you're interested in CandleCRM, feel free to contact us"
+   [:p (str "If you're interested in CandleCRM, please contact us"
             " at admin@candlecrm.com.")]
    (footer-box)])
 
