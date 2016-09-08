@@ -65,8 +65,8 @@
    [:div {:class "jumbotron"}
     [:div {:class "container"}
      [:h1 {:class "display-3"} "A CRM that updates itself."]
-     [:p (str "CandleCRM uses artificial intelligence (AI) to"
-              " update itself, replacing manual data entry.")]
+     [:p (str "CandleCRM uses artificial intelligence (AI) to keep"
+              " itself up-to-date, replacing manual data entry.")]
      [:p [:a {:class "btn btn-primary btn-lg" :href "/contact.html"
               :role "button"}
           "Contact us"]]]]
