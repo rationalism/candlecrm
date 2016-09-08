@@ -177,7 +177,7 @@
                               [:notes])))
 
 (defn person-notes []
-  [:div
+  [:div {:class "row"}
    (if (state/look :notes-edit)
      [:form {:class ""}
       [:fieldset {:class "form-group"}
@@ -203,16 +203,17 @@
                     empty? not)
                (->> s/email-from (state/look :current-node)
                     empty? not))
-       [:div
-        [person-notes]
-        [:div.person-emails
-         [:h5.infotitle (str "Emails to " node-name)]
-         [table/email-table [:current-node s/email-to] s/email-to
-          (partial u/update-emails-person! s/email-to)]]
-        [:div.person-emails
-         [:h5.infotitle (str "Emails from " node-name)]
-         [table/email-table [:current-node s/email-from] s/email-from
-          (partial u/update-emails-person! s/email-from)]]]))])
+       [:div {:class "container"}
+        [person-notes] [:br]
+        [:div {:class "row"}
+         [:div {:class "col-md-5"}
+          [:h5.infotitle (str "Emails to " node-name)]
+          [table/email-table [:current-node s/email-to] s/email-to
+           (partial u/update-emails-person! s/email-to)]]
+         [:div {:class "col-md-5 offset-md-1"}
+          [:h5.infotitle (str "Emails from " node-name)]
+          [table/email-table [:current-node s/email-from] s/email-from
+           (partial u/update-emails-person! s/email-from)]]]]))])
 
 (defn show-node [node-name item aux?]
   [:div#node-box
