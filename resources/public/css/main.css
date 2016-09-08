@@ -69,11 +69,11 @@ div#main-page table td.name {
     width: 20%;
 }
 
-div#tab2 table td.sent-date {
+div#tab2 table .sent-date {
     width: 20%;
 }
 
-table td.sent-date {
+table .sent-date {
     width: 40%;
 }
 

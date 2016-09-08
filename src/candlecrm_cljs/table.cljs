@@ -40,12 +40,12 @@
     (count (state/look :people-rows)) :people]
    [:p [util/add-new s/person]
     [util/load-box]]
-   [:table {:id "people-table" :class ""}
-    [:thead {:id "people-header"}
+   [:table {:id "people-table" :class "table"}
+    [:thead {:id "people-header" :class "thead-inverse"}
      [:tr
       (for [attr (util/add-ids person-attrs)]
         ^{:key (first attr)}
-        [:td {:class (name (first (second attr)))}
+        [:th {:class (name (first (second attr)))}
          (second (second attr))])]]
     [:tbody {:id "people-rows"}
      (for [p-row (-> :people-rows state/look util/add-ids)]
@@ -83,12 +83,12 @@
        (count (apply state/look row-keys)) :email]
       [:p [refresh-email]
        [util/load-box]]])
-   [:table {:id "email-table" :class ""}
-    [:thead {:id "email-header"}
+   [:table {:id "email-table" :class "table"}
+    [:thead {:id "email-header" :class "thead-inverse"}
      [:tr
       (for [attr (util/add-ids email-attrs)]
         ^{:key (first attr)}
-        [:td {:class (name (first (second attr)))}
+        [:th {:class (name (first (second attr)))}
          (second attr)])]]
     [:tbody {:id "email-rows"}
      (for [e-row (util/add-ids (apply state/look row-keys))]
