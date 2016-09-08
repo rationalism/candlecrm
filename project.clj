@@ -17,7 +17,7 @@
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [environ "1.1.0"]
-                 [com.taoensso/encore "2.80.0"]
+                 [com.taoensso/encore "2.80.1"]
                  [com.taoensso/timbre "4.7.4"]
                  [buddy "1.1.0"]
                  [com.google.api-client/google-api-client "1.22.0"
@@ -73,7 +73,7 @@
                  [org.seleniumhq.selenium/selenium-java "2.53.1"]
                  [com.cemerick/piggieback "0.2.1"
                   :exclusions [com.google.guava/guava]]
-                 [figwheel-sidecar "0.5.6"]
+                 [figwheel-sidecar "0.5.7"]
                  [org.jsoup/jsoup "1.9.2"]
                  [cc.mallet/mallet "2.0.8"
                   :exclusions [org.hamcrest/hamcrest-core]]
