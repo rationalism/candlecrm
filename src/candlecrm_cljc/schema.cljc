@@ -191,6 +191,9 @@
    geocode [["Latitude" lat] ["Longitude" lng]
             ["Buildings at this location" has-coord street-addr :id]]})
 
+(def exclude-edit [[notes] [notes-nlp]
+                   [has-coord lat] [has-coord lng]])
+
 (def schema-map {"PERSON" person-name "LOCATION" loc-name
                  "ORGANIZATION" org-name "MONEY" amount
                  "DATETIME" date-time "EMAIL" email-addr

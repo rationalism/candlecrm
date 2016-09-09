@@ -45,10 +45,14 @@
     (event-name (:center-node node) true)
     (simple-name node)))
 
+(defn exclude-path? [path]
+  (some #{path} s/exclude-edit))
+
 (defn new-attrs [node-type]
   (->> node-type s/node-paths (filter #(<= 2 (count %)))
        (filter #(>= 4 (count %))) (mapv rest)
-       (mapv #(if (> (count %) 2) (drop-last %) %))))
+       (mapv #(if (> (count %) 2) (drop-last %) %))
+       (remove exclude-path?)))
 
 (defn new-entity-switch [node-type]
   (let [type-attrs (new-attrs node-type)]

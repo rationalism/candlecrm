@@ -97,7 +97,7 @@
   [:div {:class "row form-group"}
    [:label {:class "col-xs-3 col-form-label"}
     (if (= 0 (first id-attr))
-      (first (second id-attr)) "")]
+      (str (first (second id-attr)) ":") "")]
    (let [attr (second (second id-attr))
          params (->> id-attr first vector (concat [attr])
                      (concat cache))]
