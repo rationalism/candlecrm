@@ -124,11 +124,11 @@
      [input-cell id-attr cache])])
 
 (defn entity-form [legend attrs cache onclick msg]
-  [:div {:class "container"}
+  [:div {:class "container-fluid"}
    [:div {:class "row"}
     [:form {:class ""}
      [:fieldset {:class "form-group"}
-      [:legend>h3 legend]
+      [:legend>h4 legend][:br]
       (for [attr attrs]
         ^{:key (first attr)}
         [input-block (second attr) cache])
