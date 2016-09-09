@@ -232,6 +232,8 @@ div.main {
 div.greyback {
     background-color: #E6E6E6;
     border-radius: 1rem;
+    padding: 1.5rem;
+    margin-top: 0.5rem;
 }
 
 img.home-circle {

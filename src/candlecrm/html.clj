@@ -168,54 +168,56 @@
 
 (defn signup-form [flash]
   [:div {:class "row"}
-   [:div.greyback {:class "col-xs-5"} [:br]
+   [:div {:class "col-xs-5"}
     [:form {:method "POST" :action "create-account"
             :class "" :id "signupForm" :novalidate ""}
      [:fieldset {:class "form-group"}
       (anti-forgery-field)
       [:legend [:h2 "Sign up"]]
-      [:div {:class "form-group"}
-       [:label {:for "signupUsername"} "Email "]
-       [:input {:type "email" :name "username" :class "form-control"
-                :id "signupUsername" :required "required"}]]
-      [:div {:class "form-group"}
-       [:label {:for "signupPassword"} "Password "]
-       [:input {:type "password" :name "password" :class "form-control"
-                :id "signupPassword" :required "required"}]]
-      [:div {:class "form-group"}
-       [:label {:for "signupConfirm"} "Confirm "]
-       [:input {:type "password" :name "confirm" :class "form-control"
-                :id "signupConfirm" :required "required"}]]
-      [:div {:class "form-group"}
-       [:input {:class "btn btn-primary" 
-                :value "Sign up" :type "submit"}]
-       [:span {:style "padding:0 0 0 10px;color:red;"
-               :id "signupError"} flash]]]]]])
+      [:div {:class "greyback"}
+       [:div {:class "form-group"}
+        [:label {:for "signupUsername"} "Email "]
+        [:input {:type "email" :name "username" :class "form-control"
+                 :id "signupUsername" :required "required"}]]
+       [:div {:class "form-group"}
+        [:label {:for "signupPassword"} "Password "]
+        [:input {:type "password" :name "password" :class "form-control"
+                 :id "signupPassword" :required "required"}]]
+       [:div {:class "form-group"}
+        [:label {:for "signupConfirm"} "Confirm "]
+        [:input {:type "password" :name "confirm" :class "form-control"
+                 :id "signupConfirm" :required "required"}]]
+       [:div {:class "form-group"}
+        [:input {:class "btn btn-primary" 
+                 :value "Sign up" :type "submit"}]
+        [:span {:style "padding:0 0 0 10px;color:red;"
+                :id "signupError"} flash]]]]]]])
 
 (defn login-form []
   [:div {:class "row"}
-   [:div.greyback {:class "col-xs-5"} [:br]
+   [:div {:class "col-xs-5"}
     [:form {:method "POST" :action "login" :class ""
             :id "loginForm" :novalidate ""}
      [:fieldset {:class "form-group"}
       (anti-forgery-field)
       [:legend [:h2 "Log in"]]
-      [:div {:class "form-group"}
-       [:label {:for "loginUsername"} "Email "]
-       [:input {:type "email" :name "username"
-                :id "loginUsername" :class "form-control"}]]
-      [:div {:class "form-group"}
-       [:label {:for "loginPassword"} "Password "]
-       [:input {:type "password" :name "password"
-                :id "loginPassword" :class "form-control"}]]
-      [:div {:class "form-group"}
-       [:input {:class "btn btn-primary"
-                :value "Log in" :type "submit"}]
-       [:a {:id "pass-reset-link" :href "/reset-password"
-            :class "btn btn-primary"}
-        "Forgot password?"]
-       [:span {:style "padding:0 0 0 10px;color:red;"
-               :id "loginError"}]]]]]])
+      [:div {:class "greyback"}
+       [:div {:class "form-group"}
+        [:label {:for "loginUsername"} "Email "]
+        [:input {:type "email" :name "username"
+                 :id "loginUsername" :class "form-control"}]]
+       [:div {:class "form-group"}
+        [:label {:for "loginPassword"} "Password "]
+        [:input {:type "password" :name "password"
+                 :id "loginPassword" :class "form-control"}]]
+       [:div {:class "form-group"}
+        [:input {:class "btn btn-primary"
+                 :value "Log in" :type "submit"}]
+        [:a {:id "pass-reset-link" :href "/reset-password"
+             :class "btn btn-primary"}
+         "Forgot password?"]
+        [:span {:style "padding:0 0 0 10px;color:red;"
+                :id "loginError"}]]]]]]])
 
 (defn reset-pwd []
   [:div
