@@ -101,6 +101,7 @@
    (let [attr (second (second id-attr))
          params (->> id-attr first vector (concat [attr])
                      (concat cache))]
+     (js/alert cache)
      [:div {:class "col-xs-4"}
       [:input {:type "text" :name (str attr (first id-attr))
                :on-change (apply set-field! params)
