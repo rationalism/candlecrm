@@ -192,7 +192,7 @@
         "Edit"]]]
      [:div [:br]
       [:button {:type "button"
-                :class "btn btn-primary"
+                :class "btn btn-primary btn-sm"
                 :on-click #(set-notes!)}
        "Edit notes"]])])
 
@@ -203,14 +203,14 @@
                     empty? not)
                (->> s/email-from (state/look :current-node)
                     empty? not))
-       [:div {:class "container"}
+       [:div {:class "container-fluid"}
         [person-notes] [:br]
         [:div {:class "row"}
-         [:div {:class "col-md-5"}
+         [:div {:class "col-md-6"}
           [:h5.infotitle (str "Emails to " node-name)]
           [table/email-table [:current-node s/email-to] s/email-to
            (partial u/update-emails-person! s/email-to)]]
-         [:div {:class "col-md-5 offset-md-1"}
+         [:div {:class "col-md-6"}
           [:h5.infotitle (str "Emails from " node-name)]
           [table/email-table [:current-node s/email-from] s/email-from
            (partial u/update-emails-person! s/email-from)]]]]))])
@@ -218,14 +218,16 @@
 (defn show-node [node-name item aux?]
   [:div#node-box
    [:h5.infotitle
-    [:span node-name (str " (" (-> item s/type-label type-name) ") ")]
+    [:span node-name " "
+     [:span {:class "tag tag-default"}
+      (-> item s/type-label type-name)]] " "
     (when aux?
       [:span
        [:a {:href "#" :on-click #(edit/edit-entity-switch (s/type-label item))
-            :class "btn btn-primary" :role "button"}
+            :class "btn btn-primary btn-sm" :role "button"}
         "Edit"] " "
        [:a {:href "#" :on-click delete-entity-switch
-            :class "btn btn-primary" :role "button"}
+            :class "btn btn-primary btn-sm" :role "button"}
         "Delete"]])]
    [info-items (-> item s/type-label s/node-paths) item]
    (when aux? [node-aux node-name item])])
