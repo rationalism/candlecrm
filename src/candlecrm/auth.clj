@@ -11,7 +11,7 @@
             [candlecrm.sendgrid :as sendgrid]
             [candlecrm_cljc.schema :as s]
             [crypto.random :as random]
-            [clj-time.core :refer [hours from-now]]
+            [clj-time.core :refer [seconds hours from-now]]
             [buddy.auth.backends.token :refer (jwe-backend)]
             [buddy.hashers :as hashers]
             [buddy.sign.jwt :as jwt]

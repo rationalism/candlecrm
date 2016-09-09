@@ -17,9 +17,7 @@
 (defn bootstrap-css []
   [:link {:rel "stylesheet"
           :href (str "https://maxcdn.bootstrapcdn.com/bootstrap/"
-                     "4.0.0-alpha.4/css/bootstrap.min.css")
-          :integrity "2hfp1SzUoho7/TsGGGDaFdsuuDL0LX2hnUp6VkX3CUQ2K4K+xjboZdsXyp4oUHZj"
-          :crossorigin "anonymous"}])
+                     "4.0.0-alpha.4/css/bootstrap.min.css")}])
 
 (defn jquery-js []
   [:script {:src "https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"
@@ -32,9 +30,7 @@
             :crossorigin "anonymous"}])
 
 (defn bootstrap-js []
-  [:script {:src "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.4/js/bootstrap.min.js"
-            :integrity "VjEeINv9OSwtWFLAtmc4JCtEJXXBub00gtSnszmspDLCtC0I4z4nqz7rEFbIZLLU"
-            :crossorigin "anonymous"}])
+  [:script {:src "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.4/js/bootstrap.min.js"}])
 
 (defn font-awesome []
   [:script {:src "https://use.fontawesome.com/6cf2e50a67.js"}])
