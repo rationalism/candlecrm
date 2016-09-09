@@ -177,24 +177,26 @@
                               [:notes])))
 
 (defn person-notes []
-  [:div {:class "row"}
-   (if (state/look :notes-edit)
-     [:form {:class ""}
-      [:fieldset {:class "form-group"}
-       [:h4 "Notes"]
-       [:textarea {:type "text" :class "edit-field"
-                   :on-change (util/set-field! :notes-text)
-                   :value (state/look :notes-text)}]
-       [:br]
+  [:div {:class "container-fluid"}
+   [:div {:class "row"}
+    (if (state/look :notes-edit)
+      [:div {:class "col-xs-6"} [:br]
+       [:form 
+        [:fieldset {:class "form-group"}
+         [:h5 "Edit notes"]
+         [:textarea {:type "text" :class "edit-field form-control"
+                     :on-change (util/set-field! :notes-text)
+                     :value (state/look :notes-text)}]
+         [:br]
+         [:button {:type "button"
+                   :class "btn btn-primary"
+                   :on-click #(u/edit-notes!)}
+          "Edit"]]]]
+      [:div [:br]
        [:button {:type "button"
-                 :class "btn btn-primary"
-                 :on-click #(u/edit-notes!)}
-        "Edit"]]]
-     [:div [:br]
-      [:button {:type "button"
-                :class "btn btn-primary btn-sm"
-                :on-click #(set-notes!)}
-       "Edit notes"]])])
+                 :class "btn btn-primary btn-sm"
+                 :on-click #(set-notes!)}
+        "Edit notes"]])]])
 
 (defn node-aux [node-name item]
   [:div
@@ -203,7 +205,7 @@
                     empty? not)
                (->> s/email-from (state/look :current-node)
                     empty? not))
-       [:div {:class "container-fluid"}
+       [:div
         [person-notes] [:br]
         [:div {:class "row"}
          [:div {:class "col-md-6"}
@@ -217,18 +219,20 @@
 
 (defn show-node [node-name item aux?]
   [:div#node-box
-   [:h5.infotitle
-    [:span node-name " "
-     [:span {:class "tag tag-default"}
-      (-> item s/type-label type-name)]] " "
-    (when aux?
-      [:span
-       [:a {:href "#" :on-click #(edit/edit-entity-switch (s/type-label item))
-            :class "btn btn-primary btn-sm" :role "button"}
-        "Edit"] " "
-       [:a {:href "#" :on-click delete-entity-switch
-            :class "btn btn-primary btn-sm" :role "button"}
-        "Delete"]])]
-   [info-items (-> item s/type-label s/node-paths) item]
+   [:div {:class "container-fluid"}
+    [:div {:class "row"}
+     [:h5.infotitle
+      [:span node-name " "
+       [:span {:class "tag tag-default"}
+        (-> item s/type-label type-name)]] " "
+      (when aux?
+        [:span
+         [:a {:href "#" :on-click #(edit/edit-entity-switch (s/type-label item))
+              :class "btn btn-primary btn-sm" :role "button"}
+          "Edit"] " "
+         [:a {:href "#" :on-click delete-entity-switch
+              :class "btn btn-primary btn-sm" :role "button"}
+          "Delete"]])]
+     [info-items (-> item s/type-label s/node-paths) item]]]
    (when aux? [node-aux node-name item])])
 
