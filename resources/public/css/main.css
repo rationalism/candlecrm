@@ -6,6 +6,14 @@ div#homepage {
     font-size: 1rem;
 }
 
+footer#copyright {
+    font-size: 1.1rem;
+}
+
+div#login {
+    font-size: 1rem;
+}
+
 nav#frontbar {
     font-size: 1.05rem;
 }
@@ -219,4 +227,9 @@ div.main {
     padding-bottom: 8rem;
     padding-top: 8rem;
     color: #FFF;
+}
+
+div.greyback {
+    background-color: #E6E6E6;
+    border-radius: 1rem;
 }

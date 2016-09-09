@@ -27,9 +27,11 @@
 (defn login-form [{:keys [flash]}]
   (html-wrapper
    (html/base-template
-    [:div#homepage
-     (html/signup-form flash)
-     (html/login-form)])))
+    [:div {:class "container"}
+     [:div#login
+      [:br] (html/signup-form flash) [:br]
+      (html/login-form)]
+     (html/footer-box)])))
 
 (defn contact-form [_req]
   (html-wrapper
