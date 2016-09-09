@@ -15,7 +15,7 @@
 
 (defn people-req [type]
   [:pages/fetch-people
-   {:start (state/person-pos type)
+   {:start (state/person-pos type) :type type
     :limit (state/look :page-lengths type)}])
 
 (defn set-people! [type rows]

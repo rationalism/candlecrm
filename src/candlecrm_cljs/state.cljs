@@ -5,9 +5,9 @@
 (defonce a
   (r/atom
    {:counters {s/person 0 s/email 0 s/email-from 0 s/email-to 0
-               :agenda 0}
+               s/organization 0 :agenda 0}
     :page-lengths {s/person 20 s/email 20 :agenda 20 s/event 50
-                   s/location 50 s/building 50}
+                   s/organization 20 s/location 50 s/building 50}
     :user {:username "Joe Bob Smith"}
     :tabid 10
     :rows {s/person [] s/email [] s/organization []}
