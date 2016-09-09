@@ -10,7 +10,7 @@
                    s/location 50 s/building 50}
     :user {:username "Joe Bob Smith"}
     :tabid 10
-    :rows {s/person [] s/email []}
+    :rows {s/person [] s/email [] s/organization []}
     :current-node nil
     :prop-filters {}
     :cal-events [{:title "event1" :start "2015-11-05" :end "2015-11-06"}
@@ -43,9 +43,9 @@
   (* (look :counters :agenda)
      (look :page-lengths :agenda)))
 
-(defn person-pos []
-  (* (look :counters s/person)
-     (look :page-lengths s/person)))
+(defn person-pos [type]
+  (* (look :counters type)
+     (look :page-lengths type)))
 
 (defn email-pos []
   (* (look :counters s/email)

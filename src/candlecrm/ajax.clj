@@ -68,7 +68,7 @@
                 :edit/edit-notes {:fn email/edit-notes!
                                   :keys [:node :notes]}
                 :pages/fetch-people {:fn queries/person-from-user
-                                     :keys [:start :limit]}
+                                     :keys [:start :limit :type]}
                 :pages/fetch-agenda {:fn queries/event-agenda
                                      :keys [:start :limit]}
                 :pages/fetch-emails {:fn queries/emails-from-user

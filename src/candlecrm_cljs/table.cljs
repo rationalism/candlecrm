@@ -34,11 +34,11 @@
          ^{:key (first attr)}
          [person-cell person (first (second attr))])])
 
-(defn people-table []
+(defn people-table [type]
   [:div
-   [util/prev-next-box s/person u/update-people!
-    (count (state/look :rows s/person)) s/person]
-   [:p [util/add-new s/person]
+   [util/prev-next-box type (partial u/update-people! type)
+    (count (state/look :rows type)) type]
+   [:p [util/add-new type]
     [util/load-box]]
    [:table {:id "people-table" :class "table table-hover"}
     [:thead {:id "people-header" :class "thead-inverse"}
@@ -48,7 +48,7 @@
         [:th {:class (name (first (second attr)))}
          (second (second attr))])]]
     [:tbody {:id "people-rows"}
-     (for [p-row (->> s/person (state/look :rows) util/add-ids)]
+     (for [p-row (->> type (state/look :rows) util/add-ids)]
        ^{:key (first p-row)}
        [person-row (second p-row)])]]])
 

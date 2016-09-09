@@ -13,17 +13,17 @@
 (defn send! [req update-fn]
   ((state/look :ajax-chan) req 5000 update-fn))
 
-(defn people-req []
+(defn people-req [type]
   [:pages/fetch-people
-   {:start (state/person-pos)
-    :limit (state/look :page-lengths s/person)}])
+   {:start (state/person-pos type)
+    :limit (state/look :page-lengths type)}])
 
-(defn set-people! [rows]
+(defn set-people! [type rows]
   {:pre [(coll? rows)]}
-  (state/set! [:rows s/person] rows))
+  (state/set! [:rows type] rows))
 
-(defn update-people! []
-  (send! (people-req) set-people!))
+(defn update-people! [type]
+  (send! (people-req type) (partial set-people! type)))
 
 (defn agenda-req []
   [:pages/fetch-agenda
@@ -283,7 +283,8 @@
     (state/set! [:loading] true)
     (js/setTimeout #(state/set! [:loading] false) 1000)
     (update-emails!)
-    (update-people!)
+    (update-people! s/person)
+    (update-people! s/organization)
     (update-agenda!)
     (fetch-ranks! s/event false)
     (fetch-ranks! s/building false)))

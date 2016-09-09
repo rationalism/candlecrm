@@ -21,12 +21,12 @@
        ", r]) as vs RETURN vs ORDER BY o DESC"))
 
 (defn person-from-user [user query-map]
-  (->> [(str "MATCH (root:" (neo4j/prop-label user s/person)
+  (->> [(str "MATCH (root:" (neo4j/prop-label user (:type query-map))
              ") OPTIONAL MATCH (root)<-[:" (neo4j/esc-token s/email-to)
              "]-(em:" (neo4j/prop-label user s/email)
              ") WITH root, count(em) as o ORDER BY o DESC"
              " SKIP {start} LIMIT {limit}" (vals-collect))
-        query-map]
+        (dissoc query-map :type)]
        neo4j/cypher-query (mapv mlrecon/mapify-params)))
 
 (defn emails-from-user [user query-map]

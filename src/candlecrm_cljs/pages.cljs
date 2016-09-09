@@ -91,6 +91,7 @@
    [:ul {:class "nav nav-sidebar"}
     [header-tab "fa fa-list-ul" 10 "Agenda"]
     [header-tab "fa fa-users" 1 "People"]
+    [header-tab "fa fa-briefcase" 11 "Companies"]
     [header-tab "fa fa-envelope" 2 "Emails"]
     [header-tab "fa fa-calendar" 3 "Calendar"]
     [header-tab "fa fa-globe" 4 "Locations"]]])
@@ -112,7 +113,7 @@
 (defn main-page []
   [:div
    (condp = (state/look :tabid)
-     1 [:div#tab1.tab-show [table/people-table]]
+     1 [:div#tab1.tab-show [table/people-table s/person]]
      2 [:div#tab2.tab-show [all-email-table]]
      3 [:div#tab3.tab-show [calendar]]
      4 [:div#tab4.tab-show [locations]]
@@ -122,6 +123,7 @@
      8 (edit/edit-form)
      9 [search/search-results]
      10 [calendar/agenda]
+     11 [:div#tab11.tab-show [table/people-table s/organization]]
      [:div "Error: Page not found."])])
 
 (defn homepage []
