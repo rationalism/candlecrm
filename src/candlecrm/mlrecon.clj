@@ -747,7 +747,16 @@
   (let [[pos-cs neg-cs] @traindata]
     (train-full user class pos-cs neg-cs)))
 
+(defn norecon-switch [user class]
+  [(str "MATCH (root:" (neo4j/prop-label user class)
+        ":" (neo4j/esc-token s/recon)
+        ") SET root:" (neo4j/esc-token s/norecon))
+   (str "MATCH (root:" (neo4j/prop-label user class)
+        ":" (neo4j/esc-token s/recon)
+        ") REMOVE root:" (neo4j/esc-token s/recon))])
+
 (defn train-iterate [user class]
+  (neo4j/cypher-combined-tx (norecon-switch user class))
   (when (empty? @recon-pairs)
     (reset! recon-pairs (shuffle (find-candidates user class))))
   (gather-train class)
