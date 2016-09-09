@@ -38,13 +38,14 @@
     [add-new rel-type] [load-box]]
    [:div#people-ranks
     [:span
-     [:span.select-text "Select a person: "]
-     [:form {:class ""}
-      [:select {:class (str "people-list-" (name rel-type))
-                :on-change #(u/rel-switch (.. % -target -value) rel-type)}
-       (for [person (add-ids (state/look :rank-lists rel-type))]
-         ^{:key (first person)}
-         [person-option (second person)])]]]]])
+     [:form
+      [:div {:class "form-group"}
+       [:span.select-text "Select a person: "]
+       [:select {:class (str "form-control people-list-" (name rel-type))
+                 :on-change #(u/rel-switch (.. % -target -value) rel-type)}
+        (for [person (add-ids (state/look :rank-lists rel-type))]
+          ^{:key (first person)}
+          [person-option (second person)])]]]]]])
 
 (defn calendar []
   [:div#calendar
