@@ -4,14 +4,13 @@
 
 (defonce a
   (r/atom
-   {:counters {:people 0 :email 0 s/email-from 0 s/email-to 0
+   {:counters {s/person 0 s/email 0 s/email-from 0 s/email-to 0
                :agenda 0}
-    :page-lengths {:people 20 :email 20 :agenda 20 s/event 50
+    :page-lengths {s/person 20 s/email 20 :agenda 20 s/event 50
                    s/location 50 s/building 50}
     :user {:username "Joe Bob Smith"}
     :tabid 10
-    :people-rows []
-    :email-rows []
+    :rows {s/person [] s/email []}
     :current-node nil
     :prop-filters {}
     :cal-events [{:title "event1" :start "2015-11-05" :end "2015-11-06"}
@@ -45,16 +44,16 @@
      (look :page-lengths :agenda)))
 
 (defn person-pos []
-  (* (look :counters :people)
-     (look :page-lengths :people)))
+  (* (look :counters s/person)
+     (look :page-lengths s/person)))
 
 (defn email-pos []
-  (* (look :counters :email)
-     (look :page-lengths :email)))
+  (* (look :counters s/email)
+     (look :page-lengths s/email)))
 
 (defn email-person-pos [link-type]
   (* (look :counters link-type)
-     (look :page-lengths :email)))
+     (look :page-lengths s/email)))
 
 (defn update! [& args]
   (apply (partial swap! a update-in) args))

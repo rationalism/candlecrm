@@ -16,11 +16,11 @@
 (defn people-req []
   [:pages/fetch-people
    {:start (state/person-pos)
-    :limit (state/look :page-lengths :people)}])
+    :limit (state/look :page-lengths s/person)}])
 
 (defn set-people! [rows]
   {:pre [(coll? rows)]}
-  (state/set! [:people-rows] rows))
+  (state/set! [:rows s/person] rows))
 
 (defn update-people! []
   (send! (people-req) set-people!))
@@ -57,18 +57,18 @@
 (defn email-req []
   [:pages/fetch-emails
    {:start (state/email-pos)
-    :limit (state/look :page-lengths :email)}])
+    :limit (state/look :page-lengths s/email)}])
 
 (defn email-person-req [link-type]
   [:pages/person-emails
    {:person-id (state/look :current-node :center-node :id)
     :link link-type
     :start (state/email-person-pos link-type)
-    :limit (state/look :page-lengths :email)}])
+    :limit (state/look :page-lengths s/email)}])
 
 (defn set-emails! [rows]
   {:pre [(coll? rows)]}
-  (state/set! [:email-rows] rows))
+  (state/set! [:rows s/email] rows))
 
 (defn update-emails! []
   (send! (email-req) set-emails!))

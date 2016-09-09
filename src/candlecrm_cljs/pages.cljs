@@ -103,7 +103,7 @@
 
 (defn all-email-table []
   [:div
-   [table/email-table [:email-rows] :email u/update-emails!]])
+   [table/email-table [:rows s/email] s/email u/update-emails!]])
 
 (defn show-node [node]
   [node/show-node (get-title node)

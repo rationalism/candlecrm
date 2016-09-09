@@ -36,8 +36,8 @@
 
 (defn people-table []
   [:div
-   [util/prev-next-box :people u/update-people!
-    (count (state/look :people-rows)) :people]
+   [util/prev-next-box s/person u/update-people!
+    (count (state/look :rows s/person)) s/person]
    [:p [util/add-new s/person]
     [util/load-box]]
    [:table {:id "people-table" :class "table table-hover"}
@@ -48,7 +48,7 @@
         [:th {:class (name (first (second attr)))}
          (second (second attr))])]]
     [:tbody {:id "people-rows"}
-     (for [p-row (-> :people-rows state/look util/add-ids)]
+     (for [p-row (->> s/person (state/look :rows) util/add-ids)]
        ^{:key (first p-row)}
        [person-row (second p-row)])]]])
 
@@ -77,10 +77,10 @@
 
 (defn email-table [row-keys counter update-fn]
   [:div
-   (when (= row-keys [:email-rows])
+   (when (= row-keys [:rows s/email])
      [:div
       [util/prev-next-box counter update-fn
-       (count (apply state/look row-keys)) :email]
+       (count (apply state/look row-keys)) s/email]
       [:p [refresh-email]
        [util/load-box]]])
    [:table {:id "email-table" :class "table table-hover"}
