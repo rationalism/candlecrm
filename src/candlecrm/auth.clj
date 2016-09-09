@@ -115,7 +115,9 @@
 
 (defn delete-user-data! [user]
   (when (neo4j/get-property user s/index-run)
-    (index/drop-constraints! user))
+    (try (index/drop-constraints! user)
+         (catch Exception e
+           (println "Could not drop constraints for user " user))))
   (index/delete-all! user)
   (delete-queue! user))
 
