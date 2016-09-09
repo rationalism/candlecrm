@@ -76,21 +76,30 @@
    [:div {:class "container"}
     [:div {:class "row"}
      [:div {:class "col-md-4"}
-      [:h2 "Email integration"]
-      [:p (str "CandleCRM can \"read\" emails, and figure out who your best"
-               " customers are, what company they work for, when"
-               " your next meeting with them is, and more. And when"
-               " new emails arrive, it updates itself, seamlessly"
-               " and automatically.")]]
+      [:img {:class "img-fluid m-x-auto img-circle home-circle"
+             :src "/images/email_circle.jpg"}]
+      [:h2 {:class "text-xs-center"} "Email integration"]
+      [:p {:class "text-xs-center"}
+       (str "CandleCRM can \"read\" emails, and figure out who your best"
+            " customers are, what company they work for, when"
+            " your next meeting with them is, and more. And when"
+            " new emails arrive, it updates itself, seamlessly"
+            " and automatically.")]]
      [:div {:class "col-md-4"}
-      [:h2 "Easy to use"]
-      [:p (str "Because your data is entered automatically, you can start"
-               " using CandleCRM in under thirty seconds. Give it a try -"
-               " just jump in and go.")]]
+      [:img {:class "img-fluid m-x-auto img-circle home-circle"
+             :src "/images/relax.jpg"}]
+      [:h2 {:class "text-xs-center"} "Easy to use"]
+      [:p {:class "text-xs-center"}
+       (str "Because your data is entered automatically, you can start"
+            " using CandleCRM in under thirty seconds. Give it a try -"
+            " just jump in and go.")]]
      [:div {:class "col-md-4"}
-      [:h2 "Coming soon"]
-      [:p (str "CandleCRM is currently in private beta. Check"
-               " back soon for more updates!")]]]
+      [:img {:class "img-fluid m-x-auto img-circle home-circle"
+             :src "/images/soon.jpg"}]
+      [:h2 {:class "text-xs-center"} "Coming soon"]
+      [:p {:class "text-xs-center"}
+       (str "CandleCRM is in private beta. Check"
+            " back soon for more updates!")]]]
     (footer-box)]])
 
 (defn login-box [content]
