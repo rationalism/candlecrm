@@ -214,7 +214,7 @@
     [s/email-sent 300000]]
    s/person
    [[s/s-name s/s-name]
-    [s/s-name 0.6]
+    [s/s-name 0.9]
     [s/email-addr s/email-addr]
     [s/phone-num s/phone-num]
     [s/website s/website]
