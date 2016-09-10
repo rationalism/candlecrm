@@ -511,7 +511,7 @@
        (mapcat #(update % 1 url-brackets))
        vec (rconj (last chunks)) (str/join "")))
 
-(defn add-urls [sentence]
+(defnc add-urls [sentence]
   (let [char-map (sentence-token-map sentence)
         text (.toString sentence)]
     (->> text (library-map url-functions) (boundaries-map sentence)
