@@ -10,20 +10,24 @@
    [:p "Your account will be deleted."]
    [:p "All data will be lost permanently!"]
    [:p "Are you sure you want to delete your account?"]
-   [:form {:class "" :action "/logout"}
-    [:label {:class "" :for "yes-delete"}
-     [:input {:id "yes-delete" :type "radio"
-              :name "delete-radio" :value "yes"
-              :on-change (set-field! :delete-account :confirm-button)}]
-     "Yes, please delete my account"]
-    [:label {:class "" :for "no-delete"}
-     [:input {:id "no-delete" :type "radio"
-              :name "delete-radio" :value "no"
-              :on-change (set-field! :delete-account :confirm-button)}]
-     "No, don't delete my account"]
-    [:button {:type "submit" :class "btn btn-primary"
-              :on-click u/delete-account!}
-     "Confirm delete"]]])
+   [:form {:action "/logout"}
+    [:fieldset {:class "form-group"}
+     [:div {:class "form-check"}
+      [:label {:class "form-check-label" :for "yes-delete"}
+       [:input {:id "yes-delete" :type "radio" :class "form-check-input"
+                :name "delete-radio" :value "yes"
+                :on-change (set-field! :delete-account :confirm-button)}]
+       "Yes, please delete my account"]]
+     [:div {:class "form-check"}
+      [:label {:class "form-check-label" :for "no-delete"}
+       [:input {:id "no-delete" :type "radio" :class "form-check-input"
+                :name "delete-radio" :value "no"
+                :on-change (set-field! :delete-account :confirm-button)}]
+       "No, don't delete my account"]]
+     [:div {:class "form-group"}
+      [:button {:type "submit" :class "btn btn-primary"
+                :on-click u/delete-account!}
+       "Confirm delete"]]]]])
 
 (defn change-pwd-box []
   [:div
