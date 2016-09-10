@@ -270,10 +270,14 @@
    [:h2 "Error: No such object can be found."]])
 
 (defn gmail-setup [flash username auth-url]
-  [:div
-   [:h2 "Set up your account by connecting your email"]
-   [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
-   [:h3 (str "Your email address is: " username)]
-   [:h3 "Select an email provider"]
-   [:a {:class "" :href auth-url}
-    [:h3 "GMail"]]])
+  [:div {:class "container"}
+   [:div {:class "row"}
+    [:div {:class "col-xs-8"}
+     [:br] [:h3 "Welcome! Set up your account by connecting your email."]
+     [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
+     [:h5 (str "Your email address is: " username)]
+     [:h5 "Select an email provider:"][:br]
+     [:a {:class "btn btn-primary btn-lg" :href auth-url
+          :role "button"}
+      [:h5 "GMail"]]]]
+   (footer-box)])
