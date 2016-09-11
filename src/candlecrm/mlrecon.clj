@@ -28,7 +28,7 @@
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
 
-(def recon-stop [])
+(def recon-stop [s/event])
 
 (defn models-dir []
   "models")
