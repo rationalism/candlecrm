@@ -28,7 +28,7 @@
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
 
-(def recon-stop [s/event])
+(def recon-stop [])
 
 (defn models-dir []
   "models")
@@ -544,7 +544,7 @@
 
 (defn optional-search [user class query]
   (if (= class s/person)
-    (concat query [(email-candidate-meta user)])
+    query #_(concat query [(email-candidate-meta user)])
     query))
 
 (defn find-candidate-paths [user class]
