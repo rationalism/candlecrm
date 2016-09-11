@@ -208,7 +208,8 @@
   (->> resource io/input-stream deserialize-stream))
 
 (defn average [coll]
-  (/ (apply + coll) (count coll)))
+  (if (empty? coll) 0.0
+      (/ (apply + coll) (count coll))))
 
 (defn map-first [coll]
   (map #(map first %) coll))

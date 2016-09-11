@@ -24,11 +24,11 @@
 (def model-rollover 0)
 
 (defonce recon-models (atom {}))
-(defonce conflict-models (atom {}))
+(defonce conflict-models (atom {})) 
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
 
-(def recon-stop [])
+(def recon-stop [s/person])
 
 (defn models-dir []
   "models")

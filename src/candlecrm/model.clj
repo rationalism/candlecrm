@@ -183,6 +183,9 @@
 (defn count-tokens [s]
   (count (str/split s #" ")))
 
+(defn token-count-coll [a b]
+  (->> [a b] (map #(map count-tokens %)) (map average)))
+
 (defn cap-ratio [s]
   (let [tokens (remove nil? (map first (str/split s #" ")))
         upper-count (count (filter #(Character/isUpperCase %) tokens))]
@@ -257,7 +260,8 @@
     [[s/email-to s/email-addr] [is-eq]]
     [[s/email-uid] [is-eq which-nil]]]
    s/person
-   [[[s/s-name] [overlap-score count-sort lcs lev-split len-and-diff]]
+   [[[s/s-name] [overlap-score count-sort token-count-coll
+                 lcs lev-split len-and-diff]]
     [[s/email-addr] [overlap-score count-sort is-eq lev shortest]]
     [[s/phone-num] [overlap]]
     [[s/website] [overlap]]
