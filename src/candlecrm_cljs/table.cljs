@@ -12,27 +12,27 @@
 (def email-attrs {s/email-sent "Date"
                   s/email-subject "Subject"})
 
-(defn person-link [person attr]
+(defn person-link [type person attr]
   [util/node-link
    (if-let [name (util/get-first person attr)]
      name "(No name)")
-   (person :id) s/person])
+   (:id person) type])
 
 (defn person-site [person attr]
   [:a {:href (util/get-first person attr)}
    (util/get-first person attr)])
 
-(defn person-cell [person attr]
+(defn person-cell [type person attr]
   [:td {:class (name attr)}
    (condp = attr
-     s/s-name [person-link person attr]
+     s/s-name [person-link type person attr]
      s/website [person-site person attr]
      (util/get-first person attr))])
 
-(defn person-row [person]
+(defn person-row [type person]
   [:tr (for [attr (util/add-ids person-attrs)]
          ^{:key (first attr)}
-         [person-cell person (first (second attr))])])
+         [person-cell type person (first (second attr))])])
 
 (defn people-table [type]
   [:div
@@ -50,7 +50,7 @@
     [:tbody {:id "people-rows"}
      (for [p-row (->> type (state/look :rows) util/add-ids)]
        ^{:key (first p-row)}
-       [person-row (second p-row)])]]])
+       [person-row type (second p-row)])]]])
 
 (defn email-link [email attr]
   [util/node-link (->> email attr (sort-by second >) ffirst)
