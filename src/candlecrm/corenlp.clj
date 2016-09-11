@@ -515,8 +515,8 @@
   (let [char-map (sentence-token-map sentence)
         text (.toString sentence)]
     (->> text (library-map url-functions) (boundaries-map sentence)
-         (filter #(= (second %) "URL")) keys (map first)
-         (sort-by first) (map #(update % 1 inc)) (apply concat)
+         (filter #(= (second %) "URL")) keys (map first) (sort-by first)
+         (remove nil?) (map #(update % 1 inc)) (apply concat)
          (map #(- % (->> sentence get-tokens first .beginPosition)))
          (sentence-ends text) vec (beam 2)
          (map #(concat [text] %)) (map #(apply subs %))
