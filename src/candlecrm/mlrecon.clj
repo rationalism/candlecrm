@@ -588,7 +588,7 @@
 (defn big-diffs [user class cols]
   (->> (find-candidates user class) (get-diffs user class)
        (map vec) (map #(update % 1 (partial diff-score cols)))
-       (sort-by second >) vec))
+       (sort-by second <) vec))
 
 (defnp conflict-data [user class ids]
   (fetch-all-paths
