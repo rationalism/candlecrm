@@ -20,14 +20,29 @@
        " type(r), v." (neo4j/esc-token s/value)
        ", r]) as vs RETURN vs ORDER BY o DESC"))
 
-(defn person-from-user [user query-map]
-  (->> [(str "MATCH (root:" (neo4j/prop-label user (:type query-map))
+(defn org-list [user query-map]
+  (->> [(str "MATCH (root:" (neo4j/prop-label user s/organization)
+             ") OPTIONAL MATCH (root)<-[:" (neo4j/esc-token s/link-to)
+             "]-(h:" (neo4j/prop-label user s/hyperlink)
+             ") WITH root, count(h) as o ORDER BY o DESC"
+             " SKIP {start} LIMIT {limit}" (vals-collect))
+        query-map]
+       neo4j/cypher-query (mapv mlrecon/mapify-params)))
+
+(defn person-list [user query-map]
+  (->> [(str "MATCH (root:" (neo4j/prop-label user s/person)
              ") OPTIONAL MATCH (root)<-[:" (neo4j/esc-token s/email-to)
              "]-(em:" (neo4j/prop-label user s/email)
              ") WITH root, count(em) as o ORDER BY o DESC"
              " SKIP {start} LIMIT {limit}" (vals-collect))
-        (dissoc query-map :type)]
+        query-map]
        neo4j/cypher-query (mapv mlrecon/mapify-params)))
+
+(defn person-from-user [user query-map]
+  (condp = (:type query-map)
+    s/person (person-list user (dissoc query-map :type))
+    s/organization (org-list user (dissoc query-map :type))
+    []))
 
 (defn emails-from-user [user query-map]
   (->> [(str "MATCH (root:" (neo4j/prop-label user s/email)
