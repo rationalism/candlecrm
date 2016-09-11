@@ -138,10 +138,12 @@
 (def never-show
   [["Email from" :link-to s/text-mentions :email-from :name :id]])
 
-(defn remove-dupes [attrs]
+(defn remove-dupes [aux? attrs]
   (cond->> attrs
     (some #{s/body-nlp} (map last attrs))
     (remove #(= s/email-body (last %)))
+    (and (not aux?) (some #{s/event-context} (map last attrs)))
+    (remove #(= s/event-context (last %)))
     (some #{s/notes-nlp} (map last attrs))
     (remove #(= s/notes (last %)))
     (some #{["Sent by" s/email-from s/s-name :id]} attrs)
@@ -154,12 +156,12 @@
 (defn drop-id [coll]
   (if (= :id (last coll)) (drop-last coll) coll))
 
-(defn info-items [attrs item]
+(defn info-items [attrs aux? item]
   [:div
    (doall
     (for [attr (->> attrs (filter #(->> % rest drop-id vec
                                         (contains? item)))
-                    remove-dupes util/add-ids)]
+                    (remove-dupes aux?) util/add-ids)]
       ^{:key (first attr)}
       [:div.infoitem
        [str-item (-> attr second first)
@@ -233,6 +235,6 @@
          [:a {:href "#" :on-click delete-entity-switch
               :class "btn btn-primary btn-sm" :role "button"}
           "Delete"]])]
-     [info-items (-> item s/type-label s/node-paths) item]]]
+     [info-items (-> item s/type-label s/node-paths) aux? item]]]
    (when aux? [node-aux node-name item])])
 
