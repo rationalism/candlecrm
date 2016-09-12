@@ -533,7 +533,7 @@
   (let [count-lines (->> text str/split-lines
                          (remove empty?) count)]
     (when (> count-lines 5)
-      (throw-info! (str "This sentence seems really long: ") text))))
+      (throw-info! (str "This sentence seems really long: " text)))))
 
 (defnc add-urls [sentence]
   (let [char-map (sentence-token-map sentence)
