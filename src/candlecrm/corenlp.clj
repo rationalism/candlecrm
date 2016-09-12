@@ -529,6 +529,12 @@
   (->> text str/split-lines (rconj "") vec (beam 2)
        (map add-period) (str/join "\n")))
 
+(defn log-long [text]
+  (let [count-lines (->> text str/split-lines
+                         (remove empty?) count)]
+    (when (> count-lines 5)
+      (throw-info! (str "This sentence seems really long: ") text))))
+
 (defnc add-urls [sentence]
   (let [char-map (sentence-token-map sentence)
         text (.toString sentence)]
@@ -562,6 +568,7 @@
         vector (loom/build-graph []))))
 
 (defn all-ner-graph [reftime sentence]
+  (-> sentence .toString log-long)
   (->> sentence relation-mentions
        (map #(ner-graph reftime %))
        (remove nil?) loom/merge-graphs))
