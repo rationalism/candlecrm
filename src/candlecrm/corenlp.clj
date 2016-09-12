@@ -523,7 +523,7 @@
 
 (defn add-period [[line1 line2]]
   (if (ends-in-url? line1)
-    (str line1 ".") line1))
+    (str line1 " .") line1))
 
 (defn break-sentences [text]
   (->> text str/split-lines (rconj "") vec (beam 2)
