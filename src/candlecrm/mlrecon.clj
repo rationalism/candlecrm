@@ -544,7 +544,7 @@
 
 (defn optional-search [user class query]
   (if (= class s/person)
-    query #_(concat query [(email-candidate-meta user)])
+    (concat query [(email-candidate-meta user)])
     query))
 
 (defn find-candidate-paths [user class]
