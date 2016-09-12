@@ -360,8 +360,11 @@
    [regex/find-urls "URL"] [regex/find-phone-nums "PHONE"]
    [dt/find-dates "DATETIME"]])
 
-(def url-functions
+(def email-functions
   [[regex/find-email-addrs "EMAIL"] [regex/find-urls "URL"]])
+
+(def url-functions
+  [[regex/find-urls "URL"]])
 
 (defn replace-all [text coll]
   (str/replace text (regex/regex-or coll) ""))
@@ -511,10 +514,25 @@
        (mapcat #(update % 1 url-brackets))
        vec (rconj (last chunks)) (str/join "")))
 
+(defn ends-in-url? [line]
+  (let [tline (str/trim line)]
+    (->> tline (library-map url-functions) keys
+         (map (juxt #(.indexOf tline %) count))
+         (map #(apply + %)) (filter #(= (count tline) %))
+         empty? not)))
+
+(defn add-period [[line1 line2]]
+  (if (ends-in-url? line1)
+    (str line1 ".") line1))
+
+(defn break-sentences [text]
+  (->> text str/split-lines (rconj "") vec (beam 2)
+       (map add-period) (str/join "\n")))
+
 (defnc add-urls [sentence]
   (let [char-map (sentence-token-map sentence)
         text (.toString sentence)]
-    (->> text (library-map url-functions) (boundaries-map sentence)
+    (->> text (library-map email-functions) (boundaries-map sentence)
          (filter #(= (second %) "URL")) keys (map first) (sort-by first)
          (remove nil?) (map #(update % 1 inc)) (apply concat)
          (map #(- % (->> sentence get-tokens first .beginPosition)))
@@ -754,7 +772,7 @@
        (.contains author (mention-text mention))))
 
 (defnc run-nlp-full [models author reftime clean-dates text]
-  (let [new-text (->> text strip-parens
+  (let [new-text (->> text strip-parens break-sentences
                       (fpp-replace models author))
         sentences (->> new-text (run-nlp-ner models)
                        get-sentences (clean-sentences clean-dates))]
