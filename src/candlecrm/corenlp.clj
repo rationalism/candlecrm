@@ -532,7 +532,7 @@
 (defn log-long [text]
   (let [count-lines (->> text str/split-lines
                          (remove empty?) count)]
-    (when (> count-lines 5)
+    (when (> count-lines 10)
       (throw-info! (str "This sentence seems really long: " text)))))
 
 (defnc add-urls [sentence]
