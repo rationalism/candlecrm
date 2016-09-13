@@ -582,10 +582,11 @@
 (defn merge-class [m class new-map]
   (assoc m class (merge new-map (get m class))))
 
-(defn diff-save [class cs diff-map]
+(defn diff-save [class cs diff-list]
   (when save-diffs
     (swap! diff-store merge-class class
-           (zipmap cs diff-map))))
+           (zipmap cs diff-list)))
+  diff-list)
 
 (defn get-diffs [user class cs]
   (let [rules (get model/scoring class)
