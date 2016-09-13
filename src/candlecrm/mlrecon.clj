@@ -22,11 +22,13 @@
             DiffMatchPatch$Operation]))
 
 (def model-rollover 0)
+(def save-diffs true)
 
 (defonce recon-models (atom {}))
 (defonce conflict-models (atom {})) 
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
+(defonce diff-store (atom {}))
 
 (def recon-stop [])
 
@@ -577,11 +579,15 @@
 (defn diff-score [cols diff]
   (->> cols (map #(nth diff %)) (apply +)))
 
+(defn diff-save [diff-map]
+  (when save-diffs
+    (swap! diff-store merge diff-map)))
+
 (defn get-diffs [user class cs]
   (let [rules (get model/scoring class)
         vs (->> cs flatten distinct
                 (fetch-all-paths (map first rules) true))]
-    (->> cs (map #(pair-map % vs)) 
+    (->> cs (map #(pair-map % vs)) diff-save
          (pmap #(score-diff rules %))
          (map vec) (zipmap cs))))
 
