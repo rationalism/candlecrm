@@ -626,6 +626,11 @@
       (fmap (->> class (get @recon-logit)
                  (partial weka/classify-logit)))))
 
+(defn score-all-saved [user class]
+  (->> @diff-store class keys
+       (get-saved-diffs user class)
+       (score-map class) (into [])))
+
 (defn score-all [user class]
   (->> (find-candidates user class) (get-diffs user class)
        (score-map class) (into [])))
