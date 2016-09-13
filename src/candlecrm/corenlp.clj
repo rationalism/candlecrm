@@ -522,7 +522,7 @@
          empty? not)))
 
 (defn add-period [[line1 line2]]
-  (if (ends-in-url? line1)
+  (if (ends-in-url? (str/replace line1 #"\]http" "] http"))
     (str line1 " .") line1))
 
 (defn break-sentences [text]
