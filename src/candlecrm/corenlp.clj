@@ -568,7 +568,6 @@
         vector (loom/build-graph []))))
 
 (defn all-ner-graph [reftime sentence]
-  (-> sentence .toString log-long)
   (->> sentence relation-mentions
        (map #(ner-graph reftime %))
        (remove nil?) loom/merge-graphs))
