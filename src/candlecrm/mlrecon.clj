@@ -588,6 +588,13 @@
            (zipmap cs diff-list)))
   diff-list)
 
+(defn get-saved-diffs [user class cs]
+  (let [rules (get model/scoring class)
+        diff-map (get @diff-store class)]
+    (->> cs (map #(get diff-map %))
+         (pmap #(score-diff rules %))
+         (map vec) (zipmap cs))))
+
 (defn get-diffs [user class cs]
   (let [rules (get model/scoring class)
         vs (->> cs flatten distinct
