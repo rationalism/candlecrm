@@ -29,6 +29,7 @@
 (defonce recon-logit (atom {}))
 (defonce view-models (atom {}))
 (defonce diff-store (atom {}))
+(defonce cluster-store (atom []))
 
 (def recon-stop [])
 
@@ -595,6 +596,11 @@
          (pmap #(score-diff rules %))
          (map vec) (zipmap cs))))
 
+(defn search-saved-diffs [class col s]
+  (let [diffs (get @diff-store class)]
+    (filter #(->> % second (mapcat (fn [props] (nth props col)))
+                  (map first) (some #{s})) diffs)))
+
 (defn get-diffs [user class cs]
   (let [rules (get model/scoring class)
         vs (->> cs flatten distinct
@@ -802,12 +808,17 @@
   (let [user (-> :train-user env auth/lookup-user)]
     (train-full user class (fetch-train-pairs class) false)))
 
+(defn append-store [clusters]
+  (swap! cluster-store concat [clusters])
+  clusters)
+
 (defnp groups-to-recon [class score-map]
   (->> (map #(update % 0 vec) score-map)
-       (mapv #(apply conj %)) (map vec)
+       (mapv #(apply conj %))
+       (map vec) append-store
        (loom/build-graph [])
        cluster/prob-weights
-       cluster/vote-clustering
+       cluster/vote-clustering 
        (remove #(-> % count (< 2)))))
 
 (defn delete-prop [id class]
