@@ -785,7 +785,8 @@
         ") REMOVE root:" (neo4j/esc-token s/recon))])
 
 (defn train-iterate [user class saved?]
-  (neo4j/cypher-combined-tx (norecon-switch user class))
+  (when (not saved?)
+    (neo4j/cypher-combined-tx (norecon-switch user class)))
   (->> class (find-candidates user)
        (if saved? (keys (get @diff-store class)))
        shuffle (reset! recon-pairs)
