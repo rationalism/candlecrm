@@ -654,7 +654,7 @@
          (* (- 1 x) (log2 (- 1 x))))))
 
 (defn entropy-weight [x]
-  (-> x bin-entropy (max 0.01)))
+  (-> x bin-entropy (Math/pow 2.0)))
 
 (defn sample-one [n total [a1 a2] sample]
   (let [i (+ a1 (second sample))]
@@ -671,7 +671,7 @@
   (let [samples (->> (if saved?
                        (score-all-saved user class)
                        (score-all user class))
-                     (mapv #(update % 1 bin-entropy)))
+                     (mapv #(update % 1 entropy-weight)))
         total (->> samples (map second) (apply +))]
     (->> (reduce (partial sample-one n total)
                  [0.0 []] samples)
