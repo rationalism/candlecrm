@@ -795,7 +795,7 @@
   (let [new-model (train-atom user class saved?)]
     (write-forest class new-model))
   (load-models!) (load-thresholds!)
-  (reset! recon-pairs (candidate-sample user class saved? 500))
+  (reset! recon-pairs (candidate-sample user class saved? 250))
   (recur user class saved?))
 
 (defn train-database [class]
