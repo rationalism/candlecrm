@@ -667,8 +667,10 @@
        (run! println))
   (run! println candidates))
 
-(defn candidate-sample [user class n]
-  (let [samples (->> (score-all user class)
+(defn candidate-sample [user class saved? n]
+  (let [samples (->> (if saved?
+                       (score-all-saved user class)
+                       (score-all user class))
                      (mapv #(update % 1 bin-entropy)))
         total (->> samples (map second) (apply +))]
     (->> (reduce (partial sample-one n total)
@@ -732,17 +734,21 @@
   (swap! traindata
          (fn [t] (update t 1 #(cons pair %)))))
 
-(defn gather-train [class]
-  (let [rules (->> class (get model/scoring) (map first))]
-    (loop [candidates @recon-pairs]
+(defn gather-train [class saved?]
+  (loop [candidates @recon-pairs]
+    (let [candidate (first candidates)
+          rules (->> class (get model/scoring) (map first))]
       (println "New candidate:")
-      (mapv println (fetch-all-paths rules true (first candidates)))
-      (println (training-query (first candidates)))
+      (mapv println
+            (if saved?
+              (get (get @diff-store class) candidate)
+              (fetch-all-paths rules true candidate)))
+      (println (training-query candidate))
       (let [resp (read-line)]
         (condp = resp
-          "p" (do (add-pos (first candidates))
+          "p" (do (add-pos candidate)
                   (recur (rest candidates)))
-          "n" (do (add-neg (first candidates))
+          "n" (do (add-neg candidate)
                   (recur (rest candidates)))
           "s" (recur (rest candidates))
           "l" (/ 1 0) ; Intentional exception to quit
@@ -754,21 +760,21 @@
   [(->> (map vec pos) (map #(conj % 1.0)))
    (->> (map vec neg) (map #(conj % 0.0)))])
 
-(defn train-forest [user class pos-cs neg-cs]
-  (->> [pos-cs neg-cs]
-       (map #(get-diffs user class %)) (map vals)
+(defn train-forest [user class cs saved?]
+  (->> (if saved?
+         (map #(get-saved-diffs user class %) cs)
+         (map #(get-diffs user class %) cs)) (map vals)
        (vector (old-model-points user class model-rollover))
        (apply map vector) (map #(apply concat %))
        append-scores (apply concat) 
        weka/save-traindat weka/make-forest))
 
-(defn train-full [user class pos-cs neg-cs]
-  (let [f (train-forest user class pos-cs neg-cs)]
+(defn train-full [user class cs saved?]
+  (let [f (train-forest user class cs saved?)]
     [f (-> (weka/load-traindat) weka/forest-curve)]))
 
-(defn train-atom [user class]
-  (let [[pos-cs neg-cs] @traindata]
-    (train-full user class pos-cs neg-cs)))
+(defn train-atom [user class saved?]
+  (train-full user class @traindata saved?))
 
 (defn norecon-switch [user class]
   [(str "MATCH (root:" (neo4j/prop-label user class)
@@ -778,21 +784,22 @@
         ":" (neo4j/esc-token s/recon)
         ") REMOVE root:" (neo4j/esc-token s/recon))])
 
-(defn train-iterate [user class]
+(defn train-iterate [user class saved?]
   (neo4j/cypher-combined-tx (norecon-switch user class))
-  (when (empty? @recon-pairs)
-    (reset! recon-pairs (shuffle (find-candidates user class))))
-  (gather-train class)
-  (let [new-model (train-atom user class)]
+  (->> class (find-candidates user)
+       (if saved? (keys (get @diff-store class)))
+       shuffle (reset! recon-pairs)
+       (when (empty? @recon-pairs)))
+  (gather-train class saved?)
+  (let [new-model (train-atom user class saved?)]
     (write-forest class new-model))
   (load-models!) (load-thresholds!)
-  (reset! recon-pairs (candidate-sample user class 500))
-  (recur user class))
+  (reset! recon-pairs (candidate-sample user class saved? 500))
+  (recur user class saved?))
 
 (defn train-database [class]
   (let [user (-> :train-user env auth/lookup-user)]
-    (apply (partial train-full user class)
-           (fetch-train-pairs class))))
+    (train-full user class (fetch-train-pairs class) false)))
 
 (defnp groups-to-recon [class score-map]
   (->> (map #(update % 0 vec) score-map)
