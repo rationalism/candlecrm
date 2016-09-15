@@ -333,7 +333,9 @@
   (when-let [old-class (.ner label)]
     (when (or (some #{old-class} ["O" "NUMBER" "ORDINAL" "PERCENT"])
               (and (some #{old-class} ["DATE" "TIME" "ORGANIZATION"])
-                   (= class "DATETIME")))
+                   (= class "DATETIME"))
+              (and (some #{old-class} ["DATE" "TIME" "DATETIME"])
+                   (= class "URL")))
       (.setNER label class)))
   label)
 
