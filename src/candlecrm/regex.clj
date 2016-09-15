@@ -21,9 +21,11 @@
 
 ;; Natty parses these as times (eg. 2015 = 8:15 PM). That's no good
 (def year-regex #"^20\d\d$")
+(def year-regex-2 #"^19\d\d$")
 
 (defn silly-date? [text]
   (or (re-matches year-regex text)
+      (re-matches year-regex-2 text)
       (= "today" (str/lower-case text))
       (= "sun" (str/lower-case text))))
 
