@@ -815,9 +815,8 @@
 (defnp groups-to-recon [class score-map]
   (->> (map #(update % 0 vec) score-map)
        (mapv #(apply conj %)) (map vec) 
-       (loom/build-graph [])
-       cluster/prob-weights
-       cluster/vote-clustering 
+       (loom/build-graph []) cluster/prob-weights
+       (cluster/vote-clustering (cluster/prob-weight 0.01)) 
        (remove #(-> % count (< 2)))))
 
 (defn delete-prop [id class]

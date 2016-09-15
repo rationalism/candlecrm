@@ -32,9 +32,10 @@
 (defn new-cluster [[c1 c2 c3] node]
   [(assoc c1 node c3) (assoc c2 c3 [node]) (inc c3)])
 
-(defn sum-score [node-scores]
+(defn sum-score [nil-score node-scores]
   [(ffirst node-scores)
-   (->> node-scores (map second) (apply +))])
+   (->> node-scores (map #(if (nil? %) [nil nil-score] %))
+        (map second) (apply +))])
 
 (defn check-best [[c1 c2 c3] node [b1 b2]]
   (if (pos? b2)
@@ -44,7 +45,7 @@
        c3])
     (new-cluster [c1 c2 c3] node)))
 
-(defn add-cluster [g [c1 c2 c3] node]
+(defn add-cluster [g nil-score [c1 c2 c3] node]
   (if-let [candidates
            (->> (loom/all-edges g node)
                 (map #(filter-edge node %))
@@ -52,14 +53,13 @@
                 seq)]
     (->> (map first candidates) (map c1) distinct (map c2)
          (map #(map (mapkeys first candidates) %))
-         (map #(remove nil? %)) (map sum-score)
-         (sort-by second >) first
+         (map #(sum-score nil-score %)) (sort-by second >) first
          (check-best [c1 c2 c3] node))
     (new-cluster [c1 c2 c3] node)))
 
-(defn vote-clustering [g]
+(defn vote-clustering [nil-score g]
   (->> g loom/nodes
-       (reduce (partial add-cluster g) [{} {} 0])
+       (reduce (partial add-cluster g nil-score) [{} {} 0])
        second vals))
 
 (defn cluster-graph [clusters]
