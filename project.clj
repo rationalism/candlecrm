@@ -58,7 +58,7 @@
                  [com.taoensso/sente "1.10.0"
                   :exclusions [org.clojure/tools.reader]]
                  [clojurewerkz/quartzite "2.0.0"]
-                 [reagent "0.6.0-rc"]
+                 [reagent "0.6.0"]
                  [jayq "2.5.4"]
                  [com.google.maps/google-maps-services "0.1.15"]
                  [nz.ac.waikato.cms.weka/weka-dev "3.7.13"]
