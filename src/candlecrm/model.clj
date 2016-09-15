@@ -226,8 +226,8 @@
    [[s/s-name s/s-name]
     [s/s-name 0.7]
     [s/email-addr s/email-addr]
-    [s/phone-num s/phone-num]
-    [s/website s/website]
+    #_[s/phone-num s/phone-num]
+    #_[s/website s/website]
     [s/email s/text-mentions s/link-to]]
    s/location
    [[s/s-name s/s-name]
