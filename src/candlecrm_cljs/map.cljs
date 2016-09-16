@@ -10,7 +10,7 @@
 
 (defn event-info-window []
   (let [marker (state/look :map-markers :clicked)]
-    [:div#markerinfo>h3
+    [:div#markerinfo>h5
      [node-link (:title marker) (:id marker) s/building]]))
 
 (defn render-window []

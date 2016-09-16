@@ -33,7 +33,7 @@
 
 (defn add-newlines [piece]
   [:span
-   (let [n (util/add-ids (str/split (str " " piece " ") #"\n"))]
+   (let [n (util/add-ids (str/split (str piece " ") #"\n"))]
      (for [ln n]
        ^{:key (first ln)}
        [:span (second ln)

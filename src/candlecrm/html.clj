@@ -173,7 +173,7 @@
             :class "" :id "signupForm" :novalidate ""}
      [:fieldset {:class "form-group"}
       (anti-forgery-field)
-      [:legend [:h2 "Sign up"]]
+      [:legend [:h3 "Sign up"]]
       [:div {:class "greyback"}
        [:div {:class "form-group"}
         [:label {:for "signupUsername"} "Email "]
@@ -200,7 +200,7 @@
             :id "loginForm" :novalidate ""}
      [:fieldset {:class "form-group"}
       (anti-forgery-field)
-      [:legend [:h2 "Log in"]]
+      [:legend [:h3 "Log in"]]
       [:div {:class "greyback"}
        [:div {:class "form-group"}
         [:label {:for "loginUsername"} "Email "]
