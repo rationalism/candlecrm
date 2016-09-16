@@ -103,11 +103,16 @@
         1 (min -0.3333 max-val) 2 -1.0 -9999.0)
       (min 0.3333 max-val))))
 
+(defn filter-max-size [coll]
+  (if (> (count coll) 25)
+    (subvec (vec coll) 0 25) coll))
+
 (defn filtered-list [attr item]
   (let [limit (get-filter-limit attr item)]
     (->> attr (get item)
          (filter #(-> % second (> limit)))
-         (sort-by second >) (map first))))
+         (sort-by second >) (map first)
+         filter-max-size)))
 
 (defn string-item [item prop]
   [:span
