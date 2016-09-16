@@ -12,6 +12,9 @@
 (defn home-with-message [message]
   (assoc (resp/redirect "/login.html") :flash message))
 
+(defn csrf-redirect [_req]
+  (assoc (resp/redirect "/")))
+
 (defn html-wrapper [body]
   {:status 200
    :headers {"Content-Type" "text/html"}

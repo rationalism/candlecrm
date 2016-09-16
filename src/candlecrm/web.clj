@@ -93,7 +93,9 @@
   (-> secure-site-defaults
       (assoc :proxy true)
       (assoc-in [:security :anti-forgery]
-                {:read-token csrf-token})))
+                {:read-token csrf-token})
+      #_(assoc-in [:anti-forgery]
+                  {:error-handler pages/csrf-redirect})))
 
 (defn unauthorized-handler []
   (fn [{:keys [uri]}]
