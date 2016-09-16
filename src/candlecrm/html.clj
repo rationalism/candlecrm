@@ -188,6 +188,10 @@
         [:input {:type "password" :name "confirm" :class "form-control"
                  :id "signupConfirm" :required "required"}]]
        [:div {:class "form-group"}
+        [:label {:for "signupCode"} "Invite code "]
+        [:input {:type "text" :name "code" :class "form-control"
+                 :id "signupCode" :required "required"}]]
+       [:div {:class "form-group"}
         [:input {:class "btn btn-primary" 
                  :value "Sign up" :type "submit"}]
         [:span {:style "padding:0 0 0 10px;color:red;"

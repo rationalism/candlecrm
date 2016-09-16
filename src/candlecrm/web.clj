@@ -60,7 +60,7 @@
         (pages/request-reset req))
   (POST "/set-password" req
         (pages/set-password req))
-  (POST "/create-account" {{:keys [username password confirm] :as params}
+  (POST "/create-account" {{:keys [username password confirm code] :as params}
                            :params :as req}
         (pages/create-account params))
   (POST "/login" {{:keys [username password] :as params}

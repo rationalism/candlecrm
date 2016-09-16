@@ -147,8 +147,9 @@
       (when-not (.isValid result)
         (str/join " " (.getMessages validator result))))))
 
-(defn new-user-check [username password confirm]
+(defn new-user-check [username password confirm code]
   (cond
+    (not (some #{code} ["PRETZEL"])) "Invalid invite code"
     (str/blank? username) "Email address blank"
     (lookup-user username) "This user already exists"
     (not (regex/one-email? username)) "Not a valid email address"
