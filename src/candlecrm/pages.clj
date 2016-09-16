@@ -10,7 +10,7 @@
             [ring.util.response :as resp]))
 
 (defn home-with-message [message]
-  (assoc (resp/redirect "/") :flash message))
+  (assoc (resp/redirect "/login.html") :flash message))
 
 (defn html-wrapper [body]
   {:status 200
