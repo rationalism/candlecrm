@@ -61,8 +61,8 @@
 
 (defn location-html []
   (if (= (state/look :tabid) 4)
-    [:div#mapbox {:style {:height "600px" :width "1000px"}}]
-    [:div#mapbox {:style {:height "599px" :width "999px"}}]))
+    [:div#mapbox {:style {:height "600px" :width "100%"}}]
+    [:div#mapbox {:style {:height "600px" :width "100%"}}]))
 
 (defn resize-map [this]
   (when-not (state/look :map-markers :updated)
