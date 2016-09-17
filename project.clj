@@ -35,12 +35,12 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"
                   :classifier "models"]
                  [com.googlecode.libphonenumber/libphonenumber "7.6.1"]
-                 [org.deeplearning4j/deeplearning4j-core "0.5.0"
+                 [org.deeplearning4j/deeplearning4j-core "0.6.0"
                   :exclusions [org.json/json com.google.guava/guava
                                org.apache.commons/commons-compress
                                com.fasterxml.jackson.core/jackson-core
                                org.projectlombok/lombok]]
-                 [org.deeplearning4j/deeplearning4j-nlp "0.5.0"
+                 [org.deeplearning4j/deeplearning4j-nlp "0.6.0"
                   :uberjar-merge-with {#"\.properties$" [slurp str spit]
                                        "reference.conf" [slurp str spit]}
                   :exclusions [com.google.code.findbugs/jsr305
