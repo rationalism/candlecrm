@@ -21,14 +21,14 @@
     (.setMaxResults result-limit)))
 
 (defn all-contacts [user]
-  (.getEntries
-   (.getFeed
-    (doto (ContactsService. app-name)
-      (.setOAuth2Credentials
-       (-> user google/lookup-token
-           google/build-google-cred!)))
-    (all-contacts-query)
-    ContactFeed)))
+  (when-let [toke (google/lookup-token user)]
+    (.getEntries
+     (.getFeed
+      (doto (ContactsService. app-name)
+        (.setOAuth2Credentials
+         (google/build-google-cred! token)))
+      (all-contacts-query)
+      ContactFeed))))
 
 (defn names [contact]
   (cond-> []
