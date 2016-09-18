@@ -1,6 +1,7 @@
 (ns candlecrm.auth-test
   (:require [clojure.test :refer :all]
             [candlecrm.auth :refer :all]
+            [candlecrm.environ :refer [env]]
             [candlecrm.neo4j :as neo4j]
             [candlecrm_cljc.schema :as s]))
 
@@ -32,7 +33,8 @@
 
 (deftest token-test
   (testing "Encode and decode a user's token"
-    (def test-user (create-user! {:username test-username :password test-password}))
+    (def test-user (create-user! {:username test-username
+                                  :password test-password}))
     (def token (make-token test-user))
     (is (-> token :token user-from-token (.id)
             (= (.id test-user))))
@@ -41,4 +43,5 @@
 (deftest user-checks
   (testing "New user and password checks"
     (is (not (password-check test-password test-password)))
-    (is (not (new-user-check test-username test-password test-password)))))
+    (is (not (new-user-check test-username test-password
+                             test-password (env :invite-code))))))
