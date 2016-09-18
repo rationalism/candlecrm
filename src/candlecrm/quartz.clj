@@ -250,5 +250,7 @@
   (neo4j/drop-all-constraints!)
   (->> (auth/list-users) (map auth/get-username)
        (mapv imap/reset-user!))
+  (reset! imap/message-queue #{})
+  (reset! imap/empty-flag false)
   (Thread/sleep 1000) (start!)
   (->> (auth/list-users) (mapv schedule-contacts!)))

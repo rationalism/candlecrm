@@ -305,7 +305,7 @@
 
 (defn reset-user! [username]
   (let [user (auth/lookup-user username)]
-    (auth/delete-user-data! user)
+    (auth/delete-user-data! user false)
     (auth/create-user-person! user)
     (add-new-queue! user)
     (index/make-constraints! user)

@@ -113,11 +113,9 @@
        (map #(neo4j/prop-label user %))
        (run! neo4j/delete-class!)))
 
-(defn delete-user-data! [user]
-  (when (neo4j/get-property user s/index-run)
-    (try (index/drop-constraints! user)
-         (catch Exception e
-           (println "Could not drop constraints for user " user))))
+(defn delete-user-data! [user constraints?]
+  (when constraints?
+    (index/drop-constraints! user))
   (index/delete-all! user)
   (delete-queue! user))
 
@@ -128,7 +126,7 @@
            (try
              (when (google/lookup-token user)
                (google/revoke-access-token! user))
-             (delete-user-data! user)
+             (delete-user-data! user (neo4j/get-property user s/index-run))
              (neo4j/delete-id! (.id user))
              :success
              (catch Exception e

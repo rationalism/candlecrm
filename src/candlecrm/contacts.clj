@@ -21,7 +21,7 @@
     (.setMaxResults result-limit)))
 
 (defn all-contacts [user]
-  (when-let [toke (google/lookup-token user)]
+  (when-let [token (google/lookup-token user)]
     (.getEntries
      (.getFeed
       (doto (ContactsService. app-name)

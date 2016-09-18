@@ -50,7 +50,7 @@
   (cond (not identity) (alt-page req)
         (google/lookup-token identity)
         (resp/redirect "/app")
-        :else (resp/redirect "/gmail")))
+        :else (resp/redirect "/email")))
 
 (defn login-page [{:keys [identity] :as req}]
   (login-switch identity req login-form))
@@ -65,9 +65,9 @@
   (cond (not identity) (home-with-message "Logged out")
         (google/lookup-token identity)
         (html-wrapper (html/app-template))
-        :else (resp/redirect "/gmail")))
+        :else (resp/redirect "/email")))
 
-(defn gmail [{:keys [identity flash]}]
+(defn email [{:keys [identity flash]}]
   (html-wrapper
    (html/base-template
     (if (google/lookup-token identity)
@@ -106,13 +106,13 @@
   (let [auth-response (google/response-from-req req)
         user (:identity req)]
     (if-let [auth-err (.getError auth-response)]
-      (assoc (resp/redirect "/gmail") :flash auth-err)
+      (assoc (resp/redirect "/email") :flash auth-err)
       (if-let [token (google/get-token! (.getCode auth-response))]
         (do (google/write-token! user token)
             (throw-warn! (str "Add Google token for user: "
                               (auth/get-username user)))
             (resp/redirect "/init-account"))
-        (assoc (resp/redirect "/gmail")
+        (assoc (resp/redirect "/email")
                :flash "Error: Could not get auth token")))))
 
 (defn reset-confirm [{{:keys [token]} :params}]
@@ -138,7 +138,7 @@
     (home-with-message err-msg)
     (->> [:username :password] (select-keys params)
          quartz/create-user! auth/make-token
-         :token (token-cookie "/gmail"))))
+         :token (token-cookie "/email"))))
 
 (defn login [params]
   (if-let [user-token (auth/login-handler params)]

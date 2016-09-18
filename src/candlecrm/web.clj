@@ -70,8 +70,8 @@
        (logout req))
   (GET "/switch" req
        (pages/switch-user req))
-  (GET "/gmail" req
-       (pages/gmail req))
+  (GET "/email" req
+       (pages/email req))
   (GET "/init-account" req
        (pages/init-account req))
   (GET google/callback-url req
