@@ -9,5 +9,6 @@
 
 (deftest random-cluster-test
   (testing "Generate, calibrate, and cluster a random graph"
-    (is (-> 10 random-graph prob-weights
-            (vote-clustering (prob-weight 0.01)) cluster-graph))))
+    (is (-> 0.01 prob-weight
+            (vote-clustering (-> 10 random-graph prob-weights))
+            cluster-graph))))
