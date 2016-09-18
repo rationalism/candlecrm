@@ -246,10 +246,9 @@
     (schedule-indexing! user) user))
 
 (defn reset-all-users! []
-  (stop!)
-  (Thread/sleep 1000)
+  (stop!) (Thread/sleep 1000)
   (neo4j/drop-all-constraints!)
   (->> (auth/list-users) (map auth/get-username)
        (mapv imap/reset-user!))
-  (Thread/sleep 1000)
-  (start!))
+  (Thread/sleep 1000) (start!)
+  (->> (auth/list-users) (mapv schedule-contacts!)))
