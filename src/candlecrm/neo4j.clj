@@ -127,7 +127,7 @@
     (.beginTransaction *session*)
     (catch Exception e
       (throw-error! "Error: Cannot start transaction in Cypher session")
-      (reset-session!) nil)))
+      nil)))
 
 (defnc cypher-combined-tx-recur [retry queries]
   #_(dump-queries queries)
@@ -139,7 +139,8 @@
          (catch Exception e
            (.failure tx) (.close tx)
            (cypher-tx-exception retry queries e)))
-    (cypher-tx-exception retry queries (Exception. ))))
+    (thread-wrap
+     (cypher-combined-tx-recur retry queries))))
 
 (defn cypher-combined-tx
   ([queries]
