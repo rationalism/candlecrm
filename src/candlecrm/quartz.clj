@@ -128,6 +128,11 @@
                     (- 3600000) (< (to-ms (dt/now)))))
        (run! #(neo4j/delete-property! % s/pwd-reset-token))))
 
+(defn load-contacts! [user]
+  (neo4j/thread-wrap
+   (Thread/sleep 1000)
+   (contacts/load-all-contacts! user)))
+
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
   (when :nil (queue-pop!)))
@@ -155,8 +160,7 @@
 
 (jobs/defjob LoadContacts [ctx]
   (let [user (user-job ctx)]
-    (neo4j/thread-wrap
-     (contacts/load-all-contacts! user))))
+    (load-contacts! user)))
 
 (jobs/defjob MakeIndexes [ctx]
   (let [user (user-job ctx)]
@@ -252,5 +256,5 @@
        (mapv imap/reset-user!))
   (reset! imap/message-queue #{})
   (reset! imap/empty-flag false)
-  (Thread/sleep 1000) (start!)
-  (->> (auth/list-users) (mapv schedule-contacts!)))
+  (Thread/sleep 1000) 
+  (->> (auth/list-users) (mapv load-contacts!)))
