@@ -168,7 +168,7 @@
 
 (defn signup-form [flash]
   [:div {:class "row"}
-   [:div {:class "col-xs-5"}
+   [:div {:class "col-md-8 col-lg-5"}
     [:form {:method "POST" :action "create-account"
             :class "" :id "signupForm" :novalidate ""}
      [:fieldset {:class "form-group"}
@@ -199,7 +199,7 @@
 
 (defn login-form []
   [:div {:class "row"}
-   [:div {:class "col-xs-5"}
+   [:div {:class "col-md-8 col-lg-5"}
     [:form {:method "POST" :action "login" :class ""
             :id "loginForm" :novalidate ""}
      [:fieldset {:class "form-group"}
