@@ -127,19 +127,19 @@
     (.beginTransaction *session*)
     (catch Exception e
       (throw-error! "Error: Cannot start transaction in Cypher session")
-      (reset-session!)
-      (cypher-tx-exception true queries e))))
+      (reset-session!) nil)))
 
 (defnc cypher-combined-tx-recur [retry queries]
   #_(dump-queries queries)
-  (let [tx (start-tx queries)]
+  (if-let [tx (start-tx queries)]
     (try (let [resp (->> (map cypher-statement queries)
                          (map #(.run tx (first %) (second %)))
                          resp-clojure)]
            (.success tx) (.close tx) resp)
          (catch Exception e
            (.failure tx) (.close tx)
-           (cypher-tx-exception retry queries e)))))
+           (cypher-tx-exception retry queries e)))
+    (cypher-tx-exception retry queries (Exception. ))))
 
 (defn cypher-combined-tx
   ([queries]
