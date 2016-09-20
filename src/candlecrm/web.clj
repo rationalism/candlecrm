@@ -42,6 +42,8 @@
        (pages/contact req))
   (GET "/login.html" req
        (pages/login-page req))
+  (GET "/YZm6sB.html" req
+       (pages/signup-page req))
   (GET "/login" req
        (pages/login req))
   (GET "/reset-password" req

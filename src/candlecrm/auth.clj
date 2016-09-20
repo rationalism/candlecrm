@@ -147,7 +147,8 @@
 
 (defn new-user-check [username password confirm code]
   (cond
-    (not (some #{code} [(env :invite-code)])) "Invalid invite code"
+    (not (some #{(str/upper-case code)} [(env :invite-code)]))
+    "Invalid invite code"
     (str/blank? username) "Email address blank"
     (lookup-user username) "This user already exists"
     (not (regex/one-email? username)) "Not a valid email address"

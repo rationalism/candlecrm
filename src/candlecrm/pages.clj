@@ -27,13 +27,20 @@
    :cookies {"token" {:value token :http-only true :secure true
                       :max-age (* 3600 auth/exp-hours)}}})
 
+(defn signup-form [{:keys [flash]}]
+  (html-wrapper
+   (html/base-template
+    [:div {:class "container"}
+     [:div#login
+      [:br] (html/signup-form flash)]
+     (html/footer-box)])))
+
 (defn login-form [{:keys [flash]}]
   (html-wrapper
    (html/base-template
     [:div {:class "container"}
      [:div#login
-      [:br] (html/signup-form flash) [:br]
-      (html/login-form)]
+      [:br] (html/login-form)]
      (html/footer-box)])))
 
 (defn contact-form [_req]
@@ -51,6 +58,9 @@
         (google/lookup-token identity)
         (resp/redirect "/app")
         :else (resp/redirect "/email")))
+
+(defn signup-page [{:keys [identity] :as req}]
+  (login-switch identity req signup-form))
 
 (defn login-page [{:keys [identity] :as req}]
   (login-switch identity req login-form))
