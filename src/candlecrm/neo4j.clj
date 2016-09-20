@@ -166,10 +166,11 @@
   (throw-warn! "Neo4j closed, trying to reconnect")
   (graph-close!) (graph-connect!) (reset-session!)
   (Thread/sleep 500)
-  (if-let [tx (start-tx)]
-    (do (.success tx) (.close tx)
-        (reset! invalid-conn false))
-    (recur)))
+  (thread-wrap
+   (if-let [tx (start-tx)]
+     (do (.success tx) (.close tx)
+         (reset! invalid-conn false))
+     (recur))))
 
 (add-watch invalid-conn :reset-trigger
            (fn [_k _r old-state new-state]
