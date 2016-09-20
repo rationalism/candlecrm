@@ -83,7 +83,7 @@
     [:div {:class "col-xs-8"}
      [:br]
      [:h2 "Contact us"]
-     [:p (str "If you have questions about CandleCRM, please contact us"
+     [:p (str "If you have any questions about CandleCRM, please contact us"
               " at admin@candlecrm.com.")]]]
    (footer-box)])
 
@@ -93,7 +93,8 @@
     [:div {:class "col-md-11"}
      [:br][:h2 "FAQ"][:br]
      [:h5
-      [:ol [:li [:a {:href "#q1"} "What is CandleCRM?"]]
+      [:ol#faqmenu
+       [:li [:a {:href "#q1"} "What is CandleCRM?"]]
        [:li [:a {:href "#q2"} "How is CandleCRM different from other CRM software?"]]
        [:li [:a {:href "#q3"} "How much does CandleCRM cost?"]]
        [:li [:a {:href "#q4"} "What do I need to start using CandleCRM?"]]

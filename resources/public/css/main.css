@@ -252,3 +252,7 @@ img.home-circle {
     margin-bottom: 1.5rem;
     border: 2px solid #444;
 }
+
+ol#faqmenu li {
+    margin-top: 0.3rem;
+}
