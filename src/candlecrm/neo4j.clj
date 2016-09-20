@@ -123,7 +123,7 @@
             (Thread/sleep 20)
             (cypher-combined-tx true queries))))
 
-(defnp start-tx [queries]
+(defnp start-tx []
   (try
     (.beginTransaction *session*)
     (catch Exception e
@@ -141,7 +141,7 @@
 (defnc cypher-combined-tx-recur [retry queries]
   #_(dump-queries queries)
   (if (not @invalid-conn)
-    (if-let [tx (start-tx queries)]
+    (if-let [tx (start-tx)]
       (try (let [resp (->> (map cypher-statement queries)
                            (map #(.run tx (first %) (second %)))
                            resp-clojure)]
@@ -163,10 +163,12 @@
 
 (defn reset-db! []
   (Thread/sleep 500)
+  (throw-warn! "Neo4j closed, trying to reconnect")
   (graph-close!) (graph-connect!) (reset-session!)
   (Thread/sleep 500)
-  (if (cypher-query "MATCH (n:notareallabel) RETURN count(n)")
-    (reset! invalid-conn false)
+  (if-let [tx (start-tx)]
+    (do (.success tx) (.close tx)
+        (reset! invalid-conn false))
     (recur)))
 
 (add-watch invalid-conn :reset-trigger
