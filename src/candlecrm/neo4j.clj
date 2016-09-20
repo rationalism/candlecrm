@@ -131,7 +131,11 @@
      (catch Exception e
        (throw-error! "Error: Cannot start transaction in Cypher session")
        (throw-error! "Invalid database connection detected")
-       (reset! invalid-conn true)
+       (throw-error! "Shutting down server")
+       (System/exit 0)
+       ;; This doesn't work because of this Neo4j Java driver bug:
+       ;; https://github.com/neo4j/neo4j-java-driver/issues/213
+       #_(reset! invalid-conn true)
        nil))))
 
 (defn retry-wrap [retry queries]
