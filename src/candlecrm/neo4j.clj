@@ -143,17 +143,15 @@
 
 (defnc cypher-combined-tx-recur [retry queries]
   #_(dump-queries queries)
-  (if (not @invalid-conn)
-    (if-let [tx (start-tx)]
+  (when (not @invalid-conn)
+    (when-let [tx (start-tx)]
       (try (let [resp (->> (map cypher-statement queries)
                            (map #(.run tx (first %) (second %)))
                            resp-clojure)]
              (.success tx) (.close tx) resp)
            (catch Exception e
              (.failure tx) (.close tx)
-             (cypher-tx-exception retry queries e)))
-      (retry-wrap retry queries))
-    (retry-wrap retry queries)))
+             (cypher-tx-exception retry queries e))))))
 
 (defn cypher-combined-tx
   ([queries]
