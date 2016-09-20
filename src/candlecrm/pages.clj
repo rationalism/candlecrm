@@ -48,10 +48,20 @@
    (html/base-template
     (html/contact-page))))
 
+(defn faq-page [_req]
+  (html-wrapper
+   (html/base-template
+    (html/faq-page))))
+
 (defn homepage-form [_req]
   (html-wrapper
    (html/base-template
     (html/homepage))))
+
+(defn invite-form [_req]
+  (html-wrapper
+   (html/base-template
+    (html/invite-page))))
 
 (defn login-switch [identity req alt-page]
   (cond (not identity) (alt-page req)
@@ -70,6 +80,12 @@
 
 (defn homepage [{:keys [identity] :as req}]
   (login-switch identity req homepage-form))
+
+(defn invite [{:keys [identity] :as req}]
+  (login-switch identity req invite-form))
+
+(defn faq [{:keys [identity] :as req}]
+  (login-switch identity req faq-page))
 
 (defn app-page [{:keys [identity]}]
   (cond (not identity) (home-with-message "Logged out")

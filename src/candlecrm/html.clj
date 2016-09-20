@@ -49,6 +49,14 @@
   [:footer#copyright [:hr]
    [:p "© 2016 CandleCRM"]])
 
+(defn invite-page []
+  [:div#homepage {:class "container"}
+   [:div {:class "row"}
+    [:div {:class "col-xs-8"}
+     [:br]
+     [:h2 "Request invite"]]]
+   (footer-box)])
+
 (defn contact-page []
   [:div#homepage {:class "container"}
    [:div {:class "row"}
@@ -63,10 +71,9 @@
   [:div#homepage {:class "container"}
    [:div {:class "row"}
     [:div {:class "col-xs-8"}
-     [:br]
-     [:h2 "FAQ"]
-     [:h4 "Question 1"][:hr]
-     [:ul>li (str "Answer 1")]]]
+     [:br][:h2 "FAQ"][:br]
+     [:h4 "Question 1"]
+     [:ul [:li (str "Answer 1")]]]]
    (footer-box)])
 
 (defn homepage []

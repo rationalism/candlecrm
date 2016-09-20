@@ -40,8 +40,12 @@
   ;; TODO: Make this return an error message when credentials are invalid
   (GET "/contact.html" req
        (pages/contact req))
+  (GET "/signup.html" req
+       (pages/invite req))
   (GET "/login.html" req
        (pages/login-page req))
+  (GET "/faq.html" req
+       (pages/faq req))
   (GET "/YZm6sB.html" req
        (pages/signup-page req))
   (GET "/login" req
