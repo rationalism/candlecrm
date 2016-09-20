@@ -167,7 +167,7 @@
   (throw-warn! "Neo4j closed, trying to reconnect")
   (graph-close!) (graph-connect!) (reset-session!)
   (Thread/sleep 500)
-  (let [session (get-session)]
+  (if-let [session (get-session)]
     (if-let [tx (try (.beginTransaction session)
                      (catch Exception e
                        (throw-warn! "Couldn't get new transaction")
@@ -175,7 +175,8 @@
       (do (.success tx) (.close tx)
           (reset! invalid-conn false)
           (.close session))
-      (do (.close session) (recur)))))
+      (do (.close session) (recur)))
+    (recur)))
 
 (add-watch invalid-conn :reset-trigger
            (fn [_k _r old-state new-state]
