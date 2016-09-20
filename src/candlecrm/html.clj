@@ -55,8 +55,18 @@
     [:div {:class "col-xs-8"}
      [:br]
      [:h2 "Contact us"]
-     [:p (str "If you're interested in trying CandleCRM, please contact us"
+     [:p (str "If you have questions about CandleCRM, please contact us"
               " at admin@candlecrm.com.")]]]
+   (footer-box)])
+
+(defn faq-page []
+  [:div#homepage {:class "container"}
+   [:div {:class "row"}
+    [:div {:class "col-xs-8"}
+     [:br]
+     [:h2 "FAQ"]
+     [:h4 "Question 1"][:hr]
+     [:ul>li (str "Answer 1")]]]
    (footer-box)])
 
 (defn homepage []
@@ -66,9 +76,9 @@
      [:h1 {:class "display-3"} "A CRM that updates itself."]
      [:p (str "CandleCRM uses artificial intelligence (AI) to keep"
               " itself up-to-date, replacing manual data entry.")]
-     [:p [:a {:class "btn btn-primary btn-lg" :href "/contact.html"
+     [:p [:a {:class "btn btn-primary btn-lg" :href "/signup.html"
               :role "button"}
-          "Contact us"]]]]
+          "Request invite"]]]]
    [:div {:class "container"}
     [:div {:class "row"}
      [:div {:class "col-md-4"}
@@ -131,8 +141,10 @@
     "CandleCRM"]
    [:ul {:class "nav navbar-nav pull-xs-right"}
     (header-tab "" "Home" "/")
-    (header-tab "" "Log In" "/login.html")
-    (header-tab "" "Contact" "/contact.html")]])
+    (header-tab "" "FAQ" "/faq.html")
+    (header-tab "" "Contact" "/contact.html")
+    (header-tab "" "Sign Up" "/signup.html")
+    (header-tab "" "Log In" "/login.html")]])
 
 (defn base-template [& content]
   (html5 {:lang "en"}
