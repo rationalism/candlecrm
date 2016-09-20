@@ -51,12 +51,12 @@
 
 (defn invite-form []
   [:div {:class "row"}
-   [:div {:class "col-md-10 col-lg-8"}
+   [:div {:class "col-md-12 col-lg-10"}
     [:form {:method "POST" :action "request-invite"
             :class "" :id "inviteForm" :novalidate ""}
      [:fieldset {:class "form-group"}
       (anti-forgery-field)
-      [:legend [:h3 "Request invite"]]
+      [:legend [:h3 "Request beta testing invite"]]
       [:div {:class "greyback"}
        [:div {:class "form-group"}
         [:label {:for "inviteName"} "Name "]
