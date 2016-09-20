@@ -135,8 +135,9 @@
 (defn retry-wrap [retry queries]
   (when retry
     (do (Thread/sleep 1000)
-        (thread-wrap
-         (cypher-combined-tx true queries)))))
+        (binding [*session* (get-session)]
+          (cypher-combined-tx true queries)
+          (.close *session*)))))
 
 (defnc cypher-combined-tx-recur [retry queries]
   #_(dump-queries queries)
@@ -166,11 +167,13 @@
   (throw-warn! "Neo4j closed, trying to reconnect")
   (graph-close!) (graph-connect!) (reset-session!)
   (Thread/sleep 500)
-  (thread-wrap
-   (if-let [tx (start-tx)]
-     (do (.success tx) (.close tx)
-         (reset! invalid-conn false))
-     (recur))))
+  (binding [*session* (get-session)]
+    (cypher-combined-tx true queries)
+    (if-let [tx (start-tx)]
+      (do (.success tx) (.close tx)
+          (reset! invalid-conn false)
+          (.close *session*))
+      (do (.close *session*) (recur)))))
 
 (add-watch invalid-conn :reset-trigger
            (fn [_k _r old-state new-state]
