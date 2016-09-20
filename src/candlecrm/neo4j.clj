@@ -123,14 +123,16 @@
             (Thread/sleep 20)
             (cypher-combined-tx true queries))))
 
-(defnp start-tx []
-  (try
-    (.beginTransaction *session*)
-    (catch Exception e
-      (throw-error! "Error: Cannot start transaction in Cypher session")
-      (throw-error! "Invalid database connection detected")
-      (reset! invalid-conn true)
-      nil)))
+(defnp start-tx
+  ([] (start-tx *session*))
+  ([session]
+   (try
+     (.beginTransaction session)
+     (catch Exception e
+       (throw-error! "Error: Cannot start transaction in Cypher session")
+       (throw-error! "Invalid database connection detected")
+       (reset! invalid-conn true)
+       nil))))
 
 (defn retry-wrap [retry queries]
   (when retry
@@ -167,12 +169,12 @@
   (throw-warn! "Neo4j closed, trying to reconnect")
   (graph-close!) (graph-connect!) (reset-session!)
   (Thread/sleep 500)
-  (binding [*session* (get-session)]
-    (if-let [tx (start-tx)]
+  (let [session (get-session)]
+    (if-let [tx (start-tx session)]
       (do (.success tx) (.close tx)
           (reset! invalid-conn false)
-          (.close *session*))
-      (do (.close *session*) (recur)))))
+          (.close session))
+      (do (.close session) (recur)))))
 
 (add-watch invalid-conn :reset-trigger
            (fn [_k _r old-state new-state]
