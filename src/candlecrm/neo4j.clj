@@ -168,7 +168,10 @@
   (graph-close!) (graph-connect!) (reset-session!)
   (Thread/sleep 500)
   (let [session (get-session)]
-    (if-let [tx (start-tx session)]
+    (if-let [tx (try (.beginTransaction session)
+                     (catch Exception e
+                       (throw-warn! "Couldn't get new transaction")
+                       (throw-warn! "Neo4j not yet ready") nil))]
       (do (.success tx) (.close tx)
           (reset! invalid-conn false)
           (.close session))
