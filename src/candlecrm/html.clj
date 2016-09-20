@@ -49,12 +49,32 @@
   [:footer#copyright [:hr]
    [:p "© 2016 CandleCRM"]])
 
+(defn invite-form []
+  [:div {:class "row"}
+   [:div {:class "col-md-10 col-lg-8"}
+    [:form {:method "POST" :action "request-invite"
+            :class "" :id "inviteForm" :novalidate ""}
+     [:fieldset {:class "form-group"}
+      (anti-forgery-field)
+      [:legend [:h3 "Request invite"]]
+      [:div {:class "greyback"}
+       [:div {:class "form-group"}
+        [:label {:for "inviteName"} "Name "]
+        [:input {:type "text" :name "name" :class "form-control"
+                 :id "inviteName" :required "required"}]]
+       [:div {:class "form-group"}
+        [:label {:for "inviteEmail"} "Email address "]
+        [:input {:type "email" :name "username" :class "form-control"
+                 :id "inviteEmail" :required "required"}]]
+       [:div {:class "form-group"}
+        [:input {:class "btn btn-primary" 
+                 :value "Submit" :type "submit"}]]]]]]])
+
 (defn invite-page []
   [:div#homepage {:class "container"}
    [:div {:class "row"}
     [:div {:class "col-xs-8"}
-     [:br]
-     [:h2 "Request invite"]]]
+     [:br](invite-form)]]
    (footer-box)])
 
 (defn contact-page []
@@ -267,7 +287,7 @@
         [:input {:class "btn btn-primary" 
                  :value "Sign up" :type "submit"}]
         [:span {:style "padding:0 0 0 10px;color:red;"
-                    :id "signupError"} flash]]]]]]])
+                :id "signupError"} flash]]]]]]])
 
 (defn login-form []
   [:div {:class "row"}
