@@ -168,7 +168,6 @@
   (graph-close!) (graph-connect!) (reset-session!)
   (Thread/sleep 500)
   (binding [*session* (get-session)]
-    (cypher-combined-tx true queries)
     (if-let [tx (start-tx)]
       (do (.success tx) (.close tx)
           (reset! invalid-conn false)
