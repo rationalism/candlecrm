@@ -72,14 +72,24 @@
    [:div {:class "row"}
     [:div {:class "col-md-11"}
      [:br][:h2 "FAQ"][:br]
-     [:h4 "1. What is CandleCRM?"]
+     [:h5
+      [:ol [:li [:a {:href "#q1"} "What is CandleCRM?"]]
+       [:li [:a {:href "#q2"} "How is CandleCRM different from other CRM software?"]]
+       [:li [:a {:href "#q3"} "How much does CandleCRM cost?"]]
+       [:li [:a {:href "#q4"} "What do I need to start using CandleCRM?"]]
+       [:li [:a {:href "#q5"} "Does CandleCRM use encryption?"]]
+       [:li [:a {:href "#q6"} "Can I use CandleCRM on my phone?"]]
+       [:li [:a {:href "#q7"} "I think I found a problem with CandleCRM. What should I do?"]]]]
+
+     [:hr]
+     [:h4 {:id "q1"} "1. What is CandleCRM?"]
      [:ul (str "CandleCRM is customer relationship management, or \"CRM\", software."
                " It keeps track of things like who your customers are,"
                " how to contact them, and when your next meeting with"
                " each customer is. CandleCRM runs over the Internet, "
                " or 'in the cloud'. You can use it from any computer "
                " or tablet with an Internet connection.")]
-     [:h4 "2. How is CandleCRM different from other CRM software?"]
+     [:h4 {:id "q2"} "2. How is CandleCRM different from other CRM software?"]
      [:ul (str "CandleCRM uses artificial intelligence (AI) to keep customer"
                " information updated. For example, suppose you receive a new email"
                " from Bob Smith. Bob likes your new product, and wants to try it out."
@@ -91,27 +101,27 @@
                " It will record Bob's email address and phone number, and add Bob"
                " to a list of customers in Dallas. Finally, it will automatically add"
                " your call with Bob to tomorrow's agenda.")]
-     [:h4 "3. How much does CandleCRM cost?"]
+     [:h4 {:id "q3"} "3. How much does CandleCRM cost?"]
      [:ul (str "Right now, CandleCRM is free. We're still testing it out, so we'd"
                " like people to give it a try, and see if there are any bugs or other"
                " problems which we need to fix. When we're done testing, there will be"
                " a free trial, and then a small monthly fee to"
                " continue using CandleCRM after the trial period ends.")]
-     [:h4 "4. What do I need to start using CandleCRM?"]
+     [:h4 {:id "q4"} "4. What do I need to start using CandleCRM?"]
      [:ul (str "Right now, to use CandleCRM, you must have a GMail account. We"
                " know that many people use other email providers, and"
                " we plan to add support for other email services very soon.")]
-     [:h4 "5. Does CandleCRM use encryption?"]
+     [:h4 {:id "q5"} "5. Does CandleCRM use encryption?"]
      [:ul (str "Yes. Everything on the CandleCRM website is encrypted with "
                " HTTPS/TLS/SSL. This encryption is recommended by security experts "
                " to keep private data safe. For example, if you're using the WiFi"
                " at a coffee shop, encryption prevents other people at the shop"
                " from snooping on your messages.")]
-     [:h4 "6. Can I use CandleCRM on my phone?"]
+     [:h4 {:id "q6"} "6. Can I use CandleCRM on my phone?"]
      [:ul (str "Yes, but it might be harder to use on a small screen."
                " Unfortunately, we don't have an iOS or Android app ready yet."
                " Please check back later for updates on a new mobile version.")]
-     [:h4 "7. I think I found a problem with CandleCRM. What should I do?"]
+     [:h4 {:id "q7"} "7. I think I found a problem with CandleCRM. What should I do?"]
      [:ul (str "Please let us know immediately, by emailing us at bugs@candlecrm.com."
                " Try to include as much detail about the problem as you can."
                " If possible, take a screenshot of the page where the problem"
