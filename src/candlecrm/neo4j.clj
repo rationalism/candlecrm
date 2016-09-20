@@ -10,6 +10,7 @@
 (defonce conn (atom nil))
 (def ^:dynamic *session* nil)
 (defonce ajax-send! (atom nil))
+(defonce invalid-conn (atom false))
 
 (defn table-refresh! [user]
   (@ajax-send! (.id user) [:refresh/tables true]))
@@ -127,20 +128,29 @@
     (.beginTransaction *session*)
     (catch Exception e
       (throw-error! "Error: Cannot start transaction in Cypher session")
+      (throw-error! "Invalid database connection detected")
+      (reset! invalid-conn true)
       nil)))
+
+(defn retry-wrap [retry queries]
+  (when retry
+    (do (Thread/sleep 1000)
+        (thread-wrap
+         (cypher-combined-tx true queries)))))
 
 (defnc cypher-combined-tx-recur [retry queries]
   #_(dump-queries queries)
-  (if-let [tx (start-tx queries)]
-    (try (let [resp (->> (map cypher-statement queries)
-                         (map #(.run tx (first %) (second %)))
-                         resp-clojure)]
-           (.success tx) (.close tx) resp)
-         (catch Exception e
-           (.failure tx) (.close tx)
-           (cypher-tx-exception retry queries e)))
-    (thread-wrap
-     (cypher-combined-tx-recur retry queries))))
+  (if (not @invalid-conn)
+    (if-let [tx (start-tx queries)]
+      (try (let [resp (->> (map cypher-statement queries)
+                           (map #(.run tx (first %) (second %)))
+                           resp-clojure)]
+             (.success tx) (.close tx) resp)
+           (catch Exception e
+             (.failure tx) (.close tx)
+             (cypher-tx-exception retry queries e)))
+      (retry-wrap retry queries))
+    (retry-wrap retry queries)))
 
 (defn cypher-combined-tx
   ([queries]
@@ -150,6 +160,19 @@
 
 (defn cypher-query [query]
   (->> query vector cypher-combined-tx first))
+
+(defn reset-db! []
+  (Thread/sleep 500)
+  (graph-close!) (graph-connect!) (reset-session!)
+  (Thread/sleep 500)
+  (if (cypher-query "MATCH (n:notareallabel) RETURN count(n)")
+    (reset! invalid-conn false)
+    (recur)))
+
+(add-watch invalid-conn :reset-trigger
+           (fn [_k _r old-state new-state]
+             (when (and new-state (not old-state))
+               (reset-db!))))
 
 (defn cypher-list [query]
   (->> (cypher-query query)

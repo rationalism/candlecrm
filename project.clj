@@ -8,7 +8,7 @@
                  [ns-tracker "0.3.0"]
                  [cheshire "5.6.3"]
                  [clj-time "0.12.0"]
-                 [clj-http "3.2.0"
+                 [clj-http "3.3.0"
                   :exclusions [commons-io]]
                  [http-kit "2.2.0"]
                  [ring/ring-core "1.5.0"]
@@ -34,7 +34,7 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.6.1"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.7.0"]
                  [org.deeplearning4j/deeplearning4j-core "0.6.0"
                   :exclusions [org.json/json com.google.guava/guava
                                org.apache.commons/commons-compress
