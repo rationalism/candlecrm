@@ -18,7 +18,7 @@
                     (s/email-subject email)
                     (Email. (s/email-from email))
                     (Content. "text/plain" (s/email-body email)))]
-    (set! (.req method) Method/POST)
-    (set! (.req endpoint) "mail/send")
-    (set! (.req body) (.build mail))
+    (set! (. req method) Method/POST)
+    (set! (. req endpoint) "mail/send")
+    (set! (. req body) (.build mail))
     (.api @sg-server req)))
