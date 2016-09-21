@@ -255,6 +255,7 @@
   (->> (auth/list-users) (map auth/get-username)
        (mapv imap/reset-user!))
   (reset! imap/message-queue #{})
+  (reset! imap/overload-locked #{})
   (reset! imap/empty-flag false)
   (Thread/sleep 1000) 
   (->> (auth/list-users) (mapv load-contacts!)))
