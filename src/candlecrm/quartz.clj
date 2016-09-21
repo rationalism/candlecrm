@@ -258,4 +258,5 @@
   (reset! imap/overload-locked #{})
   (reset! imap/empty-flag false)
   (Thread/sleep 1000) 
-  (->> (auth/list-users) (mapv load-contacts!)))
+  (->> (auth/list-users) (mapv load-contacts!))
+  :success)
