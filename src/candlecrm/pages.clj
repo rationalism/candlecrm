@@ -1,5 +1,6 @@
 (ns candlecrm.pages
   (:require [candlecrm.common :refer :all]
+            [candlecrm.environ :refer [env]]
             [candlecrm.auth :as auth]
             [candlecrm.google :as google]
             [candlecrm.html :as html]
@@ -187,4 +188,10 @@
            (not (regex/one-email? email))
            "Not a valid email address"
            :else
-           (do "Invite requested"))))
+           (do (sendgrid/send-email!
+                {s/email-from (env :test-acct-email)
+                 s/email-to (env :test-acct-email)
+                 s/email-subject "CandleCRM invite request"
+                 s/email-body (str "There has been a CandleCRM invite request from:\n\n"
+                                   "Name: " name "\n\nEmail: " email "\n\n")})
+               "Invite requested"))))

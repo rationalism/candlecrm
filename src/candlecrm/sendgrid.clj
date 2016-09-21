@@ -6,7 +6,7 @@
   (:import [com.sendgrid Content Email Mail
             Method Request SendGrid]))
 
-(def sg-server (atom nil))
+(defonce sg-server (atom nil))
 
 (defn init-server! []
   (->> :sendgrid-api env (SendGrid. )
