@@ -66,6 +66,9 @@
         (pages/request-reset req))
   (POST "/set-password" req
         (pages/set-password req))
+  (POST "/request-invite" {{:keys [name email] :as params}
+                           :params :as req}
+        (pages/request-invite params))
   (POST "/create-account" {{:keys [username password confirm code] :as params}
                            :params :as req}
         (pages/create-account params))

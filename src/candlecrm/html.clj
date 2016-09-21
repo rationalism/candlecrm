@@ -49,32 +49,37 @@
   [:footer#copyright [:hr]
    [:p "© 2016 CandleCRM"]])
 
-(defn invite-form []
+(defn invite-form [flash]
   [:div {:class "row"}
-   [:div {:class "col-md-12 col-lg-10"}
+   [:div {:class "col-md-12"}
     [:form {:method "POST" :action "request-invite"
             :class "" :id "inviteForm" :novalidate ""}
      [:fieldset {:class "form-group"}
       (anti-forgery-field)
-      [:legend [:h3 "Request beta testing invite"]]
-      [:div {:class "greyback"}
+      [:legend
+       [:h3 "Request invite"]
+       [:h6 (str "CandleCRM is in private beta. Request an invite if you'd"
+                 " like to help us test it.")]]
+      [:div {:class "col-md-8 col-lg-5 greyback"}
        [:div {:class "form-group"}
         [:label {:for "inviteName"} "Name "]
         [:input {:type "text" :name "name" :class "form-control"
                  :id "inviteName" :required "required"}]]
        [:div {:class "form-group"}
         [:label {:for "inviteEmail"} "Email address "]
-        [:input {:type "email" :name "username" :class "form-control"
+        [:input {:type "email" :name "email" :class "form-control"
                  :id "inviteEmail" :required "required"}]]
        [:div {:class "form-group"}
         [:input {:class "btn btn-primary" 
-                 :value "Submit" :type "submit"}]]]]]]])
+                 :value "Submit" :type "submit"}]
+        [:span {:style "padding:0 0 0 10px;color:red;"
+                :id "signupError"} flash]]]]]]])
 
-(defn invite-page []
+(defn invite-page [flash]
   [:div#homepage {:class "container"}
    [:div {:class "row"}
-    [:div {:class "col-xs-8"}
-     [:br](invite-form)]]
+    [:div {:class "col-xs-12"}
+     [:br] (invite-form flash)]]
    (footer-box)])
 
 (defn contact-page []
@@ -108,35 +113,35 @@
                " It keeps track of things like who your customers are,"
                " how to contact them, and when your next meeting with"
                " each customer is. CandleCRM runs over the Internet, "
-               " or 'in the cloud'. You can use it from any computer "
+               " or 'in the cloud'. You can use CandleCRM from any computer "
                " or tablet with an Internet connection.")]
      [:h4 {:id "q2"} "2. How is CandleCRM different from other CRM software?"]
      [:ul (str "CandleCRM uses artificial intelligence (AI) to keep customer"
-               " information updated. For example, suppose you receive a new email"
+               " information up to date. For example, suppose you receive a new email"
                " from Bob Smith. Bob likes your new product, and wants to try it out."
                " Bob says that he lives in Dallas, Texas, and he wants to call you"
                " at 3 PM tomorrow.")]
      [:ul (str "When you receive Bob's email, CandleCRM will automatically \"read\""
-               " it, with artificial intelligence. It will create a new entry for Bob,"
+               " it, with the latest in AI technology. It will create a new entry for Bob,"
                " or if you've talked to Bob before, it will update his existing entry."
                " It will record Bob's email address and phone number, and add Bob"
-               " to a list of customers in Dallas. Finally, it will automatically add"
+               " to a list of customers in Dallas. Finally, it automatically adds"
                " your call with Bob to tomorrow's agenda.")]
      [:h4 {:id "q3"} "3. How much does CandleCRM cost?"]
      [:ul (str "Right now, CandleCRM is free. We're still testing it out, so we'd"
                " like people to give it a try, and see if there are any bugs or other"
                " problems which we need to fix. When we're done testing, there will be"
                " a free trial, and then a small monthly fee to"
-               " continue using CandleCRM after the trial period ends.")]
+               " continue using CandleCRM after a trial period ends.")]
      [:h4 {:id "q4"} "4. What do I need to start using CandleCRM?"]
      [:ul (str "Right now, to use CandleCRM, you must have a GMail account. We"
-               " know that many people use other email providers, and"
-               " we plan to add support for other email services very soon.")]
+               " know that many people use other email services, and"
+               " we plan to add support for other email accounts very soon.")]
      [:h4 {:id "q5"} "5. Does CandleCRM use encryption?"]
-     [:ul (str "Yes. Everything on the CandleCRM website is encrypted with "
+     [:ul (str "Yes. Everything on the CandleCRM website is automatically encrypted with "
                " HTTPS/TLS/SSL. This encryption is recommended by security experts "
-               " to keep private data safe. For example, if you're using the WiFi"
-               " at a coffee shop, encryption prevents other people at the shop"
+               " to keep your private data safe. For example, if you're using the WiFi"
+               " at a coffee shop, encryption prevents others at the shop"
                " from snooping on your messages.")]
      [:h4 {:id "q6"} "6. Can I use CandleCRM on my phone?"]
      [:ul (str "Yes, but it might be harder to use on a small screen."

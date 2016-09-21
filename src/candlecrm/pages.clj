@@ -6,7 +6,9 @@
             [candlecrm.imap :as imap]
             [candlecrm.neo4j :as neo4j]
             [candlecrm.quartz :as quartz]
+            [candlecrm.regex :as regex]
             [candlecrm_cljc.schema :as s]
+            [clojure.string :as str]
             [ring.util.response :as resp]))
 
 (defn home-with-message [message]
@@ -58,10 +60,10 @@
    (html/base-template
     (html/homepage))))
 
-(defn invite-form [_req]
+(defn invite-form [{:keys [flash]}]
   (html-wrapper
    (html/base-template
-    (html/invite-page))))
+    (html/invite-page flash))))
 
 (defn login-switch [identity req alt-page]
   (cond (not identity) (alt-page req)
@@ -175,3 +177,13 @@
   (imap/add-new-queue! identity)
   (quartz/schedule-contacts! identity)
   (home-with-message "Congrats! Authentication successful"))
+
+(defn request-invite [{:keys [name email]}]
+  (assoc (resp/redirect "/signup.html") :flash
+         (cond
+           (str/blank? name) "Name blank"
+           (str/blank? email) "Email blank"
+           (not (regex/one-email? email))
+           "Not a valid email address"
+           :else
+           (do "Invite requested"))))
