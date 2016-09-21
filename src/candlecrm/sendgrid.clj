@@ -14,9 +14,9 @@
 
 (defn send-email! [email]
   (let [req (Request. )
-        mail (Mail. (Email. (s/email-to email))
+        mail (Mail. (Email. (s/email-from email))
                     (s/email-subject email)
-                    (Email. (s/email-from email))
+                    (Email. (s/email-to email))
                     (Content. "text/plain" (s/email-body email)))]
     (set! (. req method) Method/POST)
     (set! (. req endpoint) "mail/send")
