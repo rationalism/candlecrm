@@ -65,7 +65,7 @@
                  [crypto-random "1.2.0"]
                  [clojure-csv/clojure-csv "2.0.2"]
                  [org.apache.commons/commons-lang3 "3.4"]
-                 [com.sendgrid/sendgrid-java "2.2.2"]
+                 [com.sendgrid/sendgrid-java "3.0.9"]
                  [reagent-forms "0.5.25"
                   :exclusions [com.google.guava/guava]]
                  [org.apache.commons/commons-math3 "3.6.1"]

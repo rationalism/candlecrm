@@ -3,19 +3,22 @@
             [candlecrm.common :refer :all]
             [candlecrm_cljc.schema :as s]
             [candlecrm.environ :refer [env]])
-  (:import [com.sendgrid SendGrid SendGrid$Email]))
+  (:import [com.sendgrid Content Email Mail
+            Method Request SendGrid]))
 
 (def sg-server (atom nil))
 
 (defn init-server! []
-  (->> :sendgrid-api env
-       (SendGrid. )
+  (->> :sendgrid-api env (SendGrid. )
        (reset! sg-server)))
 
 (defn send-email! [email]
-  (.send @sg-server
-         (doto (SendGrid$Email. )
-           (.addTo (s/email-to email))
-           (.setFrom (s/email-from email))
-           (.setSubject (s/email-subject email))
-           (.setText (s/email-body email)))))
+  (let [req (Request. )
+        mail (Mail. (Email. (s/email-to email))
+                    (s/email-subject email)
+                    (Email. (s/email-from email))
+                    (Content. "text/plain" (s/email-body email)))]
+    (set! (.req method) Method/POST)
+    (set! (.req endpoint) "mail/send")
+    (set! (.req body) (.build mail))
+    (.api @sg-server req)))

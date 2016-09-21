@@ -7,6 +7,7 @@
             [candlecrm.neo4j :as neo4j]
             [candlecrm.quartz :as quartz]
             [candlecrm.regex :as regex]
+            [candlecrm.sendgrid :as sendgrid]
             [candlecrm_cljc.schema :as s]
             [clojure.string :as str]
             [ring.util.response :as resp]))
