@@ -208,12 +208,12 @@
 (defn node-aux [node-name item]
   [:div
    (when (-> item s/type-label (= s/person))
-     (when (or (->> s/email-to (state/look :current-node)
-                    empty? not)
-               (->> s/email-from (state/look :current-node)
-                    empty? not))
-       [:div
-        [person-notes] [:br]
+     [:div
+      [person-notes] [:br]
+      (when (or (->> s/email-to (state/look :current-node)
+                     empty? not)
+                (->> s/email-from (state/look :current-node)
+                     empty? not))
         [:div {:class "row"}
          [:div {:class "col-md-6"}
           [:h5.infotitle (str "Emails to " node-name)]
@@ -222,7 +222,10 @@
          [:div {:class "col-md-6"}
           [:h5.infotitle (str "Emails from " node-name)]
           [table/email-table [:current-node s/email-from] s/email-from
-           (partial u/update-emails-person! s/email-from)]]]]))])
+           (partial u/update-emails-person! s/email-from)]]])])
+   (when (some #{(s/type-label item)} [s/event s/location s/organization])
+     [:div
+      [person-notes] [:br]])])
 
 (defn show-node [node-name item aux?]
   [:div#node-box
