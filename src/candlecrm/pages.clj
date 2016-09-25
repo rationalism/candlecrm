@@ -123,10 +123,10 @@
   (html/base-template
    (html/login-needed uri)))
 
-(defn reset-pwd [req]
+(defn reset-pwd [{:keys [flash]}]
   (html-wrapper
    (html/base-template
-    (html/reset-pwd))))
+    (html/reset-pwd flash))))
 
 (defn new-password [user token]
   (html/base-template
@@ -153,7 +153,8 @@
 
 (defn request-reset [req]
   (auth/pwd-reset! req)
-  (home-with-message "Password reset requested."))
+  (assoc (resp/redirect "/reset-password")
+         :flash "Password reset requested."))
 
 (defn set-password [{:keys [params]}]
   (if-let [user (->> params :token (hash-map s/pwd-reset-token)

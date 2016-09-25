@@ -321,7 +321,7 @@
         [:span {:style "padding:0 0 0 10px;color:red;"
                 :id "loginError"}]]]]]]])
 
-(defn reset-pwd []
+(defn reset-pwd [flash]
   [:div {:class "container"}
    [:div {:class "row"}
     [:div {:class "col-md-8 col-lg-5"}
@@ -338,7 +338,9 @@
                   :id "resetUsername" :class "form-control"}]]
         [:div  {:class "form-group"}
          [:input {:class "btn btn-primary"
-                  :value "Request reset" :type "submit"}]]]]]]]])
+                  :value "Request reset" :type "submit"}]
+         [:span {:style "padding:0 0 0 10px;color:red;"
+                 :id "signupError"} flash]]]]]]]])
 
 (defn new-password [user token]
   [:div

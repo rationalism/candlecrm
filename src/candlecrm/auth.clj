@@ -172,7 +172,7 @@
       (sendgrid/send-email!
        {s/email-subject "Password reset"
         s/email-body (pwd-reset-email reset-token)
-        s/email-from "alyssamvance@gmail.com"
+        s/email-from "admin@candlecrm.com"
         s/email-to username}))))
 
 (defn set-password! [user {:keys [password confirm]}]
