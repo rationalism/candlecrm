@@ -143,7 +143,7 @@
                               (auth/get-username user)))
             (resp/redirect "/init-account"))
         (assoc (resp/redirect "/email")
-               :flash "Error: Could not get auth token")))))
+               :flash "Error: Could not get authorization. Please try again.")))))
 
 (defn reset-confirm [{{:keys [token]} :params}]
   (if-let [user (->> token (hash-map s/pwd-reset-token)

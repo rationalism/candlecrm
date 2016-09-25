@@ -17,7 +17,7 @@
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [environ "1.1.0"]
-                 [com.taoensso/encore "2.82.0"]
+                 [com.taoensso/encore "2.81.1"]
                  [com.taoensso/timbre "4.7.4"]
                  [buddy "1.1.0"]
                  [com.google.api-client/google-api-client "1.22.0"
