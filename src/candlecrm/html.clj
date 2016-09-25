@@ -298,7 +298,7 @@
 (defn login-form []
   [:div {:class "row"}
    [:div {:class "col-md-8 col-lg-5"}
-    [:form {:method "POST" :action "login" :class ""
+    [:form {:method "POST" :action "login"
             :id "loginForm" :novalidate ""}
      [:fieldset {:class "form-group"}
       (anti-forgery-field)
@@ -322,20 +322,23 @@
                 :id "loginError"}]]]]]]])
 
 (defn reset-pwd []
-  [:div
-   [:form {:method "POST" :action "request-reset"
-           :class ""
-           :id "resetPassForm" :novalidate ""}
-    [:fieldset {:class "form-group"}
-     (anti-forgery-field)
-     [:legend [:h2 "Reset password"]]
-     [:div.
-      [:label {:for "resetUsername"} "Email "]
-      [:input {:type "email" :name "username"
-               :id "resetUsername" :class "form-control"}]]
-     [:div
-      [:input {:class "btn btn-primary"
-               :value "Request reset" :type "submit"}]]]]])
+  [:div {:class "container"}
+   [:div {:class "row"}
+    [:div {:class "col-md-8 col-lg-5"}
+     [:br]
+     [:form {:method "POST" :action "request-reset"
+             :id "resetPassForm" :novalidate ""}
+      [:fieldset {:class "form-group"}
+       (anti-forgery-field)
+       [:legend [:h3 "Reset password"]]
+       [:div {:class "greyback"}
+        [:div {:class "form-group"}
+         [:label {:for "resetUsername"} "Email "]
+         [:input {:type "email" :name "username"
+                  :id "resetUsername" :class "form-control"}]]
+        [:div  {:class "form-group"}
+         [:input {:class "btn btn-primary"
+                  :value "Request reset" :type "submit"}]]]]]]]])
 
 (defn new-password [user token]
   [:div
