@@ -223,7 +223,7 @@
 (defn home-header []
   [:nav#frontbar
    {:class "navbar navbar-static-top navbar-dark bg-inverse"}
-   [:a {:class "navbar-brand" :href "#"}
+   [:a {:class "navbar-brand" :href "/"}
     "CandleCRM"]
    [:ul {:class "nav navbar-nav pull-xs-right"}
     (header-tab "" "Home" "/")
