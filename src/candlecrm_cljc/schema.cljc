@@ -25,7 +25,6 @@
 (def age :age)
 
 (def email :email)
-(def email-headers :email_headers)
 (def email-to :email-to)
 (def email-cc :email-cc)
 (def email-bcc :email-bcc)
