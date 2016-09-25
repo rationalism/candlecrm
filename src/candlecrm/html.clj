@@ -336,35 +336,37 @@
          [:label {:for "resetUsername"} "Email "]
          [:input {:type "email" :name "username"
                   :id "resetUsername" :class "form-control"}]]
-        [:div  {:class "form-group"}
+        [:div {:class "form-group"}
          [:input {:class "btn btn-primary"
                   :value "Request reset" :type "submit"}]
          [:span {:style "padding:0 0 0 10px;color:red;"
                  :id "signupError"} flash]]]]]]]])
 
 (defn new-password [user token]
-  [:div
-   [:form {:method "POST" :action "set-password"
-           :class ""
-           :id "changePassForm" :novalidate ""}
-    [:fieldset {:class "form-group"}
-     (anti-forgery-field)
-     [:legend [:h2 "Set a new password for "
-               (.get user (name s/email-addr))]]
-     [:input {:type "hidden" :name "reset-token"
-              :id "setPwdToken" :required "required"
-              :value token}]
-     [:div.
-      [:label {:for "setPwd"} "New password "]
-      [:input {:type "password" :name "password" :class "form-control"
-               :id "setPwd" :required "required"}]]
-     [:div.
-      [:label {:for "setPwdConfirm"} "Confirm new password "]
-      [:input {:type "password" :name "confirm" :class "form-control"
-               :id "setPwdConfirm" :required "required"}]]
-     [:div
-      [:input {:class "btn btn-primary"
-               :value "Set new password" :type "submit"}]]]]])
+  [:div {:class "container"}
+   [:div {:class "row"}
+    [:div {:class "col-md-8 col-lg-5"} [:br]
+     [:form {:method "POST" :action "set-password"
+             :id "changePassForm" :novalidate ""}
+      [:fieldset {:class "form-group"}
+       (anti-forgery-field)
+       [:legend [:h4 "Set a new password for "
+                 (strip-quotes (str (.get user (name s/email-addr))))]]
+       [:input {:type "hidden" :name "reset-token"
+                :id "setPwdToken" :required "required"
+                :value token}]
+       [:div {:class "greyback"}
+        [:div {:class "form-group"}
+         [:label {:for "setPwd"} "New password "]
+         [:input {:type "password" :name "password" :class "form-control"
+                  :id "setPwd" :required "required"}]]
+        [:div {:class "form-group"}
+         [:label {:for "setPwdConfirm"} "Confirm new password "]
+         [:input {:type "password" :name "confirm" :class "form-control"
+                  :id "setPwdConfirm" :required "required"}]]
+        [:div {:class "form-group"}
+         [:input {:class "btn btn-primary"
+                  :value "Set new password" :type "submit"}]]]]]]]])
 
 (defn login-needed [uri]
   [:h2 "You do not have sufficient privileges to access " uri])

@@ -213,3 +213,6 @@
 
 (defn map-first [coll]
   (map #(map first %) coll))
+
+(defn strip-quotes [s]
+  (subs s 1 (dec (count s))))
