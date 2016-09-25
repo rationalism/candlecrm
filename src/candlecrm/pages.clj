@@ -153,7 +153,7 @@
 
 (defn request-reset [req]
   (auth/pwd-reset! req)
-  (assoc (resp/redirect "/reset-password")
+  (assoc (resp/redirect "/reset-password.html")
          :flash "Password reset requested."))
 
 (defn set-password [{:keys [params]}]

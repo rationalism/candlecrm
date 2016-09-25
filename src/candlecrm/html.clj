@@ -315,7 +315,7 @@
        [:div {:class "form-group"}
         [:input {:class "btn btn-primary"
                  :value "Log in" :type "submit"}]
-        [:a {:id "pass-reset-link" :href "/reset-password"
+        [:a {:id "pass-reset-link" :href "/reset-password.html"
              :class "btn btn-primary"}
          "Forgot password?"]
         [:span {:style "padding:0 0 0 10px;color:red;"

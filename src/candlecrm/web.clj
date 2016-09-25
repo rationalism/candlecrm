@@ -50,7 +50,7 @@
        (pages/signup-page req))
   (GET "/login" req
        (pages/login req))
-  (GET "/reset-password" req
+  (GET "/reset-password.html" req
        (pages/reset-pwd req))
   (GET "/reset-confirm" req
        (pages/reset-confirm req))
