@@ -18,7 +18,8 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
   (:import [javax.mail FetchProfile Folder
-            Message Message$RecipientType]
+            Message Message$RecipientType
+            AuthenticationFailedException]
            [javax.mail.internet InternetAddress]
            [com.sun.mail.imap IMAPFolder$FetchProfileItem]
            [org.jsoup Jsoup]
@@ -125,18 +126,26 @@
        (map shut-folder!))
   (reset! imap-lookup {}))
 
-(defn refresh-inbox [user]
+(defn invalid-token [user]
+  (throw-warn! (str "Error: Token invalid for user "
+                    (auth/get-username user)))
+  (throw-warn! (str "Revoking token for user "
+                    (auth/get-username user)))
+  (google/revoke-access-token! user)
+  (google/delete-token! user) (auth/delete-queue! user)
+  (neo4j/page-refresh! user)
+  nil)
+
+(defnc refresh-inbox [user]
   (try
     (when-let [token (google/lookup-token user)]
       (-> token google/get-access-token!
           (google/get-imap-store! (auth/get-username user))
           get-inbox))
     (catch TokenResponseException e
-      (throw-warn! (str "Error: Token invalid for user " user))
-      (throw-warn! (str "Revoking token for user " user))
-      (google/revoke-access-token! user)
-      (google/delete-token! user) (auth/delete-queue! user)
-      nil)))
+      (invalid-token user))
+    (catch AuthenticationFailedException e
+      (invalid-token user))))
 
 ;; TODO: support IMAP stores other than GMail
 (defn fetch-imap-folder

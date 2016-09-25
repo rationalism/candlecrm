@@ -72,8 +72,9 @@
   
   (defmethod event-msg-handler :chsk/recv
     [{:as ev-msg :keys [?data]}]
-    (if (= ?data [:refresh/tables true])
-      (u/update-tables!)
+    (condp = ?data
+      [:refresh/tables true] (u/update-tables!)
+      [:refresh/page true] (.reload js/location)
       (debugf "Push event from server: %s" ?data)))
   
   (defmethod event-msg-handler :chsk/handshake

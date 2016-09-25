@@ -15,6 +15,9 @@
 (defn table-refresh! [user]
   (@ajax-send! (.id user) [:refresh/tables true]))
 
+(defn page-refresh! [user]
+  (@ajax-send! (.id user) [:refresh/page true]))
+
 (defn user-label [user]
   (str "user_" (.id user)))
 
