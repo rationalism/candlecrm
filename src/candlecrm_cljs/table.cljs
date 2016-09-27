@@ -36,7 +36,9 @@
      s/s-name [person-link type person attr]
      [s/s-name] [person-link type person attr]
      s/website [person-site person attr]
-     (util/get-first person attr))])
+     (let [cell (util/get-first person attr)]
+       (if (not (map? cell)) cell
+           [person-link (:label cell) cell s/s-name])))])
 
 (defn person-row [type person]
   [:tr (for [attr (util/add-ids (type person-attrs))]
