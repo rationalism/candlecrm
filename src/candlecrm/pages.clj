@@ -166,7 +166,7 @@
 (defn create-account [params]
   (if-let [err-msg (apply auth/new-user-check
                           ((juxt :username :password :confirm :code) params))]
-    (home-with-message err-msg)
+    (assoc (resp/redirect "/YZm6sB.html") :flash err-msg)
     (->> [:username :password] (select-keys params)
          quartz/create-user! auth/make-token
          :token (token-cookie "/email"))))
