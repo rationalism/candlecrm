@@ -265,7 +265,6 @@
     :type (state/look :current-node :type)}])
 
 (defn confirm-delete [resp]
-  (js/alert resp)
   (condp = (s/type-label resp)
     s/person (update-people! s/person)
     s/organization (update-people! s/organization)
