@@ -128,8 +128,12 @@
   [:pages/person-places
    (assoc (rel-map s/building) :person-id person-id)])
 
+(defn get-begin [cal]
+  (if-let [begin (get-first cal [s/event-begin])]
+    begin (->> (get cal [s/date-time]) sort first)))
+
 (defn normalize-cal [cal]
-  (-> (assoc cal :start (get-first cal [s/event-begin]))
+  (-> (assoc cal :start (get-begin cal))
       (assoc :end (get-first cal [s/event-end]))
       (dissoc [s/event-begin] [s/event-end])
       (assoc :title
