@@ -6,8 +6,12 @@
             [candlecrm_cljs.util :as util]))
 
 (def person-attrs
-  {s/s-name "Name" s/email-addr "Email address"
-   s/phone-num "Phone number" s/website "Website"})
+  {s/person
+   {s/s-name "Name" s/email-addr "Email address"
+    s/phone-num "Phone number" s/website "Website"}
+   s/organization
+   {[s/s-name] "Name" [s/org-member s/s-name] "Members"
+    [s/location s/s-name] "Location" [s/website] "Website"}})
 
 (def email-attrs {s/email-sent "Date"
                   s/email-subject "Subject"})
@@ -22,15 +26,20 @@
   [:a {:href (util/get-first person attr)}
    (util/get-first person attr)])
 
+(defn class-name [attr]
+  (let [vars (first attr)]
+    (if (coll? vars) (->> vars (map name) str/join) (name vars))))
+
 (defn person-cell [type person attr]
-  [:td {:class (name attr)}
+  [:td {:class (class-name [attr])}
    (condp = attr
      s/s-name [person-link type person attr]
+     [s/s-name] [person-link type person attr]
      s/website [person-site person attr]
      (util/get-first person attr))])
 
 (defn person-row [type person]
-  [:tr (for [attr (util/add-ids person-attrs)]
+  [:tr (for [attr (util/add-ids (type person-attrs))]
          ^{:key (first attr)}
          [person-cell type person (first (second attr))])])
 
@@ -43,9 +52,9 @@
    [:table {:id "people-table" :class "table table-hover"}
     [:thead {:id "people-header" :class "thead-inverse"}
      [:tr
-      (for [attr (util/add-ids person-attrs)]
+      (for [attr (util/add-ids (type person-attrs))]
         ^{:key (first attr)}
-        [:th {:class (name (first (second attr)))}
+        [:th {:class (class-name (second attr))}
          (second (second attr))])]]
     [:tbody {:id "people-rows"}
      (for [p-row (->> type (state/look :rows) util/add-ids)]
