@@ -265,7 +265,14 @@
     :type (state/look :current-node :type)}])
 
 (defn confirm-delete [resp]
-  (js/alert "Entity deleted"))
+  (js/alert resp)
+  (condp = (s/type-label resp)
+    s/person (update-people! s/person)
+    s/organization (update-people! s/organization)
+    s/email (update-emails!)
+    s/event (do (update-agenda!) (fetch-ranks! s/event false))
+    s/building (fetch-ranks! s/building false)
+    :success))
 
 (defn delete-entity! []
   (send! (delete-req) confirm-delete))

@@ -105,7 +105,8 @@
 
 (defn delete-entity! [user {:keys [id type]}]
   (when (neo4j/node-exists? user id type)
-    (neo4j/delete-id! id)))
+    (neo4j/delete-id! id)
+    {:id id s/type-label type}))
 
 (defn delete-queue! [user]
   (->> [s/email-queue s/loaded-top s/loaded-bottom
