@@ -49,7 +49,7 @@
   (.getFolder store folder-name))
 
 (defn get-inbox [store]
-  (let [folder-names (map #(.getName %) (.list (.getDefaultFolder bstore)))]
+  (let [folder-names (map #(.getName %) (.list (.getDefaultFolder store)))]
     (if (some #{gmail-folder} folder-names)
       (.getFolder store (str gmail-folder "/" inbox-folder))
       (let [root-name (->> folder-names (filter #(= \[ (first %))) first)]
