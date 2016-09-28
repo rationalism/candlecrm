@@ -27,7 +27,8 @@
             TokenResponseException]))
 
 ;; Global variables
-(def inbox-folder-name "[Gmail]/All Mail")
+(def inbox-folder "All Mail")
+(def gmail-folder "[Gmail]")
 (def plain-type "text/plain")
 (def html-type "text/html")
 (def multi-type "multipart")
@@ -48,7 +49,11 @@
   (.getFolder store folder-name))
 
 (defn get-inbox [store]
-  (.getFolder store inbox-folder-name))
+  (let [folder-names (map #(.getName %) (.list (.getDefaultFolder bstore)))]
+    (if (some #{gmail-folder} folder-names)
+      (.getFolder store (str gmail-folder "/" inbox-folder))
+      (let [root-name (->> folder-names (filter #(= \[ (first %))) first)]
+        (.getFolder store (str root-name "/" inbox-folder))))))
 
 (defn close-store! [store]
   (.close store))

@@ -164,7 +164,7 @@
                            resp-clojure)]
              (.success tx) (.close tx) resp)
            (catch Exception e
-             (.failure tx) (.close tx)
+             (fail-tx queries tx)
              (cypher-tx-exception retry queries e))))))
 
 (defn cypher-combined-tx
