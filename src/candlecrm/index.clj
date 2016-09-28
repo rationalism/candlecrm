@@ -33,8 +33,7 @@
 (defn make-constraints! [user]
   (neo4j/thread-wrap
    (->> (map #(val-unique "CREATE" user %) unique-exists-vals)
-        neo4j/cypher-combined-tx)
-   (->> (map #(val-exists "CREATE" user %) unique-exists-vals)
+        (concat (map #(val-exists "CREATE" user %) unique-exists-vals))
         neo4j/cypher-combined-tx)))
 
 (defn drop-constraints! [user]
