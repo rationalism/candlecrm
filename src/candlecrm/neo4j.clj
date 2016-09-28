@@ -148,6 +148,13 @@
           (cypher-combined-tx true queries)
           (.close *session*)))))
 
+(defn fail-tx [queries tx]
+  (try
+    (.failure tx) (.close tx)
+    (catch Exception e
+      (throw-error! (str "Could not close transaction for queries: "
+                         queries)))))
+
 (defnc cypher-combined-tx-recur [retry queries]
   #_(dump-queries queries)
   (when (not @invalid-conn)
