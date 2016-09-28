@@ -1,4 +1,4 @@
-(defproject candlecrm "0.3.2"
+(defproject candlecrm "0.4.0"
   :description "Personal semantic graphs"
   :url "https://www.candlecrm.com"
   :license {:name "Copyright Alyssa Vance - all rights reserved"}
@@ -34,7 +34,7 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.7.0"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.7.1"]
                  [org.deeplearning4j/deeplearning4j-core "0.6.0"
                   :exclusions [org.json/json com.google.guava/guava
                                org.apache.commons/commons-compress
@@ -73,7 +73,7 @@
                  [org.seleniumhq.selenium/selenium-java "2.53.1"]
                  [com.cemerick/piggieback "0.2.1"
                   :exclusions [com.google.guava/guava]]
-                 [figwheel-sidecar "0.5.7"]
+                 [figwheel-sidecar "0.5.8"]
                  [org.jsoup/jsoup "1.9.2"]
                  [cc.mallet/mallet "2.0.8"
                   :exclusions [org.hamcrest/hamcrest-core]]
