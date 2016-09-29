@@ -250,15 +250,22 @@
                             (s/email-sent message)
                             (s/email-digest message)
                             (s/email-body message))]
-      (when (-> graph loom/nodes empty? not)
+      (when (and graph (-> graph loom/nodes empty? not))
         (-> (append-hyperlinks graph message)
             (link-message message linked-text s/body-nlp)
             remove-all-metadata)))))
 
+(defn sent-date [id sent]
+  (try (java.util.Date. sent)
+       (catch Exception e
+         (throw-warn! (str "Warning: Could not parse date " sent
+                           " for message ID #" id))
+         (dt/now))))
+
 (defnc graph-from-id [models id]
   (let [[name body sent is-digest?] (fetch-body id)
         message {s/type-label s/email :id id s/email-body body
-                 s/email-sent (java.util.Date. sent)
+                 s/email-sent (sent-date id sent)
                  s/email-digest
                  (if (not is-digest?) []
                      (->> body str/split-lines

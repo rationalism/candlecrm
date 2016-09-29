@@ -170,7 +170,12 @@
      @inbox)))
 
 (defnp content [message]
-  (.getContent message))
+  (try
+    (.getContent message)
+    (catch Exception e
+      (throw-warn! (str "Warning: Could not read content of email " message))
+      (throw-warn! (str "Stack trace:"))
+      (throw-warn! e) "")))
 
 (defnp content-type [message]
   (.getContentType message))

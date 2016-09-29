@@ -727,10 +727,16 @@
 
 (defn add-hyperlinks [annotation mentions]
   (let [mmap (switch-map annotation mentions)]
-    (->> mmap (mapcat second) (cons 0) (partition-all 2)
-         (map #(apply (partial subs (.toString annotation)) %))
-         (interleave (cons "" (map switch-val mmap)))
-         (str/join ""))))
+    (try
+      (->> mmap (mapcat second) (cons 0) (partition-all 2)
+           (map #(apply (partial subs (.toString annotation)) %))
+           (interleave (cons "" (map switch-val mmap)))
+           (str/join ""))
+      (catch Exception e
+        (throw-warn! (str "Error: Could not parse sentence "
+                          (.toString annotation) " with mentions "
+                          mentions))
+        (.toString annotation)))))
 
 (defn sentence-graph [reftime sent-pair]
   (->> sent-pair val ((juxt #(all-ner-graph reftime %) get-relations))
