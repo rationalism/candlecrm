@@ -26,10 +26,15 @@
 (defn event-name [event no-link?]
   (let [subject (-> event (get-first [:link-to s/text-mentions :subject])
                     (get-first :subject))
-        from (-> event (get-first [:link-to s/text-mentions :email-from :name])
-                 (get-first :name))]
-    [:span from " - "
-     (if no-link? subject
+        from-email (-> event (get-first [:link-to s/text-mentions :email-from :name])
+                       (get-first :name))
+        from-notes (-> event (get-first [:link-to s/text-mentions :name])
+                       (get-first :name))
+        event-type (-> event (get-first [:event-type]))]
+    [:span (if (or (nil? from-email) (empty? from-email))
+             from-notes from-email) " - "
+     (if no-link? (if (or (nil? subject) (empty? subject))
+                    event-type subject)
          (node-link subject (:id event) s/event))]))
 
 (defn simple-name [node]

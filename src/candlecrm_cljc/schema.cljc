@@ -184,6 +184,7 @@
           ["Type of event" event-type] 
           ["Hosted by" event-features s-name :id]
           ["Run by" event-org s-name :id] ["Event website" website]
+          ["From notes on" link-to text-mentions s-name :id]
           ["More information" event-context]
           ["In email" link-to text-mentions email-subject :id]
           ["Email from" link-to text-mentions email-from s-name :id]
