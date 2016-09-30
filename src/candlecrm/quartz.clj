@@ -236,9 +236,11 @@
   (stop!) (start!))
 
 (defn delete-user! [user]
-  (stop!)
-  (Thread/sleep 20000)
+  (stop!) (Thread/sleep 20000)
   (auth/delete-user! user)
+  (let [username (auth/get-username user)]
+    (->> @imap/message-queue (filter #(= username (first %)))
+         (into #{}) (swap! imap/message-queue cset/difference)))
   (start!))
 
 (defn delete-req! [user query-map]

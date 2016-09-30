@@ -280,8 +280,9 @@
   (->> graph loom/nodes reply/email-nodes
        (map s/email-uid) (remove nil?) first))
 
-(defn queue-graph [graph]
-  (swap! message-queue cset/difference #{(graph-uid graph)}))
+(defn queue-graph [user graph]
+  (swap! message-queue cset/difference
+         #{[(auth/get-username user) (graph-uid graph)]}))
 
 (defn maybe-load [user graph]
   (if (contains? @overload-locked user)
@@ -289,10 +290,10 @@
     (if (->> graph loom/nodes
              (filter #(= (s/type-label %) s/email))
              count (> 5))
-      (do (queue-graph graph) graph)
+      (do (queue-graph user graph) graph)
       (do (swap! overload-locked cset/union #{user})
           (reset! empty-flag true)
-          (queue-graph graph) graph))))
+          (queue-graph user graph) graph))))
 
 (defn full-parse [[message headers] models user]
   (->> message regex/strip-javascript str/split-lines
@@ -425,13 +426,16 @@
            (#(update % 0 str/split-lines)) reverse
            (apply reply/reply-parse (reply/parse-models-fn))))))
 
-(defn add-queue [folder messages]
-  (->> messages (map #(get-uid folder %)) (into #{})
-       (swap! message-queue cset/union)) messages)
+(defn add-queue [user folder messages]
+  (let [username (auth/get-username user)]
+    (->> messages (map #(get-uid folder %))
+         (map #(vector username %)) (into #{})
+         (swap! message-queue cset/union))) messages)
 
 (defnc insert-raw-range! [user lower upper]
   (when-let [folder (fetch-imap-folder user)]
-    (->> (fetch-messages folder lower upper) (add-queue folder)
+    (->> (fetch-messages folder lower upper)
+         (add-queue user folder)
          (pmap #(->> (message-fetch folder %)
                      (hash-map :user user :message)
                      (@parse-channel)))
