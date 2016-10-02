@@ -313,12 +313,6 @@
          "), type: type(r), val: a" n1 "." (neo4j/esc-token s/value)
          ", rel: r}) AS b" n1)))
 
-(defn val-clause-old [n1 n2]
-  (let [id-node (if (= n2 1) "root" (str "b" (- n2 2) "a" n1))]
-    (str "collect([ID(" id-node "), labels(" id-node
-         "), type(r), a" n1 "." (neo4j/esc-token s/value)
-         ", r]) AS b" n1)))
-
 (defn id-clause [n1]
   (str "collect(ID(a" n1 ")) AS b" n1))
 
