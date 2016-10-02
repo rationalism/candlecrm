@@ -105,12 +105,22 @@
 
     (let [alice-hit (->> {:query "Alice Jones"}
                          (queries/full-search test-user) first)]
-      (println alice-hit)
       (edit-notes! test-user {:node alice-hit
                               :notes "Alice Jones is friends with Carol Brown"})
-      (println (queries/node-by-id user {:id (:id alice-hit) :type s/person}))
+      
+      (is (= "Carol Brown"
+             (->> alice-hit :id (hash-map :type s/person :id) 
+                  (queries/node-by-id test-user) 
+                  (#(get % [s/notes-nlp])) keys first 
+                  links/split-items drop-last last :text)))
+      
       (edit-notes! test-user {:node alice-hit
                               :notes "Alice Jones is friends with Dave Jones"})
-      (println (queries/node-by-id user {:id (:id alice-hit) :type s/person})))
+
+      (is (= "Dave Jones"
+             (->> alice-hit :id (hash-map :type s/person :id)
+                  (queries/node-by-id test-user)
+                  (#(get % [s/notes-nlp])) keys first
+                  links/split-items drop-last last :text))))
     
     (auth/delete-user! test-user)))
