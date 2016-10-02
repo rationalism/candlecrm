@@ -26,6 +26,8 @@
     (is (= {test-username 1.0}
            (-> test-user (person-from-user {:start 0 :limit 10 :type s/person})
                first s/email-addr)))
+    (is (nil? (first (person-from-user test-user {:start 0 :limit 10
+                                                  :type s/organization}))))
     
     (auth/delete-user! test-user)))
 
@@ -109,6 +111,15 @@
     (is test-user)
     (is (= '() (event-related test-user {:start 0 :limit 10
                                          :person-id "17"})))
+    
+    (auth/delete-user! test-user)))
+
+(deftest event-agenda-test
+  (testing "Test the event-agenda database query"
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
+    (is test-user)
+    (is (= '() (event-agenda test-user {:start 0 :limit 10})))
     
     (auth/delete-user! test-user)))
 

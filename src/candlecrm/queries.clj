@@ -56,22 +56,11 @@
        neo4j/cypher-query (mapv mlrecon/mapify-params)))
 
 (defn token-keys [m]
-  (->> (map #(update % 0 keyword) m)
-       (into {})))
+  (->> (map #(update % 0 keyword) m) (into {})))
 
 (defn user-data-public [user query-map]
   (-> (.asMap user) clojure-map token-keys
       (dissoc s/pwd-hash) (dissoc s/google-token)))
-
-(defn node-from-id [user id node-type]
-  (->> [(str "MATCH (root:" (neo4j/prop-label user node-type)
-             ") WHERE ID(root) = {id} WITH root, 0 as o"
-             (vals-collect))
-        {:id id}]
-       neo4j/cypher-query (mapv mlrecon/mapify-params)))
-
-(defn merge-if-exists [node query-map]
-  (when node (merge node {:type (:type query-map)})))
 
 (defn key-vector [m]
   (if (->> m keys first vector?) m
@@ -293,20 +282,6 @@
 
 (defn id-row [[r1 r2]]
   [r1 (->> r2 (map vals) (map vec) (map find-type))])
-
-(defn search-query [id]
-  [(str "MATCH (root) WHERE ID(root) = {id}"
-        " WITH root, 0 as o" (vals-collect))
-   {:id id}])
-
-(defn search-row [[r1 r2]]
-  [r1 (-> (comp first #(mapv mlrecon/mapify-params %)
-                neo4j/cypher-query
-                search-query)
-          (map r2) vec)])
-
-(defn include-pred [[r1 r2]]
-  (map #(merge % {:pred r1}) r2))
 
 (defn full-search [user query-map]
   (let [query (:query query-map)]
