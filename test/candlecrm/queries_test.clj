@@ -60,6 +60,15 @@
     
     (auth/delete-user! test-user)))
 
+(deftest bare-locations-test
+  (testing "Test the bare-locations database query"
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
+    (is test-user)
+    (is (= '() (bare-locations 10)))
+    
+    (auth/delete-user! test-user)))
+
 (deftest all-scanned-test
   (testing "Test the all-scanned database query"
     (def test-user (auth/create-user! {:username test-username

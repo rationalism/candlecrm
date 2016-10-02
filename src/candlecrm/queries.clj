@@ -11,9 +11,6 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
-(defn node-attrs [node]
-  (merge (.asMap node) (hash-map :id (.id node))))
-
 (defn vals-collect []
   (str " MATCH (root)-[r]->(v) WITH o, ID(root) as idr,"
        " collect([ID(root), labels(root),"
