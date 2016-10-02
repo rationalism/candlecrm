@@ -70,7 +70,7 @@
 
 (defn web-link [url is-last?]
   [:span [:a.go-node {:href url}
-          (regex/url-truncate url)]
+          (links/url-truncate url)]
    (when (not is-last?) ", ")])
 
 (defn web-links [item]

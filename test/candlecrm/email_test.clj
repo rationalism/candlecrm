@@ -8,6 +8,7 @@
             [candlecrm.neo4j :as neo4j]
             [candlecrm.queries :as queries]
             [candlecrm_cljc.schema :as s]
+            [candlecrm_cljc.links :as links]
             [candlecrm.email :refer :all]))
 
 (defn graph-ready [f]
@@ -90,6 +91,6 @@
 
     (let [email-hit (->> {:id email-id :type s/email}
                          (queries/node-by-id test-user))]
-      (println email-hit))
+      (println (links/split-items (first (keys (get email-hit [s/body-nlp]))))))
     
     (auth/delete-user! test-user)))
