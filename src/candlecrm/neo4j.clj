@@ -82,11 +82,6 @@
     (run! #(spit logfile (str % "\n\n") :append true)
           queries)))
 
-(defn tquery
-  ([query] (.run *session* query))
-  ([query params] (.run *session* query
-                        (to-values params))))
-
 (defn resp-clojure [resp]
   (->> (if (coll? resp) resp (vector resp))
        (map #(.list %))
