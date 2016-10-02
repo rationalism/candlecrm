@@ -6,7 +6,6 @@
             [candlecrm_cljc.schema :as s]
             [candlecrm.queries :refer :all]))
 
-
 (defn graph-ready [f]
   (neo4j/graph-connect!)
   (neo4j/reset-session!)

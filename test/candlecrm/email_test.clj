@@ -1,21 +1,49 @@
 (ns candlecrm.email-test
   (:require [clojure.test :refer :all]
-            [candlecrm.loom :as loom]
+            [candlecrm.auth :as auth]
             [candlecrm.datetime :as dt]
+            [candlecrm.imap :as imap]
+            [candlecrm.insert :as insert]
+            [candlecrm.loom :as loom]
+            [candlecrm.neo4j :as neo4j]
+            [candlecrm.queries :as queries]
             [candlecrm_cljc.schema :as s]
             [candlecrm.email :refer :all]))
 
-(defn date-model [f]
+(defn graph-ready [f]
+  (neo4j/graph-connect!)
+  (neo4j/reset-session!)
   (dt/load-date-model!)
-  (f) nil)
+  (auth/load-keys!)
+  (f)
+  (neo4j/close-session!))
 
-(use-fixtures :once date-model)
+(use-fixtures :once graph-ready)
 
 (def nlp-models (nlp-models-fn))
+
+(def test-username "someemail@foo.com")
+(def test-password "notarealpassword")
 
 (def test-body "Hello. My name is Alyssa Vance. My email address is alyssamvance@gmail.com; my phone number is 203-850-2427; and my website is rationalconspiracy.com. You can meet me in San Francisco, California on Tuesday at 3:30 PM.")
 
 (def test-body-none "There is no content in this message.")
+
+(def alice {s/type-label s/person s/s-name "Alice Jones"
+            s/email-addr "alicejones@gmail.com"})
+
+(def bob {s/type-label s/person s/s-name "Bob Smith"
+          s/email-addr "bobsmith@gmail.com"})
+
+(def bob-body "Hi Bob, this is Alice Jones.")
+
+(def email-data {s/type-label s/email s/email-subject "Hey Bob"
+                 s/email-sent (ffirst (dt/unix-dates "Sat, Aug 22, 2015 at 7:51 PM" (dt/now)))
+                 s/email-received (ffirst (dt/unix-dates "Sat, Aug 22, 2015 at 7:51 PM" (dt/now)))
+                 s/email-uid 555555})
+
+(def headers (loom/build-graph [] [[email-data alice s/email-from]
+                                   [email-data bob s/email-to]]))
 
 (deftest email-nlp
   (testing "Split an email into an NLP graph"
@@ -35,3 +63,33 @@
     (is r1)
     (is r2)))
 
+(deftest edit-notes-test
+  (testing "Create and edit some notes"
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
+    (is test-user)
+    (apply insert/push-graph!
+           (imap/parse! nlp-models {:user test-user
+                                    :message [bob-body headers]}))
+    
+    (let [alice-hit (->> {:query "Alice Jones"}
+                         (queries/full-search test-user) first)]
+      (is (= s/person (s/type-label alice-hit)))
+      (is (= "Alice Jones" (first (keys (get alice-hit [s/s-name])))))
+      (is (= "alicejones@gmail.com" (first (keys (get alice-hit [s/email-addr]))))))
+
+    (def email-id (->> {:query "Hey Bob"}
+                       (queries/full-search test-user) first :id))
+    (is (number? email-id))
+    
+    (let [email-hit (->> {:id email-id :type s/email}
+                         (queries/node-by-id test-user))]
+      (is (= bob-body (first (keys (get email-hit [s/email-body]))))))
+
+    (run-email-nlp! nlp-models {:id email-id :user test-user})
+
+    (let [email-hit (->> {:id email-id :type s/email}
+                         (queries/node-by-id test-user))]
+      (println email-hit))
+    
+    (auth/delete-user! test-user)))
