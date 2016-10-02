@@ -38,6 +38,7 @@
     (is (invite req))
     (is (faq req))
     (is (faq-page req))
+    (is (invite-form req))
     (is (contact-form req))
     (is (signup-form req))
     (is (homepage {}))
