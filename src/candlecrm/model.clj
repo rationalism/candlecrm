@@ -173,7 +173,7 @@
 (defn longest [coll1 coll2]
   (if (and (or (nil? coll1) (empty? coll1))
            (or (nil? coll2) (empty? coll2)))
-    0 (->> [coll1 coll2] (apply concat) (map first)
+    0 (->> [coll1 coll2] (apply concat)
            (map count) (apply max))))
 
 (defn bag-of-chars [s]
