@@ -55,12 +55,6 @@
 (defn fan-out [g node]
   (count (out-edges g node)))
 
-(defn top-nodes [g]
-  (filter #(zero? (fan-in g %)) (nodes g)))
-
-(defn bottom-nodes [g]
-  (filter #(zero? (fan-out g %)) (nodes g)))
-       
 (defn add-nodes [g nodes]
   (apply graph/add-nodes g nodes))
 
@@ -90,30 +84,11 @@
 (defn remove-edges [g edges]
   (reduce remove-edge g edges))
 
-(defn remove-edges-label [g label]
-  (->> (edges g)
-       (filter #(= label (third %)))
-       (remove-edges g)))
-
 (defn remove-nodes [g nodes]
   (as-> nodes $
     (mapcat #(all-edges g %) $)
     (remove-edges g $)
     (apply graph/remove-nodes $ nodes)))
-
-(defn up-nodes [g node]
-  (->> (graph/in-edges g node)
-       (map first)))
-
-(defn down-nodes [g node]
-  (->> (graph/out-edges g node)
-       (map first)))
-
-(defn sort-nodes [g]
-  (sort-by count > g))
-
-(defn labeled-edges [g node label]
-  (filter #(= label (third %)) (out-edges g node)))
 
 (defn select-edges [g edge-type]
   (filter #(= edge-type (third %)) (edges g)))
