@@ -652,33 +652,8 @@
   (->> relations (remove #(-> % (.getType) (= "_NR")))
        (reduce relation-graph ner-graph)))
 
-(defn is-fpp? [token]
-  (some #{(str/lower-case (get-text token))}
-        ["i" "me" "my" "mine" "myself" "i'm" "i'll" "i've"]))
-
-(defn char-pos [token]
-  [(.beginPosition token) (.endPosition token)])
-
-(defn char-ends [text coll]
-  (->> text count vector (concat [0] coll)))
-
-(defn subs-vec [text [p1 p2]]
-  (subs text p1 p2))
-
-(defn swap-fpp [author token]
-  (->> token get-text str/lower-case
-       (get {"i" author "me" author "my" (str author "'s")
-             "mine" (str author "'s") "myself" "themselves"
-             "i'm" (str author " is") "i'll" (str author " will")
-             "i've" (str author " has")})))
-
-(defn mesh-fpps [author fpps pieces]
-  (interleave pieces
-              (conj (mapv #(swap-fpp author %) fpps) "")))
-
 (defn sentence-split [models text]
-  (->> text (run-nlp (:token models))
-       get-sentences))
+  (->> text (run-nlp (:token models)) get-sentences))
 
 (defn fpp-merge [author strings]
   (->> strings rest (map #(str author fpp-join %))
