@@ -112,9 +112,6 @@
 (defn rcons [a b]
   (cons b a))
 
-(defn echo [x]
-  (println "Echo!") x)
-
 (defn third [x]
   (-> x next next first))
 

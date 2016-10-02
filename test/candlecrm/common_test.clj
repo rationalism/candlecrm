@@ -4,6 +4,20 @@
 
 (def test-coll [1 2 3 4 5 6 7 8 9 10])
 
+(deftest log-test
+  (testing "Setting up log system"
+    (is (not (log-setup!)))))
+
+(deftest nth-test
+  (testing "extra nth functions"
+    (is (= 3 (third test-coll)))
+    (is (= 4 (fourth test-coll)))
+    (is (= 5 (fifth test-coll)))))
+
+(deftest mapint-test
+  (testing "Get a set of ints"
+    (is (= [1 2 3 4] (map-int ["1" "2" "3" "4"])))))
+
 (deftest fmap-test
   (testing "Apply function to map values"
     (is (= {:a 2 :b 3 :c 4}
