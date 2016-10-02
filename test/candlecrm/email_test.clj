@@ -102,5 +102,15 @@
                             (hash-map :id email-id :key)
                             (queries/key-link test-user))]
         (is (= "Alice Jones" (get-first alice-link s/s-name)))))
+
+    (let [alice-hit (->> {:query "Alice Jones"}
+                         (queries/full-search test-user) first)]
+      (println alice-hit)
+      (edit-notes! test-user {:node alice-hit
+                              :notes "Alice Jones is friends with Carol Brown"})
+      (println (queries/node-by-id user {:id (:id alice-hit) :type s/person}))
+      (edit-notes! test-user {:node alice-hit
+                              :notes "Alice Jones is friends with Dave Jones"})
+      (println (queries/node-by-id user {:id (:id alice-hit) :type s/person})))
     
     (auth/delete-user! test-user)))
