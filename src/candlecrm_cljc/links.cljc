@@ -1,4 +1,4 @@
-(ns candlecrm_cljs.regex
+(ns candlecrm_cljc.links
   (:require [clojure.string :as str]
             [candlecrm_cljc.schema :as s]))
 
@@ -53,3 +53,18 @@
 (defn regex-escape [text]
   (str/replace text esc-char-regex #(str "\\" %1)))
 
+(defn split-item [s m]
+  (let [node-index (.indexOf (last s) (:original m))]
+    (->> m :original count (+ node-index) (subs (last s))
+         (vector (subs (last s) 0 node-index) m)
+         (concat (drop-last s)) vec)))
+
+(defn split-urls [item]
+  (let [parsed (url-parse item)]
+    (reduce split-item [item] parsed)))
+
+(defn split-items [item]
+  (let [parsed (node-parse item)]
+    (->> (reduce split-item [item] parsed)
+         (mapcat #(if (string? %) (split-urls %)
+                      (vector %))))))

@@ -1,8 +1,8 @@
 (ns candlecrm_cljs.node
   (:require [clojure.string :as str]
             [candlecrm_cljc.schema :as s]
+            [candlecrm_cljc.links :as links]
             [candlecrm_cljs.edit :as edit]
-            [candlecrm_cljs.regex :as regex]
             [candlecrm_cljs.state :as state]
             [candlecrm_cljs.table :as table]
             [candlecrm_cljs.update :as u]
@@ -14,22 +14,6 @@
 (defn delete-entity-switch []
   (u/delete-entity!)
   (state/set! [:tabid] 1))
-
-(defn split-item [s m]
-  (let [node-index (.indexOf (last s) (:original m))]
-    (->> m :original count (+ node-index) (subs (last s))
-         (vector (subs (last s) 0 node-index) m)
-         (concat (drop-last s)) vec)))
-
-(defn split-urls [item]
-  (let [parsed (regex/url-parse item)]
-    (reduce split-item [item] parsed)))
-
-(defn split-items [item]
-  (let [parsed (regex/node-parse item)]
-    (->> (reduce split-item [item] parsed)
-         (mapcat #(if (string? %) (split-urls %)
-                      (vector %))))))
 
 (defn add-newlines [piece]
   [:span
@@ -53,7 +37,7 @@
 
 (defn body-links [item]
   [:p#email-body
-   (for [piece (-> item split-items util/add-ids)]
+   (for [piece (-> item links/split-items util/add-ids)]
      ^{:key (first piece)}
      [body-link (second piece)])])
 
