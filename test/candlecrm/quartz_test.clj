@@ -28,11 +28,19 @@
     (def test-user (auth/create-user! {:username test-username
                                        :password test-password}))
 
-    (with-redefs [imap/fetch-imap-folder (fn [& x] nil)
+    (with-redefs [imap/fetch-imap-folder (fn [& x] :mock-queue)
                   imap/last-uid (fn [x] 777777)
                   println (fn [& x] nil)]
       (imap/add-new-queue! test-user)
       (refresh-queue! test-user)
       (queries/next-email-queue test-user))
 
+    (auth/delete-user! test-user)))
+
+(deftest run-recon-test
+  (testing "Try running recon for a user"
+    (def test-user (auth/create-user! {:username test-username
+                                       :password test-password}))
+
+    (run-recon!)
     (auth/delete-user! test-user)))
