@@ -39,7 +39,7 @@
 
 (defonce parse-channel (atom nil))
 (defonce overload-locked (atom #{}))
-(defonce message-queue (atom #{}))
+(defonce message-queue (atom {}))
 (defonce empty-flag (atom false))
 
 (def email-domains [".com" ".edu" ".org" ".net"])
@@ -281,8 +281,8 @@
        (map s/email-uid) (remove nil?) first))
 
 (defn queue-graph [user graph]
-  (swap! message-queue cset/difference
-         #{[(auth/get-username user) (graph-uid graph)]}))
+  (swap! message-queue dissoc
+         [(auth/get-username user) (graph-uid graph)]))
 
 (defn maybe-load [user graph]
   (if (contains? @overload-locked user)
@@ -426,11 +426,14 @@
            (#(update % 0 str/split-lines)) reverse
            (apply reply/reply-parse (reply/parse-models-fn))))))
 
+(defn now-vals [coll]
+  (zipmap coll (repeat (count coll) (dt/now))))
+
 (defn add-queue [user folder messages]
   (let [username (auth/get-username user)]
     (->> messages (map #(get-uid folder %))
-         (map #(vector username %)) (into #{})
-         (swap! message-queue cset/union))) messages)
+         (map #(vector username %)) now-vals
+         (swap! message-queue merge))) messages)
 
 (defnc insert-raw-range! [user lower upper]
   (when-let [folder (fetch-imap-folder user)]
