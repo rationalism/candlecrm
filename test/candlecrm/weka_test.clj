@@ -1,5 +1,6 @@
 (ns candlecrm.weka-test
   (:require [clojure.test :refer :all]
+            [clojure.java.io :as io]
             [candlecrm.weka :refer :all]))
 
 (def train-points [[0.0 0.0 0.0 0.0]
@@ -35,3 +36,10 @@
                 (apply concat) forest-curve))
     (is (> 0.5 (reverse-logit l 0.0)))
     (is (< 0.5 (reverse-logit l 1.0)))))
+
+(deftest train-bayes-test
+  (testing "Train Bayes and random forest models"
+    (let [sep-file (->> "traindata/trainsep.txt" io/resource
+                        io/input-stream)]
+      (is (= [:bayes :forest]
+             (->> sep-file train-bayes keys vec))))))
