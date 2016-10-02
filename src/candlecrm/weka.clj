@@ -124,61 +124,6 @@
        model (-> point vector make-instances
                  (make-instance point)))))
 
-;; Texts must be in "Instances" format
-(defn word-vec [texts]
-  (Filter/useFilter
-   texts (doto (StringToWordVector. )
-           (.setAttributeIndices "first")
-           (.setInputFormat texts))))
-
-(defn load-text-dir [dir-name]
-  (word-vec 
-   (.getDataSet
-    (doto (TextDirectoryLoader. )
-      (.setDirectory (File. dir-name))))))
-
-(defn string-to-vector []
-  (doto (StringToWordVector. )
-    (.setLowerCaseTokens true)
-    (.setWordsToKeep 10000)
-    (.setTokenizer (doto (WordTokenizer. )
-                     (.setDelimiters token-delims)))))
-
-(defn empty-bayes []
-  (doto (FilteredClassifier. )
-    (.setFilter (string-to-vector))
-    (.setClassifier (NaiveBayes. ))))
-
-(defn naive-bayes [points]
-  (doto (empty-bayes)
-    (.buildClassifier (instances points))))
-
-(defn add-text [instances text]
-  (.add instances 
-        (doto (DenseInstance. 2)
-          (.setDataset instances)
-          (.setValue 0 text)
-          (.setClassMissing)))
-  instances)
-
-(defn test-attributes [bayes]
-  (doto (FastVector. )
-    (add-element (let [^java.util.ArrayList e nil]
-                   (Attribute. "text" e)))
-    (add-element (-> bayes (.getClassifier)
-                     (.getHeader) (.classAttribute)))))
-
-(defnp test-instances [bayes text]
-  (doto (Instances. "test set"
-                    (test-attributes bayes) 1)
-    (.setClassIndex 1)
-    (add-text text)))
-
-(defnp classify-bayes [bayes text]
-  (->> text (test-instances bayes) first
-       (.distributionForInstance bayes)
-       (into [])))
-
 (defn classify-logit [model scores]
   (let [point (if (coll? scores) scores [scores])]
     (->> (map-indexed vector point)
@@ -247,14 +192,6 @@
     (.setOutputFile (File. outfile))
     (.setAttributes "1-2")
     (.setBuffer (StringBuffer. ))))
-
-(defn crossval-bayes [outfile points]
-  (doto (Evaluation. points)
-    (.crossValidateModel
-     (empty-bayes) points
-     (int crossval-folds)
-     (java.util.Random. )
-     (into-array Object [(html-out outfile)]))))
 
 (defn csv-out [outfile]
   (doto (CSV. )
