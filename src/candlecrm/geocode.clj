@@ -34,8 +34,8 @@
       (throw-warn! (str "Could not geocode " s))
       nil)
     (catch ApiException e
-      (throw-warn! "Error: Could not geocode " s)
-      (throw-warn! "Stack trace: " e)
+      (throw-warn! (str "Error: Could not geocode " s))
+      (throw-warn! (str "Stack trace: " e))
       nil)))
 
 (defn full-location [[addr loc zip]]
