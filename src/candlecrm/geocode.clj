@@ -9,7 +9,8 @@
             [candlecrm.queries :as queries]
             [candlecrm_cljc.schema :as s]
             [candlecrm.environ :refer [env]])
-  (:import [com.google.maps GeoApiContext GeocodingApi]))
+  (:import [com.google.maps GeoApiContext GeocodingApi]
+           [com.google.maps.errors OverQueryLimitException]))
 
 (defn make-context []
   (.setApiKey (GeoApiContext. ) (env :geocode-api-key)))
@@ -25,8 +26,12 @@
    s/type-label s/geocode})
 
 (defn fetch-geocode [s]
-  (-> @context (GeocodingApi/geocode s)
-      (.await) first))
+  (try
+    (-> @context (GeocodingApi/geocode s) (.await) first)
+    (catch OverQueryLimitException e
+      (throw-warn! "Error: Over query limit for geocoding API")
+      (throw-warn! (str "Could not geocode " s))
+      nil)))
 
 (defn full-location [[addr loc zip]]
   (str (first addr) ", " (str/join " " loc)
