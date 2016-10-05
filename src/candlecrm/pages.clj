@@ -29,7 +29,7 @@
    :headers {"Location" url}
    :body ""
    :cookies {"token" {:value token :http-only true :secure true
-                      :max-age (* 30 1 #_auth/exp-hours)}}})
+                      :max-age (* 3600 auth/exp-hours)}}})
 
 (defn signup-form [{:keys [flash]}]
   (html-wrapper
