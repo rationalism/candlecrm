@@ -55,7 +55,7 @@
 (defn make-token [user]
   {:token
    (jwt/encrypt {:user {:id (.id user)}
-                 :exp (-> exp-hours hours from-now)}
+                 :exp (-> 30 seconds from-now)}
                 @pubkey encryption)})
 
 (defn user-vertex! [email-addr pwd-hash]

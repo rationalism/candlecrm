@@ -43,6 +43,13 @@
    (->> (map #(val-exists "DROP" user %) unique-exists-vals)
         (neo4j/cypher-combined-tx :retry))))
 
+(defn refresh-unique! [class users]
+  (neo4j/thread-wrap
+   (->> (map #(val-unique "DROP" % class) users)
+        (neo4j/cypher-combined-tx :retry))
+   (->> (map #(val-unique "CREATE" % class) users)
+        (neo4j/cypher-combined-tx :retry))))
+
 (defn delete-with-prop [user prop]
   (str "MATCH (root:" (neo4j/prop-label user prop)
        ") DETACH DELETE root"))
