@@ -142,8 +142,10 @@
             (throw-warn! (str "Add Google token for user: "
                               (auth/get-username user)))
             (resp/redirect "/init-account"))
-        (assoc (resp/redirect "/email")
-               :flash "Error: Could not get authorization. Please try again.")))))
+        (do
+          (imap/invalid-token user)
+          (assoc (resp/redirect "/email")
+                 :flash "Error: Could not get authorization. Please try again."))))))
 
 (defn reset-confirm [{{:keys [token]} :params}]
   (if-let [user (->> token (hash-map s/pwd-reset-token)
