@@ -34,7 +34,7 @@
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.7.1"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.7.2"]
                  [org.deeplearning4j/deeplearning4j-core "0.6.0"
                   :exclusions [org.json/json com.google.guava/guava
                                org.apache.commons/commons-compress
@@ -60,7 +60,7 @@
                  [clojurewerkz/quartzite "2.0.0"]
                  [reagent "0.6.0"]
                  [jayq "2.5.4"]
-                 [com.google.maps/google-maps-services "0.1.15"]
+                 [com.google.maps/google-maps-services "0.1.16"]
                  [nz.ac.waikato.cms.weka/weka-dev "3.7.13"]
                  [crypto-random "1.2.0"]
                  [clojure-csv/clojure-csv "2.0.2"]
@@ -94,7 +94,7 @@
             [venantius/yagni "0.1.4"
              :exclusions [org.clojure/clojure]]
             [lein-ancient "0.6.10"]
-            [lein-cloverage "1.0.6"
+            [lein-cloverage "1.0.7"
              :exclusions [org.clojure/clojure]]]
   :repositories {"local" ~(str (.toURI (java.io.File. "maven_repo")))}
   :resource-paths ["config" "resources"]
