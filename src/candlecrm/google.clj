@@ -38,6 +38,7 @@
        (full-callback-url)
        [gmail-full-scope contact-read-scope])
       (.setAccessType "offline")
+      (.setApprovalPrompt "force")
       .build))
 
 (defn make-response-url [req]
