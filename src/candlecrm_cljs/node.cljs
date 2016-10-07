@@ -42,11 +42,11 @@
      [body-link (second piece)])])
 
 (defn see-more [attr]
-  [:a {:href "#" :on-click #(state/set! [:prop-filters attr] 1)}
+  [:a {:href "javascript:;" :on-click #(state/set! [:prop-filters attr] 1)}
    "(See more)"])
 
 (defn see-all [attr]
-  [:a {:href "#" :on-click #(state/set! [:prop-filters attr] 2)}
+  [:a {:href "javascript:;" :on-click #(state/set! [:prop-filters attr] 2)}
    "(See all)"])
 
 (defn ask-more [attr]
