@@ -20,7 +20,7 @@
 
 (defn node-link [text id type]
   [:a.go-node
-   {:href "#" :on-click #(u/go-node! id type)}
+   {:href (str "/app/node/" type "/" id)}
    text])
 
 (defn event-name [event no-link?]
@@ -66,7 +66,7 @@
     (state/set! [:new-entity-msg] nil)
     (doseq [attr type-attrs]
       (state/set! [:new-entity attr] {0 ""}))
-    (state/set! [:tabid] 7)))
+    (state/set! [:tabid] "add")))
 
 (defn add-new [rel-type]
   [:a {:href "#" :on-click #(new-entity-switch rel-type)

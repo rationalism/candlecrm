@@ -9,7 +9,7 @@
     :page-lengths {s/person 20 s/email 20 :agenda 20 s/event 50
                    s/organization 20 s/location 50 s/building 50}
     :user {:username "Joe Bob Smith"}
-    :tabid 10
+    :tabid "agenda"
     :rows {s/person [] s/email [] s/organization []}
     :current-node nil
     :prop-filters {}

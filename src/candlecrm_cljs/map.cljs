@@ -60,7 +60,7 @@
   (state/look :map-obj))
 
 (defn location-html []
-  (if (= (state/look :tabid) 4)
+  (if (= (state/look :tabid) "map")
     [:div#mapbox {:style {:height "600px" :width "100%"}}]
     [:div#mapbox {:style {:height "600px" :width "100%"}}]))
 

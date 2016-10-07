@@ -39,11 +39,11 @@
 
 (defn cal-render! [this]
   (cal-adjust "render")
-  (when (= (state/look :tabid) 3)
+  (when (= (state/look :tabid) "calendar")
     (cal-adjust "refetchEvents")))
 
 (defn cal-html []
-  (if (= (state/look :tabid) 3)
+  (if (= (state/look :tabid) "calendar")
     [:div#calendarbox {:style {:width "100%"}}]
     [:div#calendarbox {:style {:width "99%"}}]))
 

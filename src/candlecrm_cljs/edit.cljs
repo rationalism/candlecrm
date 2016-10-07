@@ -70,7 +70,7 @@
                        (filter #(= 2 (count %))))]
     (doseq [l link-keys] (map-node-link l)))
   (state/set! [:edit-entity-msg] nil)
-  (state/set! [:tabid] 8))
+  (state/set! [:tabid] "edit"))
 
 (defn submit-new-entity [type]
   (fn []

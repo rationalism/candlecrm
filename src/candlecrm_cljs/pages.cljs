@@ -69,8 +69,7 @@
 
 (defn header-tab [logo-class num name]
   [:li {:class (tab-class num)}
-   [:a {:href "#" :class "nav-link"
-        :on-click (set-tab-fn num)
+   [:a {:href (str "/app/" num) :class "nav-link"
         :id (str "set-tab-" num)}
     [:i {:class logo-class}]
     (str " " name)]])
@@ -82,19 +81,19 @@
    [:div#navbar
     [:nav {:class "nav navbar-nav pull-xs-right"}
      [:ul {:class "nav navbar-nav"}
-      [header-tab "" 5 "My Account"]]]
+      [header-tab "" "account" "My Account"]]]
     [:div {:class "form-inline pull-xs-right"}
      [search/search-box]]]])
 
 (defn side-header []
   [:div {:class "col-sm-3 col-md-2 sidebar"}
    [:ul {:class "nav nav-sidebar"}
-    [header-tab "fa fa-list-ul" 10 "Agenda"]
-    [header-tab "fa fa-users" 1 "People"]
-    [header-tab "fa fa-briefcase" 11 "Companies"]
-    [header-tab "fa fa-envelope" 2 "Emails"]
-    [header-tab "fa fa-calendar" 3 "Calendar"]
-    [header-tab "fa fa-globe" 4 "Locations"]]])
+    [header-tab "fa fa-list-ul" "agenda" "Agenda"]
+    [header-tab "fa fa-users" "people" "People"]
+    [header-tab "fa fa-briefcase" "orgs" "Companies"]
+    [header-tab "fa fa-envelope" "email" "Emails"]
+    [header-tab "fa fa-calendar" "calendar" "Calendar"]
+    [header-tab "fa fa-globe" "map" "Locations"]]])
 
 (defn my-account []
   [:div
@@ -113,17 +112,17 @@
 (defn main-page []
   [:div
    (condp = (state/look :tabid)
-     1 [:div#tab1.tab-show [table/people-table s/person]]
-     2 [:div#tab2.tab-show [all-email-table]]
-     3 [:div#tab3.tab-show [calendar]]
-     4 [:div#tab4.tab-show [locations]]
-     5 [:div#tab5.tab-show [my-account]]
-     6 [show-node (state/look :current-node)]
-     7 (edit/add-form)
-     8 (edit/edit-form)
-     9 [search/search-results]
-     10 [calendar/agenda]
-     11 [:div#tab11.tab-show [table/people-table s/organization]]
+     "people" [:div#tab1.tab-show [table/people-table s/person]]
+     "email" [:div#tab2.tab-show [all-email-table]]
+     "calendar" [:div#tab3.tab-show [calendar]]
+     "map" [:div#tab4.tab-show [locations]]
+     "account" [:div#tab5.tab-show [my-account]]
+     "node" [show-node (state/look :current-node)]
+     "add" (edit/add-form)
+     "edit" (edit/edit-form)
+     "search" [search/search-results]
+     "agenda" [calendar/agenda]
+     "orgs" [:div#tab11.tab-show [table/people-table s/organization]]
      [:div "Error: Page not found."])])
 
 (defn homepage []

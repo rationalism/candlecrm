@@ -13,7 +13,7 @@
 
 (defn delete-entity-switch []
   (u/delete-entity!)
-  (state/set! [:tabid] 1))
+  (state/set! [:tabid] "people"))
 
 (defn add-newlines [piece]
   [:span

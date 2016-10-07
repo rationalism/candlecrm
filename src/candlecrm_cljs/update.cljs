@@ -76,7 +76,7 @@
 (defn email-callback [link-type]
   (fn [resp]
     (state/set! [:current-node link-type] resp)
-    (state/set! [:tabid] 6)))
+    (state/set! [:tabid] "node")))
 
 (defn update-emails-person! [link-type]
   (send! (email-person-req link-type)
@@ -97,7 +97,7 @@
     (state/set! [:current-node] (new-node req (s/type-label req)))
     (state/set! [:prop-filters] {})
     (state/set! [:notes-edit] false)
-    (state/set! [:tabid] 6)
+    (state/set! [:tabid] "node")
     (when (= (s/type-label req) s/person)
       (update-emails-person! s/email-to)
       (update-emails-person! s/email-from))))
@@ -243,7 +243,7 @@
    {:query (state/look :search)}])
 
 (defn list-search-results! [resp]
-  (state/set! [:tabid] 9)
+  (state/set! [:tabid] "search")
   (state/set! [:search-results] resp))
 
 (defn run-search! []
@@ -283,7 +283,7 @@
 
 (defn confirm-changed [resp]
   (js/alert "Password changed")
-  (state/set! [:tabid] 1))
+  (state/set! [:tabid] "people"))
 
 (defn change-password! []
   (send! (change-pwd-req) confirm-changed))
