@@ -79,7 +79,9 @@
                   :exclusions [org.hamcrest/hamcrest-core]]
                  [org.ahocorasick/ahocorasick "0.3.0"]
                  [cpath-clj "0.1.2"]
-                 [org.graylog2/gelfclient "1.4.0"]]
+                 [org.graylog2/gelfclient "1.4.0"]
+                 [secretary "1.2.3"]
+                 [venantius/accountant "0.1.7"]]
   :min-lein-version "2.0.0"
   :plugins [[lein-environ "1.0.3"]
             [lein-kibit "0.1.2"
