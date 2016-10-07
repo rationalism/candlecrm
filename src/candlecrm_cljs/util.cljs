@@ -140,3 +140,7 @@
          (for [i (range n)]
            (->> n (- (count coll)) inc (+ i)
                 (subvec coll i)))))
+
+(defn scroll-pos []
+  (- (.-scrollHeight (.-body js/document))
+     (.-innerHeight js/window) (.-pageYOffset js/window)))
