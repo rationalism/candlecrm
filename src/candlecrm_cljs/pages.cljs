@@ -57,11 +57,6 @@
    [people-ranks s/building] [:br]
    [map/map-box]])
 
-(defn set-tab-fn [tab-num]
-  (fn []
-    (state/set! [:tabid] tab-num)
-    (state/set! [:current-node] nil)))
-
 (defn tab-class [num]
   (if (= num (state/look :tabid))
     "nav-item active"

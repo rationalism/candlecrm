@@ -56,6 +56,8 @@
        (pages/reset-confirm req))
   (GET "/app" req
        (pages/app-page req))
+  (GET "/app/*" req
+       (pages/app-page req))
   (GET "/chsk" req
        (ajax/ring-ajax-get-or-ws-handshake req))
   (POST "/chsk" req

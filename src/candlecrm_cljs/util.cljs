@@ -20,7 +20,7 @@
 
 (defn node-link [text id type]
   [:a.go-node
-   {:href (str "/app/node/" type "/" id)}
+   {:href (str "/app/node/" (name type) "/" id)}
    text])
 
 (defn event-name [event no-link?]
