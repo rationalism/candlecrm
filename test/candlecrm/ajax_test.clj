@@ -20,7 +20,6 @@
 (deftest router-broadcaster
   (testing "Start and stop of Sente server"
     (start-router!)
-    (start-broadcaster!)
     (is chsk-send!)
     (stop-router!)))
 
