@@ -58,13 +58,13 @@
     [:a {:href "/logout" :class "btn btn-primary" :role "button"}
      "Log out"]]
    [:p
-    [:a {:href "#" :class "btn btn-primary" :role "button"
+    [:a {:href "javascript:;" :class "btn btn-primary" :role "button"
          :on-click #(state/set! [:change-pwd :show-form] :true)}
      "Change password"]]
    (when (state/look :change-pwd :show-form)
      [change-pwd-box])
    [:p
-    [:a {:href "#" :class "btn btn-primary" :role "button"
+    [:a {:href "javascript:;" :class "btn btn-primary" :role "button"
          :on-click #(state/set! [:delete-account :confirm-box] :true)}
      "Close account"]]
    (when (state/look :delete-account :confirm-box)

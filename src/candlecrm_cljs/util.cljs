@@ -69,7 +69,7 @@
     (state/set! [:tabid] "add")))
 
 (defn add-new [rel-type]
-  [:a {:href "#" :on-click #(new-entity-switch rel-type)
+  [:a {:href "javascript:;" :on-click #(new-entity-switch rel-type)
        :id (str "add-new-" (name rel-type))
        :class "btn btn-primary new-button" :role "button"}
    [:i {:class "fa fa-plus"}]
@@ -78,13 +78,13 @@
 (defn prev-next-box [counter update-fn num-rows row-type]
   [:div.prev-next
    (when (> (state/look :counters counter) 0)
-     [:a {:href "#" :role "button"
+     [:a {:href "javascript:;" :role "button"
           :on-click (u/prev-fetch! counter update-fn)
           :class "prev-email-page btn btn-primary"}
       [:i {:class "fa fa-arrow-left"}]
       "  Previous"])
    (when (= num-rows (state/look :page-lengths row-type))
-     [:a {:href "#" :role "button"
+     [:a {:href "javascript:;" :role "button"
           :on-click (u/next-fetch! counter update-fn)
           :class "next-email-page btn btn-primary"}
       "Next  "
@@ -93,7 +93,7 @@
 (defn key-link [text key type]
   (condp = type
     :node [:a.go-node
-           {:href "#" :on-click #(u/go-key! key)}
+           {:href "javascript:;" :on-click #(u/go-key! key)}
            text]
     :url [:a.go-node
           {:href key} text]))

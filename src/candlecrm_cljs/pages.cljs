@@ -71,7 +71,7 @@
 
 (defn home-header []
   [:nav {:class "navbar navbar-dark navbar-fixed-top bg-inverse"}
-   [:a {:class "navbar-brand" :href "#"}
+   [:a {:class "navbar-brand" :href "/app"}
     "CandleCRM"]
    [:div#navbar
     [:nav {:class "nav navbar-nav pull-xs-right"}

@@ -110,7 +110,7 @@
      (when (= 0 (first id-attr))
        [:a {:on-click #(-> cache (concat [(second attr)])
                            (concat [(count-cells attr cache)])
-                           (state/set! "")) :href "#"
+                           (state/set! "")) :href "javascript:;'"
             :class "btn btn-primary btn-sm" :role "button"}
         [:i {:class "fa fa-plus"}]]))])
 

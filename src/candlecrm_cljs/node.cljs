@@ -221,10 +221,11 @@
         (-> item s/type-label type-name)]] " "
       (when aux?
         [:span
-         [:a {:href "#" :on-click #(edit/edit-entity-switch (s/type-label item))
+         [:a {:href "javascript:;"
+              :on-click #(edit/edit-entity-switch (s/type-label item))
               :class "btn btn-primary btn-sm" :role "button"}
           "Edit"] " "
-         [:a {:href "#" :on-click delete-entity-switch
+         [:a {:href "javascript:;" :on-click delete-entity-switch
               :class "btn btn-primary btn-sm" :role "button"}
           "Delete"]])]
      [info-items (-> item s/type-label s/node-paths) aux? item]]]
