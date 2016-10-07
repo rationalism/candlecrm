@@ -137,7 +137,7 @@
   (dt/load-date-model!)
   (imap/make-parse-pool!)
   (email/make-nlp-pool!)
-  (ajax/start!)
+  (ajax/start-router!)
   (mlrecon/load-models!)
   (mlrecon/load-thresholds!)
   (geocode/define-context!)

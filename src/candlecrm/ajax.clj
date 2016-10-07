@@ -98,7 +98,6 @@
                 :update/search {:fn queries/full-search
                                 :keys [:query]}})
 
-;; Wrap for logging, catching, etc.:
 (defn event-msg-handler*
   [{:as ev-msg :keys [event id identity ?data ring-req ?reply-fn send-fn]}]
   (neo4j/thread-wrap
@@ -106,28 +105,6 @@
      (if-let [fetch-spec (get reply-map id)]
        (?reply-fn ((make-fetch-fn fetch-spec) user ?data))
        (when ?reply-fn (?reply-fn (no-reply event)))))))
-
-;;;; Example: broadcast server>user
-
-;; As an example of push notifications, we'll setup a server loop to broadcast
-;; an event to _all_ possible user-ids every 10 seconds:
-(defn start-broadcaster! []
-  (go-loop [i 0]
-    (<! (async/timeout 10000))
-    (doseq [uid (:any @connected-uids)]
-      (chsk-send! uid
-                  [:some/broadcast
-                   {:what-is-this "A broadcast pushed from server"
-                    :how-often    "Every 10 seconds"
-                    :to-whom uid
-                    :i i}]))
-    (recur (inc i))))
-
-;;Note that this'll be fast+reliable even over Ajax!:
-(defn test-fast-server>user-pushes []
-  (doseq [uid (:any @connected-uids)]
-    (doseq [i (range 100)]
-      (chsk-send! uid [:fast-push/is-fast (str "hello " i "!!")]))))
 
 (defonce router_ (atom nil))
 
@@ -139,13 +116,8 @@
   (reset! router_ (sente/start-chsk-router!
                    ch-chsk event-msg-handler*)))
 
-(defn start! []
-  (start-router!)
-  (start-broadcaster!))
-
 ;; Restart Ajax when reloading the namespace
 (defn restart-ajax! []
   (throw-info! "Restarting Ajax")
   (stop-router!)
-  (start-router!)
-  (start-broadcaster!))
+  (start-router!))
