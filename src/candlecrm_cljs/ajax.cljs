@@ -6,7 +6,6 @@
    [taoensso.encore :as encore :refer-macros (have have?)]
    [taoensso.timbre :as timbre :refer-macros (tracef debugf infof warnf errorf)]
    [taoensso.sente  :as sente  :refer (cb-success?)]
-   [candlecrm_cljs.ajax-demo :as ajax-demo]
    [candlecrm_cljc.schema :as s]
    [candlecrm_cljs.state :as state]
    [candlecrm_cljs.update :as u])
