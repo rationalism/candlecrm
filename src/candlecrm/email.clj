@@ -59,11 +59,12 @@
 (defnp fetch-body [id]
   (->> [[s/email-from s/s-name] [s/email-from s/email-addr]
         [s/email-body] [s/email-sent] [s/timezone] [s/email-digest]]
-       (mlrecon/fetch-paths-full id) 
-       (map #(dissoc % :id s/type-label)) (partition-all 2)
+       (mlrecon/fetch-paths-full id)
+       (map #(dissoc % :id s/type-label)) (partition-all 2) debug
        ((switch find-name find-email
+                #(-> % first keys first nil? not vector)
                 #(-> % first keys first nil? not vector)))
-       (apply concat)))
+       (apply concat) debug))
 
 (defnp clean-email [sep [author body _sent _zone is-digest?]]
   (if is-digest?
