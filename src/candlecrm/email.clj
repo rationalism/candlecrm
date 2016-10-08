@@ -58,14 +58,14 @@
 
 (defnp fetch-body [id]
   (->> [[s/email-from s/s-name] [s/email-from s/email-addr]
-        [s/email-body] [s/email-sent] [s/email-digest]]
+        [s/email-body] [s/email-sent] [s/timezone] [s/email-digest]]
        (mlrecon/fetch-paths-full id) 
        (map #(dissoc % :id s/type-label)) (partition-all 2)
        ((switch find-name find-email
                 #(-> % first keys first nil? not vector)))
        (apply concat)))
 
-(defnp clean-email [sep [author body sent-date is-digest?]]
+(defnp clean-email [sep [author body _sent _zone is-digest?]]
   (if is-digest?
     (->> body str/split-lines (reply/header-dates sep)
          (conj [author body]))
@@ -79,8 +79,8 @@
          (apply concat) shuffle vec)))
 
 (defn date-sentence? [sentence]
-  (->> sentence nlp/all-ner-graph loom/nodes
-       (mapv s/hash-code) (some #{s/date-time})))
+  (->> sentence (nlp/all-ner-graph (dt/now-zone))
+       loom/nodes (mapv s/hash-code) (some #{s/date-time})))
 
 (defn addr-sentence? [sentence]
   (-> sentence (str " ") regex/might-have-addr?))
@@ -248,7 +248,8 @@
   (when (-> message s/email-body nil-or-empty? not)
     (let [[graph linked-text]
           (nlp/run-nlp-full models (author-name chain message)
-                            (s/email-sent message)
+                            {:date (s/email-sent message)
+                             :zone (s/timezone message)}
                             (s/email-digest message)
                             (s/email-body message))]
       (when (and graph (-> graph loom/nodes empty? not))
@@ -264,9 +265,11 @@
          (dt/now))))
 
 (defnc graph-from-id [models id]
-  (let [[name body sent is-digest?] (fetch-body id)
+  (let [[name body sent zone is-digest?] (fetch-body id)
         message {s/type-label s/email :id id s/email-body body
                  s/email-sent (sent-date id sent)
+                 s/timezone (if (nil? zone) (dt/zone)
+                                (dt/make-timezone zone))
                  s/email-digest
                  (if (not is-digest?) []
                      (->> body str/split-lines
@@ -323,7 +326,7 @@
         message {:id (:id node) :label (:label node) s/notes notes}]
     (neo4j/cypher-combined-tx (delete-notes-query user (:id node)))
     (let [[graph linked-text]
-          (nlp/run-nlp-full models author (dt/now) [] notes)]
+          (nlp/run-nlp-full models author (dt/now-zone) [] notes)]
       (when (-> graph loom/nodes empty? not)
         (-> (append-hyperlinks graph message)
             (link-message message linked-text s/notes-nlp)

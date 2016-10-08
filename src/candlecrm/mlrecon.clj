@@ -613,7 +613,7 @@
    (map first (get model/scoring class))
    true ids))
 
-(defnp conflict-prob [class]
+(defnc conflict-prob [class]
   (fn [d1 d2]
     (->> (map second [d1 d2])
          (score-diff (get model/scoring class))

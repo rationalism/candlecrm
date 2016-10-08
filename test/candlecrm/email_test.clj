@@ -42,7 +42,7 @@
 (def email-data {s/type-label s/email s/email-subject "Hey Bob"
                  s/email-sent (ffirst (dt/unix-dates "Sat, Aug 22, 2015 at 7:51 PM" (dt/now)))
                  s/email-received (ffirst (dt/unix-dates "Sat, Aug 22, 2015 at 7:51 PM" (dt/now)))
-                 s/email-uid 555555})
+                 s/timezone (dt/zone) s/email-uid 555555})
 
 (def headers (loom/build-graph [] [[email-data alice s/email-from]
                                    [email-data bob s/email-to]]))
@@ -50,9 +50,9 @@
 (deftest email-nlp
   (testing "Split an email into an NLP graph"
     (def message1 {s/email-body test-body s/type-label s/email
-                   s/email-sent (dt/now)})
+                   s/email-sent (dt/now) s/timezone (dt/zone)})
     (def message2 {s/email-body test-body-none s/type-label s/email
-                   s/email-sent (dt/now)})
+                   s/email-sent (dt/now) s/timezone (dt/zone)})
     (def author {s/type-label s/person s/s-name "Alyssa Vance"})
 
     (def g1 (loom/build-graph [message1 author]

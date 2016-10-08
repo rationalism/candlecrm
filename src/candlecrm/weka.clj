@@ -118,7 +118,7 @@
   (doto (Logistic. )
     (.buildClassifier (instances points))))
 
-(defnp classify [model point]
+(defnc classify [model point]
   (if (empty? point) 0.0
       (.classifyInstance
        model (-> point vector make-instances

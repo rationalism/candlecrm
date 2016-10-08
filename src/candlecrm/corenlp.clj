@@ -556,8 +556,9 @@
         (merge (condp some [node-type]
                  #{s/event}
                  (let [date-text (mention-text entity)
-                       node-dates (dt/dates-in-text date-text reftime)
-                       tree-data (-> date-text (dt/parse-dates reftime)
+                       node-dates (dt/dates-in-text
+                                   date-text (:date reftime) (:zone reftime))
+                       tree-data (-> date-text (dt/parse-dates (:date reftime))
                                      dt/all-nodes)]
                    (->> entity .getSentence add-urls (hash-map s/event-context)
                         (merge tree-data (event-times node-dates))))
@@ -719,7 +720,7 @@
 
 (defn nlp-graph
   ([parsed-text]
-   (nlp-graph (dt/now) parsed-text))
+   (nlp-graph (dt/now-zone) parsed-text))
   ([reftime parsed-text]
    (->> parsed-text number-items
         (map #(sentence-graph reftime %))

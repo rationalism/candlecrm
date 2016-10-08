@@ -90,11 +90,17 @@
 (defn now []
   (Date. ))
 
+(defn zone []
+  (SimpleTimeZone/getDefault))
+
+(defn now-zone []
+  {:date (now) :zone (zone)})
+
 (defn parse-dates
   ([text]
    (parse-dates text (now)))
   ([text reference]
-   (parse-dates text reference (SimpleTimeZone/getDefault)))
+   (parse-dates text reference (zone)))
   ([text reference zone]
    (try
      (->> (parse-dates-raw text reference zone)
