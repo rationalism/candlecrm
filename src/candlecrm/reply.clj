@@ -180,13 +180,13 @@
       (zipvec (map first header-lines)
               (sig-split (map second header-lines)))))
 
-(defn infer-subject [graph]
-  (let [subject (->> graph loom/nodes
-                     (filter #(contains? % s/email-subject))
-                     first s/email-subject)]
+(defn infer-node [type graph]
+  (let [node (->> graph loom/nodes
+                  (filter #(contains? % type))
+                  first type)]
     (loom/adjust-nodes
      graph #(if (= s/email (s/type-label %))
-              (merge % {s/email-subject subject}) %))))
+              (merge % {type node}) %))))
 
 (defn to-links [graphs]
   (remove #(nil? (second %))
@@ -255,4 +255,6 @@
         graphs (->> lines (split-body chain-mode header-map)
                     (remove nil?))]
     (if (empty? lines) (first graphs)
-        (->> graphs (infer-to-from chain-mode headers) infer-subject))))
+        (->> graphs (infer-to-from chain-mode headers)
+             (infer-node s/email-subject)
+             (infer-node s/timezone)))))

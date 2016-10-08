@@ -197,7 +197,7 @@
   {s/s-name s/person s/email-addr s/person})
 
 (def conflicts
-  {s/email [s/email-body s/email-subject s/email-sent]
+  {s/email [s/email-body s/email-subject s/email-sent s/timezone]
    s/person []
    s/location []
    s/event []
@@ -314,6 +314,11 @@
     [[s/email-uid] [which-nil]]
     [[s/email-sent] [sub]]]
    s/email-subject
+   [[[s/email-subject] [(count-regex #"\n|\r")
+                        len-and-diff diff-len-adj]]
+    [[s/email-uid] [which-nil]]
+    [[s/email-sent] [sub]]]
+   s/timezone
    [[[s/email-subject] [(count-regex #"\n|\r")
                         len-and-diff diff-len-adj]]
     [[s/email-uid] [which-nil]]
