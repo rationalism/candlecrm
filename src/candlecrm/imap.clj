@@ -110,14 +110,15 @@
 (defn sent-time [message]
   (.getSentDate message))
 
-(defn date-header [message]
-  (first (.getHeader message "date")))
-
 (defn get-uid [folder message]
   (.getUID folder message))
 
 (defn get-header [message header]
   (.getHeader message header))
+
+(defn time-zone [message]
+  (-> message (get-header "date")
+      first dt/timezone-parse))
 
 (defonce imap-lookup (atom {}))
 
@@ -367,6 +368,7 @@
 (defnp headers-fetch [message folder]
   (vector {s/email-received (received-time message)
            s/email-sent (sent-time message)
+           s/timezone (time-zone message)
            s/email-subject (subject message)
            s/email-uid (get-uid folder message)
            s/type-label s/email}

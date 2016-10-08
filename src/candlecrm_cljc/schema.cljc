@@ -40,6 +40,7 @@
 (def email-sent :sent-date)
 (def email-reply :reply)
 (def email-uid :email-uid)
+(def timezone :timezone)
 
 (def location :location)
 (def located-in :located-in)

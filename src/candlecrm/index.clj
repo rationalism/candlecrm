@@ -9,7 +9,7 @@
    s/email-received s/email-sent s/lat s/lng s/date-time s/event-time
    s/start-time s/stop-time s/s-name s/street-addr s/zipcode
    s/event-begin s/event-end s/event-cost s/frequency s/duration
-   s/body-nlp s/event-context s/notes s/notes-nlp
+   s/body-nlp s/event-context s/notes s/notes-nlp s/timezone
    ;; Special for Barry's project
    s/vendor-name s/part-name s/catalog-name s/desc1 s/desc2 s/item-cost])
 
