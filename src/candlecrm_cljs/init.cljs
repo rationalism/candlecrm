@@ -25,6 +25,7 @@
     (configure-routing!)
     (secretary/dispatch! (.-pathname (.-location js/document)))
     (enable-console-print!)
+    (scroll-listen)
     (ajax/start!)
     (pages/render-all!)))
 

@@ -20,7 +20,8 @@
   (:import [javax.mail FetchProfile Folder
             Message Message$RecipientType
             AuthenticationFailedException]
-           [javax.mail.internet InternetAddress]
+           [javax.mail.internet InternetAddress MailDateFormat]
+           [java.text ParsePosition]
            [com.sun.mail.imap IMAPFolder$FetchProfileItem]
            [org.jsoup Jsoup]
            [com.google.api.client.auth.oauth2
@@ -108,6 +109,9 @@
 
 (defn sent-time [message]
   (.getSentDate message))
+
+(defn date-header [message]
+  (first (.getHeader message "date")))
 
 (defn get-uid [folder message]
   (.getUID folder message))

@@ -19,8 +19,8 @@
   (:use [jayq.core :only [$]]))
 
 (defn on-scroll [e]
-  (js/alert (scroll-pos))
-  (js/alert e))
+  #_(js/alert (scroll-pos))
+  #_(js/alert (type e)))
 
 (defn user-welcome [username]
   [:div
