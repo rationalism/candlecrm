@@ -15,7 +15,7 @@
              :refer (pspy pspy* profile defnp p p*)])
   (:import [com.joestelmach.natty CalendarSource Parser]
            [java.text SimpleDateFormat]
-           [java.util Date]))
+           [java.util Date SimpleTimeZone]))
 
 (defonce bad-date-model (atom nil))
 
@@ -52,12 +52,13 @@
               (* 60 1000))))
     0))
 
-(defn get-timezone [text]
-  (java.util.SimpleTimeZone. (timezone-parse text) "CUSTOM"))
+(defn make-timezone [offset]
+  (SimpleTimeZone. offset "CUSTOM"))
 
-(defnp parse-dates-raw [text reference]
+(defnp parse-dates-raw [text reference zone]
   (CalendarSource/setBaseDate reference)
-  (.parse (Parser. ) text))
+  (-> (if (number? zone) (make-timezone zone) zone)
+      (Parser. ) (.parse text)))
 
 (defn spit-dates [dates]
   (mapv #(spit "/home/alyssa/alldates.txt" (str (.getText %) "\n")
@@ -93,15 +94,17 @@
   ([text]
    (parse-dates text (now)))
   ([text reference]
+   (parse-dates text reference (SimpleTimeZone/getDefault)))
+  ([text reference zone]
    (try
-     (->> (parse-dates-raw text reference)
+     (->> (parse-dates-raw text reference zone)
           (remove #(-> % (.getText) regex/silly-date?)))
      (catch java.lang.NullPointerException e
        (do (throw-info! (str "Date parse error on: " text))
            [])))))
 
-(defn unix-dates [text reference]
-  (->> (parse-dates text reference)
+(defn unix-dates [& args]
+  (->> (apply parse-dates args)
        (mapv #(.getDates %)) (map vec)))
 
 (defn add-ms [date ms]
@@ -110,31 +113,21 @@
 (defn future-ms [ms]
   (add-ms (now) ms))
 
-(defn dates-in-text
-  ([text] (dates-in-text text (now)))
-  ([text reference]
-   (->> (unix-dates text reference)
-        flatten distinct)))
+(defn dates-in-text [& args]
+  (->> (apply unix-dates args) flatten distinct))
 
-(defn intervals-in-text 
-  ([text] (intervals-in-text text (now)))
-  ([text reference]
-   (->> (unix-dates text reference)
-        (remove #(= (first %) (second %)))
-        distinct)))
+(defn intervals-in-text [& args]
+  (->> (apply unix-dates args)
+       (remove #(= (first %) (second %)))
+       distinct))
 
-(defn find-dates
-  ([text] (find-dates text (now)))
-  ([text reference]
-   (->> reference (parse-dates text)
-        (map #(.getText %)))))
+(defn find-dates [& args]
+  (map #(.getText %) (apply parse-dates args)))
 
-(defn find-intervals
-  ([text] (find-intervals text (now)))
-  ([text reference]
-   (->> (parse-dates text reference)
-        (filter interval?)
-        (map #(.getText %)))))
+(defn find-intervals [& args]
+  (->> (apply parse-dates args)
+       (filter interval?)
+       (map #(.getText %))))
 
 (defn has-ms? [some-date]
   (-> some-date .getTime (mod 1000) (not= 0)))
