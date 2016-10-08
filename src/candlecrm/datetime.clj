@@ -43,6 +43,18 @@
     (and (= 2 (count parsed-date))
          (not= (first parsed-date) (second parsed-date)))))
 
+(defn timezone-parse [text]
+  (if-let [zonecode (regex/get-timezone text)]
+    (* (if (= (first zonecode) \+) 1 -1)
+       (+ (-> zonecode (subs 1 3) Integer/parseInt
+              (* 3600 1000))
+          (-> zonecode (subs 3 5) Integer/parseInt
+              (* 60 1000))))
+    0))
+
+(defn get-timezone [text]
+  (java.util.SimpleTimeZone. (timezone-parse text) "CUSTOM"))
+
 (defnp parse-dates-raw [text reference]
   (CalendarSource/setBaseDate reference)
   (.parse (Parser. ) text))

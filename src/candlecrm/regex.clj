@@ -18,6 +18,7 @@
 (def javascript-regex #"\<javascript([^\>]+)\>")
 (def tag-regex #"\<([^\>]*)\>")
 (def esc-char-regex #"\^|\[|\]|\.|\$|\{|\}|\(|\)|\\|\*|\+|\||\?|\<|\>")
+(def timezone-regex #"[\+-]\d{4}")
 
 ;; Natty parses these as times (eg. 2015 = 8:15 PM). That's no good
 (def year-regex #"^20\d\d$")
@@ -31,6 +32,9 @@
 
 (defn regex-escape [text]
   (str/replace text esc-char-regex #(str "\\" %1)))
+
+(defn get-timezone [text]
+  (first (re-seq timezone-regex text)))
 
 (defn regex-or [coll]
   (->> (map regex-escape coll)
