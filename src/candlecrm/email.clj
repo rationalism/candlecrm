@@ -60,11 +60,10 @@
   (->> [[s/email-from s/s-name] [s/email-from s/email-addr]
         [s/email-body] [s/email-sent] [s/timezone] [s/email-digest]]
        (mlrecon/fetch-paths-full id)
-       (map #(dissoc % :id s/type-label)) (partition-all 2) debug
+       (map #(dissoc % :id s/type-label)) (partition-all 2)
        ((switch find-name find-email
-                #(-> % first keys first nil? not vector)
-                #(-> % first keys first nil? not vector)))
-       (apply concat) debug))
+                #(->> % (map vals) (map first) (map keys) (map first))))
+       (apply concat)))
 
 (defnp clean-email [sep [author body _sent _zone is-digest?]]
   (if is-digest?
@@ -233,7 +232,7 @@
        first))
 
 (defn link-message [graph message linked-text link-type]
-  (->> (assoc (dissoc message s/email-sent s/email-body)
+  (->> (assoc (dissoc message s/email-sent s/timezone s/email-body)
               link-type linked-text)
        (loom/replace-node graph message)))
 
