@@ -1,6 +1,7 @@
 (ns candlecrm.imap-test
   (:require [clojure.test :refer :all]
             [candlecrm.corenlp :as nlp]
+            [candlecrm.datetime :as dt]
             [candlecrm.loom :as loom]
             [candlecrm.regex :as regex]
             [candlecrm.reply :as reply]
@@ -78,7 +79,8 @@
   (getFrom [this] [(AddressMock. "Alice" "alice@gmail.com")])
   (getReplyTo [this] [(AddressMock. "Carol" "carol@gmail.com")])
   (getRecipients [this type] [(AddressMock. "Bob" "bob@gmail.com")])
-  (getHeader [this type] nil)
+  (getHeader [this t]
+    (if (= t "date") ["Fri, 09 Sep 2015 13:51:39 -0700"] nil))
   (getContent [this] "message body")
   (getContentType [this] "plaintext"))
 
@@ -134,7 +136,7 @@
     (def mock-message (MessageMock. ))
 
     (def email {s/email-received 17, s/email-sent 17, s/email-subject "subject",
-                s/timezone (.getRawOffset (dt/zone)), s/email-uid 0, :label s/email})
+                s/timezone (* -7 3600 1000), s/email-uid 0, :label s/email})
     (def alice {:label s/person, s/email-addr "alice@gmail.com", s/s-name "Alice"})
     (def bob {:label s/person, s/email-addr "bob@gmail.com", s/s-name "Bob"})
     (def carol {:label s/person, s/email-addr "carol@gmail.com", s/s-name "Carol"})
@@ -144,7 +146,7 @@
                            [email bob s/email-to]
                            [email carol s/email-replyto]
                            [email alice s/email-from]])
-
+    
     (is (->> mock-folder (headers-fetch mock-message)
              headers-parse loom/edges (= expected-headers)))))
 
