@@ -133,11 +133,11 @@
     (def mock-folder (FolderMock. ))
     (def mock-message (MessageMock. ))
 
-    (def email {:received-date 17, :sent-date 17, :subject "subject",
-                :email-uid 0, :label :email})
-    (def alice {:label :person, :email-addr "alice@gmail.com", :name "Alice"})
-    (def bob {:label :person, :email-addr "bob@gmail.com", :name "Bob"})
-    (def carol {:label :person, :email-addr "carol@gmail.com", :name "Carol"})
+    (def email {s/email-received 17, s/email-sent 17, s/email-subject "subject",
+                s/timezone (.getRawOffset (dt/zone)), s/email-uid 0, :label s/email})
+    (def alice {:label s/person, s/email-addr "alice@gmail.com", s/s-name "Alice"})
+    (def bob {:label s/person, s/email-addr "bob@gmail.com", s/s-name "Bob"})
+    (def carol {:label s/person, s/email-addr "carol@gmail.com", s/s-name "Carol"})
 
     (def expected-headers [[email bob s/email-bcc]
                            [email bob s/email-cc]

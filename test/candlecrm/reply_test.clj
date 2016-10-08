@@ -26,7 +26,7 @@
 (def email-data {s/type-label s/email s/email-subject "I need a ride to East Bay earlier than a lot of people. Can anyone give me a ride?"
                  s/email-sent (ffirst (dt/unix-dates "Sat, Aug 22, 2015 at 7:51 PM" (dt/now)))
                  s/email-received (ffirst (dt/unix-dates "Sat, Aug 22, 2015 at 7:51 PM" (dt/now)))
-                 s/email-uid 555555})
+                 s/timezone (.getRawOffset (dt/zone)) s/email-uid 555555})
 
 (def headers (loom/build-graph [] [[email-data brayden s/email-from]
                                    [email-data cfar s/email-to]
