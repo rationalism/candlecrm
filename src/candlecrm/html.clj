@@ -51,7 +51,8 @@
    [:div {:class "pull-xs-right"}
     [:a {:href "/terms.html"} "Terms of Service"]
     [:span " "]
-    [:a {:href "/privacy.html"} "Privacy Policy"]]])
+    [:a {:href "/privacy.html"} "Privacy Policy"]]
+   [:br][:br]])
 
 (defn invite-form [flash]
   [:div {:class "row"}
