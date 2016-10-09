@@ -396,14 +396,14 @@
      [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
      [:h6 (str "CandleCRM is in beta. Please let us know"
                " about any errors or problems you see.")][:br]
-     [:h4 "Supported email providers:"]
      [:div {:class "row"}
       [:div {:class "col-md-6"}
        [:div {:class "greyback"}
+        [:h5 "Supported email providers:"][:br]
         [:a {:class "btn btn-primary btn-lg" :href auth-url
              :role "button"}
          [:h5 [:b "GMail"]]]]]]]]
-   [:br][:br][:hr][:br]
+   [:br][:hr][:br]
    [:div {:class "container"}
     [:div {:class "row"}
      [:div {:class "col-md-4"}
@@ -426,7 +426,7 @@
         "here"] "."]]
      [:div {:class "col-md-4"}
       [:img {:class "img-fluid m-x-auto img-circle home-circle"
-             :src "/images/soon.jpg"}]
+             :src "/images/email_logo.png"}]
       [:h2 {:class "text-xs-center"} "Need help?"]
       [:p {:class "text-xs-center"}
        (str "Don't see your email service here?"
