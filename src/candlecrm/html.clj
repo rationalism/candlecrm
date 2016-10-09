@@ -164,7 +164,10 @@
               " itself up-to-date, replacing manual data entry.")]
      [:p [:a {:class "btn btn-primary btn-lg" :href "/signup.html"
               :role "button"}
-          "Request invite"]]]]
+          "Try it out"]
+      [:a {:class "btn btn-primary btn-lg btn-2" :href "/faq.html"
+           :role "button"}
+       "Learn more"]]]]
    [:div {:class "container"}
     [:div {:class "row"}
      [:div {:class "col-md-4"}
@@ -188,9 +191,9 @@
      [:div {:class "col-md-4"}
       [:img {:class "img-fluid m-x-auto img-circle home-circle"
              :src "/images/soon.jpg"}]
-      [:h2 {:class "text-xs-center"} "Coming soon"]
+      [:h2 {:class "text-xs-center"} "Free trial"]
       [:p {:class "text-xs-center"}
-       (str "CandleCRM is in private beta. Check"
+       (str "CandleCRM is free while we beta test it. Check"
             " back soon for more updates!")]]]
     (footer-box)]])
 
@@ -271,7 +274,10 @@
             :class "" :id "signupForm" :novalidate ""}
      [:fieldset {:class "form-group"}
       (anti-forgery-field)
-      [:legend [:h3 "Sign up"]]
+      [:legend
+       [:h3 "Sign up"]]
+      [:p (str "CandleCRM is free while we beta test it. Please let us know"
+               " about any errors or other issues you see.")]
       [:div {:class "greyback"}
        [:div {:class "form-group"}
         [:label {:for "signupUsername"} "Email "]
@@ -285,10 +291,10 @@
         [:label {:for "signupConfirm"} "Confirm "]
         [:input {:type "password" :name "confirm" :class "form-control"
                  :id "signupConfirm" :required "required"}]]
-       [:div {:class "form-group"}
-        [:label {:for "signupCode"} "Invite code "]
-        [:input {:type "text" :name "code" :class "form-control"
-                 :id "signupCode" :required "required"}]]
+       #_[:div {:class "form-group"}
+          [:label {:for "signupCode"} "Invite code "]
+          [:input {:type "text" :name "code" :class "form-control"
+                   :id "signupCode" :required "required"}]]
        [:div {:class "form-group"}
         [:input {:class "btn btn-primary" 
                  :value "Sign up" :type "submit"}]
