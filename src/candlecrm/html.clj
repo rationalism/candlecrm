@@ -392,11 +392,14 @@
      [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
      [:h6 (str "CandleCRM is in beta. Please let us know"
                " about any errors or problems you see.")][:br]
-     [:h3 "Supported email providers:"] 
-     [:a {:class "btn btn-primary btn-lg" :href auth-url
-          :role "button"}
-      [:h5 [:b "GMail"]]]]]
-   [:br][:br][:br]
+     [:h4 "Supported email providers:"]
+     [:div {:class "row"}
+      [:div {:class "col-md-6"}
+       [:div {:class "greyback"}
+        [:a {:class "btn btn-primary btn-lg" :href auth-url
+             :role "button"}
+         [:h5 [:b "GMail"]]]]]]]]
+   [:br][:br][:hr][:br]
    [:div {:class "container"}
     [:div {:class "row"}
      [:div {:class "col-md-4"}
@@ -413,12 +416,16 @@
       [:h2 {:class "text-xs-center"} "Privacy"]
       [:p {:class "text-xs-center"}
        (str "Your private data is kept confidential. We don't"
-            " sell data to third parties, or use it for advertising.")]]
+            " sell data to third parties, or use it for advertising."
+            " Check out our privacy policy ")
+       [:a {:href "/privacy.html"}
+        "here"] "."]]
      [:div {:class "col-md-4"}
       [:img {:class "img-fluid m-x-auto img-circle home-circle"
              :src "/images/soon.jpg"}]
-      [:h2 {:class "text-xs-center"} "Coming soon"]
+      [:h2 {:class "text-xs-center"} "Need help?"]
       [:p {:class "text-xs-center"}
-       (str "CandleCRM is free while we beta test it. Check"
-            " back soon for more updates!")]]]]
+       (str "Don't see your email service here?"
+            " Let us know it's missing, by emailing us at admin@candlecrm.com."
+            " We plan to add more options as the beta test continues.")]]]]
    (footer-box)])

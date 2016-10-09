@@ -9,7 +9,7 @@
 (defn privacy-html []
   [:div {:class "container"}
    [:div {:class "row"}
-    [:br][:br][:h3 "CandleCRM Privacy Policy"]
+    [:br][:br][:h2 "CandleCRM Privacy Policy"]
     [:p "Protecting your private information is our priority. This Statement of Privacy applies to CandleCRM and the CandleCRM website at https://www.candlecrm.com and governs data collection and usage. For the purposes of this Privacy Policy, unless otherwise noted, all references to CandleCRM include https://www.candlecrm.com. The CandleCRM website is a customer relationship management software site. By using the CandleCRM website, you consent to the data practices described in this statement." ]
 
     [:h3 "Collection of your Personal Information"]

@@ -10,6 +10,7 @@
             [candlecrm.quartz :as quartz]
             [candlecrm.regex :as regex]
             [candlecrm.sendgrid :as sendgrid]
+            [candlecrm.terms :as terms]
             [candlecrm_cljc.schema :as s]
             [clojure.string :as str]
             [ring.util.response :as resp]))
@@ -62,6 +63,11 @@
   (html-wrapper
    (html/base-template
     (privacy/privacy-html))))
+
+(defn tos-page [_req]
+  (html-wrapper
+   (html/base-template
+    (terms/tos-html))))
 
 (defn homepage-form [_req]
   (html-wrapper

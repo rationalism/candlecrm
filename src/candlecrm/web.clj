@@ -44,6 +44,8 @@
        (pages/signup-page req))
   (GET "/privacy.html" req
        (pages/privacy-page req))
+  (GET "/terms.html" req
+       (pages/tos-page req))
   (GET "/login.html" req
        (pages/login-page req))
   (GET "/faq.html" req
