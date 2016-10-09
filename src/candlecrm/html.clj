@@ -390,10 +390,35 @@
     [:div {:class "col-xs-8"}
      [:br] [:h3 "Welcome! Set up your account by connecting your email."]
      [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
-     [:h5 (str "CandleCRM is in beta. Please let us know"
+     [:h6 (str "CandleCRM is in beta. Please let us know"
                " about any errors or problems you see.")][:br]
-     [:h5 "Select an email provider:"][:br]
+     [:h3 "Supported email providers:"] 
      [:a {:class "btn btn-primary btn-lg" :href auth-url
           :role "button"}
       [:h5 [:b "GMail"]]]]]
+   [:br][:br][:br]
+   [:div {:class "container"}
+    [:div {:class "row"}
+     [:div {:class "col-md-4"}
+      [:img {:class "img-fluid m-x-auto img-circle home-circle"
+             :src "/images/encryption_logo.png"}]
+      [:h2 {:class "text-xs-center"} "Security"]
+      [:p {:class "text-xs-center"}
+       (str "CandleCRM is encrypted with HTTPS/TLS/SSL, keeping your"
+            " data safe from snooping. Our site is rated A+ by"
+            " Qualys encryption security tests.")]]
+     [:div {:class "col-md-4"}
+      [:img {:class "img-fluid m-x-auto img-circle home-circle"
+             :src "/images/privacy_logo.png"}]
+      [:h2 {:class "text-xs-center"} "Privacy"]
+      [:p {:class "text-xs-center"}
+       (str "Your private data is kept confidential. We don't"
+            " sell data to third parties, or use it for advertising.")]]
+     [:div {:class "col-md-4"}
+      [:img {:class "img-fluid m-x-auto img-circle home-circle"
+             :src "/images/soon.jpg"}]
+      [:h2 {:class "text-xs-center"} "Coming soon"]
+      [:p {:class "text-xs-center"}
+       (str "CandleCRM is free while we beta test it. Check"
+            " back soon for more updates!")]]]]
    (footer-box)])
