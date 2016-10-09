@@ -42,6 +42,8 @@
        (pages/contact req))
   (GET "/signup.html" req
        (pages/signup-page req))
+  (GET "/privacy.html" req
+       (pages/privacy-page req))
   (GET "/login.html" req
        (pages/login-page req))
   (GET "/faq.html" req

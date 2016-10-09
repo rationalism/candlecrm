@@ -9,7 +9,7 @@
 (defn privacy-html []
   [:div {:class "container"}
    [:div {:class "row"}
-    ﻿[:h3 "Privacy Policy"]
+    [:br][:br][:h3 "CandleCRM Privacy Policy"]
     [:p "Protecting your private information is our priority. This Statement of Privacy applies to CandleCRM and the CandleCRM website at https://www.candlecrm.com and governs data collection and usage. For the purposes of this Privacy Policy, unless otherwise noted, all references to CandleCRM include https://www.candlecrm.com. The CandleCRM website is a customer relationship management software site. By using the CandleCRM website, you consent to the data practices described in this statement." ]
 
     [:h3 "Collection of your Personal Information"]
@@ -45,8 +45,11 @@
 
     [:h3 "Contact Information"]
     [:p "CandleCRM welcomes your questions or comments regarding this Statement of Privacy. If you believe that CandleCRM has not adhered to this Statement, please contact CandleCRM at:"] 
-    [:p "CandleCRM"]
-    [:p "2885 Sanford Ave SW #32484"]
-    [:p "Grandville, Michigan 49418"]
+    [:p "CandleCRM" [:br]
+     "2885 Sanford Ave SW #32484" [:br]
+     "Grandville, Michigan 49418"]
     [:p "Email Address: admin@candlecrm.com"]
-    [:p "Effective as of September 16, 2016"]]])
+    [:p "Effective as of September 16, 2016"]
+    [:br][:br][:br]]])
+
+

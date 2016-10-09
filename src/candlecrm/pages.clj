@@ -6,6 +6,7 @@
             [candlecrm.html :as html]
             [candlecrm.imap :as imap]
             [candlecrm.neo4j :as neo4j]
+            [candlecrm.privacy :as privacy]
             [candlecrm.quartz :as quartz]
             [candlecrm.regex :as regex]
             [candlecrm.sendgrid :as sendgrid]
@@ -56,6 +57,11 @@
   (html-wrapper
    (html/base-template
     (html/faq-page))))
+
+(defn privacy-page [_req]
+  (html-wrapper
+   (html/base-template
+    (privacy/privacy-html))))
 
 (defn homepage-form [_req]
   (html-wrapper
