@@ -12,7 +12,11 @@ div#homepage {
 }
 
 footer#copyright {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
+}
+
+footer#copyright a {
+    margin-left: 0.5rem;
 }
 
 div#login {

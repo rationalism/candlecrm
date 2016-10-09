@@ -47,7 +47,11 @@
 
 (defn footer-box []
   [:footer#copyright [:hr]
-   [:p "© 2016 CandleCRM"]])
+   [:span "© 2016 CandleCRM"]
+   [:div {:class "pull-xs-right"}
+    [:a {:href "/terms.html"} "Terms of Service"]
+    [:span " "]
+    [:a {:href "/privacy.html"} "Privacy Policy"]]])
 
 (defn invite-form [flash]
   [:div {:class "row"}
