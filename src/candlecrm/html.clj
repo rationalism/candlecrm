@@ -390,9 +390,10 @@
     [:div {:class "col-xs-8"}
      [:br] [:h3 "Welcome! Set up your account by connecting your email."]
      [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
-     [:h5 (str "Your email address is: " username)]
+     [:h5 (str "CandleCRM is in beta. Please let us know"
+               " about any errors or problems you see.")][:br]
      [:h5 "Select an email provider:"][:br]
      [:a {:class "btn btn-primary btn-lg" :href auth-url
           :role "button"}
-      [:h5 "GMail"]]]]
+      [:h5 [:b "GMail"]]]]]
    (footer-box)])
