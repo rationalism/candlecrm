@@ -18,4 +18,4 @@
       (.apiSecret (env :outlook-client-secret))
       (.scope outlook-scope)
       (.callback (full-callback-url outlook-callback))
-      (.build LiveApi/instance)))
+      (.build (LiveApi/instance))))
