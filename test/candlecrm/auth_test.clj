@@ -44,4 +44,4 @@
   (testing "New user and password checks"
     (is (not (password-check test-password test-password)))
     (is (not (new-user-check test-username test-password
-                             test-password (env :invite-code))))))
+                             test-password)))))
