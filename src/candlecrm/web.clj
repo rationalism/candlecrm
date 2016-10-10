@@ -18,6 +18,7 @@
             [candlecrm.imap :as imap]
             [candlecrm.mlrecon :as mlrecon]
             [candlecrm.neo4j :as neo4j]
+            [candlecrm.oauth :as oauth]
             [candlecrm.pages :as pages]
             [candlecrm.quartz :as quartz]
             [candlecrm.sendgrid :as sendgrid]
@@ -91,6 +92,8 @@
        (pages/init-account req))
   (GET google/callback-url req
        (pages/google-auth req))
+  (GET oauth/outlook-callback {:keys [identity params]}
+       (pages/outlook-auth identity params))
   (route/files "/resources/public/js" {:root "./resources/public/js"})
   (route/resources "/")
   (route/not-found (slurp (io/resource "public/404.html"))))

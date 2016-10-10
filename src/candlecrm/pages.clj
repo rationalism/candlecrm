@@ -6,6 +6,7 @@
             [candlecrm.html :as html]
             [candlecrm.imap :as imap]
             [candlecrm.neo4j :as neo4j]
+            [candlecrm.oauth :as oauth]
             [candlecrm.privacy :as privacy]
             [candlecrm.quartz :as quartz]
             [candlecrm.regex :as regex]
@@ -158,6 +159,10 @@
           (imap/invalid-token user)
           (assoc (resp/redirect "/email")
                  :flash "Error: Could not get authorization. Please try again."))))))
+
+(defn outlook-auth [user {:keys [code]}]
+  (let [auth-response (oauth/outlook-token code)]
+    (println auth-response)))
 
 (defn reset-confirm [{{:keys [token]} :params}]
   (if-let [user (->> token (hash-map s/pwd-reset-token)

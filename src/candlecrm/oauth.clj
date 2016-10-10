@@ -19,3 +19,6 @@
       (.scope outlook-scope)
       (.callback (full-callback-url outlook-callback))
       (.build (LiveApi/instance))))
+
+(defn outlook-token [code]
+  (.getAccessToken (outlook-service) code))
