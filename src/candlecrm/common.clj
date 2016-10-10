@@ -213,3 +213,6 @@
 
 (defn strip-quotes [s]
   (subs s 1 (dec (count s))))
+
+(defn full-callback-url [callback-url]
+  (str (env :app-domain) callback-url))

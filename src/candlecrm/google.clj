@@ -29,13 +29,10 @@
 (def revoke-url
   "https://accounts.google.com/o/oauth2/revoke")
 
-(defn full-callback-url []
-  (str (env :app-domain) callback-url))
-
 (defn make-auth-url []
   (-> (GoogleAuthorizationCodeRequestUrl.
        (env :google-client-id)
-       (full-callback-url)
+       (full-callback-url callback-url)
        [gmail-full-scope contact-read-scope])
       (.setAccessType "offline")
       (.setApprovalPrompt "force")
@@ -59,7 +56,7 @@
           (JacksonFactory. )
           (env :google-client-id)
           (env :google-client-secret)
-          code (full-callback-url)))]
+          code (full-callback-url callback-url)))]
     (.getRefreshToken token-response)))
 
 (defn lookup-token [user]
