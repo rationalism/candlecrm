@@ -82,9 +82,9 @@
 
 (defn login-switch [identity req alt-page]
   (cond (not identity) (alt-page req)
-        (s/google-token (auth/lookup-token identity))
-        (resp/redirect "/app")
-        :else (resp/redirect "/email")))
+        (->> identity auth/lookup-token vals (every? nil?))
+        (resp/redirect "/email")
+        :else (resp/redirect "/app")))
 
 (defn signup-page [{:keys [identity] :as req}]
   (login-switch identity req signup-form))
@@ -106,17 +106,16 @@
 
 (defn app-page [{:keys [identity]}]
   (cond (not identity) (home-with-message "Logged out")
-        (s/google-token (auth/lookup-token identity))
-        (html-wrapper (html/app-template))
-        :else (resp/redirect "/email")))
+        (->> identity auth/lookup-token vals (every? nil?))
+        (resp/redirect "/email")
+        :else (html-wrapper (html/app-template))))
 
 (defn email [{:keys [identity flash]}]
   (html-wrapper
    (html/base-template
-    (if (s/google-token (auth/lookup-token identity))
-      (resp/redirect "/app")
-      (html/email-setup
-       flash (auth/get-username identity))))))
+    (if (->> identity auth/lookup-token vals (every? nil?))
+      (html/email-setup flash (auth/get-username identity))
+      (resp/redirect "/app")))))
 
 (defonce switch-target (atom nil))
 

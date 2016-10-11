@@ -57,7 +57,8 @@
 
 (defn user-data-public [user query-map]
   (-> (.asMap user) clojure-map token-keys
-      (dissoc s/pwd-hash) (dissoc s/google-token)))
+      (dissoc s/pwd-hash) (dissoc s/google-token)
+      (dissoc s/outlook-token) (dissoc s/yahoo-token)))
 
 (defn key-vector [m]
   (if (->> m keys first vector?) m

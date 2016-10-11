@@ -47,6 +47,9 @@
 (def email-domains [".com" ".edu" ".org" ".net"])
 (def email-name-blacklist ["linkedin.com"])
 
+(def imap-servers {s/google-token "imap.gmail.com"
+                   s/outlook-token "imap-mail.outlook.com"})
+
 (defn get-folder [store folder-name]
   (.getFolder store folder-name))
 
@@ -165,10 +168,17 @@
 
 (defnc refresh-inbox [user]
   (try
-    (when-let [token (s/google-token (auth/lookup-token user))]
-      (-> token google/get-access-token!
-          (get-imap-store! (auth/get-username user) "imap.gmail.com")
-          get-inbox))
+    (let [tokens (auth/lookup-token user)]
+      (when-let [token (s/google-token tokens)]
+        (-> token google/get-access-token!
+            (get-imap-store! (auth/get-username user)
+                             (s/google-token imap-servers))
+            get-inbox))
+      (when-let [token (s/outlook-token tokens)]
+        (-> token oauth/refresh-outlook-token!
+            (get-imap-store! (auth/get-username user)
+                             (s/outlook-token imap-servers))
+            get-inbox)))
     (catch TokenResponseException e
       (invalid-token user))
     (catch AuthenticationFailedException e

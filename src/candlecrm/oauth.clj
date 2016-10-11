@@ -13,6 +13,9 @@
 (def outlook-callback
   "/outlookauthcallback")
 
+(defn yahoo-auth-url []
+  "https://www.yahoo.com")
+
 (defn outlook-service []
   (-> (ServiceBuilder. )
       (.apiKey (env :outlook-client-id))
@@ -29,5 +32,5 @@
   (-> (outlook-service) (.getAccessToken code)
       .getRefreshToken))
 
-(defn yahoo-auth-url []
-  "https://www.yahoo.com")
+(defn refresh-outlook-token! [refresh-token]
+  (.refreshAccessToken (outlook-service) refresh-token))
