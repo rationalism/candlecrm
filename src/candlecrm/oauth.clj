@@ -22,6 +22,12 @@
       (.build (proxy [LiveApi] []
                 (getAccessTokenVerb [] Verb/POST)))))
 
+(defn outlook-auth-url []
+  (.getAuthorizationUrl (outlook-service)))
+
 (defn outlook-token [code]
   (-> (outlook-service) (.getAccessToken code)
       .getRefreshToken))
+
+(defn yahoo-auth-url []
+  "https://www.yahoo.com")

@@ -7,6 +7,6 @@
     (is (base-template "foobar"))
     (is (app-template "foobar"))
     (is (login-form))
-    (is (gmail-setup "" "foobar" "www.foobar.com"))
+    (is (email-setup "" "foobar"))
     (is (signup-form "foobar"))))
 

@@ -389,7 +389,7 @@
   [:div
    [:h2 "Error: No such object can be found."]])
 
-(defn gmail-setup [flash username auth-url]
+(defn email-setup [flash username]
   [:div {:class "container"}
    [:div {:class "row"}
     [:div {:class "col-xs-8"}
@@ -401,9 +401,15 @@
       [:div {:class "col-md-6"}
        [:div {:class "greyback"}
         [:h5 "Supported email providers:"][:br]
-        [:a {:class "btn btn-primary btn-lg" :href auth-url
-             :role "button"}
-         [:h5 [:b "GMail"]]]]]]]]
+        [:a {:class "btn btn-primary btn-lg"
+             :href "/google-approve" :role "button"}
+         [:h5 [:b "GMail"]]]
+        [:a {:class "btn btn-primary btn-lg"
+             :href "/outlook-approve" :role "button"}
+         [:h5 [:b "Outlook"]]]
+        [:a {:class "btn btn-primary btn-lg"
+             :href "/yahoo-approve" :role "button"}
+         [:h5 [:b "Yahoo"]]]]]]]]
    [:br][:hr][:br]
    [:div {:class "container"}
     [:div {:class "row"}

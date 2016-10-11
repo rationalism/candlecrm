@@ -115,9 +115,8 @@
    (html/base-template
     (if (s/google-token (auth/lookup-token identity))
       (resp/redirect "/app")
-      (html/gmail-setup
-       flash (auth/get-username identity)
-       (google/make-auth-url))))))
+      (html/email-setup
+       flash (auth/get-username identity))))))
 
 (defonce switch-target (atom nil))
 

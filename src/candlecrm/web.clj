@@ -90,6 +90,12 @@
        (pages/email req))
   (GET "/init-account" req
        (pages/init-account req))
+  (GET "/google-approve" req
+       (resp/redirect (google/make-auth-url)))
+  (GET "/outlook-approve" req
+       (resp/redirect (oauth/outlook-auth-url)))
+  (GET "/yahoo-approve" req
+       (resp/redirect (oauth/yahoo-auth-url)))
   (GET google/callback-url req
        (pages/google-auth req))
   (GET oauth/outlook-callback {:keys [identity params]}
