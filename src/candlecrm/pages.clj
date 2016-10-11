@@ -161,7 +161,7 @@
 
 (defn outlook-auth [user {:keys [code]}]
   (if-let [new-token (oauth/outlook-token code)]
-    (do (neo4j/set-property! user s/outlook-token token)
+    (do (neo4j/set-property! user s/outlook-token new-token)
         (throw-warn! (str "Add Outlook token for user: "
                           (auth/get-username user)))
         (resp/redirect "/init-account"))

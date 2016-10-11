@@ -406,10 +406,7 @@
          [:h5 [:b "GMail"]]]
         [:a {:class "btn btn-primary btn-lg"
              :href "/outlook-approve" :role "button"}
-         [:h5 [:b "Outlook"]]]
-        [:a {:class "btn btn-primary btn-lg"
-             :href "/yahoo-approve" :role "button"}
-         [:h5 [:b "Yahoo"]]]]]]]]
+         [:h5 [:b "Outlook"]]]]]]]]
    [:br][:hr][:br]
    [:div {:class "container"}
     [:div {:class "row"}
