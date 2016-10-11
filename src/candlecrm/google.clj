@@ -9,10 +9,7 @@
            [com.google.api.client.auth.oauth2 AuthorizationCodeResponseUrl
             TokenResponseException]
            [com.google.api.client.http.javanet NetHttpTransport]
-           [com.google.api.client.json.jackson JacksonFactory]
-           [java.util Properties]
-           [com.sun.mail.imap IMAPSSLStore]
-           [javax.mail Session]))
+           [com.google.api.client.json.jackson JacksonFactory]))
 
 (def gmail-read-scope 
   "https://www.googleapis.com/auth/gmail.readonly")
@@ -59,15 +56,6 @@
           code (full-callback-url callback-url)))]
     (.getRefreshToken token-response)))
 
-(defn lookup-token [user]
-  (neo4j/get-property user s/google-token))
-
-(defn write-token! [user token]
-  (neo4j/set-property! user s/google-token token))
-
-(defn delete-token! [user]
-  (neo4j/delete-property! user s/google-token))
-
 (defn build-google-cred! [refresh-token]
   (doto (-> (GoogleCredential$Builder. )
             (.setTransport (NetHttpTransport. ))
@@ -83,23 +71,9 @@
 (defn get-access-token! [refresh-token]
   (-> refresh-token build-google-cred! .getAccessToken))
 
-(defn revoke-access-token! [user]
+(defn revoke-access-token! [user token]
   (try
     (client/post revoke-url
-                 {:form-params {:token (lookup-token user)}})
+                 {:form-params {:token token}})
     (catch Exception e
       (throw-warn! (str "Could not revoke token for user: " user)))))
-
-;; TODO: get the user's email via a Google API
-(defn get-imap-store! [access-token email]
-  (doto (.getStore
-         (Session/getInstance
-          (doto (Properties. )           
-            (.put "mail.imap.ssl.enable" "true")
-            (.put "mail.imap.sasl.enable" "true")
-            (.put "mail.imap.sasl.mechanisms" "XOAUTH2")
-            (.put "mail.imap.auth.login.disable" "true")
-            (.put "mail.imap.auth.plain.disable" "true")
-            (.put "mail.mime.address.strict" "false")))
-         "imap")
-    (.connect "imap.gmail.com" email access-token)))

@@ -82,7 +82,7 @@
 
 (defn login-switch [identity req alt-page]
   (cond (not identity) (alt-page req)
-        (google/lookup-token identity)
+        (s/google-token (auth/lookup-token identity))
         (resp/redirect "/app")
         :else (resp/redirect "/email")))
 
@@ -106,14 +106,14 @@
 
 (defn app-page [{:keys [identity]}]
   (cond (not identity) (home-with-message "Logged out")
-        (google/lookup-token identity)
+        (s/google-token (auth/lookup-token identity))
         (html-wrapper (html/app-template))
         :else (resp/redirect "/email")))
 
 (defn email [{:keys [identity flash]}]
   (html-wrapper
    (html/base-template
-    (if (google/lookup-token identity)
+    (if (s/google-token (auth/lookup-token identity))
       (resp/redirect "/app")
       (html/gmail-setup
        flash (auth/get-username identity)
@@ -151,7 +151,7 @@
     (if-let [auth-err (.getError auth-response)]
       (assoc (resp/redirect "/email") :flash auth-err)
       (if-let [token (google/get-token! (.getCode auth-response))]
-        (do (google/write-token! user token)
+        (do (neo4j/set-property! user s/google-token token)
             (throw-warn! (str "Add Google token for user: "
                               (auth/get-username user)))
             (resp/redirect "/init-account"))

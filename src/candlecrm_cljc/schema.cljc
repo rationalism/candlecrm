@@ -6,7 +6,11 @@
 (def val-node :value)
 (def pwd-hash :pwd-hash)
 (def pwd-reset-token :pwd-reset-token)
+
 (def google-token :google-token)
+(def outlook-token :outlook-token)
+(def yahoo-token :yahoo-token)
+
 (def type-label :label)
 (def date-time :date-time)
 (def s-time :time)

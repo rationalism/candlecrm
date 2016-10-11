@@ -17,11 +17,12 @@
             [candlecrm.weka :as weka]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)])
-  (:import [javax.mail FetchProfile Folder
+  (:import [javax.mail FetchProfile Folder Session
             Message Message$RecipientType
             AuthenticationFailedException]
            [javax.mail.internet InternetAddress MailDateFormat]
            [java.text ParsePosition]
+           [java.util Date Properties]
            [com.sun.mail.imap IMAPFolder$FetchProfileItem]
            [org.jsoup Jsoup]
            [com.google.api.client.auth.oauth2
@@ -141,16 +142,32 @@
                     (auth/get-username user)))
   (throw-warn! (str "Revoking token for user "
                     (auth/get-username user)))
-  (google/revoke-access-token! user)
-  (google/delete-token! user) (auth/delete-queue! user)
+  (->> user auth/lookup-token s/google-token
+       (google/revoke-access-token! user))
+  (neo4j/delete-property! user s/google-token)
+  (auth/delete-queue! user)
   (neo4j/page-refresh! user)
   nil)
 
+;; TODO: get the user's email via a Google API
+(defn get-imap-store! [access-token email server]
+  (doto (.getStore
+         (Session/getInstance
+          (doto (Properties. )           
+            (.put "mail.imap.ssl.enable" "true")
+            (.put "mail.imap.sasl.enable" "true")
+            (.put "mail.imap.sasl.mechanisms" "XOAUTH2")
+            (.put "mail.imap.auth.login.disable" "true")
+            (.put "mail.imap.auth.plain.disable" "true")
+            (.put "mail.mime.address.strict" "false")))
+         "imap")
+    (.connect server email access-token)))
+
 (defnc refresh-inbox [user]
   (try
-    (when-let [token (google/lookup-token user)]
+    (when-let [token (s/google-token (auth/lookup-token user))]
       (-> token google/get-access-token!
-          (google/get-imap-store! (auth/get-username user))
+          (google/get-imap-store! (auth/get-username user) "imap.gmail.com")
           get-inbox))
     (catch TokenResponseException e
       (invalid-token user))
@@ -250,7 +267,7 @@
   (if v (assoc m k v) m))
 
 ;; Arbitrary date: 1960-01-02 05:11:48.874
-(def ref-date (java.util.Date. -315514073744))
+(def ref-date (Date. -315514073744))
 
 (defn sent-date [line]
   (->> (dt/dates-in-text line ref-date)

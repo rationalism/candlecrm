@@ -30,6 +30,11 @@
   (reset! privkey (buddy/private-key (str (env :ssl-dir) "privkey.pem")
                                      (env :privkey-pwd))))
 
+(defn lookup-token [user]
+  {s/google-token (neo4j/get-property user s/google-token)
+   s/outlook-token (neo4j/get-property user s/outlook-token)
+   s/yahoo-token (neo4j/get-property user s/yahoo-token)})
+
 (defn hash-pwd [password]
   (hashers/encrypt password hash-alg))
 
@@ -125,8 +130,8 @@
   (throw-warn! (str "Deleting user with username: " (get-username user)))
   (if-let [succeeded
            (try
-             (when (google/lookup-token user)
-               (google/revoke-access-token! user))
+             (when-let [goog-token (-> user lookup-token s/google-token)]
+               (google/revoke-access-token! user goog-token))
              (delete-user-data! user (neo4j/get-property user s/index-run))
              (neo4j/delete-id! (.id user))
              :success
