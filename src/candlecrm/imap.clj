@@ -167,7 +167,7 @@
   (try
     (when-let [token (s/google-token (auth/lookup-token user))]
       (-> token google/get-access-token!
-          (google/get-imap-store! (auth/get-username user) "imap.gmail.com")
+          (get-imap-store! (auth/get-username user) "imap.gmail.com")
           get-inbox))
     (catch TokenResponseException e
       (invalid-token user))
