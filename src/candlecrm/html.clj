@@ -139,7 +139,7 @@
                " a free trial, and then a small monthly fee to"
                " continue using CandleCRM after a trial period ends.")]
      [:h4 {:id "q4"} "4. What do I need to start using CandleCRM?"]
-     [:ul (str "Right now, to use CandleCRM, you must have a GMail account. We"
+     [:ul (str "Right now, to use CandleCRM, you must have a GMail or Outlook account. We"
                " know that many people use other email services, and"
                " we plan to add support for other email accounts very soon.")]
      [:h4 {:id "q5"} "5. Does CandleCRM use encryption?"]
