@@ -160,8 +160,13 @@
                  :flash "Error: Could not get authorization. Please try again."))))))
 
 (defn outlook-auth [user {:keys [code]}]
-  (let [auth-response (oauth/outlook-token code)]
-    (println auth-response)))
+  (if-let [new-token (oauth/outlook-token code)]
+    (do (neo4j/set-property! user s/outlook-token token)
+        (throw-warn! (str "Add Outlook token for user: "
+                          (auth/get-username user)))
+        (resp/redirect "/init-account"))
+    (assoc (resp/redirect "/email")
+           :flash "Could not get Outlook authorization")))
 
 (defn reset-confirm [{{:keys [token]} :params}]
   (if-let [user (->> token (hash-map s/pwd-reset-token)
