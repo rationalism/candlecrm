@@ -171,16 +171,16 @@
 (defnc refresh-inbox [user]
   (try
     (let [tokens (auth/lookup-token user)]
-      (when-let [token (s/google-token tokens)]
+      (if-let [token (s/google-token tokens)]
         (-> token google/get-access-token!
             (get-imap-store! (auth/get-username user)
                              (s/google-token imap-servers))
-            get-gmail-inbox))
-      (when-let [token (s/outlook-token tokens)]
-        (-> token oauth/refresh-outlook-token!
-            (get-imap-store! (auth/get-username user)
-                             (s/outlook-token imap-servers))
-            get-outlook-inbox)))
+            get-gmail-inbox)
+        (when-let [token (s/outlook-token tokens)]
+          (-> token oauth/refresh-outlook-token!
+              (get-imap-store! (auth/get-username user)
+                               (s/outlook-token imap-servers))
+              get-outlook-inbox))))
     (catch TokenResponseException e
       (invalid-token user))
     (catch AuthenticationFailedException e
