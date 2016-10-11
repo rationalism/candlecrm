@@ -11,6 +11,7 @@
             [candlecrm.insert :as insert]
             [candlecrm.loom :as loom]
             [candlecrm.neo4j :as neo4j]
+            [candlecrm.oauth :as oauth]
             [candlecrm.regex :as regex]
             [candlecrm.reply :as reply]
             [candlecrm_cljc.schema :as s]
