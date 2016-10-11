@@ -33,4 +33,6 @@
       .getRefreshToken))
 
 (defn refresh-outlook-token! [refresh-token]
-  (.refreshAccessToken (outlook-service) refresh-token))
+  (-> (outlook-service)
+      (.refreshAccessToken refresh-token)
+      .getAccessToken))

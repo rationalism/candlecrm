@@ -32,6 +32,7 @@
 ;; Global variables
 (def inbox-folder "All Mail")
 (def gmail-folder "[Gmail]")
+(def outlook-folder "Inbox")
 (def plain-type "text/plain")
 (def html-type "text/html")
 (def multi-type "multipart")
@@ -54,12 +55,15 @@
 (defn get-folder [store folder-name]
   (.getFolder store folder-name))
 
-(defn get-inbox [store]
+(defn get-gmail-inbox [store]
   (let [folder-names (map #(.getName %) (.list (.getDefaultFolder store)))]
     (if (some #{gmail-folder} folder-names)
       (.getFolder store (str gmail-folder "/" inbox-folder))
       (let [root-name (->> folder-names (filter #(= \[ (first %))) first)]
         (.getFolder store (str root-name "/" inbox-folder))))))
+
+(defn get-outlook-inbox [store]
+  (.getFolder store outlook-folder))
 
 (defn close-store! [store]
   (.close store))
@@ -83,9 +87,6 @@
 
 (defn last-uid [folder]
   (dec (.getUIDNext folder)))
-
-(defn inbox-count [store]
-  (message-count (get-inbox store)))
 
 (defn get-message [folder num]
   (.getMessageByUID folder num))
@@ -174,12 +175,12 @@
         (-> token google/get-access-token!
             (get-imap-store! (auth/get-username user)
                              (s/google-token imap-servers))
-            get-inbox))
+            get-gmail-inbox))
       (when-let [token (s/outlook-token tokens)]
         (-> token oauth/refresh-outlook-token!
             (get-imap-store! (auth/get-username user)
                              (s/outlook-token imap-servers))
-            get-inbox)))
+            get-outlook-inbox)))
     (catch TokenResponseException e
       (invalid-token user))
     (catch AuthenticationFailedException e

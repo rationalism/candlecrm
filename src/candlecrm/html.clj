@@ -401,10 +401,10 @@
       [:div {:class "col-md-6"}
        [:div {:class "greyback"}
         [:h5 "Supported email providers:"][:br]
-        [:a {:class "btn btn-primary btn-lg"
+        [:a {:class "btn btn-primary btn-lg btn-email"
              :href "/google-approve" :role "button"}
          [:h5 [:b "GMail"]]]
-        [:a {:class "btn btn-primary btn-lg"
+        [:a {:class "btn btn-primary btn-lg btn-email"
              :href "/outlook-approve" :role "button"}
          [:h5 [:b "Outlook"]]]]]]]]
    [:br][:hr][:br]

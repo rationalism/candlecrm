@@ -264,3 +264,8 @@ img.home-circle {
 ol#faqmenu li {
     margin-top: 0.3rem;
 }
+
+.btn-email {
+    margin-left: 0.4rem;
+    margin-right: 0.4rem;
+}
