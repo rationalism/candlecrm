@@ -26,7 +26,12 @@
                 (getAccessTokenVerb [] Verb/POST)))))
 
 (defn outlook-auth-url []
-  (.getAuthorizationUrl (outlook-service)))
+  (try
+    (.getAuthorizationUrl (outlook-service))
+    (catch Exception e
+      (throw-warn! "Error: Could not get Outlook authorization URL")
+      (throw-warn! (str "Exception: " e))
+      "/email")))
 
 (defn outlook-token [code]
   (-> (outlook-service) (.getAccessToken code)
