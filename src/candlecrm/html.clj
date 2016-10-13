@@ -167,12 +167,15 @@
      [:h1 {:class "display-3"} "A CRM that updates itself."]
      [:p (str "CandleCRM uses artificial intelligence (AI) to keep"
               " itself up-to-date, replacing manual data entry.")]
-     [:p [:a {:class "btn btn-primary btn-lg" :href "/signup.html"
-              :role "button"}
-          "Try it out"]
-      [:a {:class "btn btn-primary btn-lg btn-2" :href "/faq.html"
-           :role "button"}
-       "Learn more"]]]]
+     [:p
+      [:div {:class "row"}
+       [:div {:class "btn-group-lg"}
+        [:a {:class "btn btn-primary btn-2" :href "/signup.html"
+             :role "button"}
+         "Try it out"]
+        [:a {:class "btn btn-primary btn-2" :href "/faq.html"
+             :role "button"}
+         "Learn more"]]]]]]
    [:div {:class "container"}
     [:div {:class "row"}
      [:div {:class "col-md-4"}
