@@ -17,7 +17,7 @@
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [environ "1.1.0"]
-                 [com.taoensso/encore "2.83.3"]
+                 [com.taoensso/encore "2.84.2"]
                  [com.taoensso/timbre "4.7.4"]
                  [buddy "1.1.0"]
                  [com.google.api-client/google-api-client "1.22.0"
@@ -55,7 +55,7 @@
                  [pandect "0.6.0"]
                  [aysylu/loom "0.6.0"
                   :exclusions [org.clojure/data.priority-map]]
-                 [com.taoensso/sente "1.10.0"
+                 [com.taoensso/sente "1.11.0"
                   :exclusions [org.clojure/tools.reader]]
                  [clojurewerkz/quartzite "2.0.0"]
                  [reagent "0.6.0"]
