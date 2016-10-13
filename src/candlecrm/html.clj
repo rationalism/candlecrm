@@ -309,7 +309,7 @@
         [:span {:style "padding:0 0 0 10px;color:red;"
                 :id "signupError"} flash]]]]]]])
 
-(defn login-form []
+(defn login-form [flash]
   [:div {:class "row"}
    [:div {:class "col-md-8 col-lg-5"}
     [:form {:method "POST" :action "login"
@@ -331,9 +331,9 @@
                  :value "Log in" :type "submit"}]
         [:a {:id "pass-reset-link" :href "/reset-password.html"
              :class "btn btn-primary"}
-         "Forgot password?"]
-        [:span {:style "padding:0 0 0 10px;color:red;"
-                :id "loginError"}]]]]]]])
+         "Forgot password?"]]
+       [:span {:style "padding:0 0 0 10px;color:red;"
+               :id "loginError"} flash]]]]]])
 
 (defn reset-pwd [flash]
   [:div {:class "container"}

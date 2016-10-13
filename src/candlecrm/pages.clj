@@ -47,7 +47,7 @@
    (html/base-template
     [:div {:class "container"}
      [:div#login
-      [:br] (html/login-form)]
+      [:br] (html/login-form flash)]
      (html/footer-box)])))
 
 (defn contact-form [_req]
@@ -196,7 +196,7 @@
 (defn login [params]
   (if-let [user-token (auth/login-handler params)]
     (token-cookie "/app" (:token user-token))
-    (home-with-message "Error: Could not login.")))
+    (home-with-message "Error: Wrong username or password.")))
 
 (defn init-account [{:keys [identity]}]
   (imap/add-new-queue! identity)
