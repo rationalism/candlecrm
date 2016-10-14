@@ -5,6 +5,13 @@
 
 (def timeout timeout)
 
+(defn scroll-pos []
+  (.-pageYOffset js/window))
+
+(defn scroll-pos-rev []
+  (- (.-scrollHeight (.-body js/document))
+     (.-innerHeight js/window) (scroll-pos)))
+
 (defn get-first [node attr]
   (->> (get node attr) (into [])
        (sort-by second >)
@@ -294,14 +301,22 @@
 (defn change-password! []
   (send! (change-pwd-req) confirm-changed))
 
+(defn update-switch! [tabname]
+  (condp = tabname
+    "email" (update-emails!)
+    "people" (update-people! s/person)
+    "orgs" (update-people! s/organization)
+    "agenda" (update-agenda!)
+    nil))
+
 (defn update-tables! []
   (when (not (state/look :loading))
     (state/set! [:loading] true)
     (js/setTimeout #(state/set! [:loading] false) 1000)
-    (update-emails!)
-    (update-people! s/person)
-    (update-people! s/organization)
-    (update-agenda!)
+    (if (< (scroll-pos) 200)
+      (update-switch! (state/look :tabid))
+      (when-let [refresh-key (state/tabname-types (state/look :tabid))]
+        (state/update! [:should-refresh] assoc refresh-key true)))
     (fetch-ranks! s/event false)
     (fetch-ranks! s/building false)))
 

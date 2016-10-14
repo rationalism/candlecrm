@@ -5,6 +5,10 @@
             [secretary.core :as secretary :refer-macros [defroute]]))
 
 (defroute "/app/:tabname" [tabname]
+  (when (state/look :should-refresh (state/tabname-types tabname))
+    (u/update-switch! tabname)
+    (state/update! [:should-refresh] dissoc
+                   (state/tabname-types tabname)))
   (state/set! [:tabid] tabname)
   (u/alert-log! (str "Switch to tab '" tabname "'")))
 

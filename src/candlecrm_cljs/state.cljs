@@ -19,6 +19,7 @@
     :map-zoom 3
     :map-markers {:data [] :objs [] :updated true :window nil :clicked nil}
     :rank-lists {s/event [] s/location []}
+    :should-refresh {}
     :map-obj nil
     :input-meta {:type nil :attr-list nil}
     :ajax-chan nil
@@ -35,6 +36,9 @@
     :loading false
     :notes-edit false
     :notes-text ""}))
+
+(def tabname-types {"email" s/email "people" s/person
+                    "orgs" s/organization "agenda" s/event})
 
 (defn look [& args]
   (get-in @a args))

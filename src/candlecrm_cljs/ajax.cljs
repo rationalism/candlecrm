@@ -43,6 +43,8 @@
 
 ;; This fills in initial email values
 (defn chsk-init! []
+  (state/set! [:should-refresh] {s/email true s/person true
+                                 s/organization true s/event true})
   (u/update-tables!)
   (u/update-user!)
   (u/fetch-ranks! s/event true)

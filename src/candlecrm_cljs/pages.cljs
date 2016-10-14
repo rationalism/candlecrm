@@ -13,13 +13,13 @@
             [candlecrm_cljs.user :as user]
             [candlecrm_cljs.util :refer
              [get-first add-ids add-new new-entity-switch
-              load-box get-title scroll-pos]]
+              load-box get-title]]
             [reagent.core :as r]
             [jayq.core :as jq])
   (:use [jayq.core :only [$]]))
 
 (defn on-scroll [e]
-  #_(js/alert (scroll-pos))
+  #_(js/alert (u/scroll-pos-rev))
   #_(js/alert (type e)))
 
 (defn user-welcome [username]
