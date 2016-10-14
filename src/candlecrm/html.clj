@@ -231,7 +231,7 @@
     #_[:i {:class logo-class}]
     name]])
 
-(defn home-header []
+(defn home-header [logged-in?]
   [:nav#frontbar
    {:class "navbar navbar-static-top navbar-dark bg-inverse"}
    [:a {:class "navbar-brand" :href "/"}
@@ -240,10 +240,13 @@
     (header-tab "" "Home" "/")
     (header-tab "" "FAQ" "/faq.html")
     (header-tab "" "Contact" "/contact.html")
-    (header-tab "" "Sign Up" "/signup.html")
-    (header-tab "" "Log In" "/login.html")]])
+    (when (not logged-in?)
+      (header-tab "" "Sign Up" "/signup.html"))
+    (if logged-in?
+      (header-tab "" "Log Out" "/logout")
+      (header-tab "" "Log In" "/login.html"))]])
 
-(defn base-template [& content]
+(defn base-template [logged-in? & content]
   (html5 {:lang "en"}
          [:head [:title "CandleCRM"]
           (charset) (viewport) (ie-render)
@@ -251,7 +254,7 @@
           (include-css "/css/jumbotron.css")
           (include-css "/css/main.css")]
          [:body
-          (home-header)
+          (home-header logged-in?)
           (login-box content)
           (jquery-js) (tether-js) (bootstrap-js)
           (include-js "/js/login.js")]))

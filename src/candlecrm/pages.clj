@@ -37,48 +37,48 @@
 (defn signup-form [{:keys [flash]}]
   (html-wrapper
    (html/base-template
-    [:div {:class "container"}
-     [:div#login
-      [:br] (html/signup-form flash)]
-     (html/footer-box)])))
+    false [:div {:class "container"}
+           [:div#login
+            [:br] (html/signup-form flash)]
+           (html/footer-box)])))
 
 (defn login-form [{:keys [flash]}]
   (html-wrapper
    (html/base-template
-    [:div {:class "container"}
-     [:div#login
-      [:br] (html/login-form flash)]
-     (html/footer-box)])))
+    false [:div {:class "container"}
+           [:div#login
+            [:br] (html/login-form flash)]
+           (html/footer-box)])))
 
 (defn contact-form [_req]
   (html-wrapper
    (html/base-template
-    (html/contact-page))))
+    false (html/contact-page))))
 
 (defn faq-page [_req]
   (html-wrapper
    (html/base-template
-    (html/faq-page))))
+    false (html/faq-page))))
 
 (defn privacy-page [_req]
   (html-wrapper
    (html/base-template
-    (privacy/privacy-html))))
+    false (privacy/privacy-html))))
 
 (defn tos-page [_req]
   (html-wrapper
    (html/base-template
-    (terms/tos-html))))
+    false (terms/tos-html))))
 
 (defn homepage-form [_req]
   (html-wrapper
    (html/base-template
-    (html/homepage))))
+    false (html/homepage))))
 
 (defn invite-form [{:keys [flash]}]
   (html-wrapper
    (html/base-template
-    (html/invite-page flash))))
+    false (html/invite-page flash))))
 
 (defn login-switch [identity req alt-page]
   (cond (not identity) (alt-page req)
@@ -113,9 +113,9 @@
 (defn email [{:keys [identity flash]}]
   (html-wrapper
    (html/base-template
-    (if (->> identity auth/lookup-token vals (every? nil?))
-      (html/email-setup flash (auth/get-username identity))
-      (resp/redirect "/app")))))
+    true (if (->> identity auth/lookup-token vals (every? nil?))
+           (html/email-setup flash (auth/get-username identity))
+           (resp/redirect "/app")))))
 
 (defonce switch-target (atom nil))
 
@@ -132,16 +132,16 @@
 
 (defn login-needed [uri]
   (html/base-template
-   (html/login-needed uri)))
+   false (html/login-needed uri)))
 
 (defn reset-pwd [{:keys [flash]}]
   (html-wrapper
    (html/base-template
-    (html/reset-pwd flash))))
+    false (html/reset-pwd flash))))
 
 (defn new-password [user token]
   (html/base-template
-   (html/new-password user token)))
+   false (html/new-password user token)))
 
 (defn google-auth [req]
   (let [auth-response (google/response-from-req req)
