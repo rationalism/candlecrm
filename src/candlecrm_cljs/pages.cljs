@@ -18,9 +18,12 @@
             [jayq.core :as jq])
   (:use [jayq.core :only [$]]))
 
-(defn on-scroll [e]
-  #_(js/alert (u/scroll-pos-rev))
-  #_(js/alert (type e)))
+(defn on-scroll [_e]
+  (when (< (u/scroll-pos-rev) 200)
+    (when-let [tabid (state/tabname-types (state/look :tabid))]
+      (state/update! [:page-lengths tabid] inc 10)
+      (u/update-switch! (state/look :tabid))
+      (js/setTimeout #(on-scroll _e) 1500))))
 
 (defn user-welcome [username]
   [:div

@@ -43,7 +43,6 @@
    {:start (state/agenda-pos)
     :limit (state/look :page-lengths s/event)}])
 
-
 (defn set-agenda! [rows]
   {:pre [(coll? rows)]}
   (state/set! [:agenda-events] rows))

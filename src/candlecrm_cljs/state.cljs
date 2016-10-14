@@ -6,8 +6,9 @@
   (r/atom
    {:counters {s/person 0 s/email 0 s/email-from 0 s/email-to 0
                s/organization 0 :agenda 0}
-    :page-lengths {s/person 20 s/email 20 :agenda 20 s/event 50
-                   s/organization 20 s/location 50 s/building 50}
+    :page-lengths {s/person 20 s/email 20 :agenda 20 s/event 20
+                   s/organization 20 s/location 50 s/building 50
+                   :menu 50}
     :user {:username "Joe Bob Smith"}
     :tabid "agenda"
     :rows {s/person [] s/email [] s/organization []}
@@ -44,8 +45,8 @@
   (get-in @a args))
 
 (defn agenda-pos []
-  (* (look :counters :agenda)
-     (look :page-lengths :agenda)))
+  (* (look :counters s/event)
+     (look :page-lengths s/event)))
 
 (defn person-pos [type]
   (* (look :counters type)

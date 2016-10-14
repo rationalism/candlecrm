@@ -82,8 +82,8 @@
   [:div
    [:div
     [add-new s/event] [load-box]
-    [prev-next-box :agenda u/update-agenda!
-     (count (state/look :agenda-events)) :agenda]]
+    [prev-next-box s/event u/update-agenda!
+     (count (state/look :agenda-events)) s/event]]
    [:br]
    (let [events (agenda-events)]
      (if (empty? events)
@@ -91,5 +91,5 @@
        (for [event (add-ids events)]
          ^{:key (first event)}
          [display-agenda (second event)])))
-   [prev-next-box :agenda u/update-agenda!
-    (count (state/look :agenda-events)) :agenda]])
+   [prev-next-box s/event u/update-agenda!
+    (count (state/look :agenda-events)) s/event]])
