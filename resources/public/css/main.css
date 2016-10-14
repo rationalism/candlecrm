@@ -269,3 +269,12 @@ ol#faqmenu li {
     margin-left: 0.4rem;
     margin-right: 0.4rem;
 }
+
+.inputfile {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}

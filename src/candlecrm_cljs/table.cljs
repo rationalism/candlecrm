@@ -47,6 +47,12 @@
 
 (defn people-table [type]
   [:div
+   [:div.prev-next
+    [:input {:type "file" :id "contactcsv" :name "contactcsv"
+             :class "inputfile" :on-change (js/alert "File uploaded")
+             #_(dispatch [:save-rm-file :file (-> % .-target .-files (aget 0))])}]
+    [:label {:for "contactcsv" :class "btn btn-primary"}
+     "Upload contacts"]]
    [:p [util/add-new type]
     [util/load-box]]
    [:table {:id "people-table" :class "table table-hover"}
