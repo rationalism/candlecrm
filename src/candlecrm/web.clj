@@ -83,7 +83,7 @@
                   :params :as req}
         (pages/login params))
   (POST "/upload" req
-        (pr-str req))
+        (println req))
   (GET "/logout" req
        (logout req))
   (GET "/switch" req

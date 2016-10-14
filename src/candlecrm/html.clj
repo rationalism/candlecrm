@@ -19,6 +19,9 @@
           :href (str "https://maxcdn.bootstrapcdn.com/bootstrap/"
                      "4.0.0-alpha.4/css/bootstrap.min.css")}])
 
+(defn csrf-field []
+  (anti-forgery-field))
+
 (defn jquery-js []
   [:script {:src "https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"
             :integrity "sha384-THPy051/pYDQGanwU6poAc/hOdQxjnOEXzbT+OuUAFqNqFjL+4IGLBgCJC3ZOShY"
@@ -268,7 +271,7 @@
           (include-css "/css/fullcalendar.min.css")
           (include-css "/css/main.css")]
          [:body
-          (app-box content)
+          (app-box content) (csrf-field)
           (include-js (goog-maps))
           (jquery-js) (tether-js) (bootstrap-js)
           (include-js "https://code.highcharts.com/highcharts.js")

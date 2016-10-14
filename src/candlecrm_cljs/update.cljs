@@ -5,6 +5,10 @@
             [cljs-http.client :as http]))
 
 (def timeout timeout)
+(def token-element "__anti-forgery-token")
+
+(defn csrf-token []
+  (.-value (.getElementById js/document token-element)))
 
 (defn scroll-pos []
   (.-pageYOffset js/window))
@@ -335,6 +339,6 @@
   (send! (notes-req) new-notes))
 
 (defn upload-file! [file]
-  (js/alert "hiyas")
   (http/post "/upload"
-             {:multipart-params [["upload-file" file]]}))
+             {:multipart-params [["upload-file" file]]
+              :headers {"x-csrf-token" (csrf-token)}}))
