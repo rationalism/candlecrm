@@ -10,6 +10,7 @@
                  [clj-time "0.12.0"]
                  [clj-http "3.3.0"
                   :exclusions [commons-io]]
+                 [cljs-http "0.1.42"]
                  [http-kit "2.2.0"]
                  [ring/ring-core "1.5.0"]
                  [ring/ring-devel "1.5.0"]

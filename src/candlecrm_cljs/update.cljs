@@ -332,3 +332,6 @@
 
 (defn edit-notes! []
   (send! (notes-req) new-notes))
+
+(defn upload-file! [file]
+  (js/alert {:multipart-params {:file file}}))
