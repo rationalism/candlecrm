@@ -82,6 +82,8 @@
   (POST "/login" {{:keys [username password] :as params}
                   :params :as req}
         (pages/login params))
+  (POST "/upload" req
+        (pr-str req))
   (GET "/logout" req
        (logout req))
   (GET "/switch" req
@@ -119,11 +121,6 @@
       (assoc-in [:security :anti-forgery]
                 {:read-token csrf-token
                  :error-handler pages/homepage})))
-
-(defn unauthorized-handler []
-  (fn [{:keys [uri]}]
-    (-> (pages/login-needed uri)
-        resp/response (resp/status 401))))
 
 (defn wrap-neo4j-thread [handler]
   (fn [request]

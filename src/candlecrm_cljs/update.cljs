@@ -1,7 +1,8 @@
 (ns candlecrm_cljs.update
   (:require [clojure.set :as set]
             [candlecrm_cljs.state :as state]
-            [candlecrm_cljc.schema :as s]))
+            [candlecrm_cljc.schema :as s]
+            [cljs-http.client :as http]))
 
 (def timeout timeout)
 
@@ -334,4 +335,6 @@
   (send! (notes-req) new-notes))
 
 (defn upload-file! [file]
-  (js/alert {:multipart-params {:file file}}))
+  (js/alert "hiyas")
+  (http/post "/upload"
+             {:multipart-params [["upload-file" file]]}))
