@@ -23,7 +23,7 @@
              (< (u/scroll-pos-rev) 200))
     (state/set! [:scroll-lock] true)
     (when-let [tabid (state/tabname-types (state/look :tabid))]
-      (state/update! [:page-lengths tabid] inc 10)
+      (state/update! [:page-lengths tabid] + 10)
       (u/update-switch! (state/look :tabid))
       (js/setTimeout #(on-scroll _e) 1500)))
   (state/set! [:scroll-lock] false))
