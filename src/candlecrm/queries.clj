@@ -11,6 +11,10 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
 
+(defn client-warn! [user query-map]
+  (throw-warn! (str "Message from " (auth/get-username user)
+                    " client: " (:message query-map))))
+
 (defn vals-collect []
   (str " MATCH (root)-[r]->(v) WITH o, ID(root) as idr,"
        " collect([ID(root), labels(root),"

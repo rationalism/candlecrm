@@ -13,6 +13,12 @@
 (defn send! [req update-fn]
   ((state/look :ajax-chan) req 5000 update-fn))
 
+(defn log-req [message]
+  [:alert/warn-log {:message message}])
+
+(defn alert-log! [message]
+  (send! (log-req message) (constantly :logged)))
+
 (defn people-req [type]
   [:pages/fetch-people
    {:start (state/person-pos type) :type type

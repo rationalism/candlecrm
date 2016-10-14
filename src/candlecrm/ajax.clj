@@ -61,7 +61,9 @@
   (debugf "Unhandled event: %s" event)
   {:umatched-event-as-echoed-from-from-server event})
 
-(def reply-map {:edit/add-entity {:fn insert/new-entity!
+(def reply-map {:alert/warn-log {:fn queries/client-warn!
+                                 :keys [:message]}
+                :edit/add-entity {:fn insert/new-entity!
                                   :keys [:fields :add-links]}
                 :edit/edit-entity {:fn insert/edit-entity!
                                    :keys [:fields :add-links :delete-links]}
