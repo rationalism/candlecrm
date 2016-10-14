@@ -36,7 +36,8 @@
     :agenda-events []
     :loading false
     :notes-edit false
-    :notes-text ""}))
+    :notes-text ""
+    :scroll-lock false}))
 
 (def tabname-types {"email" s/email "people" s/person
                     "orgs" s/organization "agenda" s/event})
