@@ -75,21 +75,6 @@
    [:i {:class "fa fa-plus"}]
    (str " Add new " (name rel-type))])
 
-(defn prev-next-box [counter update-fn num-rows row-type]
-  [:div.prev-next
-   (when (> (state/look :counters counter) 0)
-     [:a {:href "javascript:;" :role "button"
-          :on-click (u/prev-fetch! counter update-fn)
-          :class "prev-email-page btn btn-primary"}
-      [:i {:class "fa fa-arrow-left"}]
-      "  Previous"])
-   (when (= num-rows (state/look :page-lengths row-type))
-     [:a {:href "javascript:;" :role "button"
-          :on-click (u/next-fetch! counter update-fn)
-          :class "next-email-page btn btn-primary"}
-      "Next  "
-      [:i {:class "fa fa-arrow-right"}]])])
-
 (defn key-link [text key type]
   (condp = type
     :node [:a.go-node

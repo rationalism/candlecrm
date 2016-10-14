@@ -47,8 +47,6 @@
 
 (defn people-table [type]
   [:div
-   [util/prev-next-box type (partial u/update-people! type)
-    (count (state/look :rows type)) type]
    [:p [util/add-new type]
     [util/load-box]]
    [:table {:id "people-table" :class "table table-hover"}
@@ -90,8 +88,6 @@
   [:div
    (when (= row-keys [:rows s/email])
      [:div
-      [util/prev-next-box counter update-fn
-       (count (apply state/look row-keys)) s/email]
       [:p [refresh-email]
        [util/load-box]]])
    [:table {:id "email-table" :class "table table-hover"}
