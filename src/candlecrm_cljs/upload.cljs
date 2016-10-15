@@ -20,8 +20,9 @@
 
 (defn column-cell [col]
   [:div {:class "row form-group"}
-   [:label {:class "col-xs-2 col-form-label"}
-    [:h6 (str "\"" (second col) "\"")]]
+   [:label {:class "col-xs-4 col-form-label"}
+    [:h6 (str "\"" (first (second col)) "\""
+              " (eg. " (second (second col)) ")")]]
    [:div {:class "col-xs-4"}
     [column-dropdown (first col)]]])
 
