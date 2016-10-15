@@ -38,7 +38,8 @@
     :notes-edit false
     :notes-text ""
     :scroll-lock false
-    :upload-alert ""}))
+    :upload-alert ""
+    :upload-cols []}))
 
 (def tabname-types {"email" s/email "people" s/person
                     "orgs" s/organization "agenda" s/event})

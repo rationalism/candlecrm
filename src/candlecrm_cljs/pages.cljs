@@ -128,6 +128,7 @@
      "search" [search/search-results]
      "agenda" [calendar/agenda]
      "orgs" [:div#tab11.tab-show [table/people-table s/organization]]
+     "upload" [:div#tab12.tab-show [my-account]]
      [:div "Error: Page not found."])])
 
 (defn homepage []
