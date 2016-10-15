@@ -10,6 +10,7 @@
             [candlecrm_cljs.state :as state]
             [candlecrm_cljs.table :as table]
             [candlecrm_cljs.update :as u]
+            [candlecrm_cljs.upload :as upload]
             [candlecrm_cljs.user :as user]
             [candlecrm_cljs.util :refer
              [get-first add-ids add-new new-entity-switch
@@ -128,7 +129,7 @@
      "search" [search/search-results]
      "agenda" [calendar/agenda]
      "orgs" [:div#tab11.tab-show [table/people-table s/organization]]
-     "upload" [:div#tab12.tab-show [my-account]]
+     "upload" [:div#tab12.tab-show [upload/column-select]]
      [:div "Error: Page not found."])])
 
 (defn homepage []

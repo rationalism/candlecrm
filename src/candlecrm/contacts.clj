@@ -84,11 +84,14 @@
     (if (->> params :upload-file :content-type (= "text/csv"))
       (let [contact-data (->> params :upload-file :tempfile
                               slurp csv/parse-csv)]
-        (if (<= (count contact-data) 1)
-          (alert-and-return user "Empty or invalid file")
-          (do (swap! neo4j/upload-cache assoc user contact-data)
-              (neo4j/contact-cols! user (first contact-data))
-              (html-wrapper "Upload OK"))))
+        (cond (<= (count contact-data) 1)
+              (alert-and-return user "Empty or invalid file")
+              (empty? (first contact-data))
+              (alert-and-return user "Empty or invalid file")
+              :else
+              (do (swap! neo4j/upload-cache assoc user contact-data)
+                  (neo4j/contact-cols! user (first contact-data))
+                  (html-wrapper "Upload OK"))))
       (alert-and-return user "Wrong file type. Please use a CSV file"))
     (do (throw-warn! (str "Tried to upload file without logging in: " params))
         (html-wrapper "Error: Not logged in"))))

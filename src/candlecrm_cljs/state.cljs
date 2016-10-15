@@ -39,7 +39,8 @@
     :notes-text ""
     :scroll-lock false
     :upload-alert ""
-    :upload-cols []}))
+    :upload-cols []
+    :upload-col-map {}}))
 
 (def tabname-types {"email" s/email "people" s/person
                     "orgs" s/organization "agenda" s/event})
