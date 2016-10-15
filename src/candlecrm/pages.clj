@@ -22,11 +22,6 @@
 (defn csrf-redirect [_req]
   (assoc (resp/redirect "/")))
 
-(defn html-wrapper [body]
-  {:status 200
-   :headers {"Content-Type" "text/html"}
-   :body body})
-
 (defn token-cookie [url token]
   {:status 302
    :headers {"Location" url}

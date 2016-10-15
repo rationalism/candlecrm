@@ -216,3 +216,8 @@
 
 (defn full-callback-url [callback-url]
   (str (env :app-domain) callback-url))
+
+(defn html-wrapper [body]
+  {:status 200
+   :headers {"Content-Type" "text/html"}
+   :body body})

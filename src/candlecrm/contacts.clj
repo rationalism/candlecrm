@@ -78,11 +78,14 @@
 (defn file-upload [user params]
   (if user
     (if (->> params :upload-file :content-type (= "text/csv"))
-      (println params)
-      (neo4j/upload-alert!
-       user (str "Error: Wrong file type."
-                 " Please upload a CSV file")))
-    (throw-warn! (str "Tried to upload file without logging in: " params))))
+      (do (println params)
+          (html-wrapper "Upload OK"))
+      (do (neo4j/upload-alert!
+           user (str "Error: Wrong file type."
+                     " Please upload a CSV file"))
+          (html-wrapper "Error: Not CSV file")))
+    (do (throw-warn! (str "Tried to upload file without logging in: " params))
+        (html-wrapper "Error: Not logged in"))))
 
 (defn contact->person [contact]
   (filter-map

@@ -9,6 +9,7 @@
     (u/update-switch! tabname)
     (state/update! [:should-refresh] dissoc
                    (state/tabname-types tabname)))
+  (state/set! [:upload-alert] "")
   (state/set! [:tabid] tabname)
   (u/alert-log! (str "Switch to tab '" tabname "'")))
 
