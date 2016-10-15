@@ -1,17 +1,29 @@
 (ns candlecrm_cljs.upload
   (:require [clojure.string :as str]
+            [candlecrm_cljc.schema :as s]
             [candlecrm_cljs.state :as state]
             [candlecrm_cljs.update :as u]
             [candlecrm_cljs.util :refer
              [add-ids]]))
 
+(def upload-cols #{s/s-name s/email-addr s/phone-num s/birthday
+                   s/org-member s/website s/location s/mail-address
+                   s/notes})
+
+(defn column-dropdown [id]
+  [:select {:class "form-control" :id (str "upload-col" id)}
+   (for [option (->> s/node-paths s/person
+                     (filter #(contains? upload-cols (second %)))
+                     add-ids)]
+     ^{:key (first option)}
+     [:option (first (second option))])])
+
 (defn column-cell [col]
   [:div {:class "row form-group"}
    [:label {:class "col-xs-2 col-form-label"}
-    (second col)]
+    [:h6 (str "\"" (second col) "\"")]]
    [:div {:class "col-xs-4"}
-    [:input {:type "text" :name (str col)
-             :class "form-control edit-field"}]]])
+    [column-dropdown (first col)]]])
 
 (defn column-select []
   [:div

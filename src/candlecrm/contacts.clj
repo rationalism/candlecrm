@@ -86,11 +86,13 @@
                               slurp csv/parse-csv)]
         (cond (<= (count contact-data) 1)
               (alert-and-return user "Empty or invalid file")
-              (empty? (first contact-data))
+              (or (empty? (first contact-data))
+                  (empty? (second contact-data)))
               (alert-and-return user "Empty or invalid file")
               :else
               (do (swap! neo4j/upload-cache assoc user contact-data)
-                  (neo4j/contact-cols! user (first contact-data))
+                  (->> contact-data (take 2) (map vec) vec
+                       (apply mapv vector) (neo4j/contact-cols! user))
                   (html-wrapper "Upload OK"))))
       (alert-and-return user "Wrong file type. Please use a CSV file"))
     (do (throw-warn! (str "Tried to upload file without logging in: " params))

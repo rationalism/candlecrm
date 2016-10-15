@@ -23,7 +23,7 @@
 (def hash-alg {:alg :bcrypt+blake2b-512})
 (defonce pubkey (atom nil))
 (defonce privkey (atom nil))
-(def exp-hours 3)
+(def exp-hours 24)
 
 (defn load-keys! []
   (reset! pubkey (buddy/public-key (str (env :ssl-dir) "pubkey.pem")))
