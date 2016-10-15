@@ -6,7 +6,8 @@
             [candlecrm.insert :as insert]
             [candlecrm.loom :as loom]
             [candlecrm.neo4j :as neo4j]
-            [candlecrm_cljc.schema :as s])
+            [candlecrm_cljc.schema :as s]
+            [clojure-csv.core :as csv])
   (:import [com.google.gdata.client Query]
            [com.google.gdata.client.contacts ContactsService]
            [com.google.gdata.data.contacts ContactFeed]
@@ -73,6 +74,12 @@
 
 (defn maybe-add [m k v]
   (if v (assoc m k v) m))
+
+(defn file-upload [identity params]
+  (println "File upload")
+  (if identity
+    (->> params :upload-file :content-type println)
+    (throw-warn! (str "Tried to upload file without logging in: " params))))
 
 (defn contact->person [contact]
   (filter-map

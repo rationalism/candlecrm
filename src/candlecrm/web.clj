@@ -11,6 +11,7 @@
             [candlecrm.common :refer :all]
             [candlecrm.ajax :as ajax]
             [candlecrm.auth :as auth]
+            [candlecrm.contacts :as contacts]
             [candlecrm.datetime :as dt]
             [candlecrm.email :as email]
             [candlecrm.geocode :as geocode]
@@ -82,8 +83,8 @@
   (POST "/login" {{:keys [username password] :as params}
                   :params :as req}
         (pages/login params))
-  (POST "/upload" req
-        (println req))
+  (POST "/upload" {:keys [identity params]}
+        (contacts/file-upload identity params))
   (GET "/logout" req
        (logout req))
   (GET "/switch" req
