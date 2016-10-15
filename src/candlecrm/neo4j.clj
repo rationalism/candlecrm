@@ -11,6 +11,7 @@
 (def ^:dynamic *session* nil)
 (defonce ajax-send! (atom nil))
 (defonce invalid-conn (atom false))
+(defonce upload-cache (atom {}))
 
 (defn table-refresh! [user]
   (@ajax-send! (.id user) [:refresh/tables true]))
@@ -20,6 +21,9 @@
 
 (defn upload-alert! [user message]
   (@ajax-send! (.id user) [:alert/upload {:message message}]))
+
+(defn contact-cols! [user cols]
+  (@ajax-send! (.id user) [:add/contacts {:columns cols}]))
 
 (defn user-label [user]
   (str "user_" (.id user)))

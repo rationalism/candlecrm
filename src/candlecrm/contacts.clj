@@ -75,15 +75,21 @@
 (defn maybe-add [m k v]
   (if v (assoc m k v) m))
 
+(defn alert-and-return [user message]
+  (neo4j/upload-alert! user message)
+  (html-wrapper message))
+
 (defn file-upload [user params]
   (if user
     (if (->> params :upload-file :content-type (= "text/csv"))
-      (do (println params)
-          (html-wrapper "Upload OK"))
-      (do (neo4j/upload-alert!
-           user (str "Error: Wrong file type."
-                     " Please upload a CSV file"))
-          (html-wrapper "Error: Not CSV file")))
+      (let [contact-data (->> params :upload-file :tempfile
+                              slurp csv/parse-csv)]
+        (if (<= (count contact-data) 1)
+          (alert-and-return user "Empty or invalid file")
+          (do (swap! neo4j/upload-cache assoc user contact-data)
+              (neo4j/contact-cols! user (first contact-data))
+              (html-wrapper "Upload OK"))))
+      (alert-and-return user "Wrong file type. Please use a CSV file"))
     (do (throw-warn! (str "Tried to upload file without logging in: " params))
         (html-wrapper "Error: Not logged in"))))
 
