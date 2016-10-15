@@ -79,7 +79,7 @@
       :refresh/page (.reload js/location)
       :alert/upload (state/set! [:upload-alert]
                                 (:message (second ?data)))
-      :add/contacts (upload/start-upload! (second ?data))
+      :add/contacts (upload/start-upload! (:columns (second ?data)))
       (debugf "Push event from server: %s" ?data)))
   
   (defmethod event-msg-handler :chsk/handshake

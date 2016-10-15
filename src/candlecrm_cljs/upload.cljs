@@ -15,7 +15,7 @@
             :on-change #(state/set! [:upload-col-map id] (.. % -target -value))}
    (for [option (->> s/node-paths s/person
                      (filter #(contains? upload-cols (second %)))
-                     add-ids)]
+                     (concat [["" nil]]) add-ids)]
      ^{:key (first option)}
      [:option (first (second option))])])
 
@@ -44,7 +44,7 @@
 
 (defn start-upload! [col-data]
   (state/set! [:tabid] "upload")
-  (->> col-data :columns (state/set! [:upload-cols]))
+  (state/set! [:upload-cols] col-data)
   (state/set! [:upload-col-map]
               (zipmap (range (count col-data))
                       (repeat (count col-data) ""))))
