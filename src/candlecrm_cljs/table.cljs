@@ -48,6 +48,8 @@
 (defn people-table [type]
   [:div
    [:div.prev-next
+    [:span {:class "alert-text"}
+     (state/look :upload-alert)]
     [:input {:type "file" :id "contactcsv" :name "contactcsv" :class "inputfile"
              :on-change #(u/upload-file! (-> % .-target .-files (aget 0)))}]
     [:label {:for "contactcsv" :class "btn btn-primary"}

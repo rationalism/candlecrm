@@ -37,7 +37,8 @@
     :loading false
     :notes-edit false
     :notes-text ""
-    :scroll-lock false}))
+    :scroll-lock false
+    :upload-alert ""}))
 
 (def tabname-types {"email" s/email "people" s/person
                     "orgs" s/organization "agenda" s/event})

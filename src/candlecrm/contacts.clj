@@ -75,10 +75,13 @@
 (defn maybe-add [m k v]
   (if v (assoc m k v) m))
 
-(defn file-upload [identity params]
-  (println "File upload")
-  (if identity
-    (->> params :upload-file :content-type println)
+(defn file-upload [user params]
+  (if user
+    (if (->> params :upload-file :content-type (= "text/csv"))
+      (println params)
+      (neo4j/upload-alert!
+       user (str "Error: Wrong file type."
+                 " Please upload a CSV file")))
     (throw-warn! (str "Tried to upload file without logging in: " params))))
 
 (defn contact->person [contact]

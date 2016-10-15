@@ -80,8 +80,8 @@
        [:div {:class "form-group"}
         [:input {:class "btn btn-primary" 
                  :value "Submit" :type "submit"}]
-        [:span {:style "padding:0 0 0 10px;color:red;"
-                :id "signupError"} flash]]]]]]])
+        [:span {:class "alert-text" :id "signupError"}
+         flash]]]]]]])
 
 (defn invite-page [flash]
   [:div#homepage {:class "container"}
@@ -312,8 +312,8 @@
        [:div {:class "form-group"}
         [:input {:class "btn btn-primary" 
                  :value "Sign up" :type "submit"}]
-        [:span {:style "padding:0 0 0 10px;color:red;"
-                :id "signupError"} flash]]]]]]])
+        [:span {:class "alert-text" :id "signupError"}
+         flash]]]]]]])
 
 (defn login-form [flash]
   [:div {:class "row"}
@@ -338,8 +338,8 @@
         [:a {:id "pass-reset-link" :href "/reset-password.html"
              :class "btn btn-primary"}
          "Forgot password?"]]
-       [:span {:style "padding:0 0 0 10px;color:red;"
-               :id "loginError"} flash]]]]]])
+       [:span {:class "alert-text" :id "loginError"}
+        flash]]]]]])
 
 (defn reset-pwd [flash]
   [:div {:class "container"}
@@ -359,8 +359,8 @@
         [:div {:class "form-group"}
          [:input {:class "btn btn-primary"
                   :value "Request reset" :type "submit"}]
-         [:span {:style "padding:0 0 0 10px;color:red;"
-                 :id "signupError"} flash]]]]]]]])
+         [:span {:class "alert-text" :id "signupError"}
+          flash]]]]]]]])
 
 (defn new-password [user token]
   [:div {:class "container"}
@@ -403,7 +403,7 @@
    [:div {:class "row"}
     [:div {:class "col-xs-8"}
      [:br] [:h3 "Welcome! Set up your account by connecting your email."]
-     [:p [:span {:style {:padding "0 0 0 10px" :color "red"}} flash]]
+     [:p [:span {:class "alert-text"} flash]]
      [:h6 (str "CandleCRM is in beta. Please let us know"
                " about any errors or problems you see.")][:br]
      [:div {:class "row"}

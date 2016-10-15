@@ -18,6 +18,9 @@
 (defn page-refresh! [user]
   (@ajax-send! (.id user) [:refresh/page true]))
 
+(defn upload-alert! [user message]
+  (@ajax-send! (.id user) [:alert/upload message]))
+
 (defn user-label [user]
   (str "user_" (.id user)))
 

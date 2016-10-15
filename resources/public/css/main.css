@@ -278,3 +278,8 @@ ol#faqmenu li {
 	position: absolute;
 	z-index: -1;
 }
+
+.alert-text {
+    padding:0 0 0 10px;
+    color:red;
+}
