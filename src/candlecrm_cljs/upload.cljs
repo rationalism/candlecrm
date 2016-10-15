@@ -11,7 +11,8 @@
                    s/notes})
 
 (defn column-dropdown [id]
-  [:select {:class "form-control" :id (str "upload-col" id)}
+  [:select {:class "form-control" :id (str "upload-col" id)
+            :on-change #(state/set! [:upload-col-map id] (.. % -target -value))}
    (for [option (->> s/node-paths s/person
                      (filter #(contains? upload-cols (second %)))
                      add-ids)]
@@ -40,3 +41,10 @@
        [:button {:type "button" :class "btn btn-primary"
                  :on-click #(js/alert "Submitted")}
         "Submit"]]]]]])
+
+(defn start-upload! [col-data]
+  (state/set! [:tabid] "upload")
+  (->> col-data :columns (state/set! [:upload-cols]))
+  (state/set! [:upload-col-map]
+              (zipmap (range (count col-data))
+                      (repeat (count col-data) ""))))

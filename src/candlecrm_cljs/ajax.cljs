@@ -8,7 +8,8 @@
    [taoensso.sente  :as sente  :refer (cb-success?)]
    [candlecrm_cljc.schema :as s]
    [candlecrm_cljs.state :as state]
-   [candlecrm_cljs.update :as u])
+   [candlecrm_cljs.update :as u]
+   [candlecrm_cljs.upload :as upload])
   ;; Optional, for Transit encoding:
   ;;[taoensso.sente.packers.transit :as sente-transit]
   (:require-macros
@@ -78,9 +79,7 @@
       :refresh/page (.reload js/location)
       :alert/upload (state/set! [:upload-alert]
                                 (:message (second ?data)))
-      :add/contacts (do (state/set! [:tabid] "upload")
-                        (->> ?data second :columns
-                             (state/set! [:upload-cols])))
+      :add/contacts (upload/start-upload! (second ?data))
       (debugf "Push event from server: %s" ?data)))
   
   (defmethod event-msg-handler :chsk/handshake
