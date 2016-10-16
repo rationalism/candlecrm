@@ -140,7 +140,7 @@
              (filter neg?) empty?
              (and (not (empty? @imap/message-queue))))
     (throw-warn! (str "Resetting message queue: " @imap/message-queue))
-    (reset! @imap/message-queue {})))
+    (reset! imap/message-queue {})))
 
 ;; Nils here allow for easy switching on/off
 (jobs/defjob EmailLoad [ctx]
