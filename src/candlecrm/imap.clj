@@ -315,8 +315,8 @@
        (map s/email-uid) (remove nil?) first))
 
 (defn queue-graph [user graph]
-  #_(swap! message-queue dissoc
-           [(auth/get-username user) (graph-uid graph)]))
+  (swap! message-queue dissoc
+         [(auth/get-username user) (graph-uid graph)]))
 
 (defn maybe-load [user graph]
   (if (contains? @overload-locked user)
