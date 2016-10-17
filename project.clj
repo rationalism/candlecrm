@@ -18,7 +18,7 @@
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [environ "1.1.0"]
-                 [com.taoensso/encore "2.85.0"]
+                 [com.taoensso/encore "2.86.1"]
                  [com.taoensso/timbre "4.7.4"]
                  [buddy "1.1.0"]
                  [com.google.api-client/google-api-client "1.22.0"
@@ -65,7 +65,7 @@
                  [nz.ac.waikato.cms.weka/weka-dev "3.7.13"]
                  [crypto-random "1.2.0"]
                  [clojure-csv/clojure-csv "2.0.2"]
-                 [org.apache.commons/commons-lang3 "3.4"]
+                 [org.apache.commons/commons-lang3 "3.5"]
                  [com.sendgrid/sendgrid-java "3.1.0"]
                  [reagent-forms "0.5.27"
                   :exclusions [com.google.guava/guava]]
