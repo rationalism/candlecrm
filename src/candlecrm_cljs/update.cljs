@@ -34,11 +34,12 @@
 (defn column-req [coldata]
   [:edit/push-contacts {:columns coldata}])
 
-(defn people-go! [_resp]
-  (state/set! [:tabid] "people"))
+(defn contacts-ready! [_resp]
+  (state/set! [:tabid] "people")
+  (state/set! [:upload-col-map] {}))
 
 (defn push-columns! [coldata]
-  (send! (column-req coldata) people-go!))
+  (send! (column-req coldata) contacts-ready!))
 
 (defn people-req [type]
   [:pages/fetch-people

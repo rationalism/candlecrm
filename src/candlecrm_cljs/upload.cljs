@@ -16,7 +16,8 @@
 
 (defn select-field-map []
   (->> (upload-fields) (map #(vector (first %) (rest %)))
-       (map #(update % 1 (fn [fs] (if (> (count fs) 2) (take 2 fs) fs))))
+       (map #(update % 1 (fn [fs] (if (> (count fs) 2)
+                                    (take 2 fs) (first fs)))))
        (map #(apply hash-map %)) (apply merge)))
 
 (defn column-dropdown [id]
