@@ -121,13 +121,16 @@
   (map #(vector node {(second k) % s/type-label (link-type (first k))}
                 (first k)) v))
 
-(defn new-entity! [user {:keys [fields add-links]}]
+(defn new-entity-graph [fields links]
   (let [new-node (decode-dates fields)
-        new-links (->> add-links (into [])
+        new-links (->> links (into [])
                        (mapcat #(new-links new-node %)))]
-    (-> new-node vector (loom/build-graph new-links)
-        (push-graph! user s/edit-src) first
-        (new-resp (s/type-label fields)))))
+    (-> new-node vector (loom/build-graph new-links))))
+
+(defn new-entity! [user {:keys [fields add-links]}]
+  (-> (new-entity-graph fields add-links)
+      (push-graph! user s/edit-src) first
+      (new-resp (s/type-label fields))))
 
 (defn vals-query [attrs]
   (str "MATCH (root)-[r:" attrs
