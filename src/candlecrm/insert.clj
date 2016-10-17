@@ -133,7 +133,9 @@
       (new-resp (s/type-label fields))))
 
 (defn push-contacts! [user {:keys [columns]}]
-  )
+  (let [contact-data (user @neo4j/upload-cache)]
+    (->> contact-data rest))
+  (swap! neo4j/upload-cache dissoc user))
 
 (defn vals-query [attrs]
   (str "MATCH (root)-[r:" attrs
