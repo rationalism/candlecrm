@@ -166,6 +166,7 @@
 (defn normalize-cal [cal]
   (-> (assoc cal :start (get-begin cal))
       (assoc :end (get-first cal [s/event-end]))
+      (assoc :url (str "/app/node/event/" (:id cal)))
       (dissoc [s/event-begin] [s/event-end])
       (assoc :title
              (get-first (get-first cal [s/link-to s/text-mentions s/email-subject])

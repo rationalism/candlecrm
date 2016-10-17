@@ -7,7 +7,8 @@
             [candlecrm_cljs.util :refer
              [add-ids add-new display-day
               get-first load-box beam event-name]]
-            [reagent.core :as r])
+            [reagent.core :as r]
+            [secretary.core :as secretary])
   (:use [jayq.core :only [$]]))
 
 (defn debug-js [x]
@@ -23,16 +24,12 @@
     (cal-adjust "changeView" "basicDay"))
   (cal-adjust "gotoDate" date))
 
-(defn event-click [event jsevent view]
-  (u/go-node! (.-id event) s/event))
-
 (defn event-source [start end timezone callback]
   (-> :cal-events state/look clj->js callback))
 
 (defn cal-params []
   (clj->js {:events event-source
-            :dayClick day-click
-            :eventClick event-click}))
+            :dayClick day-click}))
 
 (defn cal-add! [this]
   (cal-adjust (cal-params)))
