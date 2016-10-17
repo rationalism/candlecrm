@@ -4,6 +4,9 @@
             [candlecrm_cljs.update :as u]
             [secretary.core :as secretary :refer-macros [defroute]]))
 
+(defroute "/app" []
+  (secretary/dispatch! "/app/agenda"))
+
 (defroute "/app/:tabname" [tabname]
   (when (state/look :should-refresh (state/tabname-types tabname))
     (u/update-switch! tabname)
