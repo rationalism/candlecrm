@@ -121,6 +121,10 @@
   (map #(vector node {(second k) % s/type-label (link-type (first k))}
                 (first k)) v))
 
+(defn split-map [m]
+  [(->> m keys (filter #(= 1 (count %))) (select-keys m))
+   (->> m keys (filter #(= 2 (count %))) (select-keys m))])
+
 (defn new-entity-graph [fields links]
   (let [new-node (decode-dates fields)
         new-links (->> links (into [])
@@ -134,7 +138,12 @@
 
 (defn push-contacts! [user {:keys [columns]}]
   (let [contact-data (user @neo4j/upload-cache)]
-    (->> contact-data rest))
+    (->> contact-data rest
+         (map #(zipvec columns (map vector %)))
+         (map #(map (fn [v] (apply hash-map v))))
+         (map #(apply merge-with concat %)) (map split-map)
+         (map #(apply new-entity-graph %)) loom/merge-graphs
+         (#(push-graph! % user s/contact-src))))
   (swap! neo4j/upload-cache dissoc user))
 
 (defn vals-query [attrs]
