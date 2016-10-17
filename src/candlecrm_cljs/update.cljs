@@ -31,6 +31,15 @@
 (defn alert-log! [message]
   (send! (log-req message) (constantly :logged)))
 
+(defn column-req [coldata]
+  [:edit/push-contacts {:columns coldata}])
+
+(defn people-go! [_resp]
+  (state/set! [:tabid] "people"))
+
+(defn push-columns! [coldata]
+  (send! (column-req coldata) people-go!))
+
 (defn people-req [type]
   [:pages/fetch-people
    {:start (state/person-pos type) :type type

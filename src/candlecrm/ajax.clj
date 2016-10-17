@@ -69,6 +69,8 @@
                                    :keys [:fields :add-links :delete-links]}
                 :edit/edit-notes {:fn email/edit-notes!
                                   :keys [:node :notes]}
+                :edit/push-contacts {:fn insert/push-contacts!
+                                     :keys [:columns]}
                 :pages/fetch-people {:fn queries/person-from-user
                                      :keys [:start :limit :type]}
                 :pages/fetch-agenda {:fn queries/event-agenda

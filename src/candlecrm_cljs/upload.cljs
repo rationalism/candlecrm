@@ -34,6 +34,11 @@
    [:div {:class "col-xs-6"}
     [column-dropdown (first col)]]])
 
+(defn upload-switch! []
+  (let [field-map (select-field-map)]
+    (->> :upload-col-map state/look (sort-by first)
+         (map second) (mapv #(field-map %)) u/push-columns!)))
+
 (defn column-select []
   [:div
    [:h2 "Match spreadsheet columns to upload your contacts"][:br]
@@ -47,7 +52,7 @@
           ^{:key (first col)}
           [column-cell col])
         [:button {:type "button" :class "btn btn-primary"
-                  :on-click #(js/alert "Submitted")}
+                  :on-click upload-switch!}
          "Submit"]]]]]]])
 
 (defn start-upload! [col-data]

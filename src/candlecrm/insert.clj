@@ -132,6 +132,9 @@
       (push-graph! user s/edit-src) first
       (new-resp (s/type-label fields))))
 
+(defn push-contacts! [user {:keys [columns]}]
+  )
+
 (defn vals-query [attrs]
   (str "MATCH (root)-[r:" attrs
        "]->(v) WHERE ID(root) = {id}"
