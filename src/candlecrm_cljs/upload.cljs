@@ -10,21 +10,28 @@
                    s/org-member s/website s/location s/mail-address
                    s/notes})
 
+(defn upload-fields []
+  (->> s/node-paths s/person
+       (filter #(contains? upload-cols (second %)))))
+
+(defn select-field-map []
+  (->> (upload-fields) (map #(vector (first %) (rest %)))
+       (map #(update % 1 (fn [fs] (if (> (count fs) 2) (take 2 fs) fs))))
+       (map #(apply hash-map %)) (apply merge)))
+
 (defn column-dropdown [id]
   [:select {:class "form-control" :id (str "upload-col" id)
             :on-change #(state/set! [:upload-col-map id] (.. % -target -value))}
-   (for [option (->> s/node-paths s/person
-                     (filter #(contains? upload-cols (second %)))
-                     (concat [["" nil]]) add-ids)]
+   (for [option (->> (upload-fields) (concat [["" nil]]) add-ids)]
      ^{:key (first option)}
      [:option (first (second option))])])
 
 (defn column-cell [col]
   [:div {:class "row form-group"}
-   [:label {:class "col-xs-4 col-form-label"}
+   [:label {:class "col-xs-6 col-form-label"}
     [:h6 (str "\"" (first (second col)) "\""
               " (eg. " (second (second col)) ")")]]
-   [:div {:class "col-xs-4"}
+   [:div {:class "col-xs-6"}
     [column-dropdown (first col)]]])
 
 (defn column-select []
@@ -32,15 +39,16 @@
    [:h2 "Match spreadsheet columns to upload your contacts"][:br]
    [:div {:class "container-fluid"}
     [:div {:class "row"}
-     [:form {:class ""}
-      [:fieldset {:class "form-group"}
-       [:legend>h4 "Select the appropriate field for each column:"]
-       (for [col (add-ids (state/look :upload-cols))]
-         ^{:key (first col)}
-         [column-cell col])
-       [:button {:type "button" :class "btn btn-primary"
-                 :on-click #(js/alert "Submitted")}
-        "Submit"]]]]]])
+     [:div {:class "greyback col-xs-9"}
+      [:form {:class ""}
+       [:fieldset {:class "form-group"}
+        [:legend>h4 "Select the appropriate field for each column:"]
+        (for [col (add-ids (state/look :upload-cols))]
+          ^{:key (first col)}
+          [column-cell col])
+        [:button {:type "button" :class "btn btn-primary"
+                  :on-click #(js/alert "Submitted")}
+         "Submit"]]]]]]])
 
 (defn start-upload! [col-data]
   (state/set! [:tabid] "upload")
