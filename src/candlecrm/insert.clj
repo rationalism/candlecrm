@@ -138,12 +138,12 @@
 
 (defn push-contacts! [user {:keys [columns]}]
   (let [contact-data (@neo4j/upload-cache user)]
-    (->> contact-data rest debug
-         (map #(zipvec columns (map vector %))) debug
-         (map #(map (fn [v] (apply hash-map v)) %)) debug
+    (->> contact-data rest 
+         (map #(zipvec columns (map vector %))) 
+         (map #(map (fn [v] (apply hash-map v)) %)) 
          (map #(apply merge-with concat %))
-         (map #(assoc % :label s/person)) (map split-map) debug
-         (map #(apply new-entity-graph %)) loom/merge-graphs debug
+         (map #(assoc % :label s/person)) (map split-map) 
+         (map #(apply new-entity-graph %)) loom/merge-graphs 
          (#(push-graph! % user s/contact-src))))
   (swap! neo4j/upload-cache dissoc user))
 
