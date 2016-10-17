@@ -120,15 +120,18 @@
 (defn new-node [req type]
   {:center-node req :type type})
 
+(defn update-emails-node! [type]
+  (when (= type s/person)
+    (update-emails-person! s/email-to)
+    (update-emails-person! s/email-from)))
+
 (defn update-node []
   (fn [req]
     (state/set! [:current-node] (new-node req (s/type-label req)))
     (state/set! [:prop-filters] {})
     (state/set! [:notes-edit] false)
     (state/set! [:tabid] "node")
-    (when (= (s/type-label req) s/person)
-      (update-emails-person! s/email-to)
-      (update-emails-person! s/email-from))))
+    (update-emails-node! (s/type-label req))))
 
 (defn go-node! [id type]
   (send! (node-req id type) (update-node)))
@@ -322,6 +325,8 @@
     "people" (update-people! s/person)
     "orgs" (update-people! s/organization)
     "agenda" (update-agenda!)
+    "node" (update-emails-node!
+            (state/look :current-node :center-node :label)) 
     nil))
 
 (defn update-tables! []

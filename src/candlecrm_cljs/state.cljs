@@ -43,7 +43,8 @@
     :upload-col-map {}}))
 
 (def tabname-types {"email" s/email "people" s/person
-                    "orgs" s/organization "agenda" s/event})
+                    "orgs" s/organization "agenda" s/event
+                    "node" s/email})
 
 (defn look [& args]
   (get-in @a args))
