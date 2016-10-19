@@ -393,13 +393,10 @@
   (if (= (last path) :id) (drop-last path) path))
 
 (defn fetch-paths-full [id paths]
-  (println "fetch-paths-full")
-  (println id)
-  (println paths)
   (->> paths (map strip-path-id)
        (fetch-paths-query id) vector
        neo4j/cypher-combined-tx first
-       (parse-paths-general paths) debug))
+       (parse-paths-general paths)))
 
 (defn fetch-paths [id paths]
   (->> (fetch-paths-query id paths)
