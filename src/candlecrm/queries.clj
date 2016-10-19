@@ -83,9 +83,7 @@
 (defn node-by-id [user {:keys [id type] :as query-map}]
   (when (neo4j/node-exists? user id type)
     (when-let [paths (s/node-paths type)]
-      (->> paths (map rest) (mapv vec)
-           (mlrecon/fetch-paths-full id)
-           (parse-node-results type id)))))
+      (first (nodes-by-id type paths [id])))))
 
 (defn optional-fetch-node [key-result user]
   (when key-result
@@ -114,7 +112,7 @@
              " SKIP {start} LIMIT {limit} RETURN ID(root)")
         query-map]
        neo4j/cypher-query (map vals) (map first)
-       (map #(node-by-id user {:id % :type s/organization}))))
+       (nodes-by-id s/organization (s/node-paths s/organization))))
 
 (defn person-list [user query-map]
   (->> [(str "MATCH (root:" (neo4j/prop-label user s/person)
@@ -220,7 +218,7 @@
              " SKIP {start} LIMIT {limit}")
         (merge query-map {:present (to-ms (dt/now))})] 
        neo4j/cypher-query (map #(into {} %)) (mapcat vals)
-       (map #(node-by-id user {:id % :type s/event}))))
+       (nodes-by-id s/event (s/node-paths s/event))))
 
 (defn event-related [user query-map]
   (->> [(str (rel-query user)
@@ -230,7 +228,7 @@
              " MATCH (root) RETURN DISTINCT ID(root)")
         (update query-map :person-id #(Integer/parseInt %))]
        neo4j/cypher-query (map #(into {} %)) (mapcat vals)
-       (map #(node-by-id user {:id % :type s/event}))))
+       (nodes-by-id s/event (s/node-paths s/event))))
 
 (def loc-paths [[s/street-addr] [s/located-in s/s-name] [s/located-in s/zipcode]
                 [s/has-coord s/lat] [s/has-coord s/lng]])
