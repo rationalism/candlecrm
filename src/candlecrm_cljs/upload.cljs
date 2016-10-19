@@ -20,6 +20,7 @@
                                     (take 2 fs) (first fs)))))
        (map #(apply hash-map %)) (apply merge)))
 
+;; use util/set-field! here?
 (defn column-dropdown [id]
   [:select {:class "form-control" :id (str "upload-col" id)
             :on-change #(state/set! [:upload-col-map id] (.. % -target -value))}

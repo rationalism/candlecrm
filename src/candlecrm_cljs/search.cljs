@@ -1,5 +1,6 @@
 (ns candlecrm_cljs.search
   (:require [clojure.string :as str]
+            [accountant.core :as accountant]
             [candlecrm_cljc.schema :as s]
             [candlecrm_cljs.node :as node]
             [candlecrm_cljs.state :as state]
@@ -9,7 +10,7 @@
 
 (defn search-key [e]
   (when (= 13 (.-charCode e))
-    (u/run-search!)))
+    (accountant/navigate! (str "/app/search/" (state/look :search)))))
 
 (defn search-box []
   [:input {:id "search-box" :type "text" :name "search-box"

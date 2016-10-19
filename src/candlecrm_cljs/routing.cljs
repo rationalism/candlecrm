@@ -19,6 +19,12 @@
   (state/set! [:tabid] tabname)
   (u/alert-log! (str "Switch to tab '" tabname "'")))
 
+(defroute "/app/search/:query" [query]
+  (state/set! [:tabid] "search")
+  (u/run-search! query)
+  (u/alert-log! (str "Switch to tab '" "search" "'"))
+  (u/alert-log! (str "Search query: " query)))
+
 (defroute "/app/node/:type/:id" [type id]
   (state/set! [:tabid] "node")
   (u/go-node! (js/parseInt id) (keyword type))

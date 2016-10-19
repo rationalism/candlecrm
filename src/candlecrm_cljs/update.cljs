@@ -270,16 +270,14 @@
 (defn edit-entity! []
   (send! (edit-req) edit-entity-confirm!))
 
-(defn search-req []
-  [:update/search
-   {:query (state/look :search)}])
+(defn search-req [query]
+  [:update/search {:query query}])
 
 (defn list-search-results! [resp]
-  (state/set! [:tabid] "search")
   (state/set! [:search-results] resp))
 
-(defn run-search! []
-  (send! (search-req) list-search-results!))
+(defn run-search! [query]
+  (send! (search-req query) list-search-results!))
 
 (defn delete-account-req []
   [:update/delete-account
