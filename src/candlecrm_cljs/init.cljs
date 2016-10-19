@@ -23,7 +23,6 @@
   ;; property
   (when (and js/document (.-getElementById js/document))
     (configure-routing!)
-    (secretary/dispatch! (.-pathname (.-location js/document)))
     (enable-console-print!)
     (scroll-listen)
     (ajax/start!)

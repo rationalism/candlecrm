@@ -6,6 +6,7 @@
    [taoensso.encore :as encore :refer-macros (have have?)]
    [taoensso.timbre :as timbre :refer-macros (tracef debugf infof warnf errorf)]
    [taoensso.sente  :as sente  :refer (cb-success?)]
+   [secretary.core :as secretary]
    [candlecrm_cljc.schema :as s]
    [candlecrm_cljs.state :as state]
    [candlecrm_cljs.update :as u]
@@ -46,6 +47,7 @@
 (defn chsk-init! []
   (state/set! [:should-refresh] {s/email true s/person true
                                  s/organization true s/event true})
+  (secretary/dispatch! (.-pathname (.-location js/document)))
   (u/update-tables!)
   (u/update-user!)
   (u/fetch-ranks! s/event true)
