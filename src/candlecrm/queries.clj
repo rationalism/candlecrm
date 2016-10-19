@@ -293,13 +293,21 @@
 (defn id-row [[r1 r2]]
   [r1 (->> r2 (map vals) (map vec) (map find-type))])
 
+(defn search-id-lookup [id-pairs]
+  (let [results (->> id-pairs (group-by :type) vec
+                     (map #(update % 1 (fn [n] (map :id n))))
+                     (map #(vector (first %) (s/node-paths (first %)) (second %)))
+                     (mapcat #(apply nodes-by-id %))
+                     (map #(hash-map (:id %) %)) (apply merge))]
+    (->> id-pairs (map :id) (map results))))
+
 (defn full-search [user query-map]
   (let [query (:query query-map)]
     (->> s/search-preds (map #(partial-val-query user query %))
-         neo4j/cypher-combined-tx (zipvec s/search-preds) vec 
-         (remove #(-> % second empty?)) (map id-row)
-         (mapcat second) distinct (map #(zipmap [:id :type] %)) 
-         (map #(node-by-id user %)))))
+         neo4j/cypher-combined-tx (zipvec s/search-preds) 
+         vec (remove #(-> % second empty?))
+         (map id-row) (mapcat second) distinct
+         (map #(zipmap [:id :type] %)) search-id-lookup)))
 
 (defn find-user-labels [labels]
   (when labels
