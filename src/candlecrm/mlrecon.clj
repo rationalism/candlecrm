@@ -398,6 +398,11 @@
        neo4j/cypher-combined-tx first
        (parse-paths-general paths)))
 
+(defn fetch-paths-combined [ids paths]
+  (->> ids (map #(fetch-paths-query % (map strip-path-id paths)))
+       neo4j/cypher-combined-tx
+       (map #(parse-paths-general paths %))))
+
 (defn fetch-paths [id paths]
   (->> (fetch-paths-query id paths)
        vector neo4j/cypher-combined-tx
