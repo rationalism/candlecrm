@@ -51,15 +51,6 @@
     
     (auth/delete-user! test-user)))
 
-(deftest emails-with-dates-test
-  (testing "Test the emails-with-dates database query"
-    (def test-user (auth/create-user! {:username test-username
-                                       :password test-password}))
-    (is test-user)
-    (is (= '() (emails-with-dates test-user 0 10)))
-    
-    (auth/delete-user! test-user)))
-
 (deftest bare-locations-test
   (testing "Test the bare-locations database query"
     (def test-user (auth/create-user! {:username test-username

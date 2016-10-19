@@ -80,18 +80,6 @@
        neo4j/cypher-query (map vals) (map first)
        (nodes-by-id s/email s/email-table-paths)))
 
-(defn emails-with-dates [user start limit]
-  (->> [(str "MATCH (sd:" (neo4j/prop-label user s/email-sent)
-             ")<-[:" (neo4j/esc-token s/email-sent)
-             "]-(root:" (neo4j/prop-label user s/email)
-             ")-[:" (neo4j/esc-token s/text-mentions)
-             "]->(d:" (neo4j/prop-label user s/event)
-             ") WITH root, sd." (neo4j/esc-token s/value)
-             " as o ORDER BY o DESC SKIP {start} LIMIT {limit}"
-             (vals-collect))
-        {:start start :limit limit}]
-       neo4j/cypher-query (mapv mlrecon/mapify-params)))
-
 (defn key-link [user query-map]
   (-> [(str "MATCH (m)-[:" (neo4j/esc-token s/text-mentions)
             "]->(h:" (neo4j/prop-label user s/hyperlink)
@@ -101,8 +89,7 @@
             " = {key} WITH h MATCH (h)-[:" (neo4j/esc-token s/link-to)
             "]->(root) RETURN ID(root), labels(root)")
        query-map]
-      neo4j/cypher-query first
-      (optional-fetch-node user)))
+      neo4j/cypher-query first (optional-fetch-node user)))
 
 (defn org-list [user query-map]
   (->> [(str "MATCH (root:" (neo4j/prop-label user s/organization)
