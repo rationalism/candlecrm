@@ -71,7 +71,7 @@
                   :exclusions [com.google.guava/guava]]
                  [org.apache.commons/commons-math3 "3.6.1"]
                  [org.bitbucket.cowwoc/diff-match-patch "1.1"]
-                 [org.seleniumhq.selenium/selenium-java "3.0.0"]
+                 [org.seleniumhq.selenium/selenium-java "3.0.1"]
                  [com.cemerick/piggieback "0.2.1"
                   :exclusions [com.google.guava/guava]]
                  [figwheel-sidecar "0.5.8"]
