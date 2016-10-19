@@ -65,8 +65,7 @@
              " ORDER BY o DESC SKIP {start} LIMIT {limit}"
              (vals-collect))
         query-map]
-       neo4j/cypher-query (mapv mlrecon/mapify-params)
-       debug))
+       neo4j/cypher-query (mapv mlrecon/mapify-params)))
 
 (defn emails-linked [user query-map]
   (->> [(str "MATCH (root:" (neo4j/prop-label user s/email)
