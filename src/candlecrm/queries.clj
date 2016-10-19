@@ -51,12 +51,6 @@
         (update :type #(-> % vec mlrecon/filter-decode-labels second))
         (#(node-by-id user %)))))
 
-(defn vals-collect []
-  (str " MATCH (root)-[r]->(v) WITH o, ID(root) as idr,"
-       " collect([ID(root), labels(root),"
-       " type(r), v." (neo4j/esc-token s/value)
-       ", r]) as vs RETURN vs ORDER BY o DESC"))
-
 (defn emails-from-user [user query-map]
   (->> [(str "MATCH (root:" (neo4j/prop-label user s/email)
              ")-[:" (neo4j/esc-token s/email-sent)
@@ -188,13 +182,12 @@
        "]->(ev:"))
 
 (defn people-by-reltype [user query-map]
-  (->> [(str (rel-query user)
-             (neo4j/prop-label user (:reltype query-map))
-             ") WITH root, count(ev) as o ORDER BY o "
-             " DESC SKIP {start} LIMIT {limit}"
-             (vals-collect))
+  (->> [(str (rel-query user) (neo4j/prop-label user (:reltype query-map))
+             ") WITH root, count(ev) as o RETURN ID(root) ORDER BY o "
+             " DESC SKIP {start} LIMIT {limit}")
         query-map]
-       neo4j/cypher-query (mapv mlrecon/mapify-params)))
+       neo4j/cypher-query (map vals) (map first)
+       (nodes-by-id s/person s/select-table-paths)))
 
 (defn event-agenda [user query-map]
   (->> [(str "MATCH (e:" (neo4j/prop-label user s/event)

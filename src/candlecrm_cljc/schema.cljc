@@ -204,6 +204,9 @@
    ["Sent by" email-from s-name :id]
    ["Sent to" email-to s-name :id]])
 
+(def select-table-paths
+  [["Name" s-name] ["Email address" email-addr]])
+
 (def exclude-edit [[notes] [notes-nlp]
                    [has-coord lat] [has-coord lng]])
 
