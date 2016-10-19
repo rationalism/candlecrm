@@ -392,12 +392,6 @@
 (defn strip-path-id [path]
   (if (= (last path) :id) (drop-last path) path))
 
-(defn fetch-paths-full [id paths]
-  (->> paths (map strip-path-id)
-       (fetch-paths-query id) vector
-       neo4j/cypher-combined-tx first
-       (parse-paths-general paths)))
-
 (defn fetch-paths-combined [ids paths]
   (->> ids (map #(fetch-paths-query % (map strip-path-id paths)))
        neo4j/cypher-combined-tx
