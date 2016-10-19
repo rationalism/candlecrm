@@ -15,47 +15,6 @@
   (throw-warn! (str "Message from " (auth/get-username user)
                     " client: " (:message query-map))))
 
-(defn vals-collect []
-  (str " MATCH (root)-[r]->(v) WITH o, ID(root) as idr,"
-       " collect([ID(root), labels(root),"
-       " type(r), v." (neo4j/esc-token s/value)
-       ", r]) as vs RETURN vs ORDER BY o DESC"))
-
-(defn emails-from-user [user query-map]
-  (->> [(str "MATCH (root:" (neo4j/prop-label user s/email)
-             ")-[:" (neo4j/esc-token s/email-sent)
-             "]-(sd:" (neo4j/prop-label user s/email-sent)
-             ") WITH root, sd." (neo4j/esc-token s/value) " as o"
-             " ORDER BY o DESC SKIP {start} LIMIT {limit}"
-             (vals-collect))
-        query-map]
-       neo4j/cypher-query (mapv mlrecon/mapify-params)))
-
-(defn emails-linked [user query-map]
-  (->> [(str "MATCH (root:" (neo4j/prop-label user s/email)
-             ")-[:" (neo4j/esc-token (:link query-map))
-             "]->(p:" (neo4j/prop-label user s/person)
-             ") WHERE ID(p) = {`person-id`}"
-             " WITH root MATCH (root)-[r]->(v:"
-             (neo4j/prop-label user s/email-sent)
-             ") WITH root, v." (neo4j/esc-token s/value)
-             " as o ORDER BY o DESC SKIP {start} LIMIT {limit}"
-             (vals-collect))
-        (dissoc query-map :link)]
-       neo4j/cypher-query (mapv mlrecon/mapify-params)))
-
-(defn emails-with-dates [user start limit]
-  (->> [(str "MATCH (sd:" (neo4j/prop-label user s/email-sent)
-             ")<-[:" (neo4j/esc-token s/email-sent)
-             "]-(root:" (neo4j/prop-label user s/email)
-             ")-[:" (neo4j/esc-token s/text-mentions)
-             "]->(d:" (neo4j/prop-label user s/event)
-             ") WITH root, sd." (neo4j/esc-token s/value)
-             " as o ORDER BY o DESC SKIP {start} LIMIT {limit}"
-             (vals-collect))
-        {:start start :limit limit}]
-       neo4j/cypher-query (mapv mlrecon/mapify-params)))
-
 (defn token-keys [m]
   (->> (map #(update % 0 keyword) m) (into {})))
 
@@ -91,6 +50,48 @@
         (cset/rename-keys {"ID(root)" :id "labels(root)" :type})
         (update :type #(-> % vec mlrecon/filter-decode-labels second))
         (#(node-by-id user %)))))
+
+(defn vals-collect []
+  (str " MATCH (root)-[r]->(v) WITH o, ID(root) as idr,"
+       " collect([ID(root), labels(root),"
+       " type(r), v." (neo4j/esc-token s/value)
+       ", r]) as vs RETURN vs ORDER BY o DESC"))
+
+(defn emails-from-user [user query-map]
+  (->> [(str "MATCH (root:" (neo4j/prop-label user s/email)
+             ")-[:" (neo4j/esc-token s/email-sent)
+             "]-(sd:" (neo4j/prop-label user s/email-sent)
+             ") WITH root, sd." (neo4j/esc-token s/value) " as o"
+             " ORDER BY o DESC SKIP {start} LIMIT {limit}"
+             (vals-collect))
+        query-map]
+       neo4j/cypher-query (mapv mlrecon/mapify-params)
+       debug))
+
+(defn emails-linked [user query-map]
+  (->> [(str "MATCH (root:" (neo4j/prop-label user s/email)
+             ")-[:" (neo4j/esc-token (:link query-map))
+             "]->(p:" (neo4j/prop-label user s/person)
+             ") WHERE ID(p) = {`person-id`}"
+             " WITH root MATCH (root)-[r]->(v:"
+             (neo4j/prop-label user s/email-sent)
+             ") WITH root, v." (neo4j/esc-token s/value)
+             " as o ORDER BY o DESC SKIP {start} LIMIT {limit}"
+             (vals-collect))
+        (dissoc query-map :link)]
+       neo4j/cypher-query (mapv mlrecon/mapify-params)))
+
+(defn emails-with-dates [user start limit]
+  (->> [(str "MATCH (sd:" (neo4j/prop-label user s/email-sent)
+             ")<-[:" (neo4j/esc-token s/email-sent)
+             "]-(root:" (neo4j/prop-label user s/email)
+             ")-[:" (neo4j/esc-token s/text-mentions)
+             "]->(d:" (neo4j/prop-label user s/event)
+             ") WITH root, sd." (neo4j/esc-token s/value)
+             " as o ORDER BY o DESC SKIP {start} LIMIT {limit}"
+             (vals-collect))
+        {:start start :limit limit}]
+       neo4j/cypher-query (mapv mlrecon/mapify-params)))
 
 (defn key-link [user query-map]
   (-> [(str "MATCH (m)-[:" (neo4j/esc-token s/text-mentions)
