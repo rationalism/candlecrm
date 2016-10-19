@@ -13,8 +13,8 @@
    {[s/s-name] "Name" [s/org-member s/s-name] "Members"
     [s/location s/s-name] "Location" [s/website] "Website"}})
 
-(def email-attrs {s/email-sent "Date"
-                  s/email-subject "Subject"})
+(def email-attrs {[s/email-sent] "Date"
+                  [s/email-subject] "Subject"})
 
 (defn person-link [type person attr]
   [util/node-link
@@ -69,14 +69,14 @@
        [person-row type (second p-row)])]]])
 
 (defn email-link [email attr]
-  [util/node-link (->> email attr (sort-by second >) ffirst)
+  [util/node-link (->> attr email (sort-by second >) ffirst)
    (email :id) s/email])
 
 (defn email-cell [email attr]
-  [:td {:class (name attr)}
+  [:td {:class (name (first attr))}
    (cond
-     (= s/email-subject attr) [email-link email attr]
-     (some #{attr} s/date-times)
+     (= [s/email-subject] attr) [email-link email attr]
+     (some #{(first attr)} s/date-times)
      [util/email-date-display (util/get-first email attr)]
      :else (util/get-first email attr))])
 
@@ -102,8 +102,8 @@
      [:tr
       (for [attr (util/add-ids email-attrs)]
         ^{:key (first attr)}
-        [:th {:class (name (first (second attr)))}
-         (second attr)])]]
+        [:th {:class (name (ffirst (second attr)))}
+         (second (second attr))])]]
     [:tbody {:id "email-rows"}
      (for [e-row (util/add-ids (apply state/look row-keys))]
        ^{:key (first e-row)}

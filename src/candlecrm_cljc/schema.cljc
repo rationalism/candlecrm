@@ -197,6 +197,13 @@
    geocode [["Latitude" lat] ["Longitude" lng]
             ["Buildings at this location" has-coord street-addr :id]]})
 
+(def email-table-paths
+  [["Subject" email-subject] ["Email sent" email-sent]
+   ["Sent by" email-from email-addr :id]
+   ["Sent to" email-to email-addr :id]
+   ["Sent by" email-from s-name :id]
+   ["Sent to" email-to s-name :id]])
+
 (def exclude-edit [[notes] [notes-nlp]
                    [has-coord lat] [has-coord lng]])
 
