@@ -56,14 +56,16 @@
   (->> data (map vals) (map first)
        (map keys) (mapv first)))
 
-(defnp fetch-body [id]
-  (->> [[s/email-from s/s-name] [s/email-from s/email-addr]
-        [s/email-body] [s/email-sent] [s/timezone] [s/email-digest]]
-       (mlrecon/fetch-paths-full id)
-       (map #(dissoc % :id s/type-label)) (partition-all 2)
+(defn parse-body [email-body]
+  (->> email-body (map #(dissoc % :id s/type-label)) (partition-all 2)
        ((switch find-name find-email
                 #(->> % (map vals) (map first) (map keys) (map first))))
        (apply concat)))
+
+(defnp fetch-bodies [ids]
+  (->> [[s/email-from s/s-name] [s/email-from s/email-addr]
+        [s/email-body] [s/email-sent] [s/timezone] [s/email-digest]]
+       (mlrecon/fetch-paths-combined ids) (mapv parse-body)))
 
 (defnp clean-email [sep [author body _sent _zone is-digest?]]
   (if is-digest?
@@ -73,7 +75,7 @@
 
 (defn email-sentences [n]
   (let [models (nlp-models-fn)]
-    (->> (queries/email-for-nlp n) (map :id) (map fetch-body)
+    (->> (queries/email-for-nlp n) (map :id) fetch-bodies
          (map #(clean-email (:sep models) %))
          (pmap #(nlp/sentence-parse models %))
          (apply concat) shuffle vec)))
@@ -265,7 +267,7 @@
          (dt/now))))
 
 (defnc graph-from-id [models id]
-  (let [[name body sent zone is-digest?] (fetch-body id)
+  (let [[name body sent zone is-digest?] (first (fetch-bodies [id]))
         message {s/type-label s/email :id id s/email-body body
                  s/email-sent (sent-date id sent)
                  s/timezone (if (nil? zone) (dt/zone)
