@@ -68,15 +68,19 @@
   (if (->> m keys first vector?) m
       (let [[k v] (first m)] {[k] v})))
 
+(defn parse-node-results [id results]
+  (->> results (remove nil?) 
+       (filter #(not-any? nil? (keys %)))
+       (map #(dissoc % :id s/type-label))
+       (map key-vector) (apply merge)
+       (merge {:id id s/type-label type})))
+
 (defn node-by-id [user {:keys [id type] :as query-map}]
   (when (neo4j/node-exists? user id type)
     (when-let [paths (s/node-paths type)]
       (->> paths (map rest) (mapv vec)
-           (mlrecon/fetch-paths-full id) (remove nil?) 
-           (filter #(not-any? nil? (keys %)))
-           (map #(dissoc % :id s/type-label))
-           (map key-vector) (apply merge)
-           (merge {:id id s/type-label type})))))
+           (mlrecon/fetch-paths-full id)
+           (parse-node-results id)))))
 
 (defn optional-fetch-node [key-result user]
   (when key-result
