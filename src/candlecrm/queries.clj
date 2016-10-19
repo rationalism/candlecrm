@@ -105,10 +105,11 @@
   (->> [(str "MATCH (root:" (neo4j/prop-label user s/person)
              ") OPTIONAL MATCH (root)<-[:" (neo4j/esc-token s/email-to)
              "]-(em:" (neo4j/prop-label user s/email)
-             ") WITH root, count(em) as o ORDER BY o DESC"
-             " SKIP {start} LIMIT {limit}" (vals-collect))
+             ") WITH root, count(em) as o RETURN ID(root) ORDER BY o DESC"
+             " SKIP {start} LIMIT {limit}")
         query-map]
-       neo4j/cypher-query (mapv mlrecon/mapify-params)))
+       neo4j/cypher-query (map vals) (map first)
+       (nodes-by-id s/person (s/node-paths s/person))))
 
 (defn person-from-user [user query-map]
   (condp = (:type query-map)

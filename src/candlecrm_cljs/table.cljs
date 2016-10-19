@@ -7,8 +7,8 @@
 
 (def person-attrs
   {s/person
-   {s/s-name "Name" s/email-addr "Email address"
-    s/phone-num "Phone number" s/website "Website"}
+   {[s/s-name] "Name" [s/email-addr] "Email address"
+    [s/phone-num] "Phone number" [s/website] "Website"}
    s/organization
    {[s/s-name] "Name" [s/org-member s/s-name] "Members"
     [s/location s/s-name] "Location" [s/website] "Website"}})
