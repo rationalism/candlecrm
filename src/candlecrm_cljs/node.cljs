@@ -189,11 +189,15 @@
                  :on-click #(set-notes!)}
         "Edit notes"]])]])
 
+(defn tag-box []
+  [:div
+   [:span [:strong "Tags: "]]])
+
 (defn node-aux [node-name item]
   [:div
    (when (-> item s/type-label (= s/person))
      [:div
-      [person-notes] [:br]
+      [:br] [tag-box] [person-notes] [:br]
       (when (or (->> s/email-to (state/look :current-node)
                      empty? not)
                 (->> s/email-from (state/look :current-node)
@@ -209,7 +213,7 @@
            (partial u/update-emails-person! s/email-from)]]])])
    (when (some #{(s/type-label item)} [s/event s/location s/organization])
      [:div
-      [person-notes] [:br]])])
+      [:br] [tag-box] [person-notes] [:br]])])
 
 (defn show-node [node-name item aux?]
   [:div#node-box
