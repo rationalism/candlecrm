@@ -1,11 +1,15 @@
 (ns candlecrm_cljs.update
   (:require [clojure.set :as set]
+            [clojure.string :as str]
             [candlecrm_cljs.state :as state]
             [candlecrm_cljc.schema :as s]
             [cljs-http.client :as http]))
 
 (def timeout timeout)
 (def token-element "__anti-forgery-token")
+
+(defn debug-js [x]
+  (js/alert x) x)
 
 (defn csrf-token []
   (.-value (.getElementById js/document token-element)))
@@ -357,11 +361,19 @@
              {:multipart-params [["upload-file" file]]
               :headers {"x-csrf-token" (csrf-token)}}))
 
-(defn tags-req [id type tags]
-  [:edit/edit-tags {:id id :type type :tags tags}])
+(defn split-tags []
+  (map str/trim (str/split (state/look :tags-text) #",")))
+
+(defn tags-req []
+  [:edit/edit-tags
+   (-> (state/look :current-node :center-node)
+       (select-keys [:id :label])
+       (merge {:tags (split-tags)}))])
 
 (defn new-tags [resp]
+  (state/set! [:tags-edit] false)
+  (state/set! [:tags-text] "")
   (go-node! (:id resp) (:label resp)))
 
-(defn edit-tags! [id type tags]
-  (send! (tags-req id type tags) new-tags))
+(defn edit-tags! []
+  (send! (tags-req) new-tags))

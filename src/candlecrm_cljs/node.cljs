@@ -190,29 +190,43 @@
                  :on-click #(set-notes!)}
         "Edit notes"]])]])
 
+(defn get-tags []
+  (-> :current-node (state/look :center-node) (get [s/tag]) keys))
+
 (defn set-tags! []
   (state/set! [:tags-edit] true)
-  (state/set! [:tags-text]
-              (keys (get (state/look :current-node :center-node)
-                         [s/tag]))))
+  (->> (get-tags) (str/join ", ")
+       (state/set! [:tags-text])))
+
+(defn show-tags [tags]
+  [:span
+   (if (empty? tags)
+     " "
+     (for [tag (util/add-ids tags)]
+       ^{:key (first tag)}
+       [:span {:class "tag tag-default"}
+        (second tag)]))])
 
 (defn tag-box []
-  [:div {:class "row"}
-   [:span [:strong  "Tags: "]
-    (if (state/look :tags-edit)
-      [:div {:class "col-xs-4"}
-       [:div {:class "input-group"}
-        [:input {:type "text" :class "form-control btn-sm"
-                 :on-change (util/set-field! :notes-text)
-                 :value (state/look :notes-text)}]
-        [:span {:class "input-group-btn"}
-         [:button {:type "button" :class "btn btn-secondary btn-sm"
-                   :on-click #(u/edit-notes!)}
-          "Edit"]]]]
-      [:button {:type "button"
-                :class "btn btn-primary btn-sm"
-                :on-click #(set-tags!)}
-       "Edit"])]])
+  [:div {:class "container-fluid"}
+   [:div {:class "row"}
+    [:span [:strong {:style {:float "left"}} "Tags: "]
+     (if (state/look :tags-edit)
+       [:div {:class "col-xs-4"}
+        [:div {:class "input-group"}
+         [:input {:type "text" :class "form-control btn-sm"
+                  :on-change (util/set-field! :tags-text)
+                  :value (state/look :tags-text)}]
+         [:span {:class "input-group-btn"}
+          [:button {:type "button" :class "btn btn-secondary btn-sm"
+                    :on-click #(u/edit-tags!)}
+           "Edit"]]]]
+       [:span
+        [show-tags (get-tags)]
+        [:button {:type "button"
+                  :class "btn btn-primary btn-sm"
+                  :on-click #(set-tags!)}
+         "Edit"]])]]])
 
 (defn node-aux [node-name item]
   [:div
