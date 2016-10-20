@@ -190,9 +190,29 @@
                  :on-click #(set-notes!)}
         "Edit notes"]])]])
 
+(defn set-tags! []
+  (state/set! [:tags-edit] true)
+  (state/set! [:tags-text]
+              (keys (get (state/look :current-node :center-node)
+                         [s/tag]))))
+
 (defn tag-box []
-  [:div
-   [:span [:strong "Tags: "]]])
+  [:div {:class "row"}
+   [:span [:strong  "Tags: "]
+    (if (state/look :tags-edit)
+      [:div {:class "col-xs-4"}
+       [:div {:class "input-group"}
+        [:input {:type "text" :class "form-control btn-sm"
+                 :on-change (util/set-field! :notes-text)
+                 :value (state/look :notes-text)}]
+        [:span {:class "input-group-btn"}
+         [:button {:type "button" :class "btn btn-secondary btn-sm"
+                   :on-click #(u/edit-notes!)}
+          "Edit"]]]]
+      [:button {:type "button"
+                :class "btn btn-primary btn-sm"
+                :on-click #(set-tags!)}
+       "Edit"])]])
 
 (defn node-aux [node-name item]
   [:div
@@ -235,4 +255,3 @@
           "Delete"]])]
      [info-items (-> item s/type-label s/node-paths) aux? item]]]
    (when aux? [node-aux node-name item])])
-

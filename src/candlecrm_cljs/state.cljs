@@ -37,6 +37,8 @@
     :loading false
     :notes-edit false
     :notes-text ""
+    :tags-edit false
+    :tags-text ""
     :scroll-lock false
     :upload-alert ""
     :upload-cols []
