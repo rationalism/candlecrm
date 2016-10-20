@@ -25,7 +25,7 @@
     (is test-user)
     (is (= {test-username 1.0}
            (-> test-user (person-from-user {:start 0 :limit 10 :type s/person})
-               first s/email-addr)))
+               first (get [s/email-addr]))))
     (is (nil? (first (person-from-user test-user {:start 0 :limit 10
                                                   :type s/organization}))))
     
