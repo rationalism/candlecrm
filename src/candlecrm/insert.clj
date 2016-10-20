@@ -188,7 +188,7 @@
          neo4j/cypher-combined-tx)
     (new-resp id (s/type-label fields))))
 
-(defn edit-tags! [user {:keys [id tags]}]
+(defn edit-tags! [user {:keys [id type tags]}]
   (neo4j/cypher-query
    [(str "MATCH (root)-[r:" (neo4j/esc-token s/tag)
          "]->(t:" (neo4j/prop-label user s/tag)
@@ -196,4 +196,5 @@
     {:id id}])
   (-> {{s/tag tags} id} first
       (id-pair-cypher user s/edit-src)
-      neo4j/cypher-combined-tx))
+      neo4j/cypher-combined-tx)
+  {:id id :label type})

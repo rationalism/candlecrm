@@ -356,3 +356,12 @@
   (http/post "/upload"
              {:multipart-params [["upload-file" file]]
               :headers {"x-csrf-token" (csrf-token)}}))
+
+(defn tags-req [id type tags]
+  [:edit/edit-tags {:id id :type type :tags tags}])
+
+(defn new-tags [resp]
+  (go-node! (:id resp) (:label resp)))
+
+(defn edit-tags! [id type tags]
+  (send! (tags-req id type tags) new-tags))
