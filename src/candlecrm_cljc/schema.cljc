@@ -16,6 +16,7 @@
 (def s-time :time)
 (def notes :notes)
 (def notes-nlp :notes-nlp)
+(def tag :tag)
 
 (def person :person)
 (def email-addr :email-addr)

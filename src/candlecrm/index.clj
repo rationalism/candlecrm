@@ -9,7 +9,7 @@
    s/email-received s/email-sent s/lat s/lng s/date-time s/event-time
    s/start-time s/stop-time s/s-name s/street-addr s/zipcode
    s/event-begin s/event-end s/event-cost s/frequency s/duration
-   s/body-nlp s/event-context s/notes s/notes-nlp s/timezone
+   s/body-nlp s/event-context s/notes s/notes-nlp s/timezone s/tag
    ;; Special for Barry's project
    s/vendor-name s/part-name s/catalog-name s/desc1 s/desc2 s/item-cost])
 
@@ -29,6 +29,12 @@
        (neo4j/prop-label user prop)
        ") ASSERT exists(root."
        (neo4j/esc-token s/value) ")"))
+
+(defn add-constraint! [class users]
+  (neo4j/thread-wrap
+   (->> (map #(val-unique "CREATE" % class) users)
+        (concat (map #(val-exists "CREATE" % class) users))
+        neo4j/cypher-combined-tx)))
 
 (defn make-constraints! [user]
   (neo4j/thread-wrap
