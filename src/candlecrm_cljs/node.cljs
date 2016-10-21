@@ -204,13 +204,14 @@
      " "
      (for [tag (util/add-ids tags)]
        ^{:key (first tag)}
-       [:span {:class "tag tag-default"}
+       [:span {:class "tag tag-default tag-list"}
         (second tag)]))])
 
 (defn tag-box []
   [:div {:class "container-fluid"}
    [:div {:class "row"}
-    [:span [:strong {:style {:float "left"}} "Tags: "]
+    [:span
+     [:span [:strong {:class "tag-header"} "Tags: "]]
      (if (state/look :tags-edit)
        [:div {:class "col-xs-4"}
         [:div {:class "input-group"}

@@ -283,3 +283,15 @@ ol#faqmenu li {
     padding:0 10px 0 10px;
     color:red;
 }
+
+.tag-list {
+    margin-right: 0.3rem;
+    padding: 0.5em 0.5em;
+    float: left;
+    font-size: 80%;
+}
+
+.tag-header {
+    float: left;
+    margin-right: 0.3rem;
+}
