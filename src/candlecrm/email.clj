@@ -75,8 +75,8 @@
 
 (defn email-sentences [n]
   (let [models (nlp-models-fn)]
-    (->> (queries/email-for-nlp n) (map :id) fetch-bodies
-         (map #(clean-email (:sep models) %))
+    (->> (queries/queue-pull n s/nlp-done [s/email-body])
+         (map :id) fetch-bodies (map #(clean-email (:sep models) %))
          (pmap #(nlp/sentence-parse models %))
          (apply concat) shuffle vec)))
 
@@ -290,7 +290,7 @@
         {:ids ids}]))
 
 (defn push-email-nlp! []
-  (let [emails (queries/email-for-nlp batch-size)]
+  (let [emails (queries/queue-pull batch-size s/nlp-done [s/email-body])]
     (when (not (empty? emails))
       (throw-info! "run email nlp")
       (->> emails (mapv :id) nlp-done-query neo4j/cypher-query)

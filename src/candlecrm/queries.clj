@@ -295,10 +295,10 @@
     (->> labels mlrecon/filter-decode-labels
          first neo4j/find-by-id)))
 
-(defnp email-for-nlp [limit]
+(defnp queue-pull [limit label preds]
   (->> [(str "MATCH (root:" (neo4j/esc-token s/recon)
-             ")-[:" (neo4j/esc-token s/email-body)
-             "]->(b) WHERE NOT root:" (neo4j/esc-token s/nlp-done)
+             ")-[r:" (->> preds (map neo4j/esc-token) (str/join "|"))
+             "]->(b) WHERE NOT root:" (neo4j/esc-token label)
              " RETURN ID(root), labels(root) LIMIT {limit}")
         {:limit limit}]
        neo4j/cypher-query (map clojure-map)

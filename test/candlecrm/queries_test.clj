@@ -158,5 +158,5 @@
 
 (deftest email-nlp-test
   (testing "Search for emails for NLP"
-    (is (email-for-nlp 1))))
+    (is (queue-pull 1 s/nlp-done [s/email-body]))))
 
