@@ -162,11 +162,13 @@
                 s/event "Event" s/building "Building"
                 s/geocode "Coordinates"})
 
+(defn get-notes []
+  (-> :current-node (state/look :center-node)
+      (util/get-first [:notes])))
+
 (defn set-notes! []
   (state/set! [:notes-edit] true)
-  (state/set! [:notes-text]
-              (util/get-first (state/look :current-node :center-node)
-                              [:notes])))
+  (state/set! [:notes-text] (get-notes)))
 
 (defn person-notes []
   [:div {:class "container-fluid"}
