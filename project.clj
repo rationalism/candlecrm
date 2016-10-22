@@ -53,7 +53,7 @@
                                org.bytedeco/javacpp]]
                  [com.joestelmach/natty "0.12"]
                  [org.neo4j.driver/neo4j-java-driver "1.0.6"]
-                 [pandect "0.6.0"]
+                 [pandect "0.6.1"]
                  [aysylu/loom "0.6.0"
                   :exclusions [org.clojure/data.priority-map]]
                  [com.taoensso/sente "1.11.0"
@@ -80,7 +80,7 @@
                   :exclusions [org.hamcrest/hamcrest-core]]
                  [org.ahocorasick/ahocorasick "0.3.0"]
                  [cpath-clj "0.1.2"]
-                 [org.graylog2/gelfclient "1.4.0"]
+                 [org.graylog2/gelfclient "1.4.1"]
                  [secretary "1.2.3"]
                  [venantius/accountant "0.1.7"]
                  [com.github.scribejava/scribejava-core "3.2.0"]
