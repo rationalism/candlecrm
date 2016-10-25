@@ -75,7 +75,7 @@
                  [com.cemerick/piggieback "0.2.1"
                   :exclusions [com.google.guava/guava]]
                  [figwheel-sidecar "0.5.8"]
-                 [org.jsoup/jsoup "1.9.2"]
+                 [org.jsoup/jsoup "1.10.1"]
                  [cc.mallet/mallet "2.0.8"
                   :exclusions [org.hamcrest/hamcrest-core]]
                  [org.ahocorasick/ahocorasick "0.3.0"]
