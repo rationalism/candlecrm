@@ -5,9 +5,9 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.9.293"]
                  [org.clojure/tools.nrepl "0.2.12"]
-                 [ns-tracker "0.3.0"]
+                 [ns-tracker "0.3.1"]
                  [cheshire "5.6.3"]
-                 [clj-time "0.12.0"]
+                 [clj-time "0.12.2"]
                  [clj-http "3.3.0"
                   :exclusions [commons-io]]
                  [cljs-http "0.1.42"]
@@ -18,7 +18,7 @@
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
                  [environ "1.1.0"]
-                 [com.taoensso/encore "2.86.1"]
+                 [com.taoensso/encore "2.87.0"]
                  [com.taoensso/timbre "4.7.4"]
                  [buddy "1.1.0"]
                  [com.google.api-client/google-api-client "1.22.0"
@@ -28,14 +28,14 @@
                   :exclusions [com.google.code.findbugs/jsr305
                                com.google.guava/guava]]
                  [org.passay/passay "1.2.0"]
-                 [com.google.apis/google-api-services-oauth2 "v2-rev120-1.22.0"]
+                 [com.google.apis/google-api-services-oauth2 "v2-rev121-1.22.0"]
                  [com.google.http-client/google-http-client-jackson "1.22.0"]
                  [com.sun.mail/javax.mail "1.5.5"]
                  [de.jollyday/jollyday "0.4.7"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"]
                  [edu.stanford.nlp/stanford-corenlp "3.6.1"
                   :classifier "models"]
-                 [com.googlecode.libphonenumber/libphonenumber "7.7.2"]
+                 [com.googlecode.libphonenumber/libphonenumber "7.7.3"]
                  [org.deeplearning4j/deeplearning4j-core "0.6.0"
                   :exclusions [org.json/json com.google.guava/guava
                                org.apache.commons/commons-compress
@@ -67,7 +67,7 @@
                  [clojure-csv/clojure-csv "2.0.2"]
                  [org.apache.commons/commons-lang3 "3.5"]
                  [com.sendgrid/sendgrid-java "3.1.0"]
-                 [reagent-forms "0.5.27"
+                 [reagent-forms "0.5.28"
                   :exclusions [com.google.guava/guava]]
                  [org.apache.commons/commons-math3 "3.6.1"]
                  [org.bitbucket.cowwoc/diff-match-patch "1.1"]
