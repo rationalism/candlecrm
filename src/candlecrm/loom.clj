@@ -174,3 +174,4 @@
 
 (defn display-structure [g]
   (display-graph (structure g)) g)
+
