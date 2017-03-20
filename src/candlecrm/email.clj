@@ -334,4 +334,3 @@
             (link-message message linked-text s/notes-nlp)
             remove-all-metadata (insert/push-graph! user s/nlp-src []))))
     node))
-
