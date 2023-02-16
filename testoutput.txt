@@ -1,3 +1,0 @@
-Compiling ClojureScript...
-
-lein test candlecrm.ajax-test
