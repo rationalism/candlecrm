@@ -1,0 +1,83 @@
+body {
+	height: 100%;
+	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	line-height: 1.4em;
+	background: #eaeaea;
+	width: 1050px;
+	margin: 0 120px;
+}
+
+.messages {
+  background: white;
+  width: 520px;
+}
+
+div.row {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+div.home-header {
+    margin-top: 30px;
+}
+
+div.tab-show {
+    display: block;
+}
+
+div.tab-hide {
+    display: none;
+}
+
+tr.tab-row td {
+    display: inline-block;
+    margin: 0 30px;
+}
+
+div.home-content {
+    margin-top: 15px;
+}
+
+ul {
+	list-style: none;
+}
+
+li {
+	position: relative;
+	font-size: 16px;
+	padding: 5px;
+	border-bottom: 1px dotted #ccc;
+}
+
+li:last-child {
+	border-bottom: none;
+}
+
+li time {
+	font-size: 12px;
+	padding-bottom: 20px;
+}
+
+form, .error {
+	width: 520px;
+	padding: 30px;
+	margin-bottom: 50px;
+	position: relative;
+        background: white;
+}
+
+a#next-people-page {
+    margin-left: 300px;
+}
+
+a#next-email-page {
+    margin-left: 300px;
+}
+
+div.new-input-field {
+    margin-top: 5px;
+}
+
+div.new-input-field input {
+    margin-left: 20px;
+}

@@ -1,0 +1,297 @@
+body {
+    font-size: 0.9rem;
+}
+
+html, body, #mapbox {
+    margin: 0;
+    padding: 0;
+}
+
+div#homepage {
+    font-size: 1rem;
+}
+
+footer#copyright {
+    font-size: 0.9rem;
+}
+
+footer#copyright a {
+    margin-left: 0.5rem;
+}
+
+div#login {
+    font-size: 1rem;
+}
+
+nav#frontbar {
+    font-size: 1.05rem;
+}
+
+div#content {
+    background-color: #FFFFFF;
+}
+
+div.tab-show {
+    display: block;
+}
+
+div.tab-hide {
+    display: none;
+}
+
+div.main-logo {
+    margin-top: 0.7em;
+    margin-bottom: 0.7em;
+}
+
+.btn-2 {
+    margin: 0.5rem;
+}
+
+div#page-footer {
+    background: #0068CB;
+    color: #FFFFFF;
+    margin-top: 4em;
+}
+
+div#page-header {
+    background: #EEEEEE;
+    color: #FFFFFF;
+}
+
+div#menu-bar {
+    background: #0068CB;
+}
+
+div.menu-icons a {
+    color: #FFFFFF;
+}
+
+a.pure-menu-link {
+    color: #FFFFFF !important;
+}
+
+a.pure-menu-link:hover {
+    background-color: #00386B !important;
+}
+
+a.pure-menu-link:focus {
+    background-color: #00386B !important;
+}
+
+div#main-page table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+div#main-page table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+div#main-page table td.phone-num {
+    width: 15%;
+}
+
+div#main-page table td.name {
+    width: 20%;
+}
+
+div#tab2 table .sent-date {
+    width: 20%;
+}
+
+table .sent-date {
+    width: 40%;
+}
+
+div#menu-bar fieldset {
+    padding-top: 0em;
+    padding-bottom: 0.4em;
+    border: none;
+}
+
+div#node-box {
+    width: 100%;
+    word-wrap: break-word;
+}
+
+div.person-emails {
+    width: 40%;
+    float: left;
+    margin-right: 10%;
+}
+
+div#calendarbox {
+    margin-top: 60px;
+}
+
+div#people-ranks {
+    float: right;
+    width: 35%;
+}
+
+div#add-entity {
+    width: 60%;
+    float: left;
+}
+
+span.select-text {
+    float: right;
+}
+
+#search-box {
+    width: 20rem;
+}
+
+div#menu-bar .pure-menu-horizontal {
+    padding-top: 0.4em;
+}
+
+div.menu-icons h3 {
+    margin-top: 0em;
+    margin-bottom: 0em;
+}
+
+div#app-menu li {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}
+
+tbody#people-rows td {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+table#email-table {
+    margin-top: 20px;
+}
+
+table.pure-table thead {
+    font-weight: bold;
+}
+
+#email-body a, span {
+    display: inline;
+}
+
+a.new-link {
+    margin-left: 0.5em;
+}
+
+a#pass-reset-link {
+    margin-left: 1em;
+}
+
+div.prev-next {
+    float: right;
+    margin-bottom: 20px;
+}
+
+form.pure-form select {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.button-round {
+    border-radius: 4px;
+}
+
+.prev-email-page {
+    margin-right: 0.5em;
+    font-weight: bold;    
+}
+
+.next-email-page {
+    margin-right: 0.5em;
+    font-weight: bold;
+}
+
+.new-button {
+    font-weight: bold;
+}
+
+input.edit-field {
+    margin-right: 1em;
+}
+
+.navbar-dark {
+    background-color: #222!important;
+}
+
+.navbar {
+    border-radius: 0rem;
+}
+
+div.main {
+    top: 54px;
+}
+
+.display-3 {
+    font-size: 3.2rem;
+}
+
+.jumbotron {
+    background: center;
+    background-image: url(/images/jumbotron_background.jpg);
+    background-repeat: no-repeat;
+    /* background-size: 100%; */
+    padding-bottom: 8rem;
+    padding-top: 8rem;
+    color: #FFF;
+}
+
+@media (min-width: 1200px) {
+  .jumbotron {
+    background-size: 100%;
+  }
+}
+
+div.greyback {
+    background-color: #E6E6E6;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+img.home-circle {
+    width: 40%;
+    margin-bottom: 1.5rem;
+    border: 2px solid #444;
+}
+
+ol#faqmenu li {
+    margin-top: 0.3rem;
+}
+
+.btn-email {
+    margin-left: 0.4rem;
+    margin-right: 0.4rem;
+}
+
+.inputfile {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+.alert-text {
+    padding:0 10px 0 10px;
+    color:red;
+}
+
+.tag-list {
+    margin-right: 0.3rem;
+    padding: 0.5em 0.5em;
+    float: left;
+    font-size: 80%;
+}
+
+.tag-header {
+    float: left;
+    margin-right: 0.3rem;
+}
